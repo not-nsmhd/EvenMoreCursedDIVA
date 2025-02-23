@@ -1,0 +1,43 @@
+{
+    "env": 
+    {
+        "devkitPRO": "C:/msys64/opt/devkitpro"
+    },
+    "configurations": [
+        {
+            "name": "Debug Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/glad_debug/glad/include",
+                "${workspaceFolder}/lib/glm/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/msys64/mingw32/bin/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x86"
+        },
+        {
+            "name": "Release Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/glad_release/glad/include",
+                "${workspaceFolder}/lib/glm/include"
+            ],
+            "defines": [
+                "_NDEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/msys64/mingw32/bin/gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x86"
+        }
+    ],
+    "version": 4
+}

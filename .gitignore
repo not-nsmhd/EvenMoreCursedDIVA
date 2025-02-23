@@ -1,0 +1,11 @@
+*.dsc
+
+Makefile
+*.make
+
+content/
+
+*.o
+*.d
+bin/
+obj/
