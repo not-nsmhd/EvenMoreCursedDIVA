@@ -98,6 +98,7 @@ namespace MainGame
 
 		if (remainingTime <= -0.333f)
 		{
+			valuation = HitValuation::MISS;
 			expired = true;
 		}
 
@@ -138,6 +139,28 @@ namespace MainGame
 		wrongHit = !shapeMatches;
 		remainingTimeOnHit = remainingTime;
 
+		if (MathExtensions::IsInRange(-30.0f, 30.0f, hitTime_ms))
+		{
+			valuation = HitValuation::COOL;
+		}
+		else if (MathExtensions::IsInRange(-70.0f, 70.0f, hitTime_ms))
+		{
+			valuation = HitValuation::GOOD;
+		}
+		else if (MathExtensions::IsInRange(-100.0f, 100.0f, hitTime_ms))
+		{
+			valuation = HitValuation::SAFE;
+		}
+		else
+		{
+			valuation = HitValuation::BAD;
+		}
+
 		hasBeenHit = true;
+	}
+	
+	HitValuation Note::GetHitValuation()
+	{
+		return valuation;
 	}
 }

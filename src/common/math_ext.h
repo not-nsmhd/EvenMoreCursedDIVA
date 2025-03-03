@@ -17,5 +17,7 @@ namespace Common
 
 		float ConvertRange(float originalStart, float originalEnd, float newStart, float newEnd, float value);
 		vec2 GetSinePoint(float percentage, vec2 target, float deg, float freq, float ampl, float dist);
+
+		bool IsInRange(float start, float end, float value);
 	};
 };

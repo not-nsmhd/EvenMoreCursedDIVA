@@ -2,6 +2,7 @@
 #include <string>
 #include <deque>
 #include "game.h"
+#include "gamescore.h"
 #include "gfx/sprite_sheet.h"
 #include "gfx/sprite_renderer.h"
 #include "chart.h"
@@ -41,8 +42,10 @@ namespace MainGame
 
 		std::deque<Note> activeNotes = {};
 
+		GameScore gameScore;
+
 		char debugStateString[1024] = {};
-		char noteHitTime[32] = {};
+		std::string noteValu;
 		vec2 noteHitPos = {};
 		bool noteWrong = false;
 

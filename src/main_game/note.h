@@ -2,6 +2,7 @@
 #include "../gfx/sprite_sheet.h"
 #include "../gfx/sprite_renderer.h"
 #include "chart.h"
+#include "gamescore.h"
 #include <glm/vec2.hpp>
 
 namespace MainGame
@@ -26,6 +27,7 @@ namespace MainGame
 		void Draw(SpriteRenderer& sprRenderer);
 
 		void SendInput(NoteShape shape, bool secondary, bool holding);
+		HitValuation GetHitValuation();
 	private:
 		NoteShape shape;
 
@@ -40,6 +42,7 @@ namespace MainGame
 
 		bool expired = false;
 		bool hasBeenHit = false;
+		HitValuation valuation = HitValuation::NONE;
 		bool wrongHit = false;
 
 		vec2 targetPosition = { 0.0f, 0.0f };

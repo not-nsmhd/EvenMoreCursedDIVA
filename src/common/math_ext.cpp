@@ -57,5 +57,10 @@ namespace Common
 			vec2 point = RotateVector(vec2(x, y), vec2(0.0f), radians);
 			return point + target;
 		}
+		
+		bool IsInRange(float start, float end, float value)
+		{
+			return ((value >= start) && (value <= end));
+		}
 	};
 };

@@ -30,7 +30,8 @@ namespace MainGame
 		noteWrong = false;
 		noteHitPos = {};
 
-		SDL_memset(noteHitTime, 0, sizeof(noteHitTime));
+		noteValu.clear();
+		gameScore.Reset();
 
 		noteArea_ScaleFactor = vec2(
 			static_cast<float>(game->windowWidth) / noteArea_BaseSize.x,
@@ -148,9 +149,11 @@ namespace MainGame
 
 			if (firstHittableNote->HasBeenHit())
 			{
-				SDL_snprintf(noteHitTime, 31, "%.03f", firstHittableNote->GetRemainingTimeOnHit() * 1000.0f);
 				noteHitPos = firstHittableNote->GetTargetPosition();
 				noteWrong = firstHittableNote->HasBeenWrongHit();
+				HitValuation valu = firstHittableNote->GetHitValuation();
+				gameScore.RegisterNoteHit(valu, noteWrong);
+				noteValu = HitValuationNames[static_cast<int>(valu)];
 				activeNotes.erase(activeNotes.cbegin() + firstHittableNoteIndex);
 			}
 		}
@@ -224,7 +227,7 @@ namespace MainGame
 
 		if (manualUpdate)
 		{
-			pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "MANUAL UPDATE ACTIVE\n" \
+			pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "\nMANUAL UPDATE\n" \
 			"Press '.' key to timestep\nPress 'R' key to resume");
 		}
 	}
@@ -232,7 +235,10 @@ namespace MainGame
 	void MainGameState::drawDebug()
 	{
 		debugFont->PushString(spriteRenderer, debugStateString, sizeof(debugStateString) - 1, vec2(4.0f), vec2(1.0f), Common::DefaultColors::White);
-		debugFont->PushString(spriteRenderer, noteHitTime, sizeof(noteHitTime) - 1, noteHitPos, vec2(1.0f), 
+		debugFont->PushString(spriteRenderer, noteValu, noteHitPos, vec2(1.0f), 
 		noteWrong ? Common::DefaultColors::Red : Common::DefaultColors::White);
+
+		debugFont->PushString(spriteRenderer, std::to_string(gameScore.GetCurrentScore()), glm::vec2(1150.0f, 48.0f), glm::vec2(1.0f), Common::DefaultColors::White);
+		debugFont->PushString(spriteRenderer, std::to_string(gameScore.GetCurrentCombo()), glm::vec2(1150.0f, 64.0f), glm::vec2(1.0f), Common::DefaultColors::White);
 	}
 }
