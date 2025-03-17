@@ -19,5 +19,7 @@ namespace Common
 		vec2 GetSinePoint(float percentage, vec2 target, float deg, float freq, float ampl, float dist);
 
 		bool IsInRange(float start, float end, float value);
+
+		float CalculateBarDuration_Seconds(float bpm);
 	};
 };

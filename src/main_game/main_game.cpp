@@ -109,13 +109,19 @@ namespace MainGame
 			ChartNote notePtr = *note; 
 			if (elapsedTime >= note->AppearTime)
 			{
-				activeNotes.push_back(Note(&iconSet, 1.333f, &notePtr, noteArea_ScaleFactor));
+				activeNotes.push_back(Note(&iconSet, MathExtensions::CalculateBarDuration_Seconds(120.0f), &notePtr, noteArea_ScaleFactor));
 				chartNoteOffset++;
 			}
 		}
 
 		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
+			if (note->HasExpired())
+			{
+				activeNotes.erase(note);
+				break;
+			}
+
 			note->Update(game->deltaTime_ms);
 		}
 	}

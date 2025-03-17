@@ -62,5 +62,15 @@ namespace Common
 		{
 			return ((value >= start) && (value <= end));
 		}
+		
+		float CalculateBarDuration_Seconds(float bpm)
+		{
+			if (bpm <= 0.0f)
+			{
+				return 0.0f;
+			}
+
+			return (60.0f / bpm * 4.0f);
+		}
 	};
 };

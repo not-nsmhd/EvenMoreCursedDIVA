@@ -4,7 +4,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build (Debug)",
+			"label": "Build (Debug, x86)",
 			"type": "shell",
 			"command": "premake5 gmake2; make config=debug_win32 DIVA",
 			"windows": {
@@ -21,7 +21,7 @@
 			}
 		},
 		{
-			"label": "Build (Release)",
+			"label": "Build (Release, x86)",
 			"type": "shell",
 			"command": "premake5 gmake2; make config=release_win32 DIVA",
 			"windows": {

@@ -37,6 +37,7 @@ enum class GameStates
 
 	DEVSTATE_U16_TEST,
 	DEVSTATE_INPUT_TEST,
+	DEVSTATE_AUDIO_TEST,
 
 	DEVSTATE_STATE_SELECTOR,
 
@@ -48,6 +49,7 @@ const string GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] =
 	"Main Game",
 	"[Dev] UTF-16 Text Test",
 	"[Dev] Input Test",
+	"[Dev] Audio Test",
 	"[Dev] State Selector"
 };
 

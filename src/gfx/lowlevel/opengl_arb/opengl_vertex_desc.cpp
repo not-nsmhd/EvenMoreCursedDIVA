@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "opengl_defs.h"
 #include "opengl_vertex_desc.h"
 
 namespace GFX
@@ -114,6 +115,7 @@ namespace GFX
 				this->vertexStride = stride;
 
 				SDL_memcpy(this->attribs, attribs, sizeof(VertexAttribute) * attribCount);
+				LOG_INFO_ARGS("Created a new vertex description with %u attributes", attribCount);
 
 				return true;
 			}
@@ -121,6 +123,7 @@ namespace GFX
 			void VertexDescription_OpenGL::Destroy()
 			{
 				delete[] attribs;
+				LOG_INFO("Destroyed a vertex description");
 			}
 			
 			void VertexDescription_OpenGL::Set() const

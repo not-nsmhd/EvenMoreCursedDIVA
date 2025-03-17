@@ -7,5 +7,6 @@ content/
 
 *.o
 *.d
-bin/
+bin_x86/
+bin_x64/
 obj/

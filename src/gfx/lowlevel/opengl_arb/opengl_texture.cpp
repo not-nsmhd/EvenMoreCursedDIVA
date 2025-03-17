@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "opengl_defs.h"
 #include "opengl_texture.h"
 
 namespace GFX
@@ -96,6 +97,8 @@ namespace GFX
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, NULL);
 
+				LOG_INFO_ARGS("Created a new %dx%d texture (handle: %u)", width, height, handle);
+
 				return true;
 			}
 
@@ -104,6 +107,7 @@ namespace GFX
 				if (handle != 0)
 				{
 					glDeleteTextures(1, &handle);
+					LOG_INFO_ARGS("Destroyed a %dx%d texture (handle: %u)", width, height, handle);
 					handle = 0;
 				}
 			}

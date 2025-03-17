@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include "opengl_shader.h"
+#include "opengl_defs.h"
 
 namespace GFX
 {
@@ -53,7 +54,7 @@ namespace GFX
 				if (errorPos != -1)
 				{
 					errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[GFX::OpenGL]: Failed to assemble vertex program.\n%s", errorString);
+					LOG_ERROR_ARGS("Failed to assemble vertex program. Error: %s", errorString);
 				}
 
 				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fpHandle);
@@ -63,9 +64,10 @@ namespace GFX
 				if (errorPos != -1)
 				{
 					errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[GFX::OpenGL]: Failed to assemble fragment program.\n%s", errorString);
+					LOG_ERROR_ARGS("Failed to assemble fragment program. Error: %s", errorString);
 				}
 
+				LOG_INFO_ARGS("Created a new shader program (vp: %u, fp: %u)", vpHandle, fpHandle);
 				return true;
 			}
 
@@ -73,6 +75,7 @@ namespace GFX
 			{
 				glDeleteProgramsARB(1, &vpHandle);
 				glDeleteProgramsARB(1, &fpHandle);
+				LOG_INFO_ARGS("Shader program (vp: %u, fp: %u) has been destroyed", vpHandle, fpHandle);
 			}
 			
 			void Shader_OpenGL::Bind() const

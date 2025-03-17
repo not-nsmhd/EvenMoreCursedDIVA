@@ -6,7 +6,7 @@ project "DIVA"
 	kind "ConsoleApp"
 	language "C++"
 	targetname "game"
-	targetdir "bin/%{cfg.buildcfg}"
+	targetdir "bin_%{cfg.architecture}/%{cfg.buildcfg}"
 	cdialect "C17"
 	cppdialect "C++17"
 
@@ -58,11 +58,11 @@ project "DIVA"
 	filter { "configurations:Debug" }
 		defines { "_DEBUG" }
 		symbols "On"
-		buildoptions { "`sdl2-config --cflags`", "-mconsole" }
-		linkoptions { "`sdl2-config --libs`", "-mconsole" }
+		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio --cflags`", "-mconsole" }
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio --libs`", "-mconsole" }
 		
 	filter { "configurations:Release" }
 		defines { "_NDEBUG" }
 		optimize "On"
-		buildoptions { "`sdl2-config --cflags`" }
-		linkoptions { "`sdl2-config --libs`" }	
+		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio --cflags`" }
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio --libs`" }	

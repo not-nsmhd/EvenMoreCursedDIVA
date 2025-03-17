@@ -8,6 +8,13 @@
 
 using std::string;
 
+#define LOG_INFO(message) Logging::LogInfo("IO::FileSystem", message)
+#define LOG_INFO_ARGS(message, args...) Logging::LogInfo("IO::FileSystem", message, args)
+#define LOG_WARN(message) Logging::LogWarn("IO::FileSystem", message)
+#define LOG_WARN_ARGS(message, args...) Logging::LogWarn("IO::FileSystem", message, args)
+#define LOG_ERROR(message) Logging::LogError("IO::FileSystem", message)
+#define LOG_ERROR_ARGS(message, args...) Logging::LogError("IO::FileSystem", message, args)
+
 namespace IO
 {
 	FileSystem::FileSystem()
@@ -24,11 +31,11 @@ namespace IO
 			string savePath = docsPath;
 			savePath.append("\\Starshine\\EvenMoreCursedDIVA");
 
-			Logging::LogInfo("IO::FileSystem", "Save data path: %s", savePath.c_str());
+			LOG_INFO_ARGS("Save data path: %s", savePath.c_str());
 
 			if (PathFileExistsA(savePath.c_str()) != TRUE)
 			{
-				Logging::LogWarn("IO::FileSystem", "Save data directory does not exist. Creating...");
+				LOG_WARN("Save data directory does not exist. Creating...");
 
 				string tempPath = docsPath;
 
@@ -37,8 +44,8 @@ namespace IO
 				{
 					if (GetLastError() != ERROR_ALREADY_EXISTS)
 					{
-						// uiuiuiuiuiuiu
-						// something
+						LOG_ERROR("Failed to create save data directory");
+						return;
 					}
 				}
 
@@ -70,7 +77,7 @@ namespace IO
 		if (std::filesystem::exists(absPath))
 		{
 			contentPaths.push_back(absPath);
-			Logging::LogInfo("IO::FileSystem", "Mounted content path \"%s\"", absPath.string().c_str());
+			LOG_INFO_ARGS("Mounted content path \"%s\"", absPath.string().c_str());
 			return true;
 		}
 

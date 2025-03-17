@@ -5,6 +5,7 @@
 #include "main_game/main_game.h"
 #include "testing/u16_test.h"
 #include "testing/input_test.h"
+#include "testing/audio_test.h"
 #include "dev/state_selector.h"
 
 #ifdef __cplusplus
@@ -42,12 +43,16 @@ extern "C"
 
 		Game game;
 		game.stateList[static_cast<int>(GameStates::STATE_MAINGAME)] = MainGame::MainGameState::GetInstance();
+
 		game.stateList[static_cast<int>(GameStates::DEVSTATE_U16_TEST)] = Testing::U16Test::GetInstance();
 		game.stateList[static_cast<int>(GameStates::DEVSTATE_INPUT_TEST)] = Testing::InputTest::GetInstance();
+		game.stateList[static_cast<int>(GameStates::DEVSTATE_AUDIO_TEST)] = Testing::AudioTest::GetInstance();
+		
 		game.stateList[static_cast<int>(GameStates::DEVSTATE_STATE_SELECTOR)] = Dev::StateSelector::GetInstance();
 
 		if (game.Initialize() != true)
 		{
+			Logging::LoggingQuit();
 			return -1;
 		}
 

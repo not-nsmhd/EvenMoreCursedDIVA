@@ -1,4 +1,5 @@
 #include "opengl_buffers.h"
+#include "opengl_defs.h"
 
 namespace GFX
 {
@@ -76,6 +77,8 @@ namespace GFX
 				glBufferDataARB(binding, initialSize, (initialData != nullptr ? initialData : NULL), mode);
 
 				size = initialSize;
+
+				LOG_INFO_ARGS("Created a new buffer with handle %u", handle);
 				return true;
 			}
 
@@ -103,6 +106,9 @@ namespace GFX
 				}
 
 				glDeleteBuffersARB(1, &handle);
+				LOG_INFO_ARGS("Buffer %d has been destroyed", handle);
+
+				handle = 0;
 			}
 			
 			void Buffer_OpenGL::Bind() const

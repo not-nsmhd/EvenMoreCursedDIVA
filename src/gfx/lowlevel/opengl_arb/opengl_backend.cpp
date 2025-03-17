@@ -1,10 +1,10 @@
 #include <glad/glad.h>
+#include "opengl_defs.h"
 #include "opengl_buffers.h"
 #include "opengl_shader.h"
 #include "opengl_vertex_desc.h"
 #include "opengl_texture.h"
 #include "opengl_backend.h"
-#include "../../../util/logging.h"
 
 namespace GFX
 {
@@ -88,14 +88,14 @@ namespace GFX
 			{
 				if (initialized)
 				{
-					Logging::LogWarn("GFX::OpenGL", "Graphics backend has already been initialized");
+					LOG_WARN("Graphics backned has already been initialized");
 					return true;
 				}
 
 				u32 windowFlags = SDL_GetWindowFlags(window);
 				if ((windowFlags & SDL_WINDOW_OPENGL) != SDL_WINDOW_OPENGL)
 				{
-					Logging::LogError("GFX::OpenGL", "Specified window is not an OpenGL window");
+					LOG_ERROR("Game window is not an OpenGL window");
 					return false;
 				}
 
@@ -105,7 +105,7 @@ namespace GFX
 					char message[512] = {};
 					SDL_snprintf(message, 511, "Failed to create an OpenGL context.\nError: %s", SDL_GetError());
 
-					Logging::LogError("GFX::OpenGL", "%s", message);
+					LOG_ERROR_ARGS("%s", message);
 					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error (GFX)", message, targetWindow);
 
 					return false;
@@ -113,16 +113,16 @@ namespace GFX
 
 				if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 				{
-					Logging::LogError("GFX::OpenGL", "Graphics backend has already been initialized");
-					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error (GFX)", "Failed to initialize an OpenGL context.", targetWindow);
+					LOG_ERROR("Failed to load OpenGL functions");
+					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error (GFX)", "Failed to load OpenGL functions", targetWindow);
 					SDL_GL_DeleteContext(glContext);
 					return false;
 				}
 
 				SDL_GL_SetSwapInterval(1);
 
-				Logging::LogInfo("GFX::OpenGL", "Version: %s", glGetString(GL_VERSION));
-				Logging::LogInfo("GFX::OpenGL", "Renderer: %s", glGetString(GL_RENDERER));
+				LOG_INFO_ARGS("Version: %s", glGetString(GL_VERSION));
+				LOG_INFO_ARGS("Renderer: %s", glGetString(GL_RENDERER));
 
 				glEnable(GL_CULL_FACE);
 				glCullFace(GL_BACK);
@@ -207,7 +207,7 @@ namespace GFX
 			void Backend_OpenGL::ResizeMainRenderTarget(u32 newWidth, u32 newHeight)
 			{
 				glViewport(0, 0, newWidth, newHeight);
-				Logging::LogInfo("GFX::OpenGL", "New main render target size: %dx%d", newWidth, newHeight);
+				LOG_INFO_ARGS("New main render target size: %dx%d", newWidth, newHeight);
 			}
 			
 			void Backend_OpenGL::SetBlendState(const BlendState* state)
@@ -260,9 +260,6 @@ namespace GFX
 					return nullptr;
 				}
 
-				GLuint newHandle = buffer->GetHandle();
-				Logging::LogInfo("GFX::OpenGL", "Created a new vertex buffer (handle: %u)", newHandle);
-
 				return buffer;
 			}
 
@@ -286,9 +283,6 @@ namespace GFX
 					return nullptr;
 				}
 
-				GLuint newHandle = buffer->GetHandle();
-				Logging::LogInfo("GFX::OpenGL", "Created a new index buffer (handle: %u)", newHandle);
-
 				return buffer;
 			}
 
@@ -300,10 +294,7 @@ namespace GFX
 				}
 
 				Buffer_OpenGL* buffer_gl = static_cast<Buffer_OpenGL*>(buffer);
-				GLuint handle = buffer_gl->GetHandle();
 				buffer_gl->Destroy();
-
-				Logging::LogInfo("GFX::OpenGL", "Destroyed a buffer (handle: %u)", handle);
 
 				delete buffer;
 			}
@@ -393,10 +384,6 @@ namespace GFX
 					return nullptr;
 				}
 
-				GLuint vpHandle = shader_gl->GetVertexHandle();
-				GLuint fpHandle = shader_gl->GetFragmentHandle();
-				Logging::LogInfo("GFX::OpenGL", "Created a new shader program (vp: %u, fp: %u)", vpHandle, fpHandle);
-
 				return shader_gl;
 			}
 
@@ -408,11 +395,8 @@ namespace GFX
 				}
 
 				Shader_OpenGL* shader_gl = static_cast<Shader_OpenGL*>(shader);
-				GLuint vpHandle = shader_gl->GetVertexHandle();
-				GLuint fpHandle = shader_gl->GetFragmentHandle();
 				shader_gl->Destroy();
 
-				Logging::LogInfo("GFX::OpenGL", "Destroyed a shader program (vp: %u, fp: %u)", vpHandle, fpHandle);
 				delete shader;
 			}
 
@@ -457,8 +441,6 @@ namespace GFX
 					return nullptr;
 				}
 
-				Logging::LogInfo("GFX::OpenGL", "Created a new vertex description");
-
 				return desc;
 			}
 
@@ -472,7 +454,6 @@ namespace GFX
 				VertexDescription_OpenGL* desc_gl = static_cast<VertexDescription_OpenGL*>(desc);
 				desc_gl->Destroy();
 
-				Logging::LogInfo("GFX::OpenGL", "Destroyed a vertex description");
 				delete desc;
 			}
 
@@ -502,9 +483,6 @@ namespace GFX
 					return nullptr;
 				}
 
-				GLuint handle = tex_gl->GetHandle();
-				Logging::LogInfo("GFX::OpenGL", "Created a new %dx%d texture (handle: %u)", width, height, handle);
-
 				return tex_gl;
 			}
 
@@ -513,18 +491,6 @@ namespace GFX
 				if (texture != nullptr)
 				{
 					Texture_OpenGL* tex_gl = static_cast<Texture_OpenGL*>(texture);
-
-					GLuint handle = tex_gl->GetHandle();
-					const char* debugName = tex_gl->GetDebugName();
-					if (debugName != nullptr)
-					{
-						Logging::LogInfo("GFX::OpenGL", "Destroyed texture \"%s\" (handle: %u)", debugName, handle);
-					}
-					else
-					{
-						Logging::LogInfo("GFX::OpenGL", "Destroyed a texture (handle: %u)", handle);
-					}
-
 					tex_gl->Destroy();
 					delete texture;
 				}

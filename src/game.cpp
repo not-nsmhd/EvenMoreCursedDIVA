@@ -8,6 +8,13 @@
 #include "util/string_utils.h"
 #include "util/logging.h"
 
+#define LOG_INFO(message) Logging::LogInfo("Game", message)
+#define LOG_INFO_ARGS(message, args...) Logging::LogInfo("Game", message, args)
+#define LOG_WARN(message) Logging::LogWarn("Game", message)
+#define LOG_WARN_ARGS(message, args...) Logging::LogWarn("Game", message, args)
+#define LOG_ERROR(message) Logging::LogError("Game", message)
+#define LOG_ERROR_ARGS(message, args...) Logging::LogError("Game", message, args)
+
 Game::Game()
 {
 	windowWidth = 1280;
@@ -68,15 +75,15 @@ bool Game::Initialize()
 	SDL_version sdlVersion;
 	SDL_GetVersion(&sdlVersion);
 
-	Logging::LogInfo("SDL", "Version: %d.%d.%d", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
-	Logging::LogInfo("SDL", "Platform: %s", SDL_GetPlatform());
+	LOG_INFO_ARGS("SDL Version: %d.%d.%d", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
+	LOG_INFO_ARGS("SDL Platform: %s", SDL_GetPlatform());
 
 	u32 windowFlags = SDL_WINDOW_SHOWN;
 
 	fileSystem = FileSystem::GetInstance();
 	if (fileSystem->MountPath("diva") != true)
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Starshine - Error", "Main content directory \"diva\" does not exist.", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Main content directory \"diva\" does not exist.", NULL);
 		return false;
 	}
 
@@ -219,16 +226,18 @@ bool Game::Loop()
 				if (currentState->Initialize() != true)
 				{
 					Logging::LogError("Game", "Failed to initialize a game state");
+					Logging::LoggingQuit();
 					return false;
 				}
-				Logging::LogInfo("Game", "Game state initialized");
+				LOG_INFO("Game state initialized");
 
 				if (currentState->LoadContent() != true)
 				{
 					Logging::LogError("Game", "Game state failed to load content");
+					Logging::LoggingQuit();
 					return false;
 				}
-				Logging::LogInfo("Game", "Game state content loaded");
+				LOG_INFO("Game state content loaded");
 
 				changeState = false;
 			}
@@ -255,7 +264,7 @@ bool Game::Loop()
 	{
 		currentState->UnloadContent();
 		currentState->Destroy();
-		Logging::LogInfo("Game", "State destroyed");
+		LOG_INFO("State destroyed");
 	}
 
 	GlobalResources::Destroy();
@@ -274,7 +283,7 @@ void Game::SetState(GameState* state)
 		{
 			currentState->UnloadContent();
 			currentState->Destroy();
-			Logging::LogInfo("Game", "Previous state destroyed");
+			LOG_INFO("Previous state destroyed");
 		}
 
 		currentState = state;
@@ -293,7 +302,7 @@ void Game::SetState(GameStates state)
 {
 	if (currentState != nullptr)
 	{
-		Logging::LogInfo("Game", "Chaning game state: [%s] -> [%s]\n",
+		LOG_INFO_ARGS("Chaning game state: [%s] -> [%s]\n",
 		GameStateNames[static_cast<int>(currentGameState)].c_str(), GameStateNames[static_cast<int>(state)].c_str());
 	}
 

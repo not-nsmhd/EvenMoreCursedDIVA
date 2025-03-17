@@ -47,6 +47,7 @@ namespace Logging
 	{
 		if (logToFile)
 		{
+			logFile.flush();
 			logFile.close();
 		}
 	}
