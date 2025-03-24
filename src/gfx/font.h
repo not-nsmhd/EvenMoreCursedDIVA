@@ -67,5 +67,7 @@ namespace GFX
 		Texture *texture;
 
 		FontGlyph replacementGlyph;
+
+		void PushChar(SpriteRenderer &renderer, char16_t c, vec2 basePos, vec2* charPos, vec2 scale, Color color);
 	};
 };

@@ -151,51 +151,12 @@ namespace GFX
 
 		renderer.ResetSprite();
 
-		vec2 charPos = pos;
-		vec2 offset = {};
+		vec2 charPos = {};
 
-		FontGlyph glyph;
 		for (string::const_iterator c = text.begin(); c != text.end(); c++)
 		{
-			if (*c == '\n')
-			{
-				charPos.x = pos.x;
-				charPos.y += LineHeight;
-				continue;
-			}
-
-			unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(static_cast<char16_t>(*c));
-			if (glyphIt == glyphMap.end())
-			{
-				glyph = replacementGlyph;
-			}
-			else
-			{
-				glyph = glyphs[glyphIt->second];
-			}
-
-			if (*c == ' ')
-			{
-				charPos.x += static_cast<float>(glyph.XAdvance);
-				continue;
-			}
-
-			offset.x = static_cast<float>(glyph.XOffset);
-			offset.y = static_cast<float>(glyph.YOffset);
-
-			renderer.SetSpritePosition((charPos + offset) * scale);
-			renderer.SetSpriteScale({glyph.Width * scale.x, glyph.Height * scale.y});
-			renderer.SetSpriteColor(color);
-
-			renderer.SetSpriteSource(texture,
-									 {static_cast<float>(glyph.X),
-									  static_cast<float>(glyph.Y),
-									  static_cast<float>(glyph.Width),
-									  static_cast<float>(glyph.Height)});
-
-			renderer.PushSprite(texture);
-
-			charPos.x += static_cast<float>(glyph.XAdvance);
+			char16_t c16 = static_cast<char16_t>(*c);
+			PushChar(renderer, c16, pos, &charPos, scale, color);
 		}
 	}
 
@@ -208,57 +169,17 @@ namespace GFX
 
 		renderer.ResetSprite();
 
-		vec2 charPos = pos;
-		vec2 offset = {};
-
-		FontGlyph glyph;
+		vec2 charPos = {};
 
 		for (u16string::const_iterator c = text.begin(); c != text.end(); c++)
 		{
 			if (*c == 0xFEFF)
 			{
+				// Skip BOM
 				continue;
 			}
 
-			if (*c == '\n')
-			{
-				charPos.x = pos.x;
-				charPos.y += LineHeight;
-				continue;
-			}
-
-			unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(*c);
-			if (glyphIt == glyphMap.end())
-			{
-				glyph = replacementGlyph;
-			}
-			else
-			{
-				glyph = glyphs[glyphIt->second];
-			}
-
-			if (*c == ' ')
-			{
-				charPos.x += static_cast<float>(glyph.XAdvance);
-				continue;
-			}
-
-			offset.x = static_cast<float>(glyph.XOffset);
-			offset.y = static_cast<float>(glyph.YOffset);
-
-			renderer.SetSpritePosition((charPos + offset) * scale);
-			renderer.SetSpriteScale({glyph.Width * scale.x, glyph.Height * scale.y});
-			renderer.SetSpriteColor(color);
-
-			renderer.SetSpriteSource(texture,
-									 {static_cast<float>(glyph.X),
-									  static_cast<float>(glyph.Y),
-									  static_cast<float>(glyph.Width),
-									  static_cast<float>(glyph.Height)});
-
-			renderer.PushSprite(texture);
-
-			charPos.x += static_cast<float>(glyph.XAdvance);
+			PushChar(renderer, *c, pos, &charPos, scale, color);
 		}
 	}
 
@@ -281,53 +202,12 @@ namespace GFX
 
 		renderer.ResetSprite();
 
-		vec2 charPos = pos;
-		vec2 offset = {};
+		vec2 charPos = {};
 
-		FontGlyph glyph;
 		for (size_t i = 0; i < len; i++)
 		{
-			char c = text[i];
-
-			if (c == '\n')
-			{
-				charPos.x = pos.x;
-				charPos.y += LineHeight;
-				continue;
-			}
-
-			unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(static_cast<char16_t>(c));
-			if (glyphIt == glyphMap.end())
-			{
-				glyph = replacementGlyph;
-			}
-			else
-			{
-				glyph = glyphs[glyphIt->second];
-			}
-
-			if (c == ' ')
-			{
-				charPos.x += static_cast<float>(glyph.XAdvance);
-				continue;
-			}
-
-			offset.x = static_cast<float>(glyph.XOffset);
-			offset.y = static_cast<float>(glyph.YOffset);
-
-			renderer.SetSpritePosition((charPos + offset) * scale);
-			renderer.SetSpriteScale({glyph.Width * scale.x, glyph.Height * scale.y});
-			renderer.SetSpriteColor(color);
-
-			renderer.SetSpriteSource(texture,
-									 {static_cast<float>(glyph.X),
-									  static_cast<float>(glyph.Y),
-									  static_cast<float>(glyph.Width),
-									  static_cast<float>(glyph.Height)});
-
-			renderer.PushSprite(texture);
-
-			charPos.x += static_cast<float>(glyph.XAdvance);
+			char16_t c16 = static_cast<char16_t>(text[i]);
+			PushChar(renderer, c16, pos, &charPos, scale, color);
 		}
 	}
 
@@ -350,53 +230,56 @@ namespace GFX
 
 		renderer.ResetSprite();
 
-		vec2 charPos = pos;
-		vec2 offset = {};
+		vec2 charPos = {};
 
-		FontGlyph glyph;
 		for (size_t i = 0; i < len; i++)
 		{
 			char16_t c = text[i];
-
-			if (c == '\n')
-			{
-				charPos.x = pos.x;
-				charPos.y += LineHeight;
-				continue;
-			}
-
-			unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(c);
-			if (glyphIt == glyphMap.end())
-			{
-				glyph = replacementGlyph;
-			}
-			else
-			{
-				glyph = glyphs[glyphIt->second];
-			}
-
-			if (c == ' ')
-			{
-				charPos.x += static_cast<float>(glyph.XAdvance);
-				continue;
-			}
-
-			offset.x = static_cast<float>(glyph.XOffset);
-			offset.y = static_cast<float>(glyph.YOffset);
-
-			renderer.SetSpritePosition((charPos + offset) * scale);
-			renderer.SetSpriteScale({glyph.Width * scale.x, glyph.Height * scale.y});
-			renderer.SetSpriteColor(color);
-
-			renderer.SetSpriteSource(texture,
-									 {static_cast<float>(glyph.X),
-									  static_cast<float>(glyph.Y),
-									  static_cast<float>(glyph.Width),
-									  static_cast<float>(glyph.Height)});
-
-			renderer.PushSprite(texture);
-
-			charPos.x += static_cast<float>(glyph.XAdvance);
+			PushChar(renderer, c, pos, &charPos, scale, color);
 		}
+	}
+	
+	void Font::PushChar(SpriteRenderer &renderer, char16_t c, vec2 basePos, vec2* charPos, vec2 scale, Color color)
+	{
+		if (c == '\n')
+		{
+			charPos->x = 0.0f;
+			charPos->y += LineHeight;
+			return;
+		}
+
+		unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(c);
+
+		const FontGlyph* glyph;
+		if (glyphIt == glyphMap.end())
+		{
+			glyph = &replacementGlyph;
+		}
+		else
+		{
+			glyph = &glyphs[glyphIt->second];
+		}
+
+		if (c == ' ')
+		{
+			charPos->x += static_cast<float>(glyph->XAdvance);
+			return;
+		}
+
+		vec2 offset = vec2(static_cast<float>(glyph->XOffset), static_cast<float>(glyph->YOffset));
+
+		renderer.SetSpritePosition((*charPos + basePos + offset) * scale);
+		renderer.SetSpriteScale({glyph->Width * scale.x, glyph->Height * scale.y});
+		renderer.SetSpriteColor(color);
+
+		renderer.SetSpriteSource(texture,
+								 {static_cast<float>(glyph->X),
+								  static_cast<float>(glyph->Y),
+								  static_cast<float>(glyph->Width),
+								  static_cast<float>(glyph->Height)});
+
+		renderer.PushSprite(texture);
+
+		charPos->x += static_cast<float>(glyph->XAdvance);
 	}
 };
