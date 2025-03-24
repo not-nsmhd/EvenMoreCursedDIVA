@@ -40,7 +40,7 @@ namespace Testing
 
 		return true;
 	}
-	
+
 	bool AudioTest::LoadContent()
 	{
 		SDL_AudioSpec spec = {};

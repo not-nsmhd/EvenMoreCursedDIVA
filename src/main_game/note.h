@@ -17,10 +17,13 @@ namespace MainGame
 		Note(const GFX::SpriteSheet* iconSet, float barTime, const ChartNote* chartNote, vec2 scaleFactor);
 
 		vec2 GetTargetPosition();
+		NoteShape GetShape();
 
 		bool HasExpired();
 		bool HasBeenHit();
 		bool HasBeenWrongHit();
+
+		float GetRemainingTime();
 		float GetRemainingTimeOnHit();
 
 		void Update(float deltaTime_ms);

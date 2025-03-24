@@ -63,6 +63,11 @@ namespace MainGame
 		return targetPosition;
 	}
 	
+	NoteShape Note::GetShape()
+	{
+		return shape;
+	}
+	
 	bool Note::HasExpired()
 	{
 		return expired;
@@ -76,6 +81,11 @@ namespace MainGame
 	bool Note::HasBeenWrongHit()
 	{
 		return wrongHit;
+	}
+	
+	float Note::GetRemainingTime()
+	{
+		return remainingTime;
 	}
 	
 	float Note::GetRemainingTimeOnHit()

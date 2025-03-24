@@ -10,6 +10,8 @@ project "DIVA"
 	cdialect "C17"
 	cppdialect "C++17"
 
+	buildDate = os.date("%Y.%m.%dT%H:%M:%S")
+
 	newoption {
 		trigger = "gfx_d3d9",
 		description = "Enable Direct3D 9 graphics backend. (Windows only)"
@@ -31,6 +33,10 @@ project "DIVA"
 		"lib/stb/include", 
 		"lib/tinyxml2",
 		"src/" }
+
+	defines {
+		"PREMAKE_BUILD_DATE=\"" .. buildDate .. "\""
+	}
 		
 	filter { "platforms:Win32" }
 		system "Windows"
@@ -58,11 +64,11 @@ project "DIVA"
 	filter { "configurations:Debug" }
 		defines { "_DEBUG" }
 		symbols "On"
-		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio --cflags`", "-mconsole" }
-		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio --libs`", "-mconsole" }
+		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio vorbisfile --cflags`", "-mconsole" }
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`", "-mconsole" }
 		
 	filter { "configurations:Release" }
 		defines { "_NDEBUG" }
 		optimize "On"
-		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio --cflags`" }
-		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio --libs`" }	
+		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio vorbisfile --cflags`" }
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`" }	

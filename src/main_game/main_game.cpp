@@ -1,4 +1,5 @@
 #include "global_res.h"
+#include "audio/helpers.h"
 #include "main_game.h"
 #include "common/math_ext.h"
 
@@ -47,6 +48,9 @@ namespace MainGame
 		spriteRenderer.Initialize(graphicsBackend);
 		debugFont = GlobalResources::DebugFont;
 		iconSet.ReadFromTextFile(graphicsBackend, "sprites/iconset_ps3");
+		
+		Audio::Helpers::LoadSoundEffect(&hitSE, "sounds/test_pcm.wav");
+		hitSE.Volume = 0.364f;
 
 		songChart.LoadFromXml("songdata/test/test_chart.xml");
 
@@ -57,6 +61,9 @@ namespace MainGame
 	{
 		spriteRenderer.Destroy();
 		iconSet.Destroy();
+
+		audio->StopAllSFXVoices();
+		hitSE.Destroy();
 	}
 	
 	void MainGameState::Destroy()
@@ -77,7 +84,11 @@ namespace MainGame
 			gameStep();
 		}
 
-		handleNoteInput();
+		if (!autoPlay)
+		{
+			handleNoteInput();
+		}
+
 		handleDebugInput();
 
 		updateDebug();
@@ -116,53 +127,60 @@ namespace MainGame
 
 		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
-			if (note->HasExpired())
+			if (note->HasExpired() || note->HasBeenHit() || note->HasBeenWrongHit())
 			{
 				activeNotes.erase(note);
 				break;
 			}
 
 			note->Update(game->deltaTime_ms);
+
+			if (autoPlay)
+			{
+				if (note->GetRemainingTime() <= 0.0f)
+				{
+					inputNoteHit(note->GetShape(), false, true);
+				}
+			}
 		}
 	}
 	
 	void MainGameState::inputNoteHit(NoteShape shape, bool secondary, bool down)
 	{
-		if (activeNotes.size() < 0)
+		if (activeNotes.size() > 0)
 		{
-			return;
-		}
+			Note* firstHittableNote = nullptr;
+			int firstHittableNoteIndex = 0;
 
-		Note* firstHittableNote = nullptr;
-		int firstHittableNoteIndex = 0;
-
-		Note* testNote = nullptr;
-		for (int i = 0; i < activeNotes.size(); i++)
-		{
-			testNote = &activeNotes[i];
-
-			if (!testNote->HasBeenWrongHit() && !testNote->HasBeenHit() && !testNote->HasExpired())
+			Note* testNote = nullptr;
+			for (int i = 0; i < activeNotes.size(); i++)
 			{
-				firstHittableNote = testNote;
-				firstHittableNoteIndex = i;
-				break;
+				testNote = &activeNotes[i];
+
+				if (!testNote->HasBeenWrongHit() && !testNote->HasBeenHit() && !testNote->HasExpired())
+				{
+					firstHittableNote = testNote;
+					firstHittableNoteIndex = i;
+					break;
+				}
 			}
-		}
 
-		if (firstHittableNote != nullptr)
-		{
-			firstHittableNote->SendInput(shape, secondary, down);
-
-			if (firstHittableNote->HasBeenHit())
+			if (firstHittableNote != nullptr)
 			{
-				noteHitPos = firstHittableNote->GetTargetPosition();
-				noteWrong = firstHittableNote->HasBeenWrongHit();
-				HitValuation valu = firstHittableNote->GetHitValuation();
-				gameScore.RegisterNoteHit(valu, noteWrong);
-				noteValu = HitValuationNames[static_cast<int>(valu)];
-				activeNotes.erase(activeNotes.cbegin() + firstHittableNoteIndex);
-			}
+				firstHittableNote->SendInput(shape, secondary, down);
+
+				if (firstHittableNote->HasBeenHit())
+				{
+					noteHitPos = firstHittableNote->GetTargetPosition();
+					noteWrong = firstHittableNote->HasBeenWrongHit();
+					HitValuation valu = firstHittableNote->GetHitValuation();
+					gameScore.RegisterNoteHit(valu, noteWrong);
+					noteValu = HitValuationNames[static_cast<int>(valu)];
+				}
+			}	
 		}
+
+		audio->PlaySoundEffect(hitSE);
 	}
 	
 	void MainGameState::handleNoteInput()
@@ -220,6 +238,14 @@ namespace MainGame
 		{
 			manualUpdate = false;
 		}
+
+		if (keyboardState->IsKeyDown(SDL_SCANCODE_LSHIFT))
+		{
+			if (keyboardState->IsKeyTapped(SDL_SCANCODE_L))
+			{
+				autoPlay = !autoPlay;
+			}
+		}
 	}
 	
 	void MainGameState::updateDebug()
@@ -230,6 +256,7 @@ namespace MainGame
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Elapsed Time: %.3f\n", elapsedTime);
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Chart: %d/%d\n", chartNoteOffset, songChart.Notes.size());
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Active Notes: %d\n", activeNotes.size());
+		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Autoplay (Shift+L): %s\n", autoPlay ? "True" : "False");
 
 		if (manualUpdate)
 		{

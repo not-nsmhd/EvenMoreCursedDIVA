@@ -61,7 +61,6 @@ bool Game::Initialize()
 
 	convertPreprocessorDate(&buildYear, &buildMonth);
 
-	Logging::LoggingInit();
 	Logging::LogMessage("--- Starshine %02d.%02d ---", buildYear, buildMonth);
 	Logging::LogMessage("--- Starting...");
 
@@ -109,7 +108,6 @@ bool Game::Initialize()
 	if (window == NULL)
 	{
 		Logging::LogError("Init", "Failed to create game window. Error: %s", SDL_GetError());
-		Logging::LoggingQuit();
 		SDL_Quit();
 		return false;
 	}
@@ -139,6 +137,9 @@ bool Game::Initialize()
 	mouseState = Input::Mouse::GetInstance();
 
 	//SDL_CaptureMouse(SDL_TRUE);
+
+	audioEngine = AudioEngine::GetInstance();
+	audioEngine->Initialize();
 
 	GlobalResources::Load(graphicsBackend);
 
@@ -226,7 +227,6 @@ bool Game::Loop()
 				if (currentState->Initialize() != true)
 				{
 					Logging::LogError("Game", "Failed to initialize a game state");
-					Logging::LoggingQuit();
 					return false;
 				}
 				LOG_INFO("Game state initialized");
@@ -234,7 +234,6 @@ bool Game::Loop()
 				if (currentState->LoadContent() != true)
 				{
 					Logging::LogError("Game", "Game state failed to load content");
-					Logging::LoggingQuit();
 					return false;
 				}
 				LOG_INFO("Game state content loaded");
@@ -269,9 +268,9 @@ bool Game::Loop()
 
 	GlobalResources::Destroy();
 	graphicsBackend->Destroy();
+	audioEngine->Destroy();
 
 	SDL_Quit();
-	Logging::LoggingQuit();
 	return true;
 }
 
@@ -292,6 +291,7 @@ void Game::SetState(GameState* state)
 		currentState->graphicsBackend = graphicsBackend;
 		currentState->keyboardState = keyboardState;
 		currentState->mouseState = mouseState;
+		currentState->audio = audioEngine;
 		changeState = true;
 
 		currentGameState = GameStates::STATE_UNREGISTIRED;

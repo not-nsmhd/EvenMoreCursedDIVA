@@ -5,6 +5,7 @@
 #include "gamescore.h"
 #include "gfx/sprite_sheet.h"
 #include "gfx/sprite_renderer.h"
+#include "audio/audio.h"
 #include "chart.h"
 #include "note.h"
 
@@ -31,11 +32,14 @@ namespace MainGame
 		GFX::SpriteRenderer spriteRenderer;
 		GFX::SpriteSheet iconSet;
 
+		Audio::SoundEffect hitSE = {};
+
 		const vec2 noteArea_BaseSize = { 1280.0f, 720.0f };
 		vec2 noteArea_ScaleFactor = {};
 
 		float elapsedTime = 0.0f;
 		bool manualUpdate = false;
+		bool autoPlay = false;
 
 		Chart songChart;
 		size_t chartNoteOffset = 0;

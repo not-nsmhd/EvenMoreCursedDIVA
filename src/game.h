@@ -8,12 +8,14 @@
 #include "gfx/lowlevel/backend.h"
 #include "gfx/lowlevel/opengl_arb/opengl_backend.h"
 #include "gfx/lowlevel/d3d9/d3d9_backend.h"
+#include "audio/audio.h"
 
 using std::string;
 
 using IO::FileSystem;
 using Input::Keyboard;
 using Input::Mouse;
+using Audio::AudioEngine;
 
 using GFXBackend = GFX::LowLevel::Backend;
 using GFXBackendType = GFX::LowLevel::BackendType;
@@ -38,6 +40,7 @@ enum class GameStates
 	DEVSTATE_U16_TEST,
 	DEVSTATE_INPUT_TEST,
 	DEVSTATE_AUDIO_TEST,
+	DEVSTATE_MUSIC_TEST,
 
 	DEVSTATE_STATE_SELECTOR,
 
@@ -50,6 +53,7 @@ const string GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] =
 	"[Dev] UTF-16 Text Test",
 	"[Dev] Input Test",
 	"[Dev] Audio Test",
+	"[Dev] Music Stream Test",
 	"[Dev] State Selector"
 };
 
@@ -121,6 +125,9 @@ private:
 
 	GFXBackend* graphicsBackend;
 
+	/* Audio engine */
+	AudioEngine* audioEngine;
+
 	/* Game state */
 	bool changeState;
 	GameState* currentState;
@@ -142,6 +149,7 @@ public:
 	Input::Keyboard* keyboardState = nullptr;
 	Input::Mouse* mouseState = nullptr;
 	GFXBackend* graphicsBackend = nullptr;
+	AudioEngine* audio = nullptr;
 
 	GameState() { };
 
