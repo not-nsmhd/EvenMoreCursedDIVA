@@ -20,8 +20,6 @@ const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] =
 	"Main Game",
 	"[Dev] UTF-16 Text Test",
 	"[Dev] Input Test",
-	"[Dev] Audio Test",
-	"[Dev] Music Stream Test",
 	"[Dev] State Selector"
 };
 
@@ -213,7 +211,7 @@ bool Game::Loop()
 
 		if (running && !firstFrame)
 		{
-			if (keyboardState->IsKeyTapped(SDL_SCANCODE_F6))
+			if (keyboardState->IsKeyTapped(SDL_SCANCODE_F6) && currentGameState != GameStates::DEVSTATE_STATE_SELECTOR)
 			{
 				SetState(GameStates::DEVSTATE_STATE_SELECTOR);
 			}
