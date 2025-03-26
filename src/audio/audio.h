@@ -3,6 +3,7 @@
 #include <FAudio.h>
 #include "common/int_types.h"
 #include "sound_effect.h"
+#include "music.h"
 
 namespace Audio
 {
@@ -24,8 +25,10 @@ namespace Audio
 		void Destroy();
 
 		void PlaySoundEffect(SoundEffect& soundEffect);
+		void PlayMusic(Music* music);
 
 		void StopAllSFXVoices();
+		void StopAllStreamingVoices();
 	private:
 		const u32 MAX_VOICES_SFX = 48;
 		const u32 MAX_VOICES_STREAMING = 4;
@@ -38,5 +41,8 @@ namespace Audio
 
 		AudioVoice* voicesSFX = nullptr;
 		size_t lastSFXvoiceUsed_index = 0;
+
+		AudioVoice* voicesStreaming = nullptr;
+		size_t lastStreamingVoiceUsed_index = 0;
 	};
 }

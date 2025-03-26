@@ -94,6 +94,7 @@ namespace Dev
 #endif
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "Starshine %02d.%02d\n", buildYear, buildMonth);
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "%s %s\n", osName, bitWidth);
+		pos += SDL_snprintf(debugInfoText + pos, 1023, "%04d %04d\n", (int)(game->deltaTime_ms * 1000.0), (int)(game->actualFrameTime_ms * 1000.0));
 	}
 	
 	void StateSelector::Draw()
@@ -103,12 +104,12 @@ namespace Dev
 
 		debugFont->PushString(spriteRenderer, "State Selector", glm::vec2(16.0f, 16.0f), glm::vec2(1.0f), Common::DefaultColors::White);
 
-		const string* stateName = nullptr;
+		const char* stateName = nullptr;
 		float textOffset_y = 64.0f;
 		for (int i = 0; i < static_cast<int>(GameStates::DEVSTATE_STATE_SELECTOR); i++)
 		{
-			stateName = &GameStateNames[i];
-			debugFont->PushString(spriteRenderer, stateName->c_str(), 64, glm::vec2(64.0f, textOffset_y), glm::vec2(1.0f), Common::DefaultColors::White);
+			stateName = GameStateNames[i];
+			debugFont->PushString(spriteRenderer, stateName, 64, glm::vec2(64.0f, textOffset_y), glm::vec2(1.0f), Common::DefaultColors::White);
 
 			if (i == selectedStateIndex)
 			{

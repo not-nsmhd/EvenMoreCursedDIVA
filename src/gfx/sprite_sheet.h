@@ -39,19 +39,19 @@ namespace GFX
 
 		void ReadFromTextFile(Backend* backend, const path &dirPath);
 
-		Sprite GetSprite(u32 index) const;
-		Sprite GetSprite(const string &name) const;
-		u32 GetSpriteIndex(const string &name) const;
+		Sprite* GetSprite(u32 index);
+		Sprite* GetSprite(const string &name);
+		u32 GetSpriteIndex(const string &name);
 
-		void SetSpriteState(SpriteRenderer &renderer, const Sprite &sprite) const;
-		void SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex) const;
-		void SetSpriteState(SpriteRenderer &renderer, const string &spriteName) const;
+		void SetSpriteState(SpriteRenderer &renderer, Sprite &sprite);
+		void SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex);
+		void SetSpriteState(SpriteRenderer &renderer, const string &spriteName);
 
-		void PushSprite(SpriteRenderer &renderer, const Sprite &sprite) const;
-		void PushSprite(SpriteRenderer &renderer, u32 spriteIndex) const;
-		void PushSprite(SpriteRenderer &renderer, const string &spriteName) const;
-		void PushSprite(SpriteRenderer &renderer, const Sprite &sprite, vec2& scale) const;
-		void PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale) const;
+		void PushSprite(SpriteRenderer &renderer, Sprite &sprite);
+		void PushSprite(SpriteRenderer &renderer, u32 spriteIndex);
+		void PushSprite(SpriteRenderer &renderer, const string &spriteName);
+		void PushSprite(SpriteRenderer &renderer, Sprite &sprite, vec2& scale);
+		void PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale);
 
 	private:
 		Backend* backend;

@@ -13,8 +13,10 @@ namespace MainGame
 	{
 	public:
 		Note();
-		Note(const GFX::SpriteSheet* iconSet, float time, NoteShape shape, vec2 position, vec2 scaleFactor);
-		Note(const GFX::SpriteSheet* iconSet, float barTime, const ChartNote* chartNote, vec2 scaleFactor);
+		Note(float time, NoteShape shape, vec2 position, vec2 scaleFactor);
+		Note(float barTime, const ChartNote* chartNote, vec2 scaleFactor);
+
+		void SetResources(GFX::SpriteSheet* iconSet, GFX::Sprite** iconSprites, GFX::Sprite** targetSprites, GFX::Sprite* targetHandSprite);
 
 		vec2 GetTargetPosition();
 		NoteShape GetShape();
@@ -57,9 +59,9 @@ namespace MainGame
 		float frequency = 0.0f;
 		float amplitude = 0.0f;
 
-		const GFX::SpriteSheet* iconSet;
-		GFX::Sprite targetSprite;
-		GFX::Sprite iconSprite;
-		GFX::Sprite targetHandSprite;
+		GFX::SpriteSheet* iconSet;
+		GFX::Sprite* targetSprite;
+		GFX::Sprite* iconSprite;
+		GFX::Sprite* targetHandSprite;
 	};
 }

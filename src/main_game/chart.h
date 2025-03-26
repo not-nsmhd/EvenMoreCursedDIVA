@@ -4,6 +4,7 @@
 #include <string>
 #include <glm/vec2.hpp>
 #include "io/filesystem.h"
+#include "event.h"
 
 using glm::vec2;
 
@@ -16,7 +17,9 @@ namespace MainGame
 		NOTE_CIRCLE,
 		NOTE_CROSS,
 		NOTE_SQUARE,
-		NOTE_STAR
+		NOTE_STAR,
+
+		NOTE_SHAPE_COUNT
 	};
 
 	struct ChartNote
@@ -33,23 +36,8 @@ namespace MainGame
 		float Distance;
 	};
 
-	const std::string g_NoteShapeNames[] = 
-	{
-		"Triangle",
-		"Circle",
-		"Cross",
-		"Square",
-		"Star"
-	};
-
-	const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable =
-	{
-		{ "Triangle", 	NoteShape::NOTE_TRIANGLE },
-		{ "Circle", 	NoteShape::NOTE_CIRCLE },
-		{ "Cross", 		NoteShape::NOTE_CROSS },
-		{ "Square", 	NoteShape::NOTE_SQUARE },
-		{ "Star", 		NoteShape::NOTE_STAR }
-	};
+	extern const char* g_NoteShapeNames[];
+	extern const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable;
 
 	class Chart
 	{
@@ -58,6 +46,7 @@ namespace MainGame
 		~Chart();
 
 		std::vector<ChartNote> Notes;
+		std::vector<ChartEvent*> Events;
 
 		void Clear();
 

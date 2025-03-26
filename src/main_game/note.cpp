@@ -7,48 +7,20 @@ using namespace Common;
 
 namespace MainGame
 {
-	static const string l_ShapeNames[] = 
-	{
-		"Triangle", 	// NOTE_TRIANGLE
-		"Circle", 		// NOTE_CIRCLE
-		"Cross", 		// NOTE_CROSS
-		"Square", 		// NOTE_SQUARE
-		"Star" 			// NOTE_STAR
-	};
-
-	static const string l_TargetSpritePrefix = "Target_";
-	static const string l_IconSpritePrefix = "Icon_";
-	static const string l_TargetHandSprite = "TargetHand";
-
 	Note::Note() : iconSet(nullptr)
 	{
 	}
 
-	Note::Note(const GFX::SpriteSheet* iconSet, float time, NoteShape shape, vec2 position, vec2 scaleFactor) : iconSet(iconSet), shape(shape)
+	Note::Note(float time, NoteShape shape, vec2 position, vec2 scaleFactor) : iconSet(iconSet), shape(shape)
 	{
-		if (shape != NoteShape::NOTE_NONE)
-		{
-			targetSprite = iconSet->GetSprite(l_TargetSpritePrefix + l_ShapeNames[static_cast<int>(shape)]);
-			iconSprite = iconSet->GetSprite(l_IconSpritePrefix + l_ShapeNames[static_cast<int>(shape)]);
-			targetHandSprite = iconSet->GetSprite(l_TargetHandSprite);
-		}
-
 		noteTime = time;
 		targetPosition = position * scaleFactor;
 		this->scaleFactor = scaleFactor;
 	}
 	
-	Note::Note(const GFX::SpriteSheet* iconSet, float barTime, const ChartNote* chartNote, vec2 scaleFactor) : iconSet(iconSet)
+	Note::Note(float barTime, const ChartNote* chartNote, vec2 scaleFactor) : iconSet(iconSet)
 	{
 		shape = chartNote->Shape;
-
-		if (shape != NoteShape::NOTE_NONE)
-		{
-			targetSprite = iconSet->GetSprite(l_TargetSpritePrefix + l_ShapeNames[static_cast<int>(shape)]);
-			iconSprite = iconSet->GetSprite(l_IconSpritePrefix + l_ShapeNames[static_cast<int>(shape)]);
-			targetHandSprite = iconSet->GetSprite(l_TargetHandSprite);
-		}
-
 		noteTime = barTime;
 		targetPosition = chartNote->Position * scaleFactor;
 		angle = chartNote->Angle;
@@ -56,6 +28,18 @@ namespace MainGame
 		frequency= chartNote->Frequency;
 		amplitude = chartNote->Amplitude;
 		this->scaleFactor = scaleFactor;
+	}
+	
+	void Note::SetResources(GFX::SpriteSheet* iconSet, GFX::Sprite** iconSprites, GFX::Sprite** targetSprites, GFX::Sprite* targetHandSprite)
+	{
+		if (shape != NoteShape::NOTE_NONE)
+		{
+			this->iconSet = iconSet;
+
+			targetSprite = targetSprites[static_cast<int>(shape)];
+			iconSprite = iconSprites[static_cast<int>(shape)];
+			this->targetHandSprite = targetHandSprite;
+		}
 	}
 	
 	vec2 Note::GetTargetPosition()
@@ -123,16 +107,16 @@ namespace MainGame
 		{
 			sprRenderer.SetSpritePosition(targetPosition);
 			sprRenderer.SetSpriteColor(DefaultColors::White);
-			iconSet->PushSprite(sprRenderer, targetSprite, scaleFactor);
+			iconSet->PushSprite(sprRenderer, *targetSprite, scaleFactor);
 
 			sprRenderer.SetSpritePosition(targetPosition);
 			sprRenderer.SetSpriteColor(DefaultColors::White);
 			sprRenderer.SetSpriteRotation(elapsedTime_normalized * MathExtensions::MATH_EXT_2PI);
-			iconSet->PushSprite(sprRenderer, targetHandSprite, scaleFactor);
+			iconSet->PushSprite(sprRenderer, *targetHandSprite, scaleFactor);
 
 			sprRenderer.SetSpritePosition(iconPosition);
 			sprRenderer.SetSpriteColor(DefaultColors::White);
-			iconSet->PushSprite(sprRenderer, iconSprite, scaleFactor);
+			iconSet->PushSprite(sprRenderer, *iconSprite, scaleFactor);
 		}
 	}
 	

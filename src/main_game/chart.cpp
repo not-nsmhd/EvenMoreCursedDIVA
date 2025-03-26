@@ -13,18 +13,43 @@ using fsPath = std::filesystem::path;
 
 namespace MainGame
 {
+	const char* g_NoteShapeNames[] = 
+	{
+		"Triangle",
+		"Circle",
+		"Cross",
+		"Square",
+		"Star"
+	};
+
+	const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable =
+	{
+		{ "Triangle", 	NoteShape::NOTE_TRIANGLE },
+		{ "Circle", 	NoteShape::NOTE_CIRCLE },
+		{ "Cross", 		NoteShape::NOTE_CROSS },
+		{ "Square", 	NoteShape::NOTE_SQUARE },
+		{ "Star", 		NoteShape::NOTE_STAR }
+	};
+
 	Chart::Chart()
 	{
 	}
 	
 	Chart::~Chart()
 	{
-		Notes.clear();
+		Clear();
 	}
 	
 	void Chart::Clear()
 	{
 		Notes.clear();
+
+		for (vector<ChartEvent*>::iterator it = Events.begin(); it != Events.end(); it++)
+		{
+			delete *it; // lol object slicing
+		}
+
+		Events.clear();
 	}
 	
 	bool Chart::ReadFromXml(const char* xml, size_t size)
@@ -37,7 +62,7 @@ namespace MainGame
 		const XMLAttribute* elementAttr;
 		for (XMLElement* element = rootNode->FirstChildElement(); element; element = element->NextSiblingElement())
 		{
-			if (strncmp(element->Name(), "Note", 5) == 0)
+			if (SDL_strncmp(element->Name(), "Note", 5) == 0)
 			{
 				ChartNote note = {};
 
@@ -70,6 +95,53 @@ namespace MainGame
 				elementAttr->QueryFloatValue(&note.Distance);
 
 				Notes.push_back(note);
+			}
+			else if (SDL_strncmp(element->Name(), "Event", 6) == 0)
+			{
+				float execTime = 0.0f;
+				std::unordered_map<std::string, ChartEventType>::const_iterator eventType = g_ChartEventTypeConversionTable.begin();
+
+				elementAttr = element->FindAttribute("Time");
+				elementAttr->QueryFloatValue(&execTime);
+
+				elementAttr = element->FindAttribute("Type");
+				const char* typeText = elementAttr->Value();
+				eventType = g_ChartEventTypeConversionTable.find(typeText);
+
+				if (eventType == g_ChartEventTypeConversionTable.end())
+				{
+					continue;
+				}
+
+				switch (eventType->second)
+				{
+					case ChartEventType::EVENT_SET_BPM:
+						{
+							SetBPMEvent* setBPMevent = new SetBPMEvent();
+
+							setBPMevent->ExecutionTime = execTime;
+							setBPMevent->Type = ChartEventType::EVENT_SET_BPM;
+
+							elementAttr = element->FindAttribute("BPM");
+							elementAttr->QueryFloatValue(&setBPMevent->BPM);
+
+							elementAttr = element->FindAttribute("BeatsPerBar");
+							elementAttr->QueryIntValue(&setBPMevent->BeatsPerBar);
+
+							Events.push_back(setBPMevent);
+							break;
+						}
+					default:
+						{
+							ChartEvent* event = new ChartEvent();
+
+							event->ExecutionTime = execTime;
+							event->Type = eventType->second;
+
+							Events.push_back(event);
+						}
+						break;
+				}
 			}
 		}
 
@@ -112,7 +184,7 @@ namespace MainGame
 	
 	std::string Chart::WriteToXml()
 	{
-		if (Notes.size() == 0)
+		if (Notes.empty() || Events.empty())
 		{
 			return 0;
 		}
@@ -125,7 +197,7 @@ namespace MainGame
 			printer.OpenElement("Note");
 
 			printer.PushAttribute("Time", it->AppearTime);
-			printer.PushAttribute("Shape", g_NoteShapeNames[static_cast<int>(it->Shape)].c_str());
+			printer.PushAttribute("Shape", g_NoteShapeNames[static_cast<int>(it->Shape)]);
 			printer.PushAttribute("ReferenceIndex", it->ReferenceIndex);
 
 			printer.PushAttribute("X", it->Position.x);
@@ -135,6 +207,31 @@ namespace MainGame
 			printer.PushAttribute("Frequency", it->Frequency);
 			printer.PushAttribute("Amplitude", it->Amplitude);
 			printer.PushAttribute("Distance", it->Distance);
+
+			printer.CloseElement();
+		}
+
+		for (vector<ChartEvent*>::iterator it = Events.begin(); it != Events.end(); it++)
+		{
+			printer.OpenElement("Event");
+
+			printer.PushAttribute("Time", (*it)->ExecutionTime);
+			printer.PushAttribute("Type", g_EventTypeNames[static_cast<int>((*it)->Type)]);
+
+			switch ((*it)->Type)
+			{
+			case ChartEventType::EVENT_SET_BPM:
+				{
+					SetBPMEvent* actualEvent = static_cast<SetBPMEvent*>(*it);	
+			
+					printer.PushAttribute("BPM", actualEvent->BPM);
+					printer.PushAttribute("BeatsPerBar", actualEvent->BeatsPerBar);
+
+					break;
+				}
+			case ChartEventType::EVENT_SONG_END:
+				break;
+			}
 
 			printer.CloseElement();
 		}

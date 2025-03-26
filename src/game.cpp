@@ -14,6 +14,16 @@
 #define LOG_WARN_ARGS(message, args...) Logging::LogWarn("Game", message, args)
 #define LOG_ERROR(message) Logging::LogError("Game", message)
 #define LOG_ERROR_ARGS(message, args...) Logging::LogError("Game", message, args)
+  
+const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] = 
+{
+	"Main Game",
+	"[Dev] UTF-16 Text Test",
+	"[Dev] Input Test",
+	"[Dev] Audio Test",
+	"[Dev] Music Stream Test",
+	"[Dev] State Selector"
+};
 
 Game::Game()
 {
@@ -34,19 +44,18 @@ void Game::Quit()
 	running = false;
 }
 
-static void convertPreprocessorDate(int* year, int* month)
+static void convertBuildDateToVersion(int* year, int* month)
 {
-	string preprocessorDate = __DATE__;
-	static const string monthNames = "JanFebMarAprMayJunJulAugSepOctNovDec";
+	char buildDate[] = PREMAKE_BUILD_DATE;
+	
+	char* buildYearText = buildDate;
+	char* buildMonthText = SDL_strchr(buildYearText, '.') + 1;
 
-	string preprocessorMonth = {};
-	string preprocessorYear = {};
+	int buildYear = SDL_atoi(buildYearText);
+	int buildMonth = SDL_atoi(buildMonthText);
 
-	preprocessorMonth = preprocessorDate.substr(0, 3);
-	preprocessorYear = preprocessorDate.substr(preprocessorDate.length() - 4, 4);
-
-	*month = monthNames.find(preprocessorMonth, 0) / 3 + 1;
-	*year = std::stoi(preprocessorYear) - 2000;
+	*year = buildYear - 2000;
+	*month = buildMonth;
 }
 
 static int buildYear = 0;
@@ -59,14 +68,14 @@ bool Game::Initialize()
 		return true;
 	}
 
-	convertPreprocessorDate(&buildYear, &buildMonth);
+	convertBuildDateToVersion(&buildYear, &buildMonth);
 
 	Logging::LogMessage("--- Starshine %02d.%02d ---", buildYear, buildMonth);
 	Logging::LogMessage("--- Starting...");
 
 	if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) != 0)
 	{
-		Logging::LogError("Init", "Failed to initialize SDL2. Error: %s", SDL_GetError());
+		LOG_ERROR_ARGS("Failed to initialize SDL2. Error: %s", SDL_GetError());
 		Logging::LoggingQuit();
 		return false;
 	}
@@ -158,24 +167,11 @@ bool Game::Loop()
 
 	while (running)
 	{
-		ticks_lastFrame = ticks_now;
-		ticks_now = SDL_GetTicks64();
+		ticks_now = (SDL_GetPerformanceCounter() * 1000.0 / (double)SDL_GetPerformanceFrequency());
 		ticks_delta = ticks_now - ticks_lastFrame;
+		ticks_lastFrame = ticks_now;
 
-		actualFrameTime_ms = (double)(ticks_delta);
-
-		/*i64 delay = 16 - ticks_delta;
-
-		if (delay > 0)
-		{
-			SDL_Delay((u32)delay);
-
-			ticks_lastFrame = ticks_now;
-			ticks_now = SDL_GetTicks64();
-			ticks_delta = ticks_now - ticks_lastFrame;
-		}*/
-
-		deltaTime_ms = (double)(ticks_delta);
+		deltaTime_ms = ticks_delta;
 		
 		keyboardState->NextFrame();
 		mouseState->NextFrame();
@@ -303,7 +299,7 @@ void Game::SetState(GameStates state)
 	if (currentState != nullptr)
 	{
 		LOG_INFO_ARGS("Chaning game state: [%s] -> [%s]\n",
-		GameStateNames[static_cast<int>(currentGameState)].c_str(), GameStateNames[static_cast<int>(state)].c_str());
+		GameStateNames[static_cast<int>(currentGameState)], GameStateNames[static_cast<int>(state)]);
 	}
 
 	GameState* stateClass = stateList[static_cast<int>(state)];

@@ -45,10 +45,6 @@ extern "C"
 			}
 		}
 
-#ifdef PREMAKE_BUILD_DATE
-		Logging::LogMessage(PREMAKE_BUILD_DATE);				
-#endif
-
 		Game game;
 		game.stateList[static_cast<int>(GameStates::STATE_MAINGAME)] = MainGame::MainGameState::GetInstance();
 

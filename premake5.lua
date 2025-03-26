@@ -47,7 +47,7 @@ project "DIVA"
 		architecture "x86_64"
 
 	filter { "system:windows" }
-		links { "shell32", "shlwapi" }
+		links { "shell32", "shlwapi", "winmm" }
 
 	filter { "options:gfx_d3d9" }
 		defines { "STARSHINE_GFX_D3D9" }

@@ -114,22 +114,22 @@ namespace GFX
 		}
 	}
 
-	Sprite SpriteSheet::GetSprite(u32 index) const
+	Sprite* SpriteSheet::GetSprite(u32 index)
 	{
 		if (index >= sprites.size())
 		{
-			return sprites[0];
+			return &sprites[0];
 		}
-		return sprites[index];
+		return &sprites[index];
 	}
 
-	Sprite SpriteSheet::GetSprite(const string &name) const
+	Sprite* SpriteSheet::GetSprite(const string &name)
 	{
 		u32 index = GetSpriteIndex(name);
-		return sprites[index];
+		return &sprites[index];
 	}
 
-	u32 SpriteSheet::GetSpriteIndex(const string &name) const
+	u32 SpriteSheet::GetSpriteIndex(const string &name)
 	{
 		unordered_map<string, u32>::const_iterator index = spriteMap.find(name);
 
@@ -141,7 +141,7 @@ namespace GFX
 		return index->second;
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, const Sprite &sprite) const
+	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, Sprite &sprite)
 	{
 		Texture* tex = textures[sprite.texIndex];
 		renderer.SetSpriteOrigin(sprite.origin);
@@ -149,19 +149,19 @@ namespace GFX
 		renderer.SetSpriteSource(tex, sprite.sourceRect);
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex) const
+	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex)
 	{
-		Sprite sprite = GetSprite(spriteIndex);
-		SetSpriteState(renderer, sprite);
+		Sprite* sprite = GetSprite(spriteIndex);
+		SetSpriteState(renderer, *sprite);
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, const string& spriteName) const
+	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, const string& spriteName)
 	{
-		Sprite sprite = GetSprite(spriteName);
-		SetSpriteState(renderer, sprite);
+		Sprite* sprite = GetSprite(spriteName);
+		SetSpriteState(renderer, *sprite);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const Sprite& sprite) const
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite& sprite)
 	{
 		Texture* tex = textures[sprite.texIndex];
 		renderer.SetSpriteOrigin(sprite.origin);
@@ -170,19 +170,19 @@ namespace GFX
 		renderer.PushSprite(tex);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, u32 spriteIndex) const
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, u32 spriteIndex)
 	{
-		Sprite sprite = GetSprite(spriteIndex);
-		PushSprite(renderer, sprite);
+		Sprite* sprite = GetSprite(spriteIndex);
+		PushSprite(renderer, *sprite);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string& spriteName) const
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string& spriteName)
 	{
-		Sprite sprite = GetSprite(spriteName);
-		PushSprite(renderer, sprite);
+		Sprite* sprite = GetSprite(spriteName);
+		PushSprite(renderer, *sprite);
 	}
 	
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const Sprite &sprite, vec2& scale) const
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite &sprite, vec2& scale)
 	{
 		Texture* tex = textures[sprite.texIndex];
 		renderer.SetSpriteOrigin(sprite.origin * scale);
@@ -191,9 +191,9 @@ namespace GFX
 		renderer.PushSprite(tex);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale) const
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale)
 	{
-		Sprite sprite = GetSprite(spriteName);
-		PushSprite(renderer, sprite, scale);
+		Sprite* sprite = GetSprite(spriteName);
+		PushSprite(renderer, *sprite, scale);
 	}
 };

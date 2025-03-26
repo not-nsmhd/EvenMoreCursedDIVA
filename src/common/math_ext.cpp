@@ -63,14 +63,14 @@ namespace Common
 			return ((value >= start) && (value <= end));
 		}
 		
-		float CalculateBarDuration_Seconds(float bpm)
+		float CalculateBarDuration_Seconds(float bpm, int beatsPerBar)
 		{
-			if (bpm <= 0.0f)
+			if (bpm <= 0.0f || beatsPerBar <= 0)
 			{
 				return 0.0f;
 			}
 
-			return (60.0f / bpm * 4.0f);
+			return (60.0f / bpm * static_cast<float>(beatsPerBar));
 		}
 	};
 };

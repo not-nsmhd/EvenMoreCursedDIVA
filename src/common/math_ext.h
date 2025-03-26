@@ -20,6 +20,6 @@ namespace Common
 
 		bool IsInRange(float start, float end, float value);
 
-		float CalculateBarDuration_Seconds(float bpm);
+		float CalculateBarDuration_Seconds(float bpm, int beatsPerBar);
 	};
 };

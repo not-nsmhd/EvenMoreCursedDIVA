@@ -47,15 +47,7 @@ enum class GameStates
 	STATE_COUNT
 };
 
-const string GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] = 
-{
-	"Main Game",
-	"[Dev] UTF-16 Text Test",
-	"[Dev] Input Test",
-	"[Dev] Audio Test",
-	"[Dev] Music Stream Test",
-	"[Dev] State Selector"
-};
+extern const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)];
 
 class Game
 {
@@ -79,11 +71,11 @@ public:
 
 	/* Timing */
 
-	u64 ticks_lastFrame = 0;
-	u64 ticks_now = 0;
-	u64 ticks_delta = 0;
-	double deltaTime_ms = 0.0f;
-	double actualFrameTime_ms = 0.0f;
+	double ticks_lastFrame = 0.0;
+	double ticks_now = 0.0;
+	double ticks_delta = 0.0;
+	double deltaTime_ms = 0.0;
+	double actualFrameTime_ms = 0.0;
 
 	/* Game state list */
 	GameStates currentGameState = GameStates::STATE_NONE;

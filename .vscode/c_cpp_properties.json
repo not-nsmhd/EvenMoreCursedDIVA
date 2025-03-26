@@ -14,7 +14,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "PREMAKE_BUILD_DATE=\"1970.01.01T00:00:00\""
             ],
             "compilerPath": "C:/msys64/mingw32/bin/g++.exe",
             "cStandard": "c17",

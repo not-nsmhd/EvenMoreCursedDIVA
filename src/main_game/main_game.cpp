@@ -1,5 +1,6 @@
 #include "global_res.h"
 #include "audio/helpers.h"
+#include "gfx/helpers/tex_helpers.h"
 #include "main_game.h"
 #include "common/math_ext.h"
 
@@ -8,10 +9,24 @@
 using namespace Common;
 using std::fstream;
 using std::ios;
+using std::string;
 
 namespace MainGame
 {
 	static GFX::Font* debugFont;
+
+	static const string l_ShapeNames[] = 
+	{
+		"Triangle", 	// NOTE_TRIANGLE
+		"Circle", 		// NOTE_CIRCLE
+		"Cross", 		// NOTE_CROSS
+		"Square", 		// NOTE_SQUARE
+		"Star" 			// NOTE_STAR
+	};
+
+	static const string l_TargetSpritePrefix = "Target_";
+	static const string l_IconSpritePrefix = "Icon_";
+	static const string l_TargetHandSprite = "TargetHand";
 
 	MainGameState::MainGameState()
 	{
@@ -26,20 +41,11 @@ namespace MainGame
 	
 	bool MainGameState::Initialize()
 	{
-		elapsedTime = 0.0f;
-		manualUpdate = false;
-		noteWrong = false;
-		noteHitPos = {};
-
-		noteValu.clear();
-		gameScore.Reset();
-
 		noteArea_ScaleFactor = vec2(
 			static_cast<float>(game->windowWidth) / noteArea_BaseSize.x,
 			static_cast<float>(game->windowHeight) / noteArea_BaseSize.y
 			);
 
-		
 		return true;
 	}
 	
@@ -48,11 +54,25 @@ namespace MainGame
 		spriteRenderer.Initialize(graphicsBackend);
 		debugFont = GlobalResources::DebugFont;
 		iconSet.ReadFromTextFile(graphicsBackend, "sprites/iconset_ps3");
+
+		for (size_t i = 0; i < static_cast<int>(NoteShape::NOTE_SHAPE_COUNT); i++)
+		{
+			cachedNoteTargetSprites[i] = iconSet.GetSprite(l_TargetSpritePrefix + 
+				l_ShapeNames[(i % static_cast<int>(NoteShape::NOTE_SHAPE_COUNT))]);
+
+			cachedNoteIconSprites[i] = iconSet.GetSprite(l_IconSpritePrefix + 
+				l_ShapeNames[(i % static_cast<int>(NoteShape::NOTE_SHAPE_COUNT))]);
+		}
+		noteTargetHandSprite = iconSet.GetSprite(l_TargetHandSprite);
+
+		bgTexture = GFX::Helpers::LoadImage(graphicsBackend, "sprites/game_bg.png");
 		
 		Audio::Helpers::LoadSoundEffect(&hitSE, "sounds/test_pcm.wav");
-		hitSE.Volume = 0.364f;
+		hitSE.Volume = 0.1f;
 
-		songChart.LoadFromXml("songdata/test/test_chart.xml");
+		songMusic.LoadFromFile("music/pv_032.ogg");
+
+		songChart.LoadFromXml("songdata/test/test_chart2.xml");
 
 		return true;
 	}
@@ -61,16 +81,34 @@ namespace MainGame
 	{
 		spriteRenderer.Destroy();
 		iconSet.Destroy();
+		graphicsBackend->DestroyTexture(bgTexture);
 
 		audio->StopAllSFXVoices();
 		hitSE.Destroy();
+		audio->StopAllStreamingVoices();
+		songMusic.Destroy();
+
+		songChart.Clear();
 	}
 	
 	void MainGameState::Destroy()
 	{
+		elapsedTime = 0.0f;
+		over = false;
+		paused = false;
+		manualUpdate = false;
+		noteWrong = false;
+		noteHitPos = {};
+
+		noteValu.clear();
+		gameScore.Reset();
+
+		autoPlay = false;
+		musicStarted = false;
+
 		activeNotes.clear();
-		songChart.Clear();
 		chartNoteOffset = 0;
+		chartEventOffset = 0;
 	}
 	
 	void MainGameState::OnResize(u32 newWidth, u32 newHeight)
@@ -79,18 +117,17 @@ namespace MainGame
 	
 	void MainGameState::Update()
 	{
-		if (!manualUpdate)
+		if (!manualUpdate && !paused && !over)
 		{
 			gameStep();
 		}
 
-		if (!autoPlay)
+		if (!autoPlay && !paused && !over)
 		{
 			handleNoteInput();
 		}
 
 		handleDebugInput();
-
 		updateDebug();
 	}
 	
@@ -98,6 +135,12 @@ namespace MainGame
 	{
 		graphicsBackend->Clear(GFX::LowLevel::ClearFlags::GFX_CLEAR_COLOR, Common::Color(0, 24, 24, 255), 1.0f, 0);
 		graphicsBackend->SetBlendState(&GFX::LowLevel::DefaultBlendStates::AlphaBlend);
+
+		spriteRenderer.SetSpritePosition(vec2(0.0f, 0.0f));
+		spriteRenderer.SetSpriteScale(vec2(game->windowWidth, game->windowHeight));
+		spriteRenderer.SetSpriteSource(bgTexture, Common::RectangleF(0.0f, 0.0f, 640.0f, 360.0f));
+		spriteRenderer.SetSpriteColor(Common::Color(156, 156, 156, 255));
+		spriteRenderer.PushSprite(bgTexture);
 
 		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
@@ -115,25 +158,15 @@ namespace MainGame
 	{
 		elapsedTime += game->deltaTime_ms / 1000.0f;
 
-		for (std::vector<ChartNote>::const_iterator note = songChart.Notes.cbegin() + chartNoteOffset; note != songChart.Notes.cend(); note++)
-		{
-			ChartNote notePtr = *note; 
-			if (elapsedTime >= note->AppearTime)
-			{
-				activeNotes.push_back(Note(&iconSet, MathExtensions::CalculateBarDuration_Seconds(120.0f), &notePtr, noteArea_ScaleFactor));
-				chartNoteOffset++;
-			}
-		}
-
 		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
+			note->Update(game->deltaTime_ms);
+
 			if (note->HasExpired() || note->HasBeenHit() || note->HasBeenWrongHit())
 			{
-				activeNotes.erase(note);
+				activeNotes.pop_front();
 				break;
 			}
-
-			note->Update(game->deltaTime_ms);
 
 			if (autoPlay)
 			{
@@ -143,14 +176,53 @@ namespace MainGame
 				}
 			}
 		}
+
+		for (std::vector<ChartNote>::const_iterator note = songChart.Notes.cbegin() + chartNoteOffset; note != songChart.Notes.cend(); note++)
+		{
+			ChartNote notePtr = *note;
+			Note newNote(currentNoteDuration_seconds, &notePtr, noteArea_ScaleFactor);
+			newNote.SetResources(&iconSet, cachedNoteIconSprites, cachedNoteTargetSprites, noteTargetHandSprite);
+			if (elapsedTime >= note->AppearTime)
+			{
+				activeNotes.push_back(newNote);
+				chartNoteOffset++;
+			}
+		}
+
+		for (std::vector<ChartEvent*>::const_iterator event = songChart.Events.cbegin() + chartEventOffset; event!= songChart.Events.cend(); event++)
+		{
+			if (elapsedTime >= (*event)->ExecutionTime)
+			{
+				switch ((*event)->Type)
+				{
+					case ChartEventType::EVENT_SET_BPM:
+						{
+							const SetBPMEvent* eventPtr = static_cast<const SetBPMEvent*>(*event);
+							currentNoteDuration_seconds = MathExtensions::CalculateBarDuration_Seconds(eventPtr->BPM, eventPtr->BeatsPerBar);
+							break;
+						}
+					case ChartEventType::EVENT_SONG_END:
+						{
+							over = true;
+							break;
+						}
+					case ChartEventType::EVENT_PLAY_MUSIC:
+						{
+							audio->PlayMusic(&songMusic);
+							break;
+						}
+				}
+
+				chartEventOffset++;
+			}
+		}
 	}
 	
 	void MainGameState::inputNoteHit(NoteShape shape, bool secondary, bool down)
 	{
-		if (activeNotes.size() > 0)
+		if (!activeNotes.empty())
 		{
 			Note* firstHittableNote = nullptr;
-			int firstHittableNoteIndex = 0;
 
 			Note* testNote = nullptr;
 			for (int i = 0; i < activeNotes.size(); i++)
@@ -160,7 +232,6 @@ namespace MainGame
 				if (!testNote->HasBeenWrongHit() && !testNote->HasBeenHit() && !testNote->HasExpired())
 				{
 					firstHittableNote = testNote;
-					firstHittableNoteIndex = i;
 					break;
 				}
 			}
@@ -246,6 +317,11 @@ namespace MainGame
 				autoPlay = !autoPlay;
 			}
 		}
+
+		if (keyboardState->IsKeyTapped(SDL_SCANCODE_ESCAPE))
+		{
+			paused = !paused;
+		}
 	}
 	
 	void MainGameState::updateDebug()
@@ -255,6 +331,7 @@ namespace MainGame
 		int pos = 0;
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Elapsed Time: %.3f\n", elapsedTime);
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Chart: %d/%d\n", chartNoteOffset, songChart.Notes.size());
+		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Events: %d/%d\n", chartEventOffset, songChart.Events.size());
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Active Notes: %d\n", activeNotes.size());
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Autoplay (Shift+L): %s\n", autoPlay ? "True" : "False");
 
@@ -273,5 +350,14 @@ namespace MainGame
 
 		debugFont->PushString(spriteRenderer, std::to_string(gameScore.GetCurrentScore()), glm::vec2(1150.0f, 48.0f), glm::vec2(1.0f), Common::DefaultColors::White);
 		debugFont->PushString(spriteRenderer, std::to_string(gameScore.GetCurrentCombo()), glm::vec2(1150.0f, 64.0f), glm::vec2(1.0f), Common::DefaultColors::White);
+
+		if (paused)
+		{
+			spriteRenderer.SetSpriteColor(Common::Color(0, 0, 0, 128));
+			spriteRenderer.SetSpriteScale(vec2(game->windowWidth, game->windowHeight));
+			spriteRenderer.PushSprite(nullptr);
+
+			debugFont->PushString(spriteRenderer, "Paused", vec2(game->windowWidth / 2.0f, game->windowHeight / 2.0f), vec2(1.0f), Common::DefaultColors::White);
+		}
 	}
 }

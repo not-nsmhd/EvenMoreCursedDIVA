@@ -31,8 +31,15 @@ namespace MainGame
 
 		GFX::SpriteRenderer spriteRenderer;
 		GFX::SpriteSheet iconSet;
+		GFX::Sprite* cachedNoteTargetSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedNoteIconSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* noteTargetHandSprite;
+
+		GFX::LowLevel::Texture* bgTexture = nullptr;
 
 		Audio::SoundEffect hitSE = {};
+		Audio::Music songMusic = {};
+		bool musicStarted = false;
 
 		const vec2 noteArea_BaseSize = { 1280.0f, 720.0f };
 		vec2 noteArea_ScaleFactor = {};
@@ -41,9 +48,14 @@ namespace MainGame
 		bool manualUpdate = false;
 		bool autoPlay = false;
 
+		bool paused = false;
+		bool over = false;
+
 		Chart songChart;
 		size_t chartNoteOffset = 0;
+		size_t chartEventOffset = 0;
 
+		float currentNoteDuration_seconds = 1.0f;
 		std::deque<Note> activeNotes = {};
 
 		GameScore gameScore;
