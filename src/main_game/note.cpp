@@ -7,6 +7,7 @@ using namespace Common;
 
 namespace MainGame
 {
+	#if 0
 	Note::Note() : iconSet(nullptr)
 	{
 	}
@@ -157,4 +158,7 @@ namespace MainGame
 	{
 		return valuation;
 	}
+	#endif
+
+
 }

@@ -56,7 +56,7 @@ namespace MainGame
 		size_t chartEventOffset = 0;
 
 		float currentNoteDuration_seconds = 1.0f;
-		std::deque<Note> activeNotes = {};
+		std::deque<GameNote> activeNotes = {};
 
 		GameScore gameScore;
 

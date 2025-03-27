@@ -170,6 +170,15 @@ namespace GFX
 		renderer.PushSprite(tex);
 	}
 
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite* sprite)
+	{
+		Texture* tex = textures[sprite->texIndex];
+		renderer.SetSpriteOrigin(sprite->origin);
+		renderer.SetSpriteScale({sprite->sourceRect.width, sprite->sourceRect.height});
+		renderer.SetSpriteSource(tex, sprite->sourceRect);
+		renderer.PushSprite(tex);
+	}
+
 	void SpriteSheet::PushSprite(SpriteRenderer &renderer, u32 spriteIndex)
 	{
 		Sprite* sprite = GetSprite(spriteIndex);
@@ -188,6 +197,15 @@ namespace GFX
 		renderer.SetSpriteOrigin(sprite.origin * scale);
 		renderer.SetSpriteScale({sprite.sourceRect.width * scale.x, sprite.sourceRect.height * scale.y});
 		renderer.SetSpriteSource(tex, sprite.sourceRect);
+		renderer.PushSprite(tex);
+	}
+
+	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite* sprite, vec2 scale)
+	{
+		Texture* tex = textures[sprite->texIndex];
+		renderer.SetSpriteOrigin(sprite->origin * scale);
+		renderer.SetSpriteScale({sprite->sourceRect.width * scale.x, sprite->sourceRect.height * scale.y});
+		renderer.SetSpriteSource(tex, sprite->sourceRect);
 		renderer.PushSprite(tex);
 	}
 

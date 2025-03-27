@@ -213,6 +213,7 @@ namespace Audio
 		{
 			voice = &voicesSFX[i];
 			
+			FAudioSourceVoice_Stop(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
 			FAudioSourceVoice_FlushSourceBuffers(voice->faudioVoice);
 		}
 	}
@@ -227,6 +228,7 @@ namespace Audio
 			
 			if (voice->active && voice->musicPtr != nullptr)
 			{
+				FAudioSourceVoice_Stop(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
 				FAudioSourceVoice_FlushSourceBuffers(voice->faudioVoice);
 
 				voice->active = false;

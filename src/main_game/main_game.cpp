@@ -68,7 +68,7 @@ namespace MainGame
 		bgTexture = GFX::Helpers::LoadImage(graphicsBackend, "sprites/game_bg.png");
 		
 		Audio::Helpers::LoadSoundEffect(&hitSE, "sounds/test_pcm.wav");
-		hitSE.Volume = 0.1f;
+		hitSE.Volume = 0.182f;
 
 		songMusic.LoadFromFile("music/pv_032.ogg");
 
@@ -142,9 +142,36 @@ namespace MainGame
 		spriteRenderer.SetSpriteColor(Common::Color(156, 156, 156, 255));
 		spriteRenderer.PushSprite(bgTexture);
 
-		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
+		for (std::deque<GameNote>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
-			note->Draw(spriteRenderer);
+			if (note->state != GameNoteState::ACTIVE)
+			{
+				continue;
+			}
+
+			ChartNote* cNote = note->noteStats;
+
+			// Note Target
+			spriteRenderer.SetSpritePosition(cNote->Position * noteArea_ScaleFactor);
+			spriteRenderer.SetSpriteColor(DefaultColors::White);
+			iconSet.PushSprite(spriteRenderer, cachedNoteTargetSprites[static_cast<int>(cNote->Shape)], noteArea_ScaleFactor);
+
+			// Timing Bar
+			spriteRenderer.SetSpritePosition(cNote->Position * noteArea_ScaleFactor);
+			spriteRenderer.SetSpriteColor(DefaultColors::White);
+
+			float normalizedNoteTime = MathExtensions::ConvertRange(0.0f, note->flyTime_seconds, 0.0f, 1.0f, note->elapsedTime_seconds);
+			spriteRenderer.SetSpriteRotation(normalizedNoteTime * MathExtensions::MATH_EXT_2PI);
+
+			iconSet.PushSprite(spriteRenderer, noteTargetHandSprite, noteArea_ScaleFactor);
+
+			// Note Icon
+			vec2 iconPos = MathExtensions::GetSinePoint(1.0f - normalizedNoteTime, cNote->Position, cNote->Angle,
+				cNote->Frequency, cNote->Amplitude, cNote->Distance);
+
+			spriteRenderer.SetSpritePosition(iconPos * noteArea_ScaleFactor);
+			spriteRenderer.SetSpriteColor(DefaultColors::White);
+			iconSet.PushSprite(spriteRenderer, cachedNoteIconSprites[static_cast<int>(cNote->Shape)], noteArea_ScaleFactor);
 		}
 
 		// debug display
@@ -157,10 +184,11 @@ namespace MainGame
 	void MainGameState::gameStep()
 	{
 		elapsedTime += game->deltaTime_ms / 1000.0f;
+		float deltaTime_seconds = game->deltaTime_ms / 1000.0f;
 
-		for (std::deque<Note>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
+		for (std::deque<GameNote>::iterator note = activeNotes.begin(); note != activeNotes.end(); note++)
 		{
-			note->Update(game->deltaTime_ms);
+			/*note->Update(game->deltaTime_ms);
 
 			if (note->HasExpired() || note->HasBeenHit() || note->HasBeenWrongHit())
 			{
@@ -174,17 +202,40 @@ namespace MainGame
 				{
 					inputNoteHit(note->GetShape(), false, true);
 				}
+			}*/
+
+			if (autoPlay && note->elapsedTime_seconds + deltaTime_seconds >= note->flyTime_seconds)
+			{
+				inputNoteHit(note->noteStats->Shape, false, true);
+			}
+
+			if (note->state == GameNoteState::EXPIRED || note->state == GameNoteState::HIT)
+			{
+				activeNotes.pop_front();
+				continue;
+			}
+
+			note->elapsedTime_seconds += deltaTime_seconds;
+
+			if (note->elapsedTime_seconds >= note->flyTime_seconds + 0.13f)
+			{
+				note->state = GameNoteState::EXPIRED;
+				continue;
 			}
 		}
 
-		for (std::vector<ChartNote>::const_iterator note = songChart.Notes.cbegin() + chartNoteOffset; note != songChart.Notes.cend(); note++)
+		for (size_t i = chartNoteOffset; i < songChart.Notes.size(); i++)
 		{
-			ChartNote notePtr = *note;
-			Note newNote(currentNoteDuration_seconds, &notePtr, noteArea_ScaleFactor);
-			newNote.SetResources(&iconSet, cachedNoteIconSprites, cachedNoteTargetSprites, noteTargetHandSprite);
-			if (elapsedTime >= note->AppearTime)
+			ChartNote* cNote = &songChart.Notes[i];
+			if (cNote->AppearTime <= elapsedTime)
 			{
-				activeNotes.push_back(newNote);
+				GameNote gNote = {};
+
+				gNote.flyTime_seconds = currentNoteDuration_seconds;
+				gNote.noteStats = cNote;
+				gNote.state = GameNoteState::ACTIVE;
+
+				activeNotes.push_back(gNote);
 				chartNoteOffset++;
 			}
 		}
@@ -222,29 +273,52 @@ namespace MainGame
 	{
 		if (!activeNotes.empty())
 		{
-			Note* firstHittableNote = nullptr;
+			GameNote* firstHittableNote = nullptr;
 
-			Note* testNote = nullptr;
-			for (int i = 0; i < activeNotes.size(); i++)
+			size_t i = 0;
+			while (true)
 			{
-				testNote = &activeNotes[i];
+				GameNote* gNote = &activeNotes[i];
+				i++;
 
-				if (!testNote->HasBeenWrongHit() && !testNote->HasBeenHit() && !testNote->HasExpired())
+				if (gNote->state == GameNoteState::ACTIVE)
 				{
-					firstHittableNote = testNote;
+					firstHittableNote = gNote;
 					break;
 				}
 			}
 
 			if (firstHittableNote != nullptr)
 			{
-				firstHittableNote->SendInput(shape, secondary, down);
-
-				if (firstHittableNote->HasBeenHit())
+				float remainingTime_ms = (firstHittableNote->flyTime_seconds - firstHittableNote->elapsedTime_seconds) * 1000.0f;
+				if (!MathExtensions::IsInRange(-130.0f, 130.0f, remainingTime_ms))
 				{
-					noteHitPos = firstHittableNote->GetTargetPosition();
-					noteWrong = firstHittableNote->HasBeenWrongHit();
-					HitValuation valu = firstHittableNote->GetHitValuation();
+					return;
+				}
+				else
+				{
+					firstHittableNote->state = GameNoteState::HIT;
+					HitValuation valu = HitValuation::NONE;
+
+					if (MathExtensions::IsInRange(-30.0f, 30.0f, remainingTime_ms))
+					{
+						valu = HitValuation::COOL;
+					}
+					else if (MathExtensions::IsInRange(-70.0f, 70.0f, remainingTime_ms))
+					{
+						valu = HitValuation::GOOD;
+					}
+					else if (MathExtensions::IsInRange(-100.0f, 100.0f, remainingTime_ms))
+					{
+						valu = HitValuation::SAFE;
+					}
+					else
+					{
+						valu = HitValuation::BAD;
+					}
+
+					noteHitPos = firstHittableNote->noteStats->Position;
+					noteWrong = shape != firstHittableNote->noteStats->Shape;
 					gameScore.RegisterNoteHit(valu, noteWrong);
 					noteValu = HitValuationNames[static_cast<int>(valu)];
 				}
@@ -345,7 +419,7 @@ namespace MainGame
 	void MainGameState::drawDebug()
 	{
 		debugFont->PushString(spriteRenderer, debugStateString, sizeof(debugStateString) - 1, vec2(4.0f), vec2(1.0f), Common::DefaultColors::White);
-		debugFont->PushString(spriteRenderer, noteValu, noteHitPos, vec2(1.0f), 
+		debugFont->PushString(spriteRenderer, noteValu, noteHitPos * noteArea_ScaleFactor, vec2(1.0f), 
 		noteWrong ? Common::DefaultColors::Red : Common::DefaultColors::White);
 
 		debugFont->PushString(spriteRenderer, std::to_string(gameScore.GetCurrentScore()), glm::vec2(1150.0f, 48.0f), glm::vec2(1.0f), Common::DefaultColors::White);

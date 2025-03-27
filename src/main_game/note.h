@@ -9,6 +9,7 @@ namespace MainGame
 {
 	using glm::vec2;
 
+	#if 0
 	class Note
 	{
 	public:
@@ -63,5 +64,27 @@ namespace MainGame
 		GFX::Sprite* targetSprite;
 		GFX::Sprite* iconSprite;
 		GFX::Sprite* targetHandSprite;
+	};
+	#endif
+
+	enum class GameNoteState
+	{
+		NONE = -1,
+
+		ACTIVE,
+		EXPIRED,
+		HIT,
+		HIT_WRONG
+	};
+
+	struct GameNote
+	{
+		ChartNote* noteStats = nullptr;
+		GameNoteState state = GameNoteState::NONE;
+
+		float flyTime_seconds = 0.0f;
+		float elapsedTime_seconds = 0.0f;
+
+		float elapsedTimeOnHit_seconds = 0.0f;
 	};
 }

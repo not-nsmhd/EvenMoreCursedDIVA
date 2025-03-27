@@ -47,10 +47,12 @@ namespace GFX
 		void SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex);
 		void SetSpriteState(SpriteRenderer &renderer, const string &spriteName);
 
-		void PushSprite(SpriteRenderer &renderer, Sprite &sprite);
+		void PushSprite(SpriteRenderer &renderer, Sprite& sprite);
+		void PushSprite(SpriteRenderer &renderer, Sprite* sprite);
 		void PushSprite(SpriteRenderer &renderer, u32 spriteIndex);
-		void PushSprite(SpriteRenderer &renderer, const string &spriteName);
-		void PushSprite(SpriteRenderer &renderer, Sprite &sprite, vec2& scale);
+		void PushSprite(SpriteRenderer &renderer, const string& spriteName);
+		void PushSprite(SpriteRenderer &renderer, Sprite& sprite, vec2& scale);
+		void PushSprite(SpriteRenderer &renderer, Sprite* sprite, vec2 scale);
 		void PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale);
 
 	private:
