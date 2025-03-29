@@ -116,7 +116,7 @@ namespace GFX
 		currentSprite->position = { 0.0f, 0.0f };
 		currentSprite->origin = { 0.0f, 0.0f };
 		currentSprite->size = { 0.0f, 0.0f };
-		currentSprite->color = { 255, 255, 255, 255 };
+		SDL_memset(currentSprite->colors, 0xFF, sizeof(struct Color) * 4);
 
 		currentSprite->rotCos = SDL_cosf(0.0f);
 		currentSprite->rotSin = SDL_sinf(0.0f);
@@ -171,7 +171,18 @@ namespace GFX
 
 	void SpriteRenderer::SetSpriteColor(struct Color color)
 	{
-		currentSprite->color = color;
+		currentSprite->colors[0] = color;
+		currentSprite->colors[1] = color;
+		currentSprite->colors[2] = color;
+		currentSprite->colors[3] = color;
+	}
+	
+	void SpriteRenderer::SetSpriteColors(struct Color colors[4])
+	{
+		currentSprite->colors[0] = colors[0];
+		currentSprite->colors[1] = colors[1];
+		currentSprite->colors[2] = colors[2];
+		currentSprite->colors[3] = colors[3];
 	}
 
 	void SpriteRenderer::PushSprite(const Texture* texture)
@@ -245,7 +256,7 @@ namespace GFX
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
 			vertexData[vIndex].texCoord = { sprite->srcRect.x, sprite->srcRect.y };
-			vertexData[vIndex].color = u8vec4(sprite->color.R, sprite->color.G, sprite->color.B, sprite->color.A);
+			vertexData[vIndex].color = u8vec4(sprite->colors[0].R, sprite->colors[0].G, sprite->colors[0].B, sprite->colors[0].A);
 			vIndex++;
 
 			/* Bottom-right */
@@ -254,7 +265,7 @@ namespace GFX
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
 			vertexData[vIndex].texCoord = { sprite->srcRect.width, sprite->srcRect.height };
-			vertexData[vIndex].color = u8vec4(sprite->color.R, sprite->color.G, sprite->color.B, sprite->color.A);
+			vertexData[vIndex].color = u8vec4(sprite->colors[3].R, sprite->colors[3].G, sprite->colors[3].B, sprite->colors[3].A);
 			vIndex++;
 
 			/* Bottom-left */
@@ -263,7 +274,7 @@ namespace GFX
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
 			vertexData[vIndex].texCoord = { sprite->srcRect.x, sprite->srcRect.height };
-			vertexData[vIndex].color = u8vec4(sprite->color.R, sprite->color.G, sprite->color.B, sprite->color.A);
+			vertexData[vIndex].color = u8vec4(sprite->colors[2].R, sprite->colors[2].G, sprite->colors[2].B, sprite->colors[2].A);
 			vIndex++;
 
 			/* Top-right */
@@ -272,7 +283,7 @@ namespace GFX
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
 			vertexData[vIndex].texCoord = { sprite->srcRect.width, sprite->srcRect.y };
-			vertexData[vIndex].color = u8vec4(sprite->color.R, sprite->color.G, sprite->color.B, sprite->color.A);
+			vertexData[vIndex].color = u8vec4(sprite->colors[1].R, sprite->colors[1].G, sprite->colors[1].B, sprite->colors[1].A);
 			vIndex++;
 		}
 

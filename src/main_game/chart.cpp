@@ -22,13 +22,27 @@ namespace MainGame
 		"Star"
 	};
 
-	const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable =
+	const char* g_NoteTypeNames[] = 
+	{
+		"Normal",
+		"Double",
+		"Hold"
+	};
+
+	const std::unordered_map<string, NoteShape> g_NoteShapeConversionTable =
 	{
 		{ "Triangle", 	NoteShape::NOTE_TRIANGLE },
 		{ "Circle", 	NoteShape::NOTE_CIRCLE },
 		{ "Cross", 		NoteShape::NOTE_CROSS },
 		{ "Square", 	NoteShape::NOTE_SQUARE },
 		{ "Star", 		NoteShape::NOTE_STAR }
+	};
+
+	const std::unordered_map<std::string, NoteType> g_NoteTypeConversionTable = 
+	{
+		{ "Normal",		NoteType::TYPE_NORMAL },	
+		{ "Double",		NoteType::TYPE_DOUBLE },	
+		{ "Hold",		NoteType::TYPE_HOLD }	
 	};
 
 	Chart::Chart()
@@ -72,6 +86,13 @@ namespace MainGame
 				elementAttr = element->FindAttribute("Shape");
 				const char* shapeText = elementAttr->Value();
 				note.Shape = g_NoteShapeConversionTable.at(shapeText);
+
+				elementAttr = element->FindAttribute("Type");
+				const char* typeText = elementAttr->Value();
+				if (typeText != nullptr)
+				{
+					note.Type = g_NoteTypeConversionTable.at(typeText);
+				}
 
 				elementAttr = element->FindAttribute("ReferenceIndex");
 				elementAttr->QueryIntValue(&note.ReferenceIndex);
@@ -198,6 +219,7 @@ namespace MainGame
 
 			printer.PushAttribute("Time", it->AppearTime);
 			printer.PushAttribute("Shape", g_NoteShapeNames[static_cast<int>(it->Shape)]);
+			printer.PushAttribute("Type", g_NoteTypeNames[static_cast<int>(it->Type)]);
 			printer.PushAttribute("ReferenceIndex", it->ReferenceIndex);
 
 			printer.PushAttribute("X", it->Position.x);

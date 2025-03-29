@@ -21,7 +21,7 @@ namespace GFX
 		vec2 position;
 		vec2 origin;
 		vec2 size;
-		struct Color color;
+		struct Color colors[4];
 
 		float rotCos;
 		float rotSin;
@@ -71,6 +71,9 @@ namespace GFX
 		void SetSpriteSource(RectangleF source);
 		void SetSpriteSource(const LowLevel::Texture* texture, RectangleF absSource);
 		void SetSpriteColor(struct Color color);
+		
+		// Coloring order; top-left, top-right, bottom-left, bottom-right
+		void SetSpriteColors(struct Color colors[4]);
 
 		void PushSprite(const LowLevel::Texture* texture);
 

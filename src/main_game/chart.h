@@ -13,6 +13,7 @@ namespace MainGame
 	enum class NoteShape
 	{
 		NOTE_NONE = -1,
+
 		NOTE_TRIANGLE,
 		NOTE_CIRCLE,
 		NOTE_CROSS,
@@ -22,11 +23,23 @@ namespace MainGame
 		NOTE_SHAPE_COUNT
 	};
 
+	enum class NoteType
+	{
+		TYPE_NONE = -1,
+
+		TYPE_NORMAL,
+		TYPE_DOUBLE,
+		TYPE_HOLD,
+
+		NOTE_TYPE_COUNT
+	};
+
 	struct ChartNote
 	{
 		float AppearTime;
 
 		NoteShape Shape;
+		NoteType Type;
 		int ReferenceIndex;
 
 		vec2 Position;
@@ -37,7 +50,9 @@ namespace MainGame
 	};
 
 	extern const char* g_NoteShapeNames[];
+	extern const char* g_NoteTypeNames[];
 	extern const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable;
+	extern const std::unordered_map<std::string, NoteType> g_NoteTypeConversionTable;
 
 	class Chart
 	{

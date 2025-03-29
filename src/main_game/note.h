@@ -73,18 +73,28 @@ namespace MainGame
 
 		ACTIVE,
 		EXPIRED,
+
 		HIT,
+		HIT_SECONDARY,
 		HIT_WRONG
 	};
+
+	const u32 TRAIL_POINTS_RESOLUTION = 48;
+	const float MAX_NOTE_DURATION_NORMALIZED = 1.25f;
+	const u32 TRAIL_POINTS_COUNT = static_cast<u32>(TRAIL_POINTS_RESOLUTION * MAX_NOTE_DURATION_NORMALIZED);
 
 	struct GameNote
 	{
 		ChartNote* noteStats = nullptr;
 		GameNoteState state = GameNoteState::NONE;
+		GameNoteState secondaryState = GameNoteState::NONE;
 
 		float flyTime_seconds = 0.0f;
 		float elapsedTime_seconds = 0.0f;
 
 		float elapsedTimeOnHit_seconds = 0.0f;
+
+		glm::vec2 trailPoints[TRAIL_POINTS_COUNT] = {};
+		float trailScrollOffset = 0.0f;
 	};
 }

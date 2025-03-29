@@ -5,6 +5,7 @@
 #include "gamescore.h"
 #include "gfx/sprite_sheet.h"
 #include "gfx/sprite_renderer.h"
+#include "gfx/primitive_batch.h"
 #include "audio/audio.h"
 #include "chart.h"
 #include "note.h"
@@ -31,13 +32,24 @@ namespace MainGame
 
 		GFX::SpriteRenderer spriteRenderer;
 		GFX::SpriteSheet iconSet;
+
+		// --- Cached sprites
+
 		GFX::Sprite* cachedNoteTargetSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
 		GFX::Sprite* cachedNoteIconSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+
+		GFX::Sprite* cachedDoubleTargetSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedDoubleIconSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+
 		GFX::Sprite* noteTargetHandSprite;
 
+		// --------------
+
 		GFX::LowLevel::Texture* bgTexture = nullptr;
+		GFX::LowLevel::Texture* trailTexture = nullptr;
 
 		Audio::SoundEffect hitSE = {};
+		Audio::SoundEffect hitSE_double = {};
 		Audio::Music songMusic = {};
 		bool musicStarted = false;
 
@@ -67,6 +79,8 @@ namespace MainGame
 
 		void gameStep();
 		void inputNoteHit(NoteShape shape, bool secondary, bool release);
+
+		void drawNoteTrail(float t, GameNote* note);
 
 		void handleNoteInput();
 		void handleDebugInput();
