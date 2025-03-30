@@ -4,6 +4,9 @@ Makefile
 *.make
 
 content/
+!content/diva/shaders
+!content/diva/resources
+!content/diva/fonts
 
 *.o
 *.d
