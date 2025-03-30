@@ -87,14 +87,17 @@ namespace Dev
 		game->GetVersionNumber(&buildYear, &buildMonth);
 
 		const char* osName = game->GetPlatformName();
-		const char* bitWidth = (sizeof(size_t) == 8) ? "64-bit" : "32-bit";
+#if defined (_WIN32)
+		const char* bitWidth = "32-bit";
+#elif defined (_WIN64)
+		const char* bitWidth = "64-bit";
+#endif
 
 #ifdef _DEBUG
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "DEBUG BUILD\n");
 #endif
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "Starshine %02d.%02d\n", buildYear, buildMonth);
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "%s %s\n", osName, bitWidth);
-		pos += SDL_snprintf(debugInfoText + pos, 1023, "%04d %04d\n", (int)(game->deltaTime_ms * 1000.0), (int)(game->actualFrameTime_ms * 1000.0));
 	}
 	
 	void StateSelector::Draw()

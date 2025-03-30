@@ -83,7 +83,7 @@ namespace MainGame
 
 		songMusic.LoadFromFile("music/pv_032.ogg");
 
-		songChart.LoadFromXml("songdata/test/test_chart3.xml");
+		songChart.LoadFromXml("songdata/test/test_chart4.xml");
 
 		return true;
 	}
@@ -235,6 +235,10 @@ namespace MainGame
 			if (autoPlay && note->elapsedTime_seconds + deltaTime_seconds >= note->flyTime_seconds)
 			{
 				inputNoteHit(note->noteStats->Shape, false, true);
+				if (note->noteStats->Type == NoteType::TYPE_DOUBLE)
+				{
+					inputNoteHit(note->noteStats->Shape, true, true);
+				}
 			}
 
 			if (note->state == GameNoteState::EXPIRED)
@@ -243,39 +247,35 @@ namespace MainGame
 				continue;
 			}
 
-			if (note->state == GameNoteState::HIT)
-			{
-				if (note->noteStats->Type == NoteType::TYPE_DOUBLE && note->secondaryState == GameNoteState::HIT)
-				{
-					activeNotes.pop_front();
-					continue;
-				}
-				else if (note->noteStats->Type == NoteType::TYPE_NORMAL)
-				{
-					activeNotes.pop_front();
-					continue;
-				}
-			}
-
+			bool skipNote = false;
 			switch (note->noteStats->Type)
 			{
 				case NoteType::TYPE_DOUBLE:
 					{
-						if (note->state == GameNoteState::HIT && note->secondaryState == GameNoteState::HIT_SECONDARY || 
-							note->state == GameNoteState::HIT_SECONDARY && note->secondaryState == GameNoteState::HIT)
+						if ((note->state == GameNoteState::HIT && note->secondaryState == GameNoteState::HIT_SECONDARY) || 
+							(note->state == GameNoteState::HIT_SECONDARY && note->secondaryState == GameNoteState::HIT))
 							{
 								activeNotes.pop_front();
-								continue;
+								skipNote = true;
+								break;
 							}
+						break;
 					}
-				default:
+				case NoteType::TYPE_NORMAL:
 					{
 						if (note->state == GameNoteState::HIT)
 						{
 							activeNotes.pop_front();
-							continue;
+							skipNote = true;
+							break;
 						}
+						break;
 					}
+			}
+
+			if (skipNote)
+			{
+				continue;
 			}
 
 			note->elapsedTime_seconds += deltaTime_seconds;
@@ -392,9 +392,13 @@ namespace MainGame
 					
 					if (firstHittableNote->noteStats->Type == NoteType::TYPE_DOUBLE)
 					{
-						if (firstHittableNote->state != GameNoteState::ACTIVE)
+						if (firstHittableNote->state == GameNoteState::HIT)
 						{
-							firstHittableNote->secondaryState = secondary ? GameNoteState::HIT_SECONDARY : GameNoteState::HIT;
+							firstHittableNote->secondaryState = secondary ? GameNoteState::HIT_SECONDARY : GameNoteState::ACTIVE;
+						}
+						else if (firstHittableNote->state == GameNoteState::HIT_SECONDARY)
+						{
+							firstHittableNote->secondaryState = secondary ? GameNoteState::ACTIVE : GameNoteState::HIT;
 						}
 						else
 						{
@@ -427,8 +431,8 @@ namespace MainGame
 
 					if (firstHittableNote->noteStats->Type == NoteType::TYPE_DOUBLE)
 					{
-						if (firstHittableNote->state == GameNoteState::HIT && firstHittableNote->secondaryState == GameNoteState::HIT_SECONDARY || 
-							firstHittableNote->state == GameNoteState::HIT_SECONDARY && firstHittableNote->secondaryState == GameNoteState::HIT)
+						if ((firstHittableNote->state == GameNoteState::HIT && firstHittableNote->secondaryState == GameNoteState::HIT_SECONDARY) || 
+							(firstHittableNote->state == GameNoteState::HIT_SECONDARY && firstHittableNote->secondaryState == GameNoteState::HIT))
 						{
 							noteHitPos = firstHittableNote->noteStats->Position;
 							gameScore.RegisterNoteHit(valu, noteWrong);
