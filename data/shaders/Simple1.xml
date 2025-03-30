@@ -1,0 +1,10 @@
+<Shader>
+	<Files Backend="OpenGL_ARB">
+		<Vertex>opengl/VS_Simple1.vp</Vertex>
+		<Fragment>opengl/FS_Simple1.fp</Fragment>
+	</Files>
+	<Files Backend="D3D9">
+		<Vertex>d3d9/VS_Simple1.cso</Vertex>
+		<Fragment>d3d9/FS_Simple1.cso</Fragment>
+	</Files>
+</Shader>

@@ -1,0 +1,6 @@
+<Shader>
+	<Files Backend="OpenGL_ARB">
+		<Vertex>opengl/VS_Test2.vp</Vertex>
+		<Fragment>opengl/FS_Test2.fp</Fragment>
+	</Files>
+</Shader>

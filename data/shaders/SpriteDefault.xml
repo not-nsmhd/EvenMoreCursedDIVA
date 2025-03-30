@@ -1,0 +1,10 @@
+<Shader>
+	<Files Backend="OpenGL_ARB">
+		<Vertex>opengl/VS_SpriteDefault.vp</Vertex>
+		<Fragment>opengl/FS_SpriteDefault.fp</Fragment>
+	</Files>
+	<Files Backend="D3D9">
+		<Vertex>d3d9/VS_SpriteDefault.cso</Vertex>
+		<Fragment>d3d9/FS_SpriteDefault.cso</Fragment>
+	</Files>
+</Shader>
