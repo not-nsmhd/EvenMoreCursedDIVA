@@ -64,9 +64,9 @@ namespace GFX
 
 		VertexAttribute vtxAttribs[] =
 		{
-			{ VertexAttributeType::VERT_ELEMENT_POSITION, 0, VertexAttributeFormat::VERT_FORMAT_FLOAT2, false, false, offsetof(SpriteVertex, pos) },
-			{ VertexAttributeType::VERT_ELEMENT_TEXCOORD, 0, VertexAttributeFormat::VERT_FORMAT_FLOAT2, false, false, offsetof(SpriteVertex, texCoord) },
-			{ VertexAttributeType::VERT_ELEMENT_COLOR, 0, VertexAttributeFormat::VERT_FORMAT_BYTE4, true, true, offsetof(SpriteVertex, color) }
+			{ VertexAttributeType::POSITION, 0, VertexAttributeFormat::VERT_FORMAT_FLOAT2, false, false, offsetof(SpriteVertex, pos) },
+			{ VertexAttributeType::TEXCOORD, 0, VertexAttributeFormat::VERT_FORMAT_FLOAT2, false, false, offsetof(SpriteVertex, texCoord) },
+			{ VertexAttributeType::COLOR, 0, VertexAttributeFormat::VERT_FORMAT_BYTE4, true, true, offsetof(SpriteVertex, color) }
 		};
 
 		vertexBuffer = gfxBackend->CreateVertexBuffer(BufferUsage::BUFFER_USAGE_DYNAMIC, nullptr, MAX_VERTICES * sizeof(SpriteVertex));
@@ -118,10 +118,11 @@ namespace GFX
 		currentSprite->size = { 0.0f, 0.0f };
 		SDL_memset(currentSprite->colors, 0xFF, sizeof(struct Color) * 4);
 
-		currentSprite->rotCos = SDL_cosf(0.0f);
-		currentSprite->rotSin = SDL_sinf(0.0f);
+		currentSprite->rotCos = 1.0f;
+		currentSprite->rotSin = 0.0f;
 
 		currentSprite->srcRect = { 0.0f, 0.0f, 1.0f, 1.0f };
+		currentSprite->flipFlags = 0;
 	}
 
 	void SpriteRenderer::SetSpritePosition(vec2 position)
@@ -167,6 +168,16 @@ namespace GFX
 		currentSprite->srcRect.width = (absSource.x + absSource.width) / w;
 		currentSprite->srcRect.y = absSource.y / h;
 		currentSprite->srcRect.height = (absSource.y + absSource.height) / h;
+	}
+	
+	void SpriteRenderer::SetSpriteFlip(u32 flipFlags)
+	{
+		if (flipFlags > 2)
+		{
+			return;
+		}
+
+		currentSprite->flipFlags = flipFlags;
 	}
 
 	void SpriteRenderer::SetSpriteColor(struct Color color)
@@ -251,12 +262,15 @@ namespace GFX
 			vec2 sprPos = sprite->position;
 			vec2 sprSize = sprite->size;
 
+			bool flipX = (sprite->flipFlags & SpriteFlipMode::FLIP_X) == SpriteFlipMode::FLIP_X;
+			bool flipY = (sprite->flipFlags & SpriteFlipMode::FLIP_Y) == SpriteFlipMode::FLIP_Y;
+
 			/* Top-left */
 			vec2 vtxPos = { 0.0f, 0.0f };
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
-			vertexData[vIndex].texCoord = { sprite->srcRect.x, sprite->srcRect.y };
 			vertexData[vIndex].color = u8vec4(sprite->colors[0].R, sprite->colors[0].G, sprite->colors[0].B, sprite->colors[0].A);
+			vertexData[vIndex].texCoord = { !flipX ? sprite->srcRect.x : sprite->srcRect.width, !flipY ? sprite->srcRect.y : sprite->srcRect.height };
 			vIndex++;
 
 			/* Bottom-right */
@@ -264,8 +278,8 @@ namespace GFX
 			vtxPos.y = sprSize.y;
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
-			vertexData[vIndex].texCoord = { sprite->srcRect.width, sprite->srcRect.height };
 			vertexData[vIndex].color = u8vec4(sprite->colors[3].R, sprite->colors[3].G, sprite->colors[3].B, sprite->colors[3].A);
+			vertexData[vIndex].texCoord = { !flipX ? sprite->srcRect.width : sprite->srcRect.x, !flipY ? sprite->srcRect.height : sprite->srcRect.y };			
 			vIndex++;
 
 			/* Bottom-left */
@@ -273,17 +287,17 @@ namespace GFX
 			vtxPos.y = sprSize.y;
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
-			vertexData[vIndex].texCoord = { sprite->srcRect.x, sprite->srcRect.height };
 			vertexData[vIndex].color = u8vec4(sprite->colors[2].R, sprite->colors[2].G, sprite->colors[2].B, sprite->colors[2].A);
+			vertexData[vIndex].texCoord = { !flipX ? sprite->srcRect.x : sprite->srcRect.width, !flipY ? sprite->srcRect.height : sprite->srcRect.y };
 			vIndex++;
 
 			/* Top-right */
 			vtxPos.x = sprSize.x;
-			vtxPos.y = 0.0;
+			vtxPos.y = 0.0f;
 
 			vertexData[vIndex].pos = RotateVector(vtxPos, sprite->origin, sprite->rotCos, sprite->rotSin) + sprPos;
-			vertexData[vIndex].texCoord = { sprite->srcRect.width, sprite->srcRect.y };
 			vertexData[vIndex].color = u8vec4(sprite->colors[1].R, sprite->colors[1].G, sprite->colors[1].B, sprite->colors[1].A);
+			vertexData[vIndex].texCoord = { !flipX ? sprite->srcRect.width : sprite->srcRect.x, !flipY ? sprite->srcRect.y : sprite->srcRect.height };
 			vIndex++;
 		}
 

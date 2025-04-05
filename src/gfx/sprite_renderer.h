@@ -16,6 +16,12 @@ using Common::Color;
 
 namespace GFX
 {
+	enum SpriteFlipMode : u32
+	{
+		FLIP_X = (1 << 0),
+		FLIP_Y = (1 << 1)
+	};
+
 	struct SpriteState
 	{
 		vec2 position;
@@ -27,6 +33,7 @@ namespace GFX
 		float rotSin;
 
 		RectangleF srcRect;
+		u32 flipFlags = 0;
 	};
 
 	struct SpriteBatch
@@ -70,6 +77,7 @@ namespace GFX
 		void SetSpriteRotation(float radians);
 		void SetSpriteSource(RectangleF source);
 		void SetSpriteSource(const LowLevel::Texture* texture, RectangleF absSource);
+		void SetSpriteFlip(u32 flipFlags);
 		void SetSpriteColor(struct Color color);
 		
 		// Coloring order; top-left, top-right, bottom-left, bottom-right
