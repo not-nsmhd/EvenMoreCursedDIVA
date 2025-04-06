@@ -19,11 +19,8 @@ namespace GFX
 		{
 			BACKEND_NONE = -1,
 			BACKEND_OPENGL_ARB,
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
-			BACKEND_D3D9
-#endif
-#endif
+			BACKEND_D3D9,
+			BACKEND_COUNT
 		};
 
 		enum ClearFlags : u32
@@ -45,14 +42,10 @@ namespace GFX
 			PRIMITIVE_TRIANGLE_FAN
 		};
 
-		const std::string BackendNames[] = 
+		constexpr const char* BackendNames[static_cast<int>(BackendType::BACKEND_COUNT)] = 
 		{
 			"OpenGL_ARB",
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 			"D3D9"
-#endif
-#endif
 		};
 
 		class Backend
@@ -78,8 +71,8 @@ namespace GFX
 			virtual Buffer* CreateIndexBuffer(BufferUsage usage, IndexFormat format, const void* initialData, u32 size) = 0;
 			virtual void DestroyBuffer(Buffer* buffer) = 0;
 
-			virtual void BindVertexBuffer(const Buffer* buffer) = 0;
-			virtual void BindIndexBuffer(const Buffer* buffer) = 0;
+			virtual void BindVertexBuffer(Buffer* buffer) = 0;
+			virtual void BindIndexBuffer(Buffer* buffer) = 0;
 
 			virtual void SetBufferData(Buffer* buffer, const void* src, u32 offset, u32 size) = 0;
 			virtual void* MapBuffer(Buffer* buffer, BufferMapping mapMode) = 0;
@@ -88,14 +81,14 @@ namespace GFX
 			virtual Shader* CreateShader(const u8* vsSource, u32 vsSourceLength, const u8* fsSource, u32 fsSourceLength) = 0;
 			virtual void DestroyShader(Shader* shader) = 0;
 
-			virtual void BindShader(const Shader* shader) = 0;
+			virtual void BindShader(Shader* shader) = 0;
 
 			virtual void SetShaderMatrix(u32 index, const float* matrix) = 0;
 
 			virtual VertexDescription* CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader) = 0;
 			virtual void DestroyVertexDescription(VertexDescription* desc) = 0;
 
-			virtual void SetVertexDescription(const VertexDescription* desc) = 0;
+			virtual void SetVertexDescription(VertexDescription* desc) = 0;
 
 			virtual Texture* CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags) = 0;
 			virtual void DestroyTexture(Texture* texture) = 0;

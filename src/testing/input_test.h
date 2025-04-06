@@ -11,8 +11,6 @@ namespace Testing
 	public:
 		InputTest();
 
-		static InputTest* GetInstance();
-
 		bool Initialize();
 		bool LoadContent();
 		void UnloadContent();
@@ -20,11 +18,11 @@ namespace Testing
 		void OnResize(u32 newWidth, u32 newHeight);
 		void Update();
 		void Draw();
-
 	private:
-		static InputTest* instance;
-
 		GFX::SpriteRenderer spriteRenderer;
+		GFX::Font* debugFont;
+
+		i32 scrollTest = 0;
 
 		char keyboardTestString[1024] = {};
 		char mouseTestString[1024] = {};

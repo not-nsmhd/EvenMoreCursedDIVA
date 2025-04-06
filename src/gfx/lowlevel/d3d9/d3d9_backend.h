@@ -1,6 +1,4 @@
 #pragma once
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 #include <d3d9.h>
 #include "../backend.h"
 
@@ -33,8 +31,8 @@ namespace GFX
 				Buffer* CreateIndexBuffer(BufferUsage usage, IndexFormat format, const void* initialData, u32 size);
 				void DestroyBuffer(Buffer* buffer);
 
-				void BindVertexBuffer(const Buffer* buffer);
-				void BindIndexBuffer(const Buffer* buffer);
+				void BindVertexBuffer(Buffer* buffer);
+				void BindIndexBuffer(Buffer* buffer);
 
 				void SetBufferData(Buffer* buffer, const void* src, u32 offset, u32 size);
 				void* MapBuffer(Buffer* buffer, BufferMapping mapMode);
@@ -43,14 +41,14 @@ namespace GFX
 				Shader* CreateShader(const u8* vsSource, u32 vsSourceLength, const u8* fsSource, u32 fsSourceLength);
 				void DestroyShader(Shader* shader);
 
-				void BindShader(const Shader* shader);
+				void BindShader(Shader* shader);
 
 				void SetShaderMatrix(u32 index, const float* matrix);
 
 				VertexDescription* CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader);
 				void DestroyVertexDescription(VertexDescription* desc);
 
-				void SetVertexDescription(const VertexDescription* desc);
+				void SetVertexDescription(VertexDescription* desc);
 
 				Texture* CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags);
 				void DestroyTexture(Texture* texture);
@@ -63,19 +61,19 @@ namespace GFX
 				void DrawArrays(PrimitiveType type, i32 firstVertex, i32 vertexCount);
 				void DrawIndexed(PrimitiveType type, i32 vertexCount, i32 firstIndex, i32 indexCount);
 			private:
-				bool vertexDescSet = false;
-				UINT currentVertexStride = 0;
+				LPDIRECT3D9 direct3d = NULL;
+				LPDIRECT3DDEVICE9 device = NULL;
+				LPDIRECT3DSWAPCHAIN9 swapChain = NULL;
 
+				D3DPRESENT_PARAMETERS presentParameters = {};
+
+				D3DCOLOR clearColor = {};
+
+				UINT currentVertexDescSize = 0;
 				bool vertexBufferSet = false;
-
 				bool indexBufferSet = false;
-				IndexFormat currentIndexFormat = IndexFormat::INDEX_16BIT;
-
-				IDirect3D9* d3d9;
-				IDirect3DDevice9* d3d9Device;
+				bool shaderSet = false;
 			};
 		}
 	}
 }
-#endif
-#endif

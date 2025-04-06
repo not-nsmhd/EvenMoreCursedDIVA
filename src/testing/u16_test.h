@@ -11,8 +11,6 @@ namespace Testing
 	public:
 		U16Test() {}
 
-		static U16Test* GetInstance();
-
 		bool Initialize();
 		bool LoadContent();
 		void UnloadContent();
@@ -20,10 +18,7 @@ namespace Testing
 		void OnResize(u32 newWidth, u32 newHeight);
 		void Update();
 		void Draw();
-
 	private:
-		static U16Test* instance;
-
 		std::u16string testText;
 
 		GFX::Font font;

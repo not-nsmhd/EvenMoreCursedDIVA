@@ -85,7 +85,7 @@ namespace GFX
 
 		void PushSprite(const LowLevel::Texture* texture);
 
-		void RenderSprites(const LowLevel::Shader* shader);
+		void RenderSprites(LowLevel::Shader* shader);
 	private:
 		LowLevel::Backend* gfxBackend = nullptr;
 		bool initialized = false;

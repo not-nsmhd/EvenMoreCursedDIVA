@@ -124,7 +124,7 @@ namespace GFX
 				LOG_INFO_ARGS("Version: %s", glGetString(GL_VERSION));
 				LOG_INFO_ARGS("Renderer: %s", glGetString(GL_RENDERER));
 
-				glEnable(GL_CULL_FACE);
+				//glEnable(GL_CULL_FACE);
 				glCullFace(GL_BACK);
 				glFrontFace(GL_CW);
 
@@ -214,6 +214,7 @@ namespace GFX
 			{
 				if (state == nullptr)
 				{
+					glDisable(GL_BLEND);
 					return;
 				}
 
@@ -299,7 +300,7 @@ namespace GFX
 				delete buffer;
 			}
 
-			void Backend_OpenGL::BindVertexBuffer(const Buffer* buffer)
+			void Backend_OpenGL::BindVertexBuffer(Buffer* buffer)
 			{
 				if (buffer == nullptr)
 				{
@@ -316,7 +317,7 @@ namespace GFX
 				buffer_gl->Bind();
 			}
 
-			void Backend_OpenGL::BindIndexBuffer(const Buffer* buffer)
+			void Backend_OpenGL::BindIndexBuffer(Buffer* buffer)
 			{
 				if (buffer == nullptr)
 				{
@@ -400,7 +401,7 @@ namespace GFX
 				delete shader;
 			}
 
-			void Backend_OpenGL::BindShader(const Shader* shader)
+			void Backend_OpenGL::BindShader(Shader* shader)
 			{
 				if (shader == nullptr)
 				{
@@ -457,7 +458,7 @@ namespace GFX
 				delete desc;
 			}
 
-			void Backend_OpenGL::SetVertexDescription(const VertexDescription* desc)
+			void Backend_OpenGL::SetVertexDescription(VertexDescription* desc)
 			{
 				if (desc == nullptr)
 				{

@@ -1,19 +1,14 @@
 #pragma once
-#include "../../common/int_types.h"
+#include "common/int_types.h"
+#include "resource.h"
 
-namespace GFX
+namespace GFX::LowLevel
 {
-	namespace LowLevel
+	class Shader : public Resource
 	{
-		class Shader
-		{
-		public:
-			Shader() {}
+	public:
+		Shader() {}
 
-			virtual const char* GetDebugName() const = 0;
-			virtual void SetDebugName(const char* name) = 0;
-		protected:
-			char* debugName = nullptr;
-		};
-	}
+		virtual void Destroy() = 0;
+	};
 }

@@ -3,10 +3,18 @@
 #include <SDL2/SDL_syswm.h>
 #include <stb_image.h>
 #include "game.h"
+#include "gfx/lowlevel/opengl_arb/opengl_backend.h"
+#include "gfx/lowlevel/d3d9/d3d9_backend.h"
 #include <vector>
 #include "global_res.h"
 #include "util/string_utils.h"
 #include "util/logging.h"
+
+#include "main_game/main_game.h"
+#include "testing/u16_test.h"
+#include "testing/input_test.h"
+#include "testing/gfx_backend_test.h"
+#include "dev/state_selector.h"
 
 #define LOG_INFO(message) Logging::LogInfo("Game", message)
 #define LOG_INFO_ARGS(message, args...) Logging::LogInfo("Game", message, args)
@@ -14,14 +22,6 @@
 #define LOG_WARN_ARGS(message, args...) Logging::LogWarn("Game", message, args)
 #define LOG_ERROR(message) Logging::LogError("Game", message)
 #define LOG_ERROR_ARGS(message, args...) Logging::LogError("Game", message, args)
-  
-const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] = 
-{
-	"Main Game",
-	"[Dev] UTF-16 Text Test",
-	"[Dev] Input Test",
-	"[Dev] State Selector"
-};
 
 Game::Game()
 {
@@ -124,15 +124,11 @@ bool Game::Initialize()
 	switch (gfxBackendType)
 	{
 	case GFXBackendType::BACKEND_OPENGL_ARB:
-		graphicsBackend = &gfxBackend_OpenGL;
+		graphicsBackend = new GFX::LowLevel::OpenGL_ARB::Backend_OpenGL();
 		break;
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 	case GFXBackendType::BACKEND_D3D9:
-		graphicsBackend = &gfxBackend_D3D9;
+		graphicsBackend = new GFX::LowLevel::D3D9::Backend_D3D9();
 		break;
-#endif
-#endif
 	}
 
 	if (!graphicsBackend->Initialize(window))
@@ -148,7 +144,7 @@ bool Game::Initialize()
 	audioEngine = AudioEngine::GetInstance();
 	audioEngine->Initialize();
 
-	GlobalResources::Load(graphicsBackend);
+	//GlobalResources::Load(graphicsBackend);
 
 	initialized = true;
 	running = true;
@@ -218,6 +214,17 @@ bool Game::Loop()
 
 			if (changeState)
 			{
+				if (currentState != nullptr)
+				{
+					currentState->UnloadContent();
+					currentState->Destroy();
+					delete currentState;
+					currentState = nullptr;
+				}
+
+				currentState = nextState;
+				nextState = nullptr;
+
 				if (currentState->Initialize() != true)
 				{
 					Logging::LogError("Game", "Failed to initialize a game state");
@@ -264,11 +271,12 @@ bool Game::Loop()
 	graphicsBackend->Destroy();
 	audioEngine->Destroy();
 
+	delete[] graphicsBackend;
 	SDL_Quit();
 	return true;
 }
 
-void Game::SetState(GameState* state)
+/*void Game::SetState(GameState* state)
 {
 	if (state != nullptr)
 	{
@@ -290,7 +298,7 @@ void Game::SetState(GameState* state)
 
 		currentGameState = GameStates::STATE_UNREGISTIRED;
 	}
-}
+}*/
 
 void Game::SetState(GameStates state)
 {
@@ -300,8 +308,36 @@ void Game::SetState(GameStates state)
 		GameStateNames[static_cast<int>(currentGameState)], GameStateNames[static_cast<int>(state)]);
 	}
 
-	GameState* stateClass = stateList[static_cast<int>(state)];
-	SetState(stateClass);
+	GameState* stateClass = nullptr;
+
+	switch (state)
+	{
+		case GameStates::STATE_MAINGAME:
+			stateClass = new MainGame::MainGameState();
+			break;
+		case GameStates::DEVSTATE_U16_TEST:
+			stateClass = new Testing::U16Test();
+			break;
+		case GameStates::DEVSTATE_INPUT_TEST:
+			stateClass = new Testing::InputTest();
+			break;
+		case GameStates::DEVSTATE_GFX_BACKEND_TEST:
+			stateClass = new Testing::GFXBackendTest();
+			break;
+		case GameStates::DEVSTATE_STATE_SELECTOR:
+			stateClass = new Dev::StateSelector();
+			break;
+	}
+
+	nextState = stateClass;
+	nextState->game = this;
+	nextState->fileSystem = fileSystem;
+	nextState->graphicsBackend = graphicsBackend;
+	nextState->keyboardState = keyboardState;
+	nextState->mouseState = mouseState;
+	nextState->audio = audioEngine;
+	changeState = true;
+
 	currentGameState = state;
 }
 
@@ -371,14 +407,10 @@ void Game::loadInitialConfig()
 					{
 						gfxBackendType = GFXBackendType::BACKEND_OPENGL_ARB;
 					}
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 					else if (keyValue[1] == "D3D9")
 					{
 						gfxBackendType = GFXBackendType::BACKEND_D3D9;
 					}
-#endif
-#endif
 					else
 					{
 						Logging::LogWarn("Init", "Unknown graphics backend. Defaulting to OpenGL_ARB.");

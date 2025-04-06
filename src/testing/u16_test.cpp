@@ -3,13 +3,6 @@
 
 namespace Testing
 {
-	U16Test* U16Test::instance = new U16Test();
-
-	U16Test* U16Test::GetInstance()
-	{
-		return instance;
-	}
-
 	bool U16Test::Initialize()
 	{
 		alphaBlend.srcColor = GFX::LowLevel::BlendFactor::BLEND_SRC_ALPHA;

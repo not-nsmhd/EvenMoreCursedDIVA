@@ -1,36 +1,26 @@
 #pragma once
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 #include <d3d9.h>
 #include "../vertex_desc.h"
 
-namespace GFX
+namespace GFX::LowLevel::D3D9
 {
-	namespace LowLevel
+	class VertexDescription_D3D9 : public VertexDescription
 	{
-		namespace D3D9
-		{
-			class VertexDescription_D3D9 : public VertexDescription
-			{
-			public:
-				VertexDescription_D3D9() {}
+	public:
+		VertexDescription_D3D9() = delete;
+		VertexDescription_D3D9(LPDIRECT3DDEVICE9 d3dDevice) : device(d3dDevice) {}
 
-				const VertexAttribute* GetAttributes() const;
-				size_t GetAttributeCount() const;
-				size_t GetVertexStride() const;
+		const VertexAttribute *GetAttributes() const;
+		size_t GetAttributeCount() const;
+		size_t GetVertexStride() const;
 
-				bool Initialize(IDirect3DDevice9* device, const VertexAttribute* attribs, u32 attribCount, size_t stride);
-				void Destroy();
+		bool Initialize(const VertexAttribute *attribs, u32 attribCount, size_t stride);
+		void Destroy();
 
-				void Set() const;
-			private:
-				IDirect3DDevice9* device = nullptr;
+		void Set();
+	private:
+		LPDIRECT3DDEVICE9 device = NULL;
 
-				D3DVERTEXELEMENT9* vertexElements = nullptr;
-				IDirect3DVertexDeclaration9* vertexDecl = nullptr;
-			};
-		}
-	}
+		LPDIRECT3DVERTEXDECLARATION9 vertexDecl = NULL;
+	};
 }
-#endif
-#endif

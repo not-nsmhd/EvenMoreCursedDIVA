@@ -1,48 +1,39 @@
 #pragma once
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 #include <d3d9.h>
 #include "../buffers.h"
 
-namespace GFX
+namespace GFX::LowLevel::D3D9
 {
-	namespace LowLevel
+	class Buffer_D3D9 : public Buffer
 	{
-		namespace D3D9
-		{
-			class Buffer_D3D9 : public Buffer
-			{
-			public:
-				Buffer_D3D9() {}
+	public:
+		Buffer_D3D9() = delete;
+		Buffer_D3D9(LPDIRECT3DDEVICE9 d3dDevice) : device(d3dDevice) {}
 
-				bool Mapped = false;
+		u32 GetSize() const;
+		BufferType GetType() const;
+		BufferUsage GetUsage() const;
+		IndexFormat GetIndexFormat() const;
 
-				u32 GetSize() const;
-				BufferType GetType() const;
-				BufferUsage GetUsage() const;
-				IndexFormat GetIndexFormat() const;
+		LPDIRECT3DVERTEXBUFFER9 GetBaseVertexBuffer() const;
+		LPDIRECT3DINDEXBUFFER9 GetBaseIndexBuffer() const;
 
-				IDirect3DVertexBuffer9* GetBaseVertexBuffer() const;
-				IDirect3DIndexBuffer9* GetBaseIndexBuffer() const;
+		bool InitializeVertex(BufferUsage usage, size_t initialSize, const void* initialData);
+		bool InitializeIndex(BufferUsage usage, IndexFormat indexFormat, size_t initialSize, const void* initialData);
+		void Destroy();
 
-				bool Initialize(IDirect3DDevice9* device, BufferType type, BufferUsage usage, size_t initialSize, const void* initialData);
-				bool Initialize(IDirect3DDevice9* device, BufferType type, BufferUsage usage, IndexFormat indexFormat, size_t initialSize, const void* initialData);
-				void Destroy();
+		void Bind(UINT vtxStride);
 
-				void SetData(const void* src, size_t offset, size_t size);
-			private:
-				IDirect3DDevice9* device;
+		void SetData(const void* src, size_t offset, size_t size);
 
-				IDirect3DVertexBuffer9* vertexBuffer;
-				IDirect3DIndexBuffer9* indexBuffer;
-				u32 size = 0;
+		void* Map(BufferMapping mapping);
+		bool Unmap();
+	private:
+		LPDIRECT3DDEVICE9 device = NULL;
+		LPDIRECT3DVERTEXBUFFER9 vertexBuffer = NULL;
+		LPDIRECT3DINDEXBUFFER9 indexBuffer = NULL;
 
-				BufferType type = BufferType::BUFFER_NONE;
-				BufferUsage usage = BufferUsage::BUFFER_USAGE_NONE;
-				IndexFormat indexFormat = IndexFormat::INDEX_16BIT;
-			};
-		}
-	}
+		bool mapped = false;
+		void* mappedAddress = nullptr;
+	};
 }
-#endif
-#endif

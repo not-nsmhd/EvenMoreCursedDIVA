@@ -6,8 +6,6 @@
 #include "input/keyboard.h"
 #include "input/mouse.h"
 #include "gfx/lowlevel/backend.h"
-#include "gfx/lowlevel/opengl_arb/opengl_backend.h"
-#include "gfx/lowlevel/d3d9/d3d9_backend.h"
 #include "audio/audio.h"
 
 using std::string;
@@ -19,13 +17,6 @@ using Audio::AudioEngine;
 
 using GFXBackend = GFX::LowLevel::Backend;
 using GFXBackendType = GFX::LowLevel::BackendType;
-using GFX::LowLevel::OpenGL_ARB::Backend_OpenGL;
-
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
-using GFX::LowLevel::D3D9::Backend_D3D9;
-#endif
-#endif
 
 class Game;
 class GameState;
@@ -39,13 +30,21 @@ enum class GameStates
 
 	DEVSTATE_U16_TEST,
 	DEVSTATE_INPUT_TEST,
+	DEVSTATE_GFX_BACKEND_TEST,
 
 	DEVSTATE_STATE_SELECTOR,
 
 	STATE_COUNT
 };
 
-extern const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)];
+constexpr const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] = 
+{
+	"Main Game",
+	"[Dev] UTF-16 Text Test",
+	"[Dev] Input Test",
+	"[Dev] Graphics Backend Test",
+	"[Dev] State Selector"
+};
 
 class Game
 {
@@ -90,7 +89,7 @@ public:
 
 	bool Initialize();
 	bool Loop();
-	void SetState(GameState* state);
+	//void SetState(GameState* state);
 	void SetState(GameStates state);
 
 	bool IsActive();
@@ -103,16 +102,6 @@ private:
 
 	/* File system */
 	FileSystem* fileSystem;
-
-	/* Graphics backends */
-	Backend_OpenGL gfxBackend_OpenGL;
-	
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
-	Backend_D3D9 gfxBackend_D3D9;
-#endif
-#endif
-
 	GFXBackend* graphicsBackend;
 
 	/* Audio engine */
@@ -121,6 +110,7 @@ private:
 	/* Game state */
 	bool changeState;
 	GameState* currentState;
+	GameState* nextState;
 
 	/* Input */
 	Input::Keyboard* keyboardState;

@@ -10,19 +10,8 @@ using std::ios;
 
 namespace Testing
 {
-	static GFX::Font* debugFont;
-
-	static i32 scrollTest = 0;
-
 	InputTest::InputTest()
 	{
-	}
-
-	InputTest* InputTest::instance = new InputTest();
-	
-	InputTest* InputTest::GetInstance()
-	{
-		return instance;
 	}
 	
 	bool InputTest::Initialize()

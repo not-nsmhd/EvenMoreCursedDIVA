@@ -1,79 +1,54 @@
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 #include <SDL2/SDL.h>
-#include "../../../util/logging.h"
 #include "d3d9_shader.h"
+#include "d3d9_defs.h"
 
-namespace GFX
+namespace GFX::LowLevel::D3D9
 {
-	namespace LowLevel
+	bool Shader_D3D9::Initialize(const u8 *vsSource, u32 vsSourceSize, const u8 *fsSource, u32 fsSourceSize)
 	{
-		namespace D3D9
+		if (vsSource == nullptr || vsSourceSize == 0 ||
+			fsSource == nullptr || fsSourceSize == 0)
 		{
-			const char* Shader_D3D9::GetDebugName() const
-			{
-				return debugName;
-			}
+			return false;
+		}
 
-			void Shader_D3D9::SetDebugName(const char* name)
-			{
-				size_t nameLength = SDL_strlen(name);
-				nameLength = SDL_min(nameLength, 128);
+		HRESULT result = device->CreateVertexShader((const DWORD*)vsSource, &vertShader);
+		if (result != D3D_OK)
+		{
+			LOG_ERROR_ARGS("Failed to create vertex shader. Error: 0x%X", result);
+			return false;
+		}
 
-				debugName = new char[nameLength + 1];
-				SDL_memcpy(debugName, name, nameLength);
-				debugName[nameLength] = '\0';
-			}
-			
-			IDirect3DVertexShader9* Shader_D3D9::GetVertexShader() const
-			{
-				return vertShader;
-			}
-			
-			IDirect3DPixelShader9* Shader_D3D9::GetFragmentShader() const
-			{
-				return fragShader;
-			}
+		result = device->CreatePixelShader((const DWORD*)fsSource, &fragShader);
+		if (result != D3D_OK)
+		{
+			LOG_ERROR_ARGS("Failed to create fragment shader. Error: 0x%X", result);
+			vertShader->Release();
+			return false;
+		}
 
-			bool Shader_D3D9::Initialize(IDirect3DDevice9* device, const u8* vsSource, size_t vsSourceSize, const u8* fsSource, size_t fsSourceSize)
-			{
-				if (vsSource == nullptr || vsSourceSize == 0 ||
-					fsSource == nullptr || fsSourceSize == 0)
-				{
-					return false;
-				}
+		LOG_INFO_ARGS("Created a new shader program (vertex: 0x%X, fragment: 0x%X)", vertShader, fragShader);
+		return true;
+	}
 
-				this->device = device;
-
-				HRESULT result = S_OK;
-				if ((result = device->CreateVertexShader((const DWORD*)vsSource, &vertShader)) != S_OK)
-				{
-					Logging::LogError("GFX::D3D9", "Failed to create a vertex shader. Result: 0x%X", result);
-					return false;
-				}
-
-				if ((result = device->CreatePixelShader((const DWORD*)fsSource, &fragShader)) != S_OK)
-				{
-					Logging::LogError("GFX::D3D9", "Failed to create a fragment shader. Result: 0x%X", result);
-					return false;
-				}
-
-				return true;
-			}
-
-			void Shader_D3D9::Destroy()
-			{
-				vertShader->Release();
-				fragShader->Release();
-			}
-			
-			void Shader_D3D9::Bind() const
-			{
-				device->SetVertexShader(vertShader);
-				device->SetPixelShader(fragShader);
-			}
+	void Shader_D3D9::Destroy()
+	{
+		vertShader->Release();
+		fragShader->Release();
+		
+		if (nameSet)
+		{
+			LOG_INFO_ARGS("Shader program \"%s\" has been destroyed", name);
+		}
+		else
+		{
+			LOG_INFO_ARGS("Shader program (vertex: 0x%X, fragment: 0x%X) has been destroyed", vertShader, fragShader);
 		}
 	}
+
+	void Shader_D3D9::Bind()
+	{
+		device->SetVertexShader(vertShader);
+		device->SetPixelShader(fragShader);
+	}
 }
-#endif
-#endif

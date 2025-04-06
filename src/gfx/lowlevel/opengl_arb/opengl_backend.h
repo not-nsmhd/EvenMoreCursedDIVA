@@ -30,8 +30,8 @@ namespace GFX
 				Buffer* CreateIndexBuffer(BufferUsage usage, IndexFormat format, const void* initialData, u32 size);
 				void DestroyBuffer(Buffer* buffer);
 
-				void BindVertexBuffer(const Buffer* buffer);
-				void BindIndexBuffer(const Buffer* buffer);
+				void BindVertexBuffer(Buffer* buffer);
+				void BindIndexBuffer(Buffer* buffer);
 
 				void SetBufferData(Buffer* buffer, const void* src, u32 offset, u32 size);
 				void* MapBuffer(Buffer* buffer, BufferMapping mapMode);
@@ -40,14 +40,14 @@ namespace GFX
 				Shader* CreateShader(const u8* vsSource, u32 vsSourceLength, const u8* fsSource, u32 fsSourceLength);
 				void DestroyShader(Shader* shader);
 
-				void BindShader(const Shader* shader);
+				void BindShader(Shader* shader);
 
 				void SetShaderMatrix(u32 index, const float* matrix);
 
 				VertexDescription* CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader);
 				void DestroyVertexDescription(VertexDescription* desc);
 
-				void SetVertexDescription(const VertexDescription* desc);
+				void SetVertexDescription(VertexDescription* desc);
 
 				Texture* CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags);
 				void DestroyTexture(Texture* texture);

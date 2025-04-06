@@ -1,168 +1,203 @@
-#ifdef _WIN32
-#ifdef STARSHINE_GFX_D3D9
 #include "d3d9_buffers.h"
-#include <SDL2/SDL.h>
+#include "d3d9_defs.h"
 
-namespace GFX
+namespace GFX::LowLevel::D3D9
 {
-	namespace LowLevel
+	namespace GFXtoD3D9
 	{
-		namespace GFXtoD3D9
+		DWORD BufferUsage[] = 
 		{
-			DWORD BufferUsage[] = 
-			{
-				D3DUSAGE_WRITEONLY,		// BUFFER_USAGE_STATIC
-				D3DUSAGE_DYNAMIC		// BUFFER_USAGE_DYNAMIC
-			};
+			D3DUSAGE_WRITEONLY, // BUFFER_USAGE_STATIC
+			D3DUSAGE_DYNAMIC	// BUFFER_USAGE_DYNAMIC
+		};
 
-			D3DFORMAT IndexFormat[] = 
-			{
-				D3DFMT_INDEX16,
-				D3DFMT_INDEX32
-			};
+		D3DFORMAT IndexFormat[] = 
+		{
+			D3DFORMAT::D3DFMT_INDEX16,
+			D3DFORMAT::D3DFMT_INDEX32
+		};
+	}
+
+	u32 Buffer_D3D9::GetSize() const
+	{
+		return size;
+	}
+
+	BufferType Buffer_D3D9::GetType() const
+	{
+		return type;
+	}
+
+	BufferUsage Buffer_D3D9::GetUsage() const
+	{
+		return usage;
+	}
+
+	IndexFormat Buffer_D3D9::GetIndexFormat() const
+	{
+		return indexFormat;
+	}
+
+	LPDIRECT3DVERTEXBUFFER9 Buffer_D3D9::GetBaseVertexBuffer() const
+	{
+		return vertexBuffer;
+	}
+
+	LPDIRECT3DINDEXBUFFER9 Buffer_D3D9::GetBaseIndexBuffer() const
+	{
+		return indexBuffer;
+	}
+
+	bool Buffer_D3D9::InitializeVertex(BufferUsage usage, size_t initialSize, const void *initialData)
+	{
+		if (usage == BufferUsage::BUFFER_USAGE_STATIC && (initialSize == 0 || initialData == nullptr))
+		{
+			return false;
 		}
 
-		namespace D3D9
+		if (initialSize == 0)
 		{
-			u32 Buffer_D3D9::GetSize() const
-			{
-				return size;
-			}
+			return false;
+		}
 
-			BufferType Buffer_D3D9::GetType() const
-			{
-				return type;
-			}
+		this->type = BufferType::BUFFER_VERTEX;
+		this->usage = usage;
 
-			BufferUsage Buffer_D3D9::GetUsage() const
-			{
-				return usage;
-			}
+		DWORD d3dUsage = GFXtoD3D9::BufferUsage[static_cast<i32>(usage)];
+		HRESULT result = device->CreateVertexBuffer(initialSize, d3dUsage, 0, D3DPOOL_MANAGED, &vertexBuffer, NULL);
 
-			IndexFormat Buffer_D3D9::GetIndexFormat() const
-			{
-				return indexFormat;
-			}
+		if (result != D3D_OK)
+		{
+			LOG_ERROR_ARGS("Failed to create a vertex buffer. Error: 0x%X", result);
+			return false;
+		}
 
-			IDirect3DVertexBuffer9* Buffer_D3D9::GetBaseVertexBuffer() const
-			{
-				return vertexBuffer;
-			}
+		size = initialSize;
 
-			IDirect3DIndexBuffer9* Buffer_D3D9::GetBaseIndexBuffer() const
-			{
-				return indexBuffer;
-			}
+		if (initialData != nullptr)
+		{
+			void* bufferData = nullptr;
+			vertexBuffer->Lock(0, initialSize, &bufferData, D3DLOCK_DISCARD);
+			SDL_memcpy(bufferData, initialData, initialSize);
+			vertexBuffer->Unlock();
+		}
 
-			bool Buffer_D3D9::Initialize(IDirect3DDevice9* device, BufferType type, BufferUsage usage, size_t initialSize, const void* initialData)
-			{
-				if (usage == BufferUsage::BUFFER_USAGE_STATIC && (initialSize == 0 || initialData == nullptr))
-				{
-					return false;
-				}
+		LOG_INFO_ARGS("Created a new vertex buffer at address 0x%X", vertexBuffer);
+		return true;
+	}
 
-				if (initialSize == 0)
-				{
-					return false;
-				}
+	bool Buffer_D3D9::InitializeIndex(BufferUsage usage, IndexFormat indexFormat, size_t initialSize, const void *initialData)
+	{
+		if (usage == BufferUsage::BUFFER_USAGE_STATIC && (initialSize == 0 || initialData == nullptr))
+		{
+			return false;
+		}
 
-				this->type = type;
-				this->usage = usage;
-				this->device = device;
+		if (initialSize == 0)
+		{
+			return false;
+		}
 
-				DWORD bufferUsage = GFXtoD3D9::BufferUsage[static_cast<int>(usage)];
-				HRESULT result = 0;
+		this->type = BufferType::BUFFER_INDEX;
+		this->usage = usage;
 
-				if ((result = device->CreateVertexBuffer(initialSize, bufferUsage, 0, D3DPOOL_DEFAULT, &vertexBuffer, NULL)) != S_OK)
-				{
-					return false;
-				}
+		DWORD d3dUsage = GFXtoD3D9::BufferUsage[static_cast<i32>(usage)];
+		D3DFORMAT d3dFormat = GFXtoD3D9::IndexFormat[static_cast<i32>(indexFormat)];
+		HRESULT result = device->CreateIndexBuffer(initialSize, d3dUsage, d3dFormat, D3DPOOL_MANAGED, &indexBuffer, NULL);
 
-				if (initialData != nullptr)
-				{
-					void* bufferData = nullptr;
-					vertexBuffer->Lock(0, initialSize, &bufferData, D3DLOCK_DISCARD);
-					SDL_memcpy(bufferData, initialData, initialSize);
-					vertexBuffer->Unlock();
-				}
+		if (result != D3D_OK)
+		{
+			LOG_ERROR_ARGS("Failed to create an index buffer. Error: 0x%X", result);
+			return false;
+		}
 
-				size = initialSize;
-				return true;
-			}
+		size = initialSize;
+		this->indexFormat = indexFormat;
 
-			bool Buffer_D3D9::Initialize(IDirect3DDevice9* device, BufferType type, BufferUsage usage, IndexFormat indexFormat, size_t initialSize, const void* initialData)
-			{
-				if (usage == BufferUsage::BUFFER_USAGE_STATIC && (initialSize == 0 || initialData == nullptr))
-				{
-					return false;
-				}
+		if (initialData != nullptr)
+		{
+			void* bufferData = nullptr;
+			indexBuffer->Lock(0, initialSize, &bufferData, D3DLOCK_DISCARD);
+			SDL_memcpy(bufferData, initialData, initialSize);
+			indexBuffer->Unlock();
+		}
 
-				if (initialSize == 0)
-				{
-					return false;
-				}
+		LOG_INFO_ARGS("Created a new index buffer at address 0x%X", indexBuffer);
+		return true;
+	}
 
-				this->type = type;
-				this->usage = usage;
-				this->device = device;
+	void Buffer_D3D9::Destroy()
+	{
+		void* destroyedBuffer = nullptr;
 
-				DWORD bufferUsage = GFXtoD3D9::BufferUsage[static_cast<int>(usage)];
-				HRESULT result = 0;
-				D3DFORMAT indexFormat_d3d = GFXtoD3D9::IndexFormat[static_cast<int>(indexFormat)];
-
-				if ((result = device->CreateIndexBuffer(initialSize, bufferUsage, indexFormat_d3d, D3DPOOL_DEFAULT, &indexBuffer, NULL)) != S_OK)
-				{
-					return false;
-				}
-
-				if (initialData != nullptr)
-				{
-					void* bufferData = nullptr;
-					indexBuffer->Lock(0, initialSize, &bufferData, D3DLOCK_DISCARD);
-					SDL_memcpy(bufferData, initialData, initialSize);
-					indexBuffer->Unlock();
-				}
-
-				size = initialSize;
-				this->indexFormat = indexFormat;
-				return true;
-			}
-
-			void Buffer_D3D9::Destroy()
-			{
-				if (type == BufferType::BUFFER_VERTEX)
-				{
-					vertexBuffer->Release();
-				}
-				else if (type == BufferType::BUFFER_INDEX)
-				{
-					indexBuffer->Release();
-				}
-			}
-			
-			void Buffer_D3D9::SetData(const void* src, size_t offset, size_t size)
-			{
-				if (src == nullptr || device == nullptr)
-				{
-					return;
-				}
-
-				void* bufferData = nullptr;
-				if (type == BufferType::BUFFER_VERTEX)
-				{
-					vertexBuffer->Lock(static_cast<UINT>(offset), static_cast<UINT>(size), &bufferData, D3DLOCK_DISCARD);
-					SDL_memcpy(bufferData, src, size);
-					vertexBuffer->Unlock();
-				}
-				else if (type == BufferType::BUFFER_INDEX)
-				{
-					indexBuffer->Lock(static_cast<UINT>(offset), static_cast<UINT>(size), &bufferData, D3DLOCK_DISCARD);
-					SDL_memcpy(bufferData, src, size);
-					indexBuffer->Unlock();
-				}
-			}
+		if (vertexBuffer != NULL)
+		{
+			destroyedBuffer = vertexBuffer;
+			vertexBuffer->Release();
+			vertexBuffer = NULL;
+		}
+		
+		if (indexBuffer != NULL)
+		{
+			destroyedBuffer = indexBuffer;
+			indexBuffer->Release();
+			indexBuffer = NULL;
+		}
+		
+		if (nameSet)
+		{
+			LOG_INFO_ARGS("Buffer \"%s\" has been destroyed", name);
+		}
+		else
+		{
+			LOG_INFO_ARGS("Buffer at address 0x%X has been destroyed", destroyedBuffer);
 		}
 	}
+
+	void Buffer_D3D9::Bind(UINT vtxStride)
+	{
+		switch (type)
+		{
+			case BufferType::BUFFER_VERTEX:
+				device->SetStreamSource(0, vertexBuffer, 0, vtxStride);
+				break;
+			case BufferType::BUFFER_INDEX:
+				device->SetIndices(indexBuffer);
+				break;
+		}
+	}
+
+	void Buffer_D3D9::SetData(const void *src, size_t offset, size_t size)
+	{
+		void* bufferData = nullptr;
+
+		switch (type)
+		{
+			case BufferType::BUFFER_VERTEX:
+				vertexBuffer->Lock(offset, size, &bufferData, D3DLOCK_DISCARD);
+				SDL_memcpy(bufferData, src, size);
+				vertexBuffer->Unlock();
+				break;
+			case BufferType::BUFFER_INDEX:
+				indexBuffer->Lock(offset, size, &bufferData, D3DLOCK_DISCARD);
+				SDL_memcpy(bufferData, src, size);
+				indexBuffer->Unlock();
+				break;
+		}
+	}
+
+	void *Buffer_D3D9::Map(BufferMapping mapping)
+	{
+		if (mapped)
+		{
+			return mappedAddress;
+		}
+
+		return nullptr;
+	}
+
+	bool Buffer_D3D9::Unmap()
+	{
+		return false;
+	}
 }
-#endif
-#endif

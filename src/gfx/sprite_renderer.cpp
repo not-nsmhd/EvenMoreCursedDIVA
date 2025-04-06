@@ -247,7 +247,7 @@ namespace GFX
 		}
 	}
 
-	void SpriteRenderer::RenderSprites(const Shader* shader)
+	void SpriteRenderer::RenderSprites(Shader* shader)
 	{
 		if (batchCount == 0)
 		{
@@ -303,7 +303,7 @@ namespace GFX
 
 		gfxBackend->SetBufferData(vertexBuffer, vertexData, 0, spriteCount * 4 * sizeof(SpriteVertex));
 
-		const Shader* sprShader = (shader == nullptr) ? defaultShader : shader;
+		Shader* sprShader = (shader == nullptr) ? defaultShader : shader;
 
 		gfxBackend->BindShader(sprShader);
 		gfxBackend->SetVertexDescription(vtxDesc);
