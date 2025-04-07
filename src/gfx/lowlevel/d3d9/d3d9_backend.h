@@ -44,6 +44,7 @@ namespace GFX
 				void BindShader(Shader* shader);
 
 				void SetShaderMatrix(u32 index, const float* matrix);
+				void SetShaderMatrix(u32 index, const mat4* matrix);
 
 				VertexDescription* CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader);
 				void DestroyVertexDescription(VertexDescription* desc);

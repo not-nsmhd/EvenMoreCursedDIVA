@@ -1,4 +1,5 @@
 #include <SDL2/SDL_syswm.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "d3d9_backend.h"
 #include "d3d9_buffers.h"
 #include "d3d9_shader.h"
@@ -273,7 +274,19 @@ namespace GFX::LowLevel::D3D9
 	
 	void Backend_D3D9::SetShaderMatrix(u32 index, const float* matrix)
 	{
-		
+		if (shaderSet)
+		{
+			device->SetVertexShaderConstantF(index, matrix, 4);
+		}	
+	}
+	
+	void Backend_D3D9::SetShaderMatrix(u32 index, const mat4* matrix)
+	{
+		if (shaderSet)
+		{
+			mat4 transposedMatrix = glm::transpose(*matrix);
+			device->SetVertexShaderConstantF(index, glm::value_ptr(transposedMatrix), 4);
+		}
 	}
 	
 	VertexDescription* Backend_D3D9::CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader)

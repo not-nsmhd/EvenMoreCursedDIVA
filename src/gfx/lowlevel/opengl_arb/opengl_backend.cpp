@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "opengl_defs.h"
 #include "opengl_buffers.h"
 #include "opengl_shader.h"
@@ -424,6 +425,19 @@ namespace GFX
 				else
 				{
 					glLoadMatrixf(matrix);
+				}
+			}
+			
+			void Backend_OpenGL::SetShaderMatrix(u32 index, const mat4* matrix)
+			{
+				glMatrixMode(GL_MATRIX0_ARB + index);
+				if (matrix == nullptr)
+				{
+					glLoadIdentity();
+				}
+				else
+				{
+					glLoadMatrixf(glm::value_ptr(*matrix));
 				}
 			}
 

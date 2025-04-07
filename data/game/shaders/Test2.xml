@@ -3,4 +3,8 @@
 		<Vertex>opengl/VS_Test2.vp</Vertex>
 		<Fragment>opengl/FS_Test2.fp</Fragment>
 	</Files>
+	<Files Backend="D3D9">
+		<Vertex>d3d9/VS_Test2.cso</Vertex>
+		<Fragment>d3d9/FS_Test2.cso</Fragment>
+	</Files>
 </Shader>
