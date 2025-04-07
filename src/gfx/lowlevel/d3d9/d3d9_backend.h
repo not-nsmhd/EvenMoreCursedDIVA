@@ -54,7 +54,7 @@ namespace GFX
 				Texture* CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags);
 				void DestroyTexture(Texture* texture);
 
-				void BindTexture(const Texture* texture, u32 unit);
+				void BindTexture(Texture* texture, u32 unit);
 
 				void SetTextureData(Texture* texture, const void* data);
 				void SetTextureData(Texture* texture, const void* data, u32 x, u32 y, u32 width, u32 height);

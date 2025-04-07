@@ -138,7 +138,9 @@ namespace GFX
 		fsPath texturePath = fntPath;
 		texturePath.replace_extension("png");
 
-		texture = LoadImage(backend, texturePath);
+		texture = LoadTexture(backend, texturePath);
+		string texName = texturePath.filename().replace_extension("").generic_string() + "_FontTexture";
+		texture->SetDebugName(texName.c_str());
 		this->backend = backend;
 	}
 

@@ -107,8 +107,7 @@ namespace GFX
 				temp.append("sheet_" + to_string(i) + ".png");
 				path texPath = fs->GetContentFilePath(temp);
 
-				Texture* tex = LoadImage(this->backend, texPath);
-
+				Texture* tex = LoadTexture(this->backend, texPath);
 				textures.push_back(tex);
 			}
 		}

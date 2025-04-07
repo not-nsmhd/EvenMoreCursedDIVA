@@ -7,6 +7,6 @@ namespace GFX
 {
 	namespace Helpers
 	{
-		LowLevel::Texture* LoadImage(LowLevel::Backend* backend, const std::filesystem::path& path);
+		LowLevel::Texture* LoadTexture(LowLevel::Backend* backend, const std::filesystem::path& path);
 	}
 }

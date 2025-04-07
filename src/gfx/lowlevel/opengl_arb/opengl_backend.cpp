@@ -511,7 +511,7 @@ namespace GFX
 				}
 			}
 
-			void Backend_OpenGL::BindTexture(const Texture* texture, u32 unit)
+			void Backend_OpenGL::BindTexture(Texture* texture, u32 unit)
 			{
 				if (texture != nullptr)
 				{

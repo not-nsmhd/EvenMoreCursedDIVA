@@ -4,6 +4,7 @@
 #include "d3d9_buffers.h"
 #include "d3d9_shader.h"
 #include "d3d9_vertex_desc.h"
+#include "d3d9_texture.h"
 #include "d3d9_defs.h"
 
 namespace GFX::LowLevel::D3D9
@@ -329,27 +330,52 @@ namespace GFX::LowLevel::D3D9
 	
 	Texture* Backend_D3D9::CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags)
 	{
+		Texture_D3D9* texture = new Texture_D3D9(device);
+
+		if (texture->Initialize(width, height, format, flags))
+		{
+			return texture;
+		}
+
+		delete[] texture;
 		return nullptr;
 	}
 	
 	void Backend_D3D9::DestroyTexture(Texture* texture)
 	{
-		
+		if (texture != nullptr)
+		{
+			Texture_D3D9* d3dTexture = static_cast<Texture_D3D9*>(texture);
+			d3dTexture->Destroy();
+			delete[] d3dTexture;
+		}
 	}
 	
-	void Backend_D3D9::BindTexture(const Texture* texture, u32 unit)
+	void Backend_D3D9::BindTexture(Texture* texture, u32 unit)
 	{
-		
+		if (texture != nullptr)
+		{
+			Texture_D3D9* d3dTexture = static_cast<Texture_D3D9*>(texture);
+			d3dTexture->Bind(unit);
+		}
 	}
 	
 	void Backend_D3D9::SetTextureData(Texture* texture, const void* data)
 	{
-		
+		if (texture != nullptr)
+		{
+			Texture_D3D9* d3dTexture = static_cast<Texture_D3D9*>(texture);
+			d3dTexture->SetData(data);
+		}
 	}
 	
 	void Backend_D3D9::SetTextureData(Texture* texture, const void* data, u32 x, u32 y, u32 width, u32 height)
 	{
-		
+		if (texture != nullptr)
+		{
+			Texture_D3D9* d3dTexture = static_cast<Texture_D3D9*>(texture);
+			d3dTexture->SetData(data, x, y, width, height);
+		}
 	}
 	
 	void Backend_D3D9::DrawArrays(PrimitiveType type, i32 firstVertex, i32 vertexCount)

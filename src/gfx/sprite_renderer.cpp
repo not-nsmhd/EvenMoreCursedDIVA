@@ -196,7 +196,7 @@ namespace GFX
 		currentSprite->colors[3] = colors[3];
 	}
 
-	void SpriteRenderer::PushSprite(const Texture* texture)
+	void SpriteRenderer::PushSprite(Texture* texture)
 	{
 		if (spriteCount >= MAX_SPRITES)
 		{
@@ -214,7 +214,7 @@ namespace GFX
 
 		ResetSprite();
 
-		const Texture* sprTexture = (texture == nullptr) ? blankTexture : texture;
+		Texture* sprTexture = (texture == nullptr) ? blankTexture : texture;
 
 		if (currentBatch->texture != sprTexture)
 		{

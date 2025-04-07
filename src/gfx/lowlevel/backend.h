@@ -94,7 +94,7 @@ namespace GFX
 			virtual Texture* CreateTexture(u32 width, u32 height, TextureFormat format, u32 flags) = 0;
 			virtual void DestroyTexture(Texture* texture) = 0;
 
-			virtual void BindTexture(const Texture* texture, u32 unit) = 0;
+			virtual void BindTexture(Texture* texture, u32 unit) = 0;
 
 			virtual void SetTextureData(Texture* texture, const void* data) = 0;
 			virtual void SetTextureData(Texture* texture, const void* data, u32 x, u32 y, u32 width, u32 height) = 0;

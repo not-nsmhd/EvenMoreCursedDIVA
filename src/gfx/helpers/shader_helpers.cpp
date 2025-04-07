@@ -50,7 +50,7 @@ namespace GFX
 			std::filesystem::path vsPath = parentDir;
 			std::filesystem::path fsPath = parentDir;
 
-			const char* currentBackendName = LowLevel::BackendNames[static_cast<int>(backend->GetType())].c_str();
+			const char* currentBackendName = LowLevel::BackendNames[static_cast<int>(backend->GetType())];
 
 			XMLElement* rootNode = doc.FirstChildElement("Shader");
 			for (XMLElement* node = rootNode->FirstChildElement(); node; node = node->NextSiblingElement())

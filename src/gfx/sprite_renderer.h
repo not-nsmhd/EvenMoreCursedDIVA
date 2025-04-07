@@ -38,7 +38,7 @@ namespace GFX
 
 	struct SpriteBatch
 	{
-		const LowLevel::Texture* texture;
+		LowLevel::Texture* texture;
 
 		vector<SpriteState>::iterator firstSprite;
 		u32 spriteCount;
@@ -83,7 +83,7 @@ namespace GFX
 		// Coloring order; top-left, top-right, bottom-left, bottom-right
 		void SetSpriteColors(struct Color colors[4]);
 
-		void PushSprite(const LowLevel::Texture* texture);
+		void PushSprite(LowLevel::Texture* texture);
 
 		void RenderSprites(LowLevel::Shader* shader);
 	private:

@@ -1,5 +1,8 @@
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "gfx/helpers/shader_helpers.h"
+#include "gfx/helpers/tex_helpers.h"
 #include "gfx_backend_test.h"
 
 namespace Testing
@@ -8,6 +11,7 @@ namespace Testing
 	{
 		glm::vec2 position;
 		glm::u8vec4 color;
+		glm::vec2 texCoord;
 	};
 
 	bool GFXBackendTest::Initialize()
@@ -25,10 +29,10 @@ namespace Testing
 	{
 		TestVertex vertexData[] = 
 		{
-			{ glm::vec2(-0.5f, -0.5f), glm::u8vec4(255, 0, 0, 255) },
-			{ glm::vec2( 0.5f,  0.5f), glm::u8vec4(0, 255, 0, 255) },
-			{ glm::vec2( 0.5f, -0.5f), glm::u8vec4(0, 0, 255, 255) },
-			{ glm::vec2(-0.5f,  0.5f), glm::u8vec4(255, 255, 255, 255) }
+			{ glm::vec2(0.0f, 0.0f), glm::u8vec4(255, 255, 255, 255), glm::vec2(0.0f, 0.0f) },
+			{ glm::vec2(128.0f, 128.0f), glm::u8vec4(255, 255, 255, 64), glm::vec2(1.0f, 1.0f) },
+			{ glm::vec2(128.0f, 0.0f), glm::u8vec4(255, 255, 255, 255), glm::vec2(1.0f, 0.0f) },
+			{ glm::vec2(0.0f, 128.0f), glm::u8vec4(255, 255, 255, 64), glm::vec2(0.0f, 1.0f) }
 		};
 
 		u16 indexData[] = 
@@ -37,12 +41,16 @@ namespace Testing
 			1, 2, 0
 		};
 
-		shader = GFX::Helpers::LoadShaderFromDescriptor(graphicsBackend, "shaders/Test1.xml");
-		vertexDesc = graphicsBackend->CreateVertexDescription(TestVertexAttribs, 2, sizeof(TestVertex), shader);
+		shader = GFX::Helpers::LoadShaderFromDescriptor(graphicsBackend, "shaders/SpriteDefault.xml");
+		vertexDesc = graphicsBackend->CreateVertexDescription(TestVertexAttribs, 3, sizeof(TestVertex), shader);
 
 		vertexBuffer = graphicsBackend->CreateVertexBuffer(GFX::LowLevel::BufferUsage::BUFFER_USAGE_STATIC, vertexData, sizeof(vertexData));
 		indexBuffer = graphicsBackend->CreateIndexBuffer(GFX::LowLevel::BufferUsage::BUFFER_USAGE_STATIC, GFX::LowLevel::IndexFormat::INDEX_16BIT, 
 			indexData, sizeof(indexData));
+
+		texture = GFX::Helpers::LoadTexture(graphicsBackend, "sprites/test.png");
+
+		projMatrix = glm::orthoLH_ZO(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
 
 		return true;
 	}
@@ -53,6 +61,7 @@ namespace Testing
 		graphicsBackend->DestroyBuffer(indexBuffer);
 		graphicsBackend->DestroyVertexDescription(vertexDesc);
 		graphicsBackend->DestroyShader(shader);
+		graphicsBackend->DestroyTexture(texture);
 	}
 	
 	void GFXBackendTest::Destroy()
@@ -77,6 +86,8 @@ namespace Testing
 		graphicsBackend->BindVertexBuffer(vertexBuffer);
 		graphicsBackend->BindIndexBuffer(indexBuffer);
 		graphicsBackend->BindShader(shader);
+		graphicsBackend->SetShaderMatrix(0, &projMatrix);
+		graphicsBackend->BindTexture(texture, 0);
 		graphicsBackend->DrawIndexed(GFX::LowLevel::PrimitiveType::PRIMITIVE_TRIANGLES, 4, 0, 6);
 
 		graphicsBackend->SwapBuffers();
