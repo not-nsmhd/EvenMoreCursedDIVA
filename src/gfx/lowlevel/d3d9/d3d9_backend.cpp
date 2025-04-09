@@ -34,6 +34,37 @@ namespace GFX::LowLevel::D3D9
 			3,	// PRIMITIVE_TRIANGLE_STRIP
 			3		// PRIMITIVE_TRIANGLE_FAN
 		};
+
+		D3DBLEND BlendFactor[] = 
+		{
+			D3DBLEND::D3DBLEND_ZERO, // BLEND_ZERO
+			D3DBLEND::D3DBLEND_ONE, // BLEND_ONE
+
+			D3DBLEND::D3DBLEND_SRCCOLOR, // BLEND_SRC_COLOR
+			D3DBLEND::D3DBLEND_INVSRCCOLOR, // BLEND_ONE_MINUS_SRC_COLOR
+			D3DBLEND::D3DBLEND_DESTCOLOR, // BLEND_DST_COLOR
+			D3DBLEND::D3DBLEND_INVDESTCOLOR, // BLEND_ONE_MINUS_DST_COLOR
+ 
+			D3DBLEND::D3DBLEND_SRCALPHA, // BLEND_SRC_ALPHA
+			D3DBLEND::D3DBLEND_INVSRCALPHA, // BLEND_ONE_MINUS_SRC_ALPHA
+			D3DBLEND::D3DBLEND_DESTALPHA, // BLEND_DST_ALPHA
+			D3DBLEND::D3DBLEND_INVDESTALPHA, // BLEND_ONE_MINUS_DST_ALPHA
+ 
+			D3DBLEND::D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_COLOR
+			D3DBLEND::D3DBLEND_INVBLENDFACTOR, // BLEND_ONE_MINUS_CONSTANT_COLOR
+ 
+			D3DBLEND::D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_ALPHA
+			D3DBLEND::D3DBLEND_INVBLENDFACTOR // BLEND_ONE_MINUS_CONSTANT_ALPHA
+		};
+
+		D3DBLENDOP BlendOp[] = 
+		{
+			D3DBLENDOP::D3DBLENDOP_ADD, // BLEND_OP_ADD
+			D3DBLENDOP::D3DBLENDOP_SUBTRACT, // BLEND_OP_SUBTRACT
+			D3DBLENDOP::D3DBLENDOP_REVSUBTRACT, // BLEND_OP_REVERSE_SUBTRACT
+			D3DBLENDOP::D3DBLENDOP_MIN, // BLEND_OP_MIN
+			D3DBLENDOP::D3DBLENDOP_MAX // BLEND_OP_MAX
+		};
 	}
 
 	bool Backend_D3D9::Initialize(SDL_Window *window)
@@ -52,10 +83,13 @@ namespace GFX::LowLevel::D3D9
 
 		LOG_INFO_ARGS("Adapter: %s", adapterIdentifier.Description);
 
+		SDL_Rect displayBounds = {};
+		SDL_GetDisplayBounds(0, &displayBounds);
+
 		presentParameters.Windowed = TRUE;
-		presentParameters.BackBufferWidth = 1920;
-		presentParameters.BackBufferHeight = 1080;
-		presentParameters.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_COPY;
+		presentParameters.BackBufferWidth = displayBounds.w;
+		presentParameters.BackBufferHeight = displayBounds.h;
+		presentParameters.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_DISCARD;
 		presentParameters.BackBufferFormat = D3DFORMAT::D3DFMT_A8R8G8B8;
 		presentParameters.PresentationInterval = 0;
 		presentParameters.EnableAutoDepthStencil = FALSE;
@@ -100,12 +134,6 @@ namespace GFX::LowLevel::D3D9
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZENABLE, D3DZB_FALSE);
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZWRITEENABLE, D3DZB_FALSE);
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZFUNC, D3DCMP_ALWAYS);
-		
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, TRUE);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLEND, D3DBLEND::D3DBLEND_SRCALPHA);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLEND, D3DBLEND::D3DBLEND_INVSRCALPHA);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLENDALPHA, D3DBLEND::D3DBLEND_SRCALPHA);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLENDALPHA, D3DBLEND::D3DBLEND_INVSRCALPHA);
 
 		return true;
 	}
@@ -144,7 +172,6 @@ namespace GFX::LowLevel::D3D9
 	{
 		device->EndScene();
 		device->Present(&windowRect, NULL, presentParameters.hDeviceWindow, NULL);
-		ValidateRect(presentParameters.hDeviceWindow, &windowRect);
 	}
 	
 	void Backend_D3D9::Begin()
@@ -183,6 +210,28 @@ namespace GFX::LowLevel::D3D9
 	
 	void Backend_D3D9::SetBlendState(const BlendState* state)
 	{
+		if (state == nullptr)
+		{
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, FALSE);
+		}
+		else
+		{
+			D3DBLEND srcColor = GFXtoD3D9::BlendFactor[static_cast<i32>(state->srcColor)];
+			D3DBLEND srcAlpha = GFXtoD3D9::BlendFactor[static_cast<i32>(state->srcAlpha)];
+
+			D3DBLEND dstColor = GFXtoD3D9::BlendFactor[static_cast<i32>(state->dstColor)];
+			D3DBLEND dstAlpha = GFXtoD3D9::BlendFactor[static_cast<i32>(state->dstAlpha)];
+
+			D3DBLENDOP blendOp = GFXtoD3D9::BlendOp[static_cast<i32>(state->colorOp)];
+
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, TRUE);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLEND, srcColor);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLEND, dstColor);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLENDALPHA, srcAlpha);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLENDALPHA, dstAlpha);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_BLENDOP, blendOp);
+			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_BLENDOPALPHA, blendOp);
+		}
 	}
 	
 	Buffer* Backend_D3D9::CreateVertexBuffer(BufferUsage usage, const void* initialData, u32 size)

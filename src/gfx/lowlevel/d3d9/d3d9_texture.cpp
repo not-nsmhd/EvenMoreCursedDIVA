@@ -79,9 +79,8 @@ namespace GFX::LowLevel::D3D9
 	{
 		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSU, D3DTEXTUREADDRESS::D3DTADDRESS_CLAMP);
 		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_ADDRESSV, D3DTEXTUREADDRESS::D3DTADDRESS_CLAMP);
-		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MINFILTER, D3DTEXTUREFILTERTYPE::D3DTEXF_GAUSSIANCUBIC);
-		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MAGFILTER, D3DTEXTUREFILTERTYPE::D3DTEXF_GAUSSIANCUBIC);
-		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MIPFILTER, D3DTEXTUREFILTERTYPE::D3DTEXF_NONE);
+		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MINFILTER, D3DTEXTUREFILTERTYPE::D3DTEXF_LINEAR);
+		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MAGFILTER, D3DTEXTUREFILTERTYPE::D3DTEXF_LINEAR);
 		device->SetSamplerState(0, D3DSAMPLERSTATETYPE::D3DSAMP_MAXMIPLEVEL, 0);
 		device->SetTexture(unit, baseTexture);
 	}
@@ -90,11 +89,11 @@ namespace GFX::LowLevel::D3D9
 	{
 		if (baseTexture != 0 && data != nullptr)
 		{
-			RECT surfaceRect = { 0, 0, width, height };
+			RECT surfaceRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
 			D3DLOCKED_RECT lockedRect = {};
 			baseTexture->LockRect(0, &lockedRect, &surfaceRect, 0);
 
-			SDL_memcpy(lockedRect.pBits, data, lockedRect.Pitch * height);
+			SDL_memcpy(lockedRect.pBits, data, lockedRect.Pitch * surfaceRect.bottom);
 			baseTexture->UnlockRect(0);
 		}
 	}
@@ -103,11 +102,11 @@ namespace GFX::LowLevel::D3D9
 	{
 		if (baseTexture != 0 && data != nullptr)
 		{
-			RECT surfaceRect = { 0, 0, width, height };
+			RECT surfaceRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
 			D3DLOCKED_RECT lockedRect = {};
 			baseTexture->LockRect(0, &lockedRect, &surfaceRect, 0);
 
-			SDL_memcpy(lockedRect.pBits, data, lockedRect.Pitch * height);
+			SDL_memcpy(lockedRect.pBits, data, lockedRect.Pitch * surfaceRect.bottom);
 			baseTexture->UnlockRect(0);
 		}
 	}
