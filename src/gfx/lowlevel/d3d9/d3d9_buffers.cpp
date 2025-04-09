@@ -64,7 +64,7 @@ namespace GFX::LowLevel::D3D9
 		this->usage = usage;
 
 		DWORD d3dUsage = GFXtoD3D9::BufferUsage[static_cast<i32>(usage)];
-		HRESULT result = device->CreateVertexBuffer(initialSize, d3dUsage, 0, D3DPOOL_MANAGED, &vertexBuffer, NULL);
+		HRESULT result = device->CreateVertexBuffer(initialSize, d3dUsage, 0, D3DPOOL_DEFAULT, &vertexBuffer, NULL);
 
 		if (result != D3D_OK)
 		{
@@ -103,7 +103,7 @@ namespace GFX::LowLevel::D3D9
 
 		DWORD d3dUsage = GFXtoD3D9::BufferUsage[static_cast<i32>(usage)];
 		D3DFORMAT d3dFormat = GFXtoD3D9::IndexFormat[static_cast<i32>(indexFormat)];
-		HRESULT result = device->CreateIndexBuffer(initialSize, d3dUsage, d3dFormat, D3DPOOL_MANAGED, &indexBuffer, NULL);
+		HRESULT result = device->CreateIndexBuffer(initialSize, d3dUsage, d3dFormat, D3DPOOL_DEFAULT, &indexBuffer, NULL);
 
 		if (result != D3D_OK)
 		{

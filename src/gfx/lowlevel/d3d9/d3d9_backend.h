@@ -64,11 +64,15 @@ namespace GFX
 			private:
 				LPDIRECT3D9 direct3d = NULL;
 				LPDIRECT3DDEVICE9 device = NULL;
+
 				LPDIRECT3DSWAPCHAIN9 swapChain = NULL;
+				LPDIRECT3DSURFACE9 swapChain_backBuffer = NULL;
 
 				D3DPRESENT_PARAMETERS presentParameters = {};
 
 				D3DCOLOR clearColor = {};
+				D3DVIEWPORT9 viewport = {};
+				RECT windowRect = {};
 
 				UINT currentVertexDescSize = 0;
 				bool vertexBufferSet = false;

@@ -7,13 +7,6 @@
 
 namespace Testing
 {
-	struct TestVertex
-	{
-		glm::vec2 position;
-		glm::u8vec4 color;
-		glm::vec2 texCoord;
-	};
-
 	bool GFXBackendTest::Initialize()
 	{
 		noBlend.srcColor = GFX::LowLevel::BlendFactor::BLEND_SRC_ALPHA;
@@ -27,41 +20,13 @@ namespace Testing
 	
 	bool GFXBackendTest::LoadContent()
 	{
-		TestVertex vertexData[] = 
-		{
-			{ glm::vec2(0.0f, 0.0f), glm::u8vec4(255, 255, 255, 255), glm::vec2(0.0f, 0.0f) },
-			{ glm::vec2(128.0f, 128.0f), glm::u8vec4(255, 255, 255, 64), glm::vec2(1.0f, 1.0f) },
-			{ glm::vec2(128.0f, 0.0f), glm::u8vec4(255, 255, 255, 255), glm::vec2(1.0f, 0.0f) },
-			{ glm::vec2(0.0f, 128.0f), glm::u8vec4(255, 255, 255, 64), glm::vec2(0.0f, 1.0f) }
-		};
-
-		u16 indexData[] = 
-		{
-			0, 3, 1,
-			1, 2, 0
-		};
-
-		shader = GFX::Helpers::LoadShaderFromDescriptor(graphicsBackend, "shaders/SpriteDefault.xml");
-		vertexDesc = graphicsBackend->CreateVertexDescription(TestVertexAttribs, 3, sizeof(TestVertex), shader);
-
-		vertexBuffer = graphicsBackend->CreateVertexBuffer(GFX::LowLevel::BufferUsage::BUFFER_USAGE_STATIC, vertexData, sizeof(vertexData));
-		indexBuffer = graphicsBackend->CreateIndexBuffer(GFX::LowLevel::BufferUsage::BUFFER_USAGE_STATIC, GFX::LowLevel::IndexFormat::INDEX_16BIT, 
-			indexData, sizeof(indexData));
-
-		texture = GFX::Helpers::LoadTexture(graphicsBackend, "sprites/test.png");
-
-		projMatrix = glm::orthoLH_ZO(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
-
+		spriteRenderer.Initialize(graphicsBackend);
 		return true;
 	}
 	
 	void GFXBackendTest::UnloadContent()
 	{
-		graphicsBackend->DestroyBuffer(vertexBuffer);
-		graphicsBackend->DestroyBuffer(indexBuffer);
-		graphicsBackend->DestroyVertexDescription(vertexDesc);
-		graphicsBackend->DestroyShader(shader);
-		graphicsBackend->DestroyTexture(texture);
+		spriteRenderer.Destroy();
 	}
 	
 	void GFXBackendTest::Destroy()
@@ -82,13 +47,33 @@ namespace Testing
 		graphicsBackend->Clear(GFX::LowLevel::ClearFlags::GFX_CLEAR_COLOR, Common::Color(0, 24, 24, 255), 1.0f, 0);
 		graphicsBackend->SetBlendState(nullptr);
 
-		graphicsBackend->SetVertexDescription(vertexDesc);
-		graphicsBackend->BindVertexBuffer(vertexBuffer);
-		graphicsBackend->BindIndexBuffer(indexBuffer);
-		graphicsBackend->BindShader(shader);
-		graphicsBackend->SetShaderMatrix(0, &projMatrix);
-		graphicsBackend->BindTexture(texture, 0);
-		graphicsBackend->DrawIndexed(GFX::LowLevel::PrimitiveType::PRIMITIVE_TRIANGLES, 4, 0, 6);
+		float x = 0.0f;
+		float y = 0.0f;
+		float width = 0.0f;
+		float height = 0.0f;
+		graphicsBackend->GetViewportSize(&x, &y, &width, &height);
+
+		spriteRenderer.SetSpritePosition(vec2(0.0f, 0.0f));
+		spriteRenderer.SetSpriteScale(vec2(16.0f, 16.0f));
+		spriteRenderer.SetSpriteColor(Common::DefaultColors::White);
+		spriteRenderer.PushSprite(nullptr);
+
+		spriteRenderer.SetSpritePosition(vec2(width - 16.0f, 0.0f));
+		spriteRenderer.SetSpriteScale(vec2(16.0f, 16.0f));
+		spriteRenderer.SetSpriteColor(Common::DefaultColors::White);
+		spriteRenderer.PushSprite(nullptr);
+
+		spriteRenderer.SetSpritePosition(vec2(0.0f, height - 16.0f));
+		spriteRenderer.SetSpriteScale(vec2(16.0f, 16.0f));
+		spriteRenderer.SetSpriteColor(Common::DefaultColors::White);
+		spriteRenderer.PushSprite(nullptr);
+
+		spriteRenderer.SetSpritePosition(vec2(width - 16.0f, height - 16.0f));
+		spriteRenderer.SetSpriteScale(vec2(16.0f, 16.0f));
+		spriteRenderer.SetSpriteColor(Common::DefaultColors::White);
+		spriteRenderer.PushSprite(nullptr);
+
+		spriteRenderer.RenderSprites(nullptr);
 
 		graphicsBackend->SwapBuffers();
 	}

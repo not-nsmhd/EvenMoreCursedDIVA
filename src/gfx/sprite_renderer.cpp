@@ -316,7 +316,7 @@ namespace GFX
 		float height;
 		gfxBackend->GetViewportSize(&x, &y, &width, &height);
 		uniforms.projMatrix = glm::orthoLH_ZO(0.0f, width, height, 0.0f, 0.0f, 1.0f);
-		gfxBackend->SetShaderMatrix(0, glm::value_ptr(uniforms.projMatrix));
+		gfxBackend->SetShaderMatrix(0, &uniforms.projMatrix);
 
 		size_t spriteOffset = 0;
 		for (vector<SpriteBatch>::iterator batch = batches.begin(); batch != batches.begin() + batchCount; batch++)

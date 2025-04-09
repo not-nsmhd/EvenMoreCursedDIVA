@@ -144,7 +144,7 @@ bool Game::Initialize()
 	audioEngine = AudioEngine::GetInstance();
 	audioEngine->Initialize();
 
-	//GlobalResources::Load(graphicsBackend);
+	GlobalResources::Load(graphicsBackend);
 
 	initialized = true;
 	running = true;

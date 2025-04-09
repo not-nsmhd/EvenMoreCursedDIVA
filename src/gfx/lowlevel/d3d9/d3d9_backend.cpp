@@ -53,8 +53,9 @@ namespace GFX::LowLevel::D3D9
 		LOG_INFO_ARGS("Adapter: %s", adapterIdentifier.Description);
 
 		presentParameters.Windowed = TRUE;
-		presentParameters.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_DISCARD;
-		//presentParameters.BackBufferCount = 2;
+		presentParameters.BackBufferWidth = 1920;
+		presentParameters.BackBufferHeight = 1080;
+		presentParameters.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_COPY;
 		presentParameters.BackBufferFormat = D3DFORMAT::D3DFMT_A8R8G8B8;
 		presentParameters.PresentationInterval = 0;
 		presentParameters.EnableAutoDepthStencil = FALSE;
@@ -62,8 +63,10 @@ namespace GFX::LowLevel::D3D9
 		SDL_SysWMinfo wmInfo = {};
 		SDL_GetWindowWMInfo(targetWindow, &wmInfo);
 
+		presentParameters.hDeviceWindow = wmInfo.info.win.window;
+
 		HRESULT result = S_OK;
-		if ((result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wmInfo.info.win.window,
+		if ((result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL,
 											 D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentParameters, &device)) != S_OK)
 		{
 			LOG_ERROR_ARGS("Failed to create Direct3D 9 device. Error: 0x%X", result);
@@ -76,11 +79,33 @@ namespace GFX::LowLevel::D3D9
 			return false;
 		}
 
+		i32 width = 0;
+		i32 height = 0;
+		SDL_GetWindowSize(targetWindow, &width, &height);
+
+		windowRect.left = 0;
+		windowRect.top = 0;
+		windowRect.right = width;
+		windowRect.bottom = height;
+
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width = width;
+		viewport.Height = height;
+		viewport.MinZ = 0.0f;
+		viewport.MaxZ = 1.0f;
+		device->SetViewport(&viewport);
+
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_CULLMODE, D3DCULL_NONE);
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZENABLE, D3DZB_FALSE);
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZWRITEENABLE, D3DZB_FALSE);
 		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZFUNC, D3DCMP_ALWAYS);
-		//device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_BLEND, D3DCMP_ALWAYS);
+		
+		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, TRUE);
+		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLEND, D3DBLEND::D3DBLEND_SRCALPHA);
+		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLEND, D3DBLEND::D3DBLEND_INVSRCALPHA);
+		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLENDALPHA, D3DBLEND::D3DBLEND_SRCALPHA);
+		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLENDALPHA, D3DBLEND::D3DBLEND_INVSRCALPHA);
 
 		return true;
 	}
@@ -111,14 +136,15 @@ namespace GFX::LowLevel::D3D9
 			clearFlags |= D3DCLEAR_STENCIL;
 		}
 
-		device->Clear(0, NULL, clearFlags, clearColor, depth, static_cast<DWORD>(stencil)); 
+		device->Clear(0, NULL, clearFlags, clearColor, depth, static_cast<DWORD>(stencil));
 		device->BeginScene();
 	}
 
 	void Backend_D3D9::SwapBuffers()
 	{
 		device->EndScene();
-		swapChain->Present(NULL, NULL, NULL, NULL, D3DPRESENT_INTERVAL_ONE);
+		device->Present(&windowRect, NULL, presentParameters.hDeviceWindow, NULL);
+		ValidateRect(presentParameters.hDeviceWindow, &windowRect);
 	}
 	
 	void Backend_D3D9::Begin()
@@ -131,10 +157,28 @@ namespace GFX::LowLevel::D3D9
 	
 	void Backend_D3D9::GetViewportSize(float* x, float* y, float* width, float* height)
 	{
+		*x = static_cast<float>(viewport.X);
+		*y = static_cast<float>(viewport.Y);
+		*width = static_cast<float>(viewport.Width);
+		*height = static_cast<float>(viewport.Height);
 	}
 	
 	void Backend_D3D9::ResizeMainRenderTarget(u32 newWidth, u32 newHeight)
 	{
+		vertexBufferSet = false;
+		indexBufferSet = false;
+		currentVertexDescSize = 0;
+		shaderSet = false;
+
+		viewport.Width = static_cast<DWORD>(newWidth);
+		viewport.Height = static_cast<DWORD>(newHeight);
+
+		device->SetViewport(&viewport);
+
+		windowRect.left = 0;
+		windowRect.top = 0;
+		windowRect.right = static_cast<LONG>(newWidth);
+		windowRect.bottom = static_cast<LONG>(newHeight);
 	}
 	
 	void Backend_D3D9::SetBlendState(const BlendState* state)

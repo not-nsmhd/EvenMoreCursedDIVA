@@ -47,7 +47,7 @@ project "DIVA"
 		architecture "x86_64"
 
 	filter { "system:windows" }
-		links { "shell32", "shlwapi", "winmm" }
+		links { "shell32", "shlwapi", "winmm", "d3d9" }
 
 	filter { "options:gfx_d3d9" }
 		defines { "STARSHINE_GFX_D3D9" }
@@ -71,4 +71,44 @@ project "DIVA"
 		defines { "_NDEBUG" }
 		optimize "On"
 		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio vorbisfile --cflags`" }
-		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`" }	
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`" }
+
+project "SpritePack"
+	kind "ConsoleApp"
+	language "C++"
+	targetdir "bin_%{cfg.architecture}/tools/%{cfg.buildcfg}"
+	objdir "obj/tools"
+	cdialect "C17"
+	cppdialect "C++17"
+
+	files { 
+		"src_tools/SpritePack/**.cpp",
+		"src_tools/SpritePack/**.h",
+		"src_tools/SpritePack/*/**.cpp",
+		"src_tools/SpritePack/*/**.h",
+		"lib/fmt/src/format.cc"
+	}
+		
+	includedirs {
+		"lib/glm/include", 
+		"lib/stb/include", 
+		"lib/tinyxml2",
+		"lib/fmt/include",
+		"lib/qoi/include",
+		"src_tools/SpritePack/" }
+
+	filter { "platforms:Win32" }
+		system "Windows"
+		architecture "x86"
+
+	filter { "platforms:Win64" }
+		system "Windows"
+		architecture "x86_64"
+
+	filter { "configurations:Debug" }
+		defines { "_DEBUG" }
+		symbols "On"
+		
+	filter { "configurations:Release" }
+		defines { "_NDEBUG" }
+		optimize "On"
