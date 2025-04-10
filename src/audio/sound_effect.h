@@ -1,6 +1,6 @@
 #pragma once
 #include <FAudio.h>
-#include "common/int_types.h"
+#include "../common/int_types.h"
 
 namespace Audio
 {

@@ -1,6 +1,6 @@
 #include "state_selector.h"
-#include "gfx/font.h"
-#include "global_res.h"
+#include "../gfx/font.h"
+#include "../global_res.h"
 #include <string>
 
 using std::string;
@@ -14,13 +14,6 @@ namespace Dev
 
 	StateSelector::StateSelector()
 	{
-	}
-
-	StateSelector* StateSelector::instance = new StateSelector();
-	
-	StateSelector* StateSelector::GetInstance()
-	{
-		return instance;
 	}
 	
 	bool StateSelector::Initialize()

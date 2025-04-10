@@ -1,6 +1,6 @@
 #include "input_test.h"
-#include "common/math_ext.h"
-#include "global_res.h"
+#include "../common/math_ext.h"
+#include "../global_res.h"
 
 #include <fstream>
 

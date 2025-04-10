@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "common/int_types.h"
+#include "../common/int_types.h"
 #include <glm/vec2.hpp>
 
 namespace Input

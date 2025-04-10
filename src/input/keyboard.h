@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "common/int_types.h"
+#include "../common/int_types.h"
 #include <unordered_map>
 
 namespace Input

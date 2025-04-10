@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <glm/vec2.hpp>
-#include "io/filesystem.h"
+#include "../io/filesystem.h"
 #include "event.h"
 
 using glm::vec2;
@@ -29,7 +29,8 @@ namespace MainGame
 
 		TYPE_NORMAL,
 		TYPE_DOUBLE,
-		TYPE_HOLD,
+		TYPE_HOLD_START,
+		TYPE_HOLD_END,
 
 		NOTE_TYPE_COUNT
 	};

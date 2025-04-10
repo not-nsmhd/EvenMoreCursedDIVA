@@ -26,7 +26,8 @@ namespace MainGame
 	{
 		"Normal",
 		"Double",
-		"Hold"
+		"HoldStart",
+		"HoldEnd"
 	};
 
 	const std::unordered_map<string, NoteShape> g_NoteShapeConversionTable =
@@ -42,7 +43,8 @@ namespace MainGame
 	{
 		{ "Normal",		NoteType::TYPE_NORMAL },	
 		{ "Double",		NoteType::TYPE_DOUBLE },	
-		{ "Hold",		NoteType::TYPE_HOLD }	
+		{ "HoldStart",	NoteType::TYPE_HOLD_START },
+		{ "HoldEnd",	NoteType::TYPE_HOLD_END }	
 	};
 
 	Chart::Chart()
@@ -88,9 +90,9 @@ namespace MainGame
 				note.Shape = g_NoteShapeConversionTable.at(shapeText);
 
 				elementAttr = element->FindAttribute("Type");
-				const char* typeText = elementAttr->Value();
-				if (typeText != nullptr)
+				if (elementAttr != nullptr)
 				{
+					const char* typeText = elementAttr->Value();
 					note.Type = g_NoteTypeConversionTable.at(typeText);
 				}
 

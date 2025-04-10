@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <vorbis/vorbisfile.h>
-#include "common/int_types.h"
+#include "../common/int_types.h"
 
 namespace Audio
 {

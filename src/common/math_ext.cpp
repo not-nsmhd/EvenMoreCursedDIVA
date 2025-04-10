@@ -33,6 +33,11 @@ namespace Common
 			return glm::degrees<float>(radians);
 		}
 		
+		vec2 AbsVector2(vec2 point)
+		{
+			return vec2(SDL_fabsf(point.x), SDL_fabsf(point.y));
+		}
+		
 		float ConvertRange(float originalStart, float originalEnd, float newStart, float newEnd, float value)
 		{
 			return newStart + (value - originalStart) * (newEnd - newStart) / (originalEnd - originalStart);

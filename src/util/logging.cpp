@@ -66,7 +66,7 @@ namespace Logging
 		va_list list;
 
 		va_start(list, text);
-		int written = vsprintf(tempBuf, text, list);
+		int written = SDL_vsnprintf(tempBuf, 1023, text, list);
 		
 		if (logToFile)
 		{
@@ -92,9 +92,9 @@ namespace Logging
 		va_list list;
 
 		va_start(list, text);
-		int written = vsprintf(tempBuf, text, list);
+		int written = SDL_vsnprintf(tempBuf, 1023, text, list);
 		
-		if (logToFile)
+		if(logToFile)
 		{
 			logFile.write(tempBuf, written);
 			logFile << '\n';
@@ -119,7 +119,7 @@ namespace Logging
 		va_list list;
 
 		va_start(list, text);
-		int written = vsprintf(tempBuf, text, list);
+		int written = SDL_vsnprintf(tempBuf, 1023, text, list);
 		
 		if (logToFile)
 		{
@@ -146,7 +146,7 @@ namespace Logging
 		va_list list;
 
 		va_start(list, text);
-		int written = vsprintf(tempBuf, text, list);
+		int written = SDL_vsnprintf(tempBuf, 1023, text, list);
 		
 		if (logToFile)
 		{

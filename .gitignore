@@ -11,6 +11,7 @@ bin_x86/
 bin_x64/
 obj/
 
+VisualC/.vs/
 VisualC/bin_x86/
 VisualC/bin_x64/
 

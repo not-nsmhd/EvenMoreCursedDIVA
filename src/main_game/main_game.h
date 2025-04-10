@@ -1,12 +1,11 @@
 #pragma once
 #include <string>
 #include <deque>
-#include "game.h"
+#include "../game.h"
 #include "gamescore.h"
-#include "gfx/sprite_sheet.h"
-#include "gfx/sprite_renderer.h"
-#include "gfx/primitive_batch.h"
-#include "audio/audio.h"
+#include "../gfx/sprite_sheet.h"
+#include "../gfx/sprite_renderer.h"
+#include "../audio/audio.h"
 #include "chart.h"
 #include "note.h"
 
@@ -35,11 +34,14 @@ namespace MainGame
 
 		// --- Cached sprites
 
-		GFX::Sprite* cachedNoteTargetSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-		GFX::Sprite* cachedNoteIconSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedSprites_NoteTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedSprites_NoteIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
 
-		GFX::Sprite* cachedDoubleTargetSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-		GFX::Sprite* cachedDoubleIconSprites[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedSprites_DoubleTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedSprites_DoubleIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+
+		GFX::Sprite* cachedSprites_HoldTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
+		GFX::Sprite* cachedSprites_HoldIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
 
 		GFX::Sprite* noteTargetHandSprite;
 
@@ -69,6 +71,8 @@ namespace MainGame
 
 		float currentNoteDuration_seconds = 1.0f;
 		std::deque<GameNote> activeNotes = {};
+
+		GameNote* currentlyHeldNote = nullptr;
 
 		GameScore gameScore;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "common/int_types.h"
+#include "../common/int_types.h"
 #include <string>
 
 namespace MainGame

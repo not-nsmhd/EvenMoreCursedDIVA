@@ -19,6 +19,7 @@ using namespace std::filesystem;
 void WriteText(std::vector<Sprite>& spritesToPack, std::vector<path>& spriteImagePaths, i32 sheetWidth, i32 sheetHeight, std::string name)
 {
 	u8* sheetImageData = new u8[sheetWidth * sheetHeight * 4];
+	memset(sheetImageData, 0, sheetWidth * sheetHeight * 4);
 
 	int dummy = 0;
 	for (std::vector<Sprite>::iterator it = spritesToPack.begin(); it != spritesToPack.end(); it++)

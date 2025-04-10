@@ -5,7 +5,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "(gdb) Launch",
+			"name": "(gdb) Launch Game",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/bin_x86/Debug/game.exe",
@@ -13,6 +13,32 @@
 			"args": [ "--log-to-file" ],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/content",
+			"environment": [],
+			"externalConsole": true,
+			"MIMode": "gdb",
+			"miDebuggerPath": "C:/msys64/mingw32/bin/gdb.exe",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Set Disassembly Flavor to Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "(gdb) Launch (SpritePack)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin_x86/tools/Debug/SpritePack.exe",
+			"preLaunchTask": "Build Tools (Debug, x86)",
+			"args": [ "Test1_src", "Test1" ],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/data/SpritePack",
 			"environment": [],
 			"externalConsole": true,
 			"MIMode": "gdb",

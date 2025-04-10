@@ -15,6 +15,8 @@ namespace Common
 		float ToRadians(float degrees);
 		float ToDegrees(float radians);
 
+		vec2 AbsVector2(vec2 point);
+
 		float ConvertRange(float originalStart, float originalEnd, float newStart, float newEnd, float value);
 		vec2 GetSinePoint(float percentage, vec2 target, float deg, float freq, float ampl, float dist);
 

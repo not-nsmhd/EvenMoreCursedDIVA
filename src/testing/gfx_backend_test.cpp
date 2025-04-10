@@ -1,8 +1,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "gfx/helpers/shader_helpers.h"
-#include "gfx/helpers/tex_helpers.h"
+#include "../gfx/helpers/shader_helpers.h"
+#include "../gfx/helpers/tex_helpers.h"
 #include "gfx_backend_test.h"
 
 namespace Testing

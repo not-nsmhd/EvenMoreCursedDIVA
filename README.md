@@ -13,6 +13,6 @@ I could say something about how this is a valuable learning experience for me, b
 
 Initially, I didn't plan on making this repository public, but I didn't want to spend even more time constantly rewriting this project from scratch over and over again instead of simply refactoring it. Letting it just sit here also doesn't seem really good, especially if *somebody* ~~(bro though he was cooking with this one😂😂)~~ actually wants to hack around with this code, but whatever.
 
-A lot of this code was just me playing around with random ideas and also trying to implement gameplay from some random rhythm game about singing robots with dead eyes/dancing dolls with overly glossy skin (and using random memes from the `Pictures` folder on PC as placeholders and as part of the "Readme" text doesn't really help the case).
+A lot of this code was just me playing around with random ideas and also trying to implement gameplay from some random rhythm game about singing robots with dead eyes/dancing dolls with overly glossy skin (and using random memes from the `Pictures` folder on my PC as placeholders and as part of the "Readme" text doesn't really help the case).
 
 ![Project DIVA Artstyle Meme](readme_img/Meme_ProjectDIVA_ArtStyle.png)

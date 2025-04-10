@@ -1,7 +1,7 @@
 #include <fstream>
 #include <SDL2/SDL.h>
 #include "helpers.h"
-#include "io/filesystem.h"
+#include "../io/filesystem.h"
 
 using std::fstream;
 using std::ios;
@@ -27,6 +27,7 @@ namespace Audio
 			}
 
 			std::filesystem::path fileExt = fullPath.extension();
+			size_t fileSize = std::filesystem::file_size(fullPath);
 
 			if (fileExt == ".wav")
 			{
@@ -36,10 +37,6 @@ namespace Audio
 				{
 					return false;
 				}
-
-				wavFile.seekg(0, ios::end);
-				size_t fileSize = wavFile.tellg();
-				wavFile.seekg(0, ios::beg);
 
 				u8* wavFileData = new u8[fileSize];
 				wavFile.read((char*)wavFileData, fileSize);

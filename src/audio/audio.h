@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <FAudio.h>
-#include "common/int_types.h"
+#include "../common/int_types.h"
 #include "sound_effect.h"
 #include "music.h"
 

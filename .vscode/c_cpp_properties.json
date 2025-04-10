@@ -9,12 +9,12 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/lib/glad_debug/glad/include",
-                "${workspaceFolder}/lib/glm/include"
+                "${workspaceFolder}/lib/glm/include",
+                "${workspaceFolder}/lib/fmt/include",
+                "${workspaceFolder}/lib/qoi/include"
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE",
-                "_UNICODE",
                 "PREMAKE_BUILD_DATE=\"1970.01.01T00:00:00\""
             ],
             "compilerPath": "C:/msys64/mingw32/bin/g++.exe",
@@ -31,8 +31,7 @@
             ],
             "defines": [
                 "_NDEBUG",
-                "UNICODE",
-                "_UNICODE"
+                "PREMAKE_BUILD_DATE=\"1970.01.01T00:00:00\""
             ],
             "compilerPath": "C:/msys64/mingw32/bin/gcc.exe",
             "cStandard": "c17",

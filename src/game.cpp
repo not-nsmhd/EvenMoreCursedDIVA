@@ -17,11 +17,11 @@
 #include "dev/state_selector.h"
 
 #define LOG_INFO(message) Logging::LogInfo("Game", message)
-#define LOG_INFO_ARGS(message, args...) Logging::LogInfo("Game", message, args)
+#define LOG_INFO_ARGS(message, ...) Logging::LogInfo("Game", message, __VA_ARGS__)
 #define LOG_WARN(message) Logging::LogWarn("Game", message)
-#define LOG_WARN_ARGS(message, args...) Logging::LogWarn("Game", message, args)
+#define LOG_WARN_ARGS(message, ...) Logging::LogWarn("Game", message, __VA_ARGS__)
 #define LOG_ERROR(message) Logging::LogError("Game", message)
-#define LOG_ERROR_ARGS(message, args...) Logging::LogError("Game", message, args)
+#define LOG_ERROR_ARGS(message, ...) Logging::LogError("Game", message, __VA_ARGS__)
 
 Game::Game()
 {
@@ -44,7 +44,7 @@ void Game::Quit()
 
 static void convertBuildDateToVersion(int* year, int* month)
 {
-	char buildDate[] = PREMAKE_BUILD_DATE;
+	char buildDate[] = "1970.01.01T00:00:00";
 	
 	char* buildYearText = buildDate;
 	char* buildMonthText = SDL_strchr(buildYearText, '.') + 1;
@@ -81,8 +81,9 @@ bool Game::Initialize()
 	SDL_version sdlVersion;
 	SDL_GetVersion(&sdlVersion);
 
-	LOG_INFO_ARGS("SDL Version: %d.%d.%d", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
+	LOG_INFO_ARGS("SDL Version: %u.%u.%u", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
 	LOG_INFO_ARGS("SDL Platform: %s", SDL_GetPlatform());
+	//Logging::LogMessage("SDL Version: %u.%u.%u", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
 
 	u32 windowFlags = SDL_WINDOW_SHOWN;
 
@@ -244,11 +245,11 @@ bool Game::Loop()
 
 			if (currentState != nullptr)
 			{
-				if (!changeState)
+				if (!changeState && currentState != nullptr)
 				{
 					currentState->Update();
 				}
-				if (!changeState)
+				if (!changeState && currentState != nullptr)
 				{
 					currentState->Draw();
 				}
@@ -329,16 +330,19 @@ void Game::SetState(GameStates state)
 			break;
 	}
 
-	nextState = stateClass;
-	nextState->game = this;
-	nextState->fileSystem = fileSystem;
-	nextState->graphicsBackend = graphicsBackend;
-	nextState->keyboardState = keyboardState;
-	nextState->mouseState = mouseState;
-	nextState->audio = audioEngine;
-	changeState = true;
+	if (stateClass != nullptr)
+	{
+		nextState = stateClass;
+		nextState->game = this;
+		nextState->fileSystem = fileSystem;
+		nextState->graphicsBackend = graphicsBackend;
+		nextState->keyboardState = keyboardState;
+		nextState->mouseState = mouseState;
+		nextState->audio = audioEngine;
+		changeState = true;
 
-	currentGameState = state;
+		currentGameState = state;
+	}
 }
 
 bool Game::IsActive()

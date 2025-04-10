@@ -21,6 +21,23 @@
 			}
 		},
 		{
+			"label": "Build Tools (Debug, x86)",
+			"type": "shell",
+			"command": "premake5 gmake2; make config=debug_win32 SpritePack",
+			"windows": {
+				"options": {
+					"env": {
+						"PATH": "${env.PATH};C:\\msys2\\mingw32\\bin"
+					}
+				}
+			},
+			"problemMatcher": [ "$gcc" ],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
 			"label": "Build (Release, x86)",
 			"type": "shell",
 			"command": "premake5 gmake2; make config=release_win32 DIVA",

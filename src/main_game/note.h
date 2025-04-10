@@ -76,7 +76,9 @@ namespace MainGame
 
 		HIT,
 		HIT_SECONDARY,
-		HIT_WRONG
+
+		HELD,
+		RELEASED
 	};
 
 	const u32 TRAIL_POINTS_RESOLUTION = 48;
@@ -88,6 +90,7 @@ namespace MainGame
 		ChartNote* noteStats = nullptr;
 		GameNoteState state = GameNoteState::NONE;
 		GameNoteState secondaryState = GameNoteState::NONE;
+		int index = -1;
 
 		float flyTime_seconds = 0.0f;
 		float elapsedTime_seconds = 0.0f;

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <SDL2/SDL.h>
-#include "io/filesystem.h"
+#include "../io/filesystem.h"
 #include "music.h"
 
 using std::fstream;
