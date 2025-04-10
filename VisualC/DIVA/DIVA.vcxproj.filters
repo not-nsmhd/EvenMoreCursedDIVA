@@ -100,6 +100,9 @@
     <Filter Include="Header Files\pcg">
       <UniqueIdentifier>{70eb4f2b-3d78-4605-81fa-369f669a6825}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\build">
+      <UniqueIdentifier>{43548505-a480-44bd-988d-f26baabf9902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game.cpp">
@@ -382,6 +385,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\util\string_utils.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\build\build_info.h">
+      <Filter>Header Files\build</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

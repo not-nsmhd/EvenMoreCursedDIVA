@@ -1,4 +1,5 @@
 #include "state_selector.h"
+#include "../build/build_info.h"
 #include "../gfx/font.h"
 #include "../global_res.h"
 #include <string>
@@ -91,6 +92,7 @@ namespace Dev
 #endif
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "Starshine %02d.%02d\n", buildYear, buildMonth);
 		pos += SDL_snprintf(debugInfoText + pos, 1023, "%s %s\n", osName, bitWidth);
+		pos += SDL_snprintf(debugInfoText + pos, 1023, "\n%s %s %s\n", BuildInfo::BuildDateString, BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 	}
 	
 	void StateSelector::Draw()
@@ -115,7 +117,8 @@ namespace Dev
 			textOffset_y += debugFont->LineHeight;
 		}
 
-		debugFont->PushString(spriteRenderer, debugInfoText, glm::vec2(16.0f, game->windowHeight - 128.0f), glm::vec2(1.0f), Common::DefaultColors::White);
+		debugFont->PushString(spriteRenderer, debugInfoText, glm::vec2(16.0f, game->windowHeight - debugFont->LineHeight * 5.0f - 16.0f), 
+			glm::vec2(1.0f), Common::DefaultColors::White);
 
 		spriteRenderer.RenderSprites(nullptr);	
 

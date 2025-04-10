@@ -1,3 +1,4 @@
+#include "build/build_info.h"
 #include <stdio.h>
 #include <fstream>
 #include <SDL2/SDL_syswm.h>
@@ -44,10 +45,10 @@ void Game::Quit()
 
 static void convertBuildDateToVersion(int* year, int* month)
 {
-	char buildDate[] = "1970.01.01T00:00:00";
+	const char* buildDate = BuildInfo::BuildDateString;
 	
-	char* buildYearText = buildDate;
-	char* buildMonthText = SDL_strchr(buildYearText, '.') + 1;
+	const char* buildYearText = buildDate;
+	const char* buildMonthText = SDL_strchr(buildYearText, '.') + 1;
 
 	int buildYear = SDL_atoi(buildYearText);
 	int buildMonth = SDL_atoi(buildMonthText);
