@@ -10,3 +10,17 @@ content/
 bin_x86/
 bin_x64/
 obj/
+
+VisualC/bin_x86/
+VisualC/bin_x64/
+
+VisualC/lib/FAudio/
+VisualC/lib/libogg/
+VisualC/lib/libvorbis/
+VisualC/lib/SDL2/
+
+VisualC/DIVA/obj_x86/
+VisualC/DIVA/obj_x64/
+
+VisualC/SpritePack/obj_x86/
+VisualC/SpritePack/obj_x64/
