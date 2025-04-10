@@ -389,5 +389,8 @@
     <ClInclude Include="..\..\src\build\build_info.h">
       <Filter>Header Files\build</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\build\build_info_dummy.h">
+      <Filter>Header Files\build</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

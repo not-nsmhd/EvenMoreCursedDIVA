@@ -11,6 +11,8 @@ bin_x86/
 bin_x64/
 obj/
 
+src/build/build_info.h
+
 VisualC/.vs/
 VisualC/bin_x86/
 VisualC/bin_x64/

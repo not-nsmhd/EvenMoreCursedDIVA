@@ -70,6 +70,7 @@
     <ClInclude Include="..\..\src\audio\music.h" />
     <ClInclude Include="..\..\src\audio\sound_effect.h" />
     <ClInclude Include="..\..\src\build\build_info.h" />
+    <ClInclude Include="..\..\src\build\build_info_dummy.h" />
     <ClInclude Include="..\..\src\common\color.h" />
     <ClInclude Include="..\..\src\common\int_types.h" />
     <ClInclude Include="..\..\src\common\math_ext.h" />
