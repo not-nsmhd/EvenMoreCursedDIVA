@@ -103,6 +103,12 @@
     <Filter Include="Header Files\build">
       <UniqueIdentifier>{43548505-a480-44bd-988d-f26baabf9902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\dev\profiler">
+      <UniqueIdentifier>{71786d57-230b-44b2-b772-3b46a6fd2381}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dev\profiler">
+      <UniqueIdentifier>{db7410db-7788-4040-a646-f3b7ab58e89f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game.cpp">
@@ -233,6 +239,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dev\profiler\profiler.cpp">
+      <Filter>Source Files\dev\profiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -391,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\build\build_info_dummy.h">
       <Filter>Header Files\build</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\dev\profiler\profiler.h">
+      <Filter>Header Files\dev\profiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

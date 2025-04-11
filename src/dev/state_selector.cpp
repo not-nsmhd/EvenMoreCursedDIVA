@@ -120,7 +120,7 @@ namespace Dev
 		debugFont->PushString(spriteRenderer, debugInfoText, glm::vec2(16.0f, game->windowHeight - debugFont->LineHeight * 5.0f - 16.0f), 
 			glm::vec2(1.0f), Common::DefaultColors::White);
 
-		spriteRenderer.RenderSprites(nullptr);	
+		spriteRenderer.RenderSprites(nullptr);
 
 		graphicsBackend->SwapBuffers();
 	}

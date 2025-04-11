@@ -25,7 +25,10 @@ namespace Audio
 		void Destroy();
 
 		void PlaySoundEffect(SoundEffect& soundEffect);
-		void PlayMusic(Music* music);
+		void PlayMusic(Music* music, u32 voiceIndex);
+
+		void PauseStreamingVoice(u32 index);
+		void ResumeStreamingVoice(u32 index);
 
 		void StopAllSFXVoices();
 		void StopAllStreamingVoices();

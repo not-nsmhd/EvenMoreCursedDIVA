@@ -177,31 +177,48 @@ namespace Audio
 		}
 	}
 	
-	void AudioEngine::PlayMusic(Music* music)
+	void AudioEngine::PlayMusic(Music* music, u32 voiceIndex)
 	{
-		if (lastStreamingVoiceUsed_index >= MAX_VOICES_STREAMING - 1)
+		if (voiceIndex >= MAX_VOICES_STREAMING - 1)
 		{
-			lastStreamingVoiceUsed_index = 0;
+			return;
 		}
 
 		AudioVoice* voice = nullptr;
 
-		for (int i = lastStreamingVoiceUsed_index; i < MAX_VOICES_STREAMING; i++)
+		voice = &voicesStreaming[voiceIndex];
+		if (!voice->active && voice->musicPtr == nullptr)
 		{
-			voice = &voicesStreaming[i];
-			
-			if (!voice->active && voice->musicPtr == nullptr)
-			{
-				voice->musicPtr = music;
+			voice->musicPtr = music;
 
-				FAudioCallbacks::DecodeNextMusicBuffer_Callback(nullptr, voice);
-				FAudioVoice_SetVolume(voice->faudioVoice, 0.7f, FAUDIO_COMMIT_NOW);
-				FAudioSourceVoice_Start(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
-				voice->active = true;
+			FAudioCallbacks::DecodeNextMusicBuffer_Callback(nullptr, voice);
+			FAudioVoice_SetVolume(voice->faudioVoice, 0.7f, FAUDIO_COMMIT_NOW);
+			FAudioSourceVoice_Start(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
+			voice->active = true;
 
-				lastStreamingVoiceUsed_index = i;
-				return;
-			}
+			return;
+		}
+	}
+
+	void AudioEngine::PauseStreamingVoice(u32 index)
+	{
+		AudioVoice* voice = nullptr;
+		voice = &voicesStreaming[index];
+
+		if (voice->active && voice->musicPtr != nullptr)
+		{
+			FAudioSourceVoice_Stop(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
+		}
+	}
+
+	void AudioEngine::ResumeStreamingVoice(u32 index)
+	{
+		AudioVoice* voice = nullptr;
+		voice = &voicesStreaming[index];
+
+		if (voice->active && voice->musicPtr != nullptr)
+		{
+			FAudioSourceVoice_Start(voice->faudioVoice, 0, FAUDIO_COMMIT_NOW);
 		}
 	}
 	

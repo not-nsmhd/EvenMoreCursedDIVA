@@ -161,6 +161,11 @@ namespace MainGame
 							event->ExecutionTime = execTime;
 							event->Type = eventType->second;
 
+							if (event->Type == ChartEventType::EVENT_PLAY_MUSIC)
+							{
+								hasMusicStartCommand = true;
+							}
+
 							Events.push_back(event);
 						}
 						break;
@@ -266,5 +271,10 @@ namespace MainGame
 		printer.ClearBuffer();
 
 		return outputString;
+	}
+
+	bool Chart::HasMusicStartCommand()
+	{
+		return hasMusicStartCommand;
 	}
 }

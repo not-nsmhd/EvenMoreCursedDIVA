@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\src\audio\sound_effect.cpp" />
     <ClCompile Include="..\..\src\common\color.cpp" />
     <ClCompile Include="..\..\src\common\math_ext.cpp" />
+    <ClCompile Include="..\..\src\dev\profiler\profiler.cpp" />
     <ClCompile Include="..\..\src\dev\state_selector.cpp" />
     <ClCompile Include="..\..\src\game.cpp" />
     <ClCompile Include="..\..\src\gfx\font.cpp" />
@@ -75,6 +76,7 @@
     <ClInclude Include="..\..\src\common\int_types.h" />
     <ClInclude Include="..\..\src\common\math_ext.h" />
     <ClInclude Include="..\..\src\common\rect.h" />
+    <ClInclude Include="..\..\src\dev\profiler\profiler.h" />
     <ClInclude Include="..\..\src\dev\state_selector.h" />
     <ClInclude Include="..\..\src\game.h" />
     <ClInclude Include="..\..\src\gfx\font.h" />
@@ -171,25 +173,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj_$(PlatformShortName)\$(Configuration)</IntDir>
-    <TargetName>game</TargetName>
+    <TargetName>game_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj_$(PlatformShortName)\$(Configuration)</IntDir>
     <TargetName>game</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj_$(PlatformShortName)\$(Configuration)</IntDir>
-    <TargetName>game</TargetName>
+    <TargetName>game_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)bin_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj_$(PlatformShortName)\$(Configuration)</IntDir>
     <TargetName>game</TargetName>
   </PropertyGroup>
@@ -231,7 +233,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -283,7 +285,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>

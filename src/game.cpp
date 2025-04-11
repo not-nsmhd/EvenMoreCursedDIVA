@@ -84,7 +84,6 @@ bool Game::Initialize()
 
 	LOG_INFO_ARGS("SDL Version: %u.%u.%u", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
 	LOG_INFO_ARGS("SDL Platform: %s", SDL_GetPlatform());
-	//Logging::LogMessage("SDL Version: %u.%u.%u", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
 
 	u32 windowFlags = SDL_WINDOW_SHOWN;
 
@@ -168,7 +167,7 @@ bool Game::Loop()
 		ticks_lastFrame = ticks_now;
 
 		deltaTime_ms = ticks_delta;
-		
+
 		keyboardState->NextFrame();
 		mouseState->NextFrame();
 

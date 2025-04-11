@@ -69,5 +69,9 @@ namespace MainGame
 		bool ReadFromXml(const char* xml, size_t size);
 		bool LoadFromXml(const std::filesystem::path& path);
 		std::string WriteToXml();
+
+		bool HasMusicStartCommand();
+	private:
+		bool hasMusicStartCommand = false;
 	};
 }

@@ -89,7 +89,6 @@ public:
 
 	bool Initialize();
 	bool Loop();
-	//void SetState(GameState* state);
 	void SetState(GameStates state);
 
 	bool IsActive();

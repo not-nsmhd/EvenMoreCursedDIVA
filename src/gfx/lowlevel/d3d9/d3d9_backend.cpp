@@ -13,14 +13,14 @@ namespace GFX::LowLevel::D3D9
 	{
 		D3DPRIMITIVETYPE PrimitiveTypes[] =
 		{
-			D3DPRIMITIVETYPE::D3DPT_POINTLIST,		// PRIMITIVE_POINTS
+			D3DPT_POINTLIST,		// PRIMITIVE_POINTS
 
-			D3DPRIMITIVETYPE::D3DPT_LINELIST,		// PRIMITIVE_LINES
-			D3DPRIMITIVETYPE::D3DPT_LINESTRIP,		// PRIMITIVE_LINE_STRIP
+			D3DPT_LINELIST,		// PRIMITIVE_LINES
+			D3DPT_LINESTRIP,		// PRIMITIVE_LINE_STRIP
 
-			D3DPRIMITIVETYPE::D3DPT_TRIANGLELIST,	// PRIMITIVE_TRIANGLES
-			D3DPRIMITIVETYPE::D3DPT_TRIANGLESTRIP,	// PRIMITIVE_TRIANGLE_STRIP
-			D3DPRIMITIVETYPE::D3DPT_TRIANGLEFAN		// PRIMITIVE_TRIANGLE_FAN
+			D3DPT_TRIANGLELIST,	// PRIMITIVE_TRIANGLES
+			D3DPT_TRIANGLESTRIP,	// PRIMITIVE_TRIANGLE_STRIP
+			D3DPT_TRIANGLEFAN		// PRIMITIVE_TRIANGLE_FAN
 		};
 
 		UINT VerticesPerPrimitive[] = 
@@ -37,33 +37,33 @@ namespace GFX::LowLevel::D3D9
 
 		D3DBLEND BlendFactor[] = 
 		{
-			D3DBLEND::D3DBLEND_ZERO, // BLEND_ZERO
-			D3DBLEND::D3DBLEND_ONE, // BLEND_ONE
+			D3DBLEND_ZERO, // BLEND_ZERO
+			D3DBLEND_ONE, // BLEND_ONE
 
-			D3DBLEND::D3DBLEND_SRCCOLOR, // BLEND_SRC_COLOR
-			D3DBLEND::D3DBLEND_INVSRCCOLOR, // BLEND_ONE_MINUS_SRC_COLOR
-			D3DBLEND::D3DBLEND_DESTCOLOR, // BLEND_DST_COLOR
-			D3DBLEND::D3DBLEND_INVDESTCOLOR, // BLEND_ONE_MINUS_DST_COLOR
+			D3DBLEND_SRCCOLOR, // BLEND_SRC_COLOR
+			D3DBLEND_INVSRCCOLOR, // BLEND_ONE_MINUS_SRC_COLOR
+			D3DBLEND_DESTCOLOR, // BLEND_DST_COLOR
+			D3DBLEND_INVDESTCOLOR, // BLEND_ONE_MINUS_DST_COLOR
  
-			D3DBLEND::D3DBLEND_SRCALPHA, // BLEND_SRC_ALPHA
-			D3DBLEND::D3DBLEND_INVSRCALPHA, // BLEND_ONE_MINUS_SRC_ALPHA
-			D3DBLEND::D3DBLEND_DESTALPHA, // BLEND_DST_ALPHA
-			D3DBLEND::D3DBLEND_INVDESTALPHA, // BLEND_ONE_MINUS_DST_ALPHA
+			D3DBLEND_SRCALPHA, // BLEND_SRC_ALPHA
+			D3DBLEND_INVSRCALPHA, // BLEND_ONE_MINUS_SRC_ALPHA
+			D3DBLEND_DESTALPHA, // BLEND_DST_ALPHA
+			D3DBLEND_INVDESTALPHA, // BLEND_ONE_MINUS_DST_ALPHA
  
-			D3DBLEND::D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_COLOR
-			D3DBLEND::D3DBLEND_INVBLENDFACTOR, // BLEND_ONE_MINUS_CONSTANT_COLOR
+			D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_COLOR
+			D3DBLEND_INVBLENDFACTOR, // BLEND_ONE_MINUS_CONSTANT_COLOR
  
-			D3DBLEND::D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_ALPHA
-			D3DBLEND::D3DBLEND_INVBLENDFACTOR // BLEND_ONE_MINUS_CONSTANT_ALPHA
+			D3DBLEND_BLENDFACTOR, // BLEND_CONSTANT_ALPHA
+			D3DBLEND_INVBLENDFACTOR // BLEND_ONE_MINUS_CONSTANT_ALPHA
 		};
 
 		D3DBLENDOP BlendOp[] = 
 		{
-			D3DBLENDOP::D3DBLENDOP_ADD, // BLEND_OP_ADD
-			D3DBLENDOP::D3DBLENDOP_SUBTRACT, // BLEND_OP_SUBTRACT
-			D3DBLENDOP::D3DBLENDOP_REVSUBTRACT, // BLEND_OP_REVERSE_SUBTRACT
-			D3DBLENDOP::D3DBLENDOP_MIN, // BLEND_OP_MIN
-			D3DBLENDOP::D3DBLENDOP_MAX // BLEND_OP_MAX
+			D3DBLENDOP_ADD, // BLEND_OP_ADD
+			D3DBLENDOP_SUBTRACT, // BLEND_OP_SUBTRACT
+			D3DBLENDOP_REVSUBTRACT, // BLEND_OP_REVERSE_SUBTRACT
+			D3DBLENDOP_MIN, // BLEND_OP_MIN
+			D3DBLENDOP_MAX // BLEND_OP_MAX
 		};
 	}
 
@@ -89,9 +89,9 @@ namespace GFX::LowLevel::D3D9
 		presentParameters.Windowed = TRUE;
 		presentParameters.BackBufferWidth = displayBounds.w;
 		presentParameters.BackBufferHeight = displayBounds.h;
-		presentParameters.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_DISCARD;
-		presentParameters.BackBufferFormat = D3DFORMAT::D3DFMT_A8R8G8B8;
-		presentParameters.PresentationInterval = 0;
+		presentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+		presentParameters.BackBufferFormat = D3DFMT_A8R8G8B8;
+		presentParameters.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 		presentParameters.EnableAutoDepthStencil = FALSE;
 
 		SDL_SysWMinfo wmInfo = {};
@@ -130,10 +130,10 @@ namespace GFX::LowLevel::D3D9
 		viewport.MaxZ = 1.0f;
 		device->SetViewport(&viewport);
 
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_CULLMODE, D3DCULL_NONE);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZENABLE, D3DZB_FALSE);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZWRITEENABLE, D3DZB_FALSE);
-		device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ZFUNC, D3DCMP_ALWAYS);
+		device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+		device->SetRenderState(D3DRS_ZWRITEENABLE, D3DZB_FALSE);
+		device->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
 		return true;
 	}
@@ -212,7 +212,7 @@ namespace GFX::LowLevel::D3D9
 	{
 		if (state == nullptr)
 		{
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, FALSE);
+			device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		}
 		else
 		{
@@ -224,13 +224,13 @@ namespace GFX::LowLevel::D3D9
 
 			D3DBLENDOP blendOp = GFXtoD3D9::BlendOp[static_cast<i32>(state->colorOp)];
 
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_ALPHABLENDENABLE, TRUE);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLEND, srcColor);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLEND, dstColor);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_SRCBLENDALPHA, srcAlpha);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_DESTBLENDALPHA, dstAlpha);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_BLENDOP, blendOp);
-			device->SetRenderState(D3DRENDERSTATETYPE::D3DRS_BLENDOPALPHA, blendOp);
+			device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			device->SetRenderState(D3DRS_SRCBLEND, srcColor);
+			device->SetRenderState(D3DRS_DESTBLEND, dstColor);
+			device->SetRenderState(D3DRS_SRCBLENDALPHA, srcAlpha);
+			device->SetRenderState(D3DRS_DESTBLENDALPHA, dstAlpha);
+			device->SetRenderState(D3DRS_BLENDOP, blendOp);
+			device->SetRenderState(D3DRS_BLENDOPALPHA, blendOp);
 		}
 	}
 	
@@ -243,7 +243,7 @@ namespace GFX::LowLevel::D3D9
 			return buffer;
 		}
 
-		delete[] buffer;
+		delete buffer;
 		return nullptr;
 	}
 	
@@ -256,7 +256,7 @@ namespace GFX::LowLevel::D3D9
 			return buffer;
 		}
 
-		delete[] buffer;
+		delete buffer;
 		return nullptr;
 	}
 	
@@ -266,7 +266,7 @@ namespace GFX::LowLevel::D3D9
 		{
 			Buffer_D3D9* d3dBuffer = static_cast<Buffer_D3D9*>(buffer);
 			d3dBuffer->Destroy();
-			delete[] buffer;
+			delete buffer;
 		}
 	}
 	
@@ -338,7 +338,7 @@ namespace GFX::LowLevel::D3D9
 			return shader;
 		}
 
-		delete[] shader;
+		delete shader;
 		return nullptr;
 	}
 	
@@ -348,7 +348,7 @@ namespace GFX::LowLevel::D3D9
 		{
 			Shader_D3D9* d3dShader = static_cast<Shader_D3D9*>(shader);
 			d3dShader->Destroy();
-			delete[] shader;
+			delete shader;
 		}
 	}
 	
@@ -392,7 +392,7 @@ namespace GFX::LowLevel::D3D9
 			return vertexDesc;
 		}
 
-		delete[] vertexDesc;
+		delete vertexDesc;
 		return nullptr;
 	}
 	
@@ -402,7 +402,7 @@ namespace GFX::LowLevel::D3D9
 		{
 			VertexDescription_D3D9* vertexDesc = static_cast<VertexDescription_D3D9*>(desc);
 			vertexDesc->Destroy();
-			delete[] desc;
+			delete desc;
 		}
 	}
 	
@@ -430,7 +430,7 @@ namespace GFX::LowLevel::D3D9
 			return texture;
 		}
 
-		delete[] texture;
+		delete texture;
 		return nullptr;
 	}
 	
@@ -440,7 +440,7 @@ namespace GFX::LowLevel::D3D9
 		{
 			Texture_D3D9* d3dTexture = static_cast<Texture_D3D9*>(texture);
 			d3dTexture->Destroy();
-			delete[] d3dTexture;
+			delete d3dTexture;
 		}
 	}
 	

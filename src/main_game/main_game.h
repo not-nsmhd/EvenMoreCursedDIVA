@@ -59,7 +59,6 @@ namespace MainGame
 		vec2 noteArea_ScaleFactor = {};
 
 		float elapsedTime = 0.0f;
-		bool manualUpdate = false;
 		bool autoPlay = false;
 
 		bool paused = false;

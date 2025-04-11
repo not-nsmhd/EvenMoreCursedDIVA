@@ -115,7 +115,6 @@ namespace MainGame
 		elapsedTime = 0.0f;
 		over = false;
 		paused = false;
-		manualUpdate = false;
 		noteWrong = false;
 		noteHitPos = {};
 
@@ -136,7 +135,7 @@ namespace MainGame
 	
 	void MainGameState::Update()
 	{
-		if (!manualUpdate && !paused && !over)
+		if (!paused && !over)
 		{
 			gameStep();
 		}
@@ -263,6 +262,11 @@ namespace MainGame
 		size_t noteIndex = 0;
 		while (noteIndex < activeNotes.size())
 		{
+			if (songChart.HasMusicStartCommand() && !musicStarted)
+			{
+				break;
+			}
+
 			GameNote* note = &activeNotes[noteIndex];
 
 			if (autoPlay && note->elapsedTime_seconds + deltaTime_seconds >= note->flyTime_seconds)
@@ -327,6 +331,11 @@ namespace MainGame
 
 		for (size_t i = chartNoteOffset; i < songChart.Notes.size(); i++)
 		{
+			if (songChart.HasMusicStartCommand() && !musicStarted)
+			{
+				break;
+			}
+
 			ChartNote* cNote = &songChart.Notes[i];
 			if (cNote->AppearTime <= elapsedTime)
 			{
@@ -380,7 +389,8 @@ namespace MainGame
 						}
 					case ChartEventType::EVENT_PLAY_MUSIC:
 						{
-							audio->PlayMusic(&songMusic);
+							audio->PlayMusic(&songMusic, 0);
+							musicStarted = true;
 							break;
 						}
 				}
@@ -633,17 +643,6 @@ namespace MainGame
 	
 	void MainGameState::handleDebugInput()
 	{
-		if (keyboardState->IsKeyTapped(SDL_SCANCODE_PERIOD))
-		{
-			manualUpdate = true;
-			gameStep();
-		}
-
-		if (keyboardState->IsKeyTapped(SDL_SCANCODE_R))
-		{
-			manualUpdate = false;
-		}
-
 		if (keyboardState->IsKeyDown(SDL_SCANCODE_LSHIFT))
 		{
 			if (keyboardState->IsKeyTapped(SDL_SCANCODE_L))
@@ -655,6 +654,15 @@ namespace MainGame
 		if (keyboardState->IsKeyTapped(SDL_SCANCODE_ESCAPE))
 		{
 			paused = !paused;
+
+			if (paused)
+			{
+				audio->PauseStreamingVoice(0);
+			}
+			else
+			{
+				audio->ResumeStreamingVoice(0);
+			}
 		}
 	}
 	
@@ -668,12 +676,6 @@ namespace MainGame
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Events: %d/%d\n", chartEventOffset, songChart.Events.size());
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Active Notes: %d\n", activeNotes.size());
 		pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "Autoplay (Shift+L): %s\n", autoPlay ? "True" : "False");
-
-		if (manualUpdate)
-		{
-			pos += SDL_snprintf(debugStateString + pos, sizeof(debugStateString) - 1, "\nMANUAL UPDATE\n" \
-			"Press '.' key to timestep\nPress 'R' key to resume");
-		}
 	}
 	
 	void MainGameState::drawDebug()
