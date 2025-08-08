@@ -7,21 +7,27 @@ import xml.etree.ElementTree as XmlET
 
 def GetNoteShapeString(value):
     match value:
-        case 0 | 4:
+        case 0 | 4 | 8:
             return "Triangle"
-        case 1 | 5:
+        case 1 | 5 | 9:
             return "Circle"
-        case 2 | 6:
+        case 2 | 6 | 10:
             return "Cross"
-        case 3 | 7:
+        case 3 | 7 | 11:
             return "Square"
-            
-    return "Triangle"
+       
+    print("Unknown shape value: {0}".format(value));
+    return "Circle"
   
 def GetNoteTypeString(value):
-    if (value > 3):
+    if (value <= 3):
+        return "Normal"
+    elif (value <= 7):
         return "Double"
+    elif (value <= 11):
+        return "HoldStart"
         
+    print("Unknown type value: {0}".format(value));
     return "Normal"
     
 if len(sys.argv) < 2:
@@ -61,6 +67,9 @@ xmlChart = XmlET.Element("Chart")
 
 opcodeIdx = 1
 nextCommandTime_divaTime = 0
+
+prevShapeString = ""
+prevTypeString = ""
 while True:
     if opcodeIdx >= (int)(dscDataSize / 4):
         break
@@ -81,6 +90,15 @@ while True:
         case 6: # TARGET
             shape = dscData[opcodeIdx + 1]
             
+            shapeString = GetNoteShapeString(shape)
+            typeString = GetNoteTypeString(shape)
+            
+            if (prevTypeString == "HoldStart" and typeString == "HoldStart" and prevShapeString == shapeString):
+                typeString = "HoldEnd"
+            
+            prevShapeString = shapeString
+            prevTypeString = typeString
+            
             tgtX = dscData[opcodeIdx + 4]
             tgtY = dscData[opcodeIdx + 5]
             
@@ -92,10 +110,9 @@ while True:
             xmlChartNote = XmlET.SubElement(xmlChart, "Note", 
             {
                 "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "ReferenceIndex": "-1",
                 
-                "Shape": GetNoteShapeString(shape),
-                "Type": GetNoteTypeString(shape),
+                "Shape": shapeString,
+                "Type": typeString,
                 "X": "{0:.3f}".format((tgtX * 960.0 / 480000.0) + 160.0),
                 "Y": "{0:.3f}".format((tgtY * 540.0 / 272000.0) + 90.0),
                 

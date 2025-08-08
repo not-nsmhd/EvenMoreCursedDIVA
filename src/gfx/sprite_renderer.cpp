@@ -5,17 +5,18 @@
 #include "helpers/shader_helpers.h"
 #include "sprite_renderer.h"
 
-using namespace GFX::Helpers;
-using namespace GFX::LowLevel;
-
 namespace GFX
 {
-#pragma region Internal Helper Functions
+	using namespace GFX::Helpers;
+	using namespace GFX::LowLevel;
+	using namespace std;
+	using namespace Common;
+
 	void SpriteRenderer::InitializeIndexBuffer()
 	{
-		u16* indexData = new u16[MAX_INDICES];
+		u16* indexData = new u16[MaxIndices];
 
-		for (size_t i = 0, v = 0; i < MAX_INDICES; i += 6, v += 4)
+		for (size_t i = 0, v = 0; i < MaxIndices; i += 6, v += 4)
 		{
 			indexData[i + 0] = (u16)(v + 0);
 			indexData[i + 1] = (u16)(v + 3);
@@ -30,15 +31,13 @@ namespace GFX
 			BufferUsage::BUFFER_USAGE_STATIC, 
 			IndexFormat::INDEX_16BIT,
 			indexData, 
-			MAX_INDICES * sizeof(u16)
+			MaxIndices * sizeof(u16)
 		);
 
 		delete[] indexData;
 	}
-#pragma endregion
 
-#pragma region Implementation
-	SpriteRenderer::SpriteRenderer()
+	SpriteRenderer::SpriteRenderer() : uniforms{}
 	{
 	}
 
@@ -61,6 +60,7 @@ namespace GFX
 		uniforms.projMatrix = glm::orthoLH_ZO(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
 
 		defaultShader = LoadShaderFromDescriptor(gfxBackend, "shaders/SpriteDefault.xml");
+		defaultShader->SetDebugName("SpriteRenderer_DefaultShader");
 
 		VertexAttribute vtxAttribs[] =
 		{
@@ -69,16 +69,20 @@ namespace GFX
 			{ VertexAttributeType::COLOR, 0, VertexAttributeFormat::VERT_FORMAT_BYTE4, true, true, offsetof(SpriteVertex, color) }
 		};
 
-		vertexBuffer = gfxBackend->CreateVertexBuffer(BufferUsage::BUFFER_USAGE_DYNAMIC, nullptr, MAX_VERTICES * sizeof(SpriteVertex));
+		vertexBuffer = gfxBackend->CreateVertexBuffer(BufferUsage::BUFFER_USAGE_DYNAMIC, nullptr, MaxVertices * sizeof(SpriteVertex));
 		InitializeIndexBuffer();
 
 		vtxDesc = gfxBackend->CreateVertexDescription(vtxAttribs, 3, sizeof(SpriteVertex), defaultShader);
 
-		vertexData = new SpriteVertex[MAX_VERTICES];
+		vertexData = new SpriteVertex[MaxVertices];
 
 		u32 pixel = 0xFFFFFFFF;
 		blankTexture = gfxBackend->CreateTexture(1, 1, TextureFormat::TEXFORMAT_RGBA8, 0);
+		blankTexture->SetDebugName("SpriteRenderer_BlankTexture");
 		gfxBackend->SetTextureData(blankTexture, &pixel);
+
+		sprites.reserve(MaxSprites);
+		batches.reserve(MaxSprites);
 
 		sprites.push_back({});
 		batches.push_back({});
@@ -116,7 +120,7 @@ namespace GFX
 		currentSprite->position = { 0.0f, 0.0f };
 		currentSprite->origin = { 0.0f, 0.0f };
 		currentSprite->size = { 0.0f, 0.0f };
-		SDL_memset(currentSprite->colors, 0xFF, sizeof(struct Color) * 4);
+		SDL_memset(currentSprite->colors, 0xFF, sizeof(Color) * 4);
 
 		currentSprite->rotCos = 1.0f;
 		currentSprite->rotSin = 0.0f;
@@ -125,22 +129,22 @@ namespace GFX
 		currentSprite->flipFlags = 0;
 	}
 
-	void SpriteRenderer::SetSpritePosition(vec2 position)
+	void SpriteRenderer::SetSpritePosition(vec2& position)
 	{
 		currentSprite->position = position;
 	}
 
-	void SpriteRenderer::SetSpriteScale(vec2 absScale)
+	void SpriteRenderer::SetSpriteScale(vec2& absScale)
 	{
 		currentSprite->size = absScale;
 	}
 
-	void SpriteRenderer::SetSpriteScale(const Texture* texture, vec2 scale)
+	void SpriteRenderer::SetSpriteScale(const Texture* texture, vec2& scale)
 	{
 		currentSprite->size = { texture->GetWidth() * scale.x, texture->GetHeight() * scale.y };
 	}
 
-	void SpriteRenderer::SetSpriteOrigin(vec2 origin)
+	void SpriteRenderer::SetSpriteOrigin(vec2& origin)
 	{
 		currentSprite->origin = origin;
 	}
@@ -151,12 +155,12 @@ namespace GFX
 		currentSprite->rotSin = SDL_sinf(radians);
 	}
 
-	void SpriteRenderer::SetSpriteSource(RectangleF source)
+	void SpriteRenderer::SetSpriteSource(RectangleF& source)
 	{
 		currentSprite->srcRect = source;
 	}
 
-	void SpriteRenderer::SetSpriteSource(const Texture* texture, RectangleF absSource)
+	void SpriteRenderer::SetSpriteSource(const Texture* texture, RectangleF& absSource)
 	{
 		int width = texture->GetWidth();
 		int height = texture->GetHeight();
@@ -180,7 +184,7 @@ namespace GFX
 		currentSprite->flipFlags = flipFlags;
 	}
 
-	void SpriteRenderer::SetSpriteColor(struct Color color)
+	void SpriteRenderer::SetSpriteColor(Color color)
 	{
 		currentSprite->colors[0] = color;
 		currentSprite->colors[1] = color;
@@ -188,7 +192,7 @@ namespace GFX
 		currentSprite->colors[3] = color;
 	}
 	
-	void SpriteRenderer::SetSpriteColors(struct Color colors[4])
+	void SpriteRenderer::SetSpriteColors(Color colors[4])
 	{
 		currentSprite->colors[0] = colors[0];
 		currentSprite->colors[1] = colors[1];
@@ -196,9 +200,17 @@ namespace GFX
 		currentSprite->colors[3] = colors[3];
 	}
 
+	void SpriteRenderer::SetSpriteColors(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight)
+	{
+		currentSprite->colors[0] = topLeft;
+		currentSprite->colors[1] = bottomRight;
+		currentSprite->colors[2] = bottomLeft;
+		currentSprite->colors[3] = topRight;
+	}
+
 	void SpriteRenderer::PushSprite(Texture* texture)
 	{
-		if (spriteCount >= MAX_SPRITES)
+		if (spriteCount >= MaxSprites)
 		{
 			RenderSprites(nullptr);
 		}
@@ -337,5 +349,4 @@ namespace GFX
 
 		ResetSprite();
 	}
-#pragma endregion
 };

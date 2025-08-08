@@ -1,30 +1,22 @@
 #pragma once
 #include <string>
+#include <string_view>
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
 #include <glm/vec2.hpp>
-#include "../common/int_types.h"
+#include "../common/types.h"
 #include "../common/rect.h"
 #include "lowlevel/backend.h"
 #include "sprite_renderer.h"
-
-using Common::RectangleF;
-using GFX::SpriteRenderer;
-using GFX::LowLevel::Backend;
-using GFX::LowLevel::Texture;
-using glm::vec2;
-using std::string;
-using std::unordered_map;
-using std::vector;
-using std::filesystem::path;
 
 namespace GFX
 {
 	struct Sprite
 	{
+		std::string name;
 		u32 texIndex;
-		RectangleF sourceRect;
+		Common::RectangleF sourceRect;
 		vec2 origin;
 	};
 
@@ -33,33 +25,35 @@ namespace GFX
 	public:
 		SpriteSheet();
 		
-		string Name;
+		std::string Name;
 
 		void Destroy();
 
-		void ReadFromTextFile(Backend* backend, const path &dirPath);
+		void ReadFromTextFile(LowLevel::Backend* backend, const std::filesystem::path &dirPath);
 
 		Sprite* GetSprite(u32 index);
-		Sprite* GetSprite(const string &name);
-		u32 GetSpriteIndex(const string &name);
+		Sprite* GetSprite(std::string_view name);
+		u32 GetSpriteIndex(std::string_view name);
 
-		void SetSpriteState(SpriteRenderer &renderer, Sprite &sprite);
-		void SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex);
-		void SetSpriteState(SpriteRenderer &renderer, const string &spriteName);
+		LowLevel::Texture* GetTexture(u32 index);
+			
+		void SetSpriteState(SpriteRenderer* renderer, Sprite &sprite);
+		void SetSpriteState(SpriteRenderer* renderer, u32 spriteIndex);
+		void SetSpriteState(SpriteRenderer* renderer, std::string_view spriteName);
 
-		void PushSprite(SpriteRenderer &renderer, Sprite& sprite);
-		void PushSprite(SpriteRenderer &renderer, Sprite* sprite);
-		void PushSprite(SpriteRenderer &renderer, u32 spriteIndex);
-		void PushSprite(SpriteRenderer &renderer, const string& spriteName);
-		void PushSprite(SpriteRenderer &renderer, Sprite& sprite, vec2& scale);
-		void PushSprite(SpriteRenderer &renderer, Sprite* sprite, vec2 scale);
-		void PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale);
+		void PushSprite(SpriteRenderer* renderer, Sprite& sprite);
+		void PushSprite(SpriteRenderer* renderer, Sprite* sprite);
+		void PushSprite(SpriteRenderer* renderer, u32 spriteIndex);
+		void PushSprite(SpriteRenderer* renderer, Sprite& sprite, vec2& scale);
+		void PushSprite(SpriteRenderer* renderer, Sprite* sprite, vec2 scale);
+
+	public:
+		static constexpr u32 InvalidSpriteIndex = std::numeric_limits<u32>().max();
 
 	private:
-		Backend* backend;
+		LowLevel::Backend* backend;
 
-		vector<Sprite> sprites;
-		unordered_map<string, u32> spriteMap;
-		vector<Texture*> textures;
+		std::vector<Sprite> sprites;
+		std::vector<LowLevel::Texture*> textures;
 	};
 };

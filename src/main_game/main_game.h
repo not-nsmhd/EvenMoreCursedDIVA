@@ -1,13 +1,5 @@
 #pragma once
-#include <string>
-#include <deque>
 #include "../game.h"
-#include "gamescore.h"
-#include "../gfx/sprite_sheet.h"
-#include "../gfx/sprite_renderer.h"
-#include "../audio/audio.h"
-#include "chart.h"
-#include "note.h"
 
 namespace MainGame
 {
@@ -15,8 +7,7 @@ namespace MainGame
 	{
 	public:
 		MainGameState();
-
-		static MainGameState* GetInstance();
+		~MainGameState();
 
 		bool Initialize();
 		bool LoadContent();
@@ -27,68 +18,7 @@ namespace MainGame
 		void Draw();
 
 	private:
-		static MainGameState* instance;
-
-		GFX::SpriteRenderer spriteRenderer;
-		GFX::SpriteSheet iconSet;
-
-		// --- Cached sprites
-
-		GFX::Sprite* cachedSprites_NoteTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-		GFX::Sprite* cachedSprites_NoteIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-
-		GFX::Sprite* cachedSprites_DoubleTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-		GFX::Sprite* cachedSprites_DoubleIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-
-		GFX::Sprite* cachedSprites_HoldTargets[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-		GFX::Sprite* cachedSprites_HoldIcons[static_cast<int>(NoteShape::NOTE_SHAPE_COUNT)];
-
-		GFX::Sprite* noteTargetHandSprite;
-
-		// --------------
-
-		GFX::LowLevel::Texture* bgTexture = nullptr;
-		GFX::LowLevel::Texture* trailTexture = nullptr;
-
-		Audio::SoundEffect hitSE = {};
-		Audio::SoundEffect hitSE_double = {};
-		Audio::Music songMusic = {};
-		bool musicStarted = false;
-
-		const vec2 noteArea_BaseSize = { 1280.0f, 720.0f };
-		vec2 noteArea_ScaleFactor = {};
-
-		float elapsedTime = 0.0f;
-		bool autoPlay = false;
-
-		bool paused = false;
-		bool over = false;
-
-		Chart songChart;
-		size_t chartNoteOffset = 0;
-		size_t chartEventOffset = 0;
-
-		float currentNoteDuration_seconds = 1.0f;
-		std::deque<GameNote> activeNotes = {};
-
-		GameNote* currentlyHeldNote = nullptr;
-
-		GameScore gameScore;
-
-		char debugStateString[1024] = {};
-		std::string noteValu;
-		vec2 noteHitPos = {};
-		bool noteWrong = false;
-
-		void gameStep();
-		void inputNoteHit(NoteShape shape, bool secondary, bool release);
-
-		void drawNoteTrail(float t, GameNote* note);
-
-		void handleNoteInput();
-		void handleDebugInput();
-
-		void updateDebug();
-		void drawDebug();
+		struct StateInternal;
+		StateInternal* stateInternal = nullptr;
 	};
 }

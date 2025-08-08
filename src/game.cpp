@@ -4,8 +4,7 @@
 #include <SDL2/SDL_syswm.h>
 #include <stb_image.h>
 #include "game.h"
-#include "gfx/lowlevel/opengl_arb/opengl_backend.h"
-#include "gfx/lowlevel/d3d9/d3d9_backend.h"
+#include "gfx/lowlevel/opengl/opengl_backend.h"
 #include <vector>
 #include "global_res.h"
 #include "util/string_utils.h"
@@ -14,7 +13,6 @@
 #include "main_game/main_game.h"
 #include "testing/u16_test.h"
 #include "testing/input_test.h"
-#include "testing/gfx_backend_test.h"
 #include "dev/state_selector.h"
 
 #define LOG_INFO(message) Logging::LogInfo("Game", message)
@@ -96,13 +94,15 @@ bool Game::Initialize()
 
 	loadInitialConfig();
 
-	if (gfxBackendType == GFXBackendType::BACKEND_OPENGL_ARB)
+	if (gfxBackendType == GFXBackendType::OpenGL_ARB)
 	{
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 		windowFlags |= SDL_WINDOW_OPENGL;
 	}
@@ -124,11 +124,8 @@ bool Game::Initialize()
 
 	switch (gfxBackendType)
 	{
-	case GFXBackendType::BACKEND_OPENGL_ARB:
+	case GFXBackendType::OpenGL_ARB:
 		graphicsBackend = new GFX::LowLevel::OpenGL_ARB::Backend_OpenGL();
-		break;
-	case GFXBackendType::BACKEND_D3D9:
-		graphicsBackend = new GFX::LowLevel::D3D9::Backend_D3D9();
 		break;
 	}
 
@@ -141,9 +138,6 @@ bool Game::Initialize()
 	mouseState = Input::Mouse::GetInstance();
 
 	//SDL_CaptureMouse(SDL_TRUE);
-
-	audioEngine = AudioEngine::GetInstance();
-	audioEngine->Initialize();
 
 	GlobalResources::Load(graphicsBackend);
 
@@ -162,11 +156,20 @@ bool Game::Loop()
 
 	while (running)
 	{
-		ticks_now = (SDL_GetPerformanceCounter() * 1000.0 / (double)SDL_GetPerformanceFrequency());
-		ticks_delta = ticks_now - ticks_lastFrame;
 		ticks_lastFrame = ticks_now;
+		ticks_now = SDL_GetPerformanceCounter() * 10000000 / SDL_GetPerformanceFrequency();
+		ticks_delta = ticks_now - ticks_lastFrame;
 
-		deltaTime_ms = ticks_delta;
+		actualFrameTime_ms = static_cast<double>(ticks_delta) / 10000.0;
+
+		while (ticks_delta < 166667)
+		{
+			SDL_Delay(1);
+			ticks_now = SDL_GetPerformanceCounter() * 10000000 / SDL_GetPerformanceFrequency();
+			ticks_delta = ticks_now - ticks_lastFrame;
+		}
+
+		deltaTime_ms = static_cast<double>(ticks_delta) / 10000.0;
 
 		keyboardState->NextFrame();
 		mouseState->NextFrame();
@@ -208,9 +211,9 @@ bool Game::Loop()
 
 		if (running && !firstFrame)
 		{
-			if (keyboardState->IsKeyTapped(SDL_SCANCODE_F6) && currentGameState != GameStates::DEVSTATE_STATE_SELECTOR)
+			if (keyboardState->IsKeyTapped(SDL_SCANCODE_F6) && currentGameState != GameStates::Dev_StateSelector)
 			{
-				SetState(GameStates::DEVSTATE_STATE_SELECTOR);
+				SetState(GameStates::Dev_StateSelector);
 			}
 
 			if (changeState)
@@ -270,42 +273,17 @@ bool Game::Loop()
 
 	GlobalResources::Destroy();
 	graphicsBackend->Destroy();
-	audioEngine->Destroy();
 
-	delete[] graphicsBackend;
+	delete graphicsBackend;
 	SDL_Quit();
 	return true;
 }
-
-/*void Game::SetState(GameState* state)
-{
-	if (state != nullptr)
-	{
-		if (currentState != nullptr)
-		{
-			currentState->UnloadContent();
-			currentState->Destroy();
-			LOG_INFO("Previous state destroyed");
-		}
-
-		currentState = state;
-		currentState->game = this;
-		currentState->fileSystem = fileSystem;
-		currentState->graphicsBackend = graphicsBackend;
-		currentState->keyboardState = keyboardState;
-		currentState->mouseState = mouseState;
-		currentState->audio = audioEngine;
-		changeState = true;
-
-		currentGameState = GameStates::STATE_UNREGISTIRED;
-	}
-}*/
 
 void Game::SetState(GameStates state)
 {
 	if (currentState != nullptr)
 	{
-		LOG_INFO_ARGS("Chaning game state: [%s] -> [%s]\n",
+		LOG_INFO_ARGS("Changing game state: [%s] -> [%s]",
 		GameStateNames[static_cast<int>(currentGameState)], GameStateNames[static_cast<int>(state)]);
 	}
 
@@ -313,20 +291,19 @@ void Game::SetState(GameStates state)
 
 	switch (state)
 	{
-		case GameStates::STATE_MAINGAME:
+		case GameStates::MainGame:
 			stateClass = new MainGame::MainGameState();
 			break;
-		case GameStates::DEVSTATE_U16_TEST:
+		case GameStates::DevTest_UnicodeText:
 			stateClass = new Testing::U16Test();
 			break;
-		case GameStates::DEVSTATE_INPUT_TEST:
+		case GameStates::DevTest_Input:
 			stateClass = new Testing::InputTest();
 			break;
-		case GameStates::DEVSTATE_GFX_BACKEND_TEST:
-			stateClass = new Testing::GFXBackendTest();
-			break;
-		case GameStates::DEVSTATE_STATE_SELECTOR:
+		case GameStates::Dev_StateSelector:
 			stateClass = new Dev::StateSelector();
+			break;
+		default:
 			break;
 	}
 
@@ -338,7 +315,6 @@ void Game::SetState(GameStates state)
 		nextState->graphicsBackend = graphicsBackend;
 		nextState->keyboardState = keyboardState;
 		nextState->mouseState = mouseState;
-		nextState->audio = audioEngine;
 		changeState = true;
 
 		currentGameState = state;
@@ -356,12 +332,9 @@ void Game::GetVersionNumber(int* year, int* month)
 	*month = buildMonth;
 }
 
-const char* Game::GetPlatformName()
+GFXBackend* Game::GetGraphicsBackend()
 {
-#if defined(_WIN32)
-	return "Windows";
-#endif
-	return "Unknown"; 
+	return graphicsBackend;
 }
 
 void Game::loadInitialConfig()
@@ -407,18 +380,7 @@ void Game::loadInitialConfig()
 				}
 				else if (keyValue[0] == "GraphicsBackend")
 				{
-					if (keyValue[1] == "OpenGL_ARB")
-					{
-						gfxBackendType = GFXBackendType::BACKEND_OPENGL_ARB;
-					}
-					else if (keyValue[1] == "D3D9")
-					{
-						gfxBackendType = GFXBackendType::BACKEND_D3D9;
-					}
-					else
-					{
-						Logging::LogWarn("Init", "Unknown graphics backend. Defaulting to OpenGL_ARB.");
-					}
+					gfxBackendType = DIVA::EnumFromString<GFXBackendType>(GFX::LowLevel::BackendTypeNames, keyValue[1]);
 				}
 				else
 				{

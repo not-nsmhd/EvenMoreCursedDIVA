@@ -10,6 +10,8 @@ using std::ios;
 
 namespace Testing
 {
+	static GFX::SpriteRenderer* spriteRenderer;
+
 	InputTest::InputTest()
 	{
 	}
@@ -22,13 +24,12 @@ namespace Testing
 	bool InputTest::LoadContent()
 	{
 		debugFont = GlobalResources::DebugFont;
-		spriteRenderer.Initialize(graphicsBackend);
+		spriteRenderer = GlobalResources::SpriteRenderer;
 		return true;
 	}
 	
 	void InputTest::UnloadContent()
 	{
-		spriteRenderer.Destroy();
 	}
 	
 	void InputTest::Destroy()
@@ -87,7 +88,7 @@ namespace Testing
 
 		debugFont->PushString(spriteRenderer, keyboardTestString, sizeof(keyboardTestString) - 1, vec2(4.0f, 4.0f), vec2(1.0f), Common::DefaultColors::White);
 		debugFont->PushString(spriteRenderer, mouseTestString, sizeof(mouseTestString) - 1, vec2(256.0f, 4.0f), vec2(1.0f), Common::DefaultColors::White);
-		spriteRenderer.RenderSprites(nullptr);
+		spriteRenderer->RenderSprites(nullptr);
 
 		graphicsBackend->SwapBuffers();
 	}

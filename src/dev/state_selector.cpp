@@ -9,6 +9,7 @@ using std::string;
 namespace Dev
 {
 	static GFX::Font* debugFont;
+	static GFX::SpriteRenderer* spriteRenderer;
 	static int selectedStateIndex = 0;
 
 	static char debugInfoText[1024] = {};
@@ -22,7 +23,7 @@ namespace Dev
 		selectedStateIndex = 0;
 		SDL_memset(debugInfoText, 0, sizeof(debugInfoText));
 		debugFont = GlobalResources::DebugFont;
-		spriteRenderer.Initialize(graphicsBackend);
+		spriteRenderer = GlobalResources::SpriteRenderer;
 		return true;
 	}
 	
@@ -37,7 +38,6 @@ namespace Dev
 	
 	void StateSelector::Destroy()
 	{
-		spriteRenderer.Destroy();	
 	}
 	
 	void StateSelector::OnResize(u32 newWidth, u32 newHeight)
@@ -48,7 +48,7 @@ namespace Dev
 	{
 		if (keyboardState->IsKeyTapped(SDL_SCANCODE_DOWN))
 		{
-			if (selectedStateIndex < static_cast<int>(GameStates::DEVSTATE_STATE_SELECTOR) - 1)
+			if (selectedStateIndex < static_cast<int>(GameStates::Dev_StateSelector) - 1)
 			{
 				selectedStateIndex++;
 			}
@@ -80,11 +80,11 @@ namespace Dev
 		int buildMonth = 0;
 		game->GetVersionNumber(&buildYear, &buildMonth);
 
-		const char* osName = game->GetPlatformName();
-#if defined (_WIN32)
-		const char* bitWidth = "32-bit";
-#elif defined (_WIN64)
+		const char* osName = SDL_GetPlatform();
+#if defined (_WIN64) || defined (__x86_64__)
 		const char* bitWidth = "64-bit";
+#elif defined (_WIN32)
+		const char* bitWidth = "32-bit";
 #endif
 
 #ifdef _DEBUG
@@ -104,7 +104,7 @@ namespace Dev
 
 		const char* stateName = nullptr;
 		float textOffset_y = 64.0f;
-		for (int i = 0; i < static_cast<int>(GameStates::DEVSTATE_STATE_SELECTOR); i++)
+		for (int i = 0; i < static_cast<int>(GameStates::Dev_StateSelector); i++)
 		{
 			stateName = GameStateNames[i];
 			debugFont->PushString(spriteRenderer, stateName, 64, glm::vec2(64.0f, textOffset_y), glm::vec2(1.0f), Common::DefaultColors::White);
@@ -120,7 +120,7 @@ namespace Dev
 		debugFont->PushString(spriteRenderer, debugInfoText, glm::vec2(16.0f, game->windowHeight - debugFont->LineHeight * 5.0f - 16.0f), 
 			glm::vec2(1.0f), Common::DefaultColors::White);
 
-		spriteRenderer.RenderSprites(nullptr);
+		spriteRenderer->RenderSprites(nullptr);
 
 		graphicsBackend->SwapBuffers();
 	}

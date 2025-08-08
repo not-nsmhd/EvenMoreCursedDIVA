@@ -7,13 +7,6 @@
 #include "../common/color.h"
 #include "lowlevel/backend.h"
 
-using std::vector;
-using glm::vec2;
-using glm::u8vec4;
-using glm::mat4;
-using Common::RectangleF;
-using Common::Color;
-
 namespace GFX
 {
 	enum SpriteFlipMode : u32
@@ -27,12 +20,12 @@ namespace GFX
 		vec2 position;
 		vec2 origin;
 		vec2 size;
-		struct Color colors[4];
+		struct Common::Color colors[4];
 
 		float rotCos;
 		float rotSin;
 
-		RectangleF srcRect;
+		Common::RectangleF srcRect;
 		u32 flipFlags = 0;
 	};
 
@@ -40,13 +33,13 @@ namespace GFX
 	{
 		LowLevel::Texture* texture;
 
-		vector<SpriteState>::iterator firstSprite;
+		std::vector<SpriteState>::const_iterator firstSprite;
 		u32 spriteCount;
 	};
 
-	const u32 MAX_SPRITES = 1024;
-	const u32 MAX_VERTICES = MAX_SPRITES * 4;
-	const u32 MAX_INDICES = MAX_SPRITES * 6;
+	constexpr u32 MaxSprites = 1024;
+	constexpr u32 MaxVertices = MaxSprites * 4;
+	constexpr u32 MaxIndices = MaxSprites * 6;
 
 	struct SpriteVertex
 	{
@@ -70,18 +63,19 @@ namespace GFX
 		void Destroy();
 
 		void ResetSprite();
-		void SetSpritePosition(vec2 position);
-		void SetSpriteScale(vec2 absScale);
-		void SetSpriteScale(const LowLevel::Texture* texture, vec2 scale);
-		void SetSpriteOrigin(vec2 origin);
+		void SetSpritePosition(vec2& position);
+		void SetSpriteScale(vec2& absScale);
+		void SetSpriteScale(const LowLevel::Texture* texture, vec2& scale);
+		void SetSpriteOrigin(vec2& origin);
 		void SetSpriteRotation(float radians);
-		void SetSpriteSource(RectangleF source);
-		void SetSpriteSource(const LowLevel::Texture* texture, RectangleF absSource);
+		void SetSpriteSource(Common::RectangleF& source);
+		void SetSpriteSource(const LowLevel::Texture* texture, Common::RectangleF& absSource);
 		void SetSpriteFlip(u32 flipFlags);
-		void SetSpriteColor(struct Color color);
+		void SetSpriteColor(Common::Color color);
 		
-		// Coloring order; top-left, top-right, bottom-left, bottom-right
-		void SetSpriteColors(struct Color colors[4]);
+		// NOTE: Coloring order; top-left, top-right, bottom-left, bottom-right
+		void SetSpriteColors(Common::Color colors[4]);
+		void SetSpriteColors(Common::Color topLeft, Common::Color topRight, Common::Color bottomLeft, Common::Color bottomRight);
 
 		void PushSprite(LowLevel::Texture* texture);
 
@@ -90,27 +84,22 @@ namespace GFX
 		LowLevel::Backend* gfxBackend = nullptr;
 		bool initialized = false;
 
-		/* State */
+		// NOTE: State
+		std::vector<SpriteState> sprites;
+		std::vector<SpriteBatch> batches;
 
-		vector<SpriteState> sprites;
-		vector<SpriteBatch> batches;
-
-		vector<SpriteState>::iterator currentSprite;
-		vector<SpriteBatch>::iterator currentBatch;
+		std::vector<SpriteState>::iterator currentSprite;
+		std::vector<SpriteBatch>::iterator currentBatch;
 
 		size_t spriteCount = 0;
 		size_t batchCount = 0;
 
-		/* Uniforms */
-
 		SpriteUniforms uniforms;
 
-		/* Buffer data */
-
+		// NOTE: Buffer data
 		SpriteVertex* vertexData = nullptr;
 
-		/* Graphical resources */
-
+		// NOTE: Graphics data
 		LowLevel::Buffer* vertexBuffer = nullptr;
 		LowLevel::Buffer* indexBuffer = nullptr;
 		LowLevel::Shader* defaultShader = nullptr;
@@ -118,8 +107,7 @@ namespace GFX
 
 		LowLevel::Texture* blankTexture = {};
 
-		/* Helper functions */
-
+		// NOTE: Helper functions
 		void InitializeIndexBuffer();
 	};
 };

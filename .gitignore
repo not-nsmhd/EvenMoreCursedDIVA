@@ -8,23 +8,13 @@ content/
 
 *.o
 *.d
-bin_x86/
-bin_x64/
+bin/
 obj/
 
 src/build/build_info.h
 
-VisualC/.vs/
-VisualC/bin_x86/
-VisualC/bin_x64/
-
-VisualC/lib/FAudio/
-VisualC/lib/libogg/
-VisualC/lib/libvorbis/
-VisualC/lib/SDL2/
-
-VisualC/DIVA/obj_x86/
-VisualC/DIVA/obj_x64/
-
-VisualC/SpritePack/obj_x86/
-VisualC/SpritePack/obj_x64/
+.vs/
+lib_vs/FAudio
+lib_vs/libogg
+lib_vs/libvorbis
+lib_vs/SDL2

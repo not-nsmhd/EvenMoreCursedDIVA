@@ -2,7 +2,6 @@
 #include <string>
 #include "../game.h"
 #include "../gfx/font.h"
-#include "../gfx/sprite_renderer.h"
 
 namespace Testing
 {
@@ -19,11 +18,10 @@ namespace Testing
 		void Update();
 		void Draw();
 	private:
-		std::u16string testText;
+		u8* testTextBuffer = nullptr;
+		size_t testTextBufferSize = 0;
 
 		GFX::Font font;
-		GFX::SpriteRenderer spriteRenderer;
-
 		GFX::LowLevel::BlendState alphaBlend = {};
 	};
 }

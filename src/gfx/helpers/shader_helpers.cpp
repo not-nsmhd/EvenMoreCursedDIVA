@@ -29,6 +29,7 @@ namespace GFX
 			}
 
 			const std::filesystem::path& parentDir = fullPath.parent_path();
+			const std::filesystem::path& fileName = fullPath.filename();
 			size_t xmlFileSize = std::filesystem::file_size(fullPath);
 
 			fstream xmlFile;
@@ -50,7 +51,7 @@ namespace GFX
 			std::filesystem::path vsPath = parentDir;
 			std::filesystem::path fsPath = parentDir;
 
-			const char* currentBackendName = LowLevel::BackendNames[static_cast<int>(backend->GetType())];
+			const char* currentBackendName = DIVA::EnumToString<LowLevel::BackendType>(LowLevel::BackendTypeNames, backend->GetType()).data();
 
 			XMLElement* rootNode = doc.FirstChildElement("Shader");
 			for (XMLElement* node = rootNode->FirstChildElement(); node; node = node->NextSiblingElement())

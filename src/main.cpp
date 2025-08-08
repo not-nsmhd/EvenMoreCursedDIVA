@@ -45,7 +45,7 @@ extern "C"
 			return -1;
 		}
 
-		game.SetState(GameStates::DEVSTATE_STATE_SELECTOR); 
+		game.SetState(GameStates::Dev_StateSelector); 
 		if (game.Loop() != true)
 		{
 			Logging::LoggingQuit();

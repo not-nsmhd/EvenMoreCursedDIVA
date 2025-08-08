@@ -1,15 +1,18 @@
 #include <cstring>
 #include <fstream>
-#include <new>
+#include <utf8.h>
 #include <tinyxml2.h>
 #include "../io/filesystem.h"
 #include "helpers/tex_helpers.h"
 #include "font.h"
 
-using fsPath = std::filesystem::path;
-
 namespace GFX
 {
+	using namespace std;
+	using namespace std::filesystem;
+	using namespace LowLevel;
+	using namespace Common;
+
 	Font::Font()
 	{
 	}
@@ -21,7 +24,7 @@ namespace GFX
 		glyphs.clear();	
 	}
 
-	void Font::LoadBMFont(Backend *backend, const std::filesystem::path &path)
+	void Font::LoadBMFont(Backend *backend, const path& filePath)
 	{
 		if (backend == nullptr)
 		{
@@ -34,7 +37,7 @@ namespace GFX
 		using namespace IO;
 
 		FileSystem* fs = FileSystem::GetInstance();
-		fsPath fntPath = fs->GetContentFilePath(path);
+		path fntPath = fs->GetContentFilePath(filePath);
 
 		ifstream xmlFile;
 		xmlFile.open(fntPath, ios::in | ios::binary);
@@ -90,11 +93,11 @@ namespace GFX
 					charAttr = charNode->FindAttribute("id");
 					if (charAttr->IntValue() == -1)
 					{
-						fontGlyph.CharCode = 0xFFFF;
+						fontGlyph.CharCode = ReplacementCharcode;
 					}
 					else
 					{
-						u16 code = static_cast<u16>(charAttr->IntValue());
+						u32 code = static_cast<u32>(charAttr->IntValue());
 						fontGlyph.CharCode = code;
 					}
 
@@ -119,7 +122,7 @@ namespace GFX
 					charAttr = charNode->FindAttribute("xadvance");
 					fontGlyph.XAdvance = static_cast<i16>(charAttr->IntValue());
 
-					if (fontGlyph.CharCode == 0xFFFF)
+					if (fontGlyph.CharCode == ReplacementCharcode)
 					{
 						replacementGlyph = fontGlyph;
 					}
@@ -135,7 +138,7 @@ namespace GFX
 		doc.Clear();
 		delete[] xmlData;
 
-		fsPath texturePath = fntPath;
+		path texturePath = fntPath;
 		texturePath.replace_extension("png");
 
 		texture = LoadTexture(backend, texturePath);
@@ -144,36 +147,36 @@ namespace GFX
 		this->backend = backend;
 	}
 
-	void Font::PushString(SpriteRenderer &renderer, const string &text, vec2 pos, vec2 scale, Color color)
+	void Font::PushString(SpriteRenderer* renderer, string_view text, vec2 pos, vec2 scale, Color color)
 	{
 		if (text.size() == 0)
 		{
 			return;
 		}
 
-		renderer.ResetSprite();
+		renderer->ResetSprite();
 
 		vec2 charPos = {};
 
-		for (string::const_iterator c = text.begin(); c != text.end(); c++)
+		for (string_view::const_iterator c = text.begin(); c != text.end(); c++)
 		{
 			char16_t c16 = static_cast<char16_t>(*c);
 			PushChar(renderer, c16, pos, &charPos, scale, color);
 		}
 	}
 
-	void Font::PushString(SpriteRenderer &renderer, const u16string &text, vec2 pos, vec2 scale, Color color)
+	void Font::PushString(SpriteRenderer* renderer, u16string_view text, vec2 pos, vec2 scale, Color color)
 	{
 		if (text.size() == 0)
 		{
 			return;
 		}
 
-		renderer.ResetSprite();
+		renderer->ResetSprite();
 
 		vec2 charPos = {};
 
-		for (u16string::const_iterator c = text.begin(); c != text.end(); c++)
+		for (u16string_view::const_iterator c = text.begin(); c != text.end(); c++)
 		{
 			if (*c == 0xFEFF)
 			{
@@ -185,7 +188,7 @@ namespace GFX
 		}
 	}
 
-	void Font::PushString(SpriteRenderer &renderer, const char *text, size_t maxLen, vec2 pos, vec2 scale, Color color)
+	void Font::PushString(SpriteRenderer* renderer, const char *text, size_t maxLen, vec2 pos, vec2 scale, Color color)
 	{
 		if (text == nullptr || maxLen == 0)
 		{
@@ -202,7 +205,7 @@ namespace GFX
 			len++;
 		}
 
-		renderer.ResetSprite();
+		renderer->ResetSprite();
 
 		vec2 charPos = {};
 
@@ -213,7 +216,7 @@ namespace GFX
 		}
 	}
 
-	void Font::PushString(SpriteRenderer &renderer, const char16_t *text, size_t maxLen, vec2 pos, vec2 scale, Color color)
+	void Font::PushString(SpriteRenderer* renderer, const char16_t *text, size_t maxLen, vec2 pos, vec2 scale, Color color)
 	{
 		if (text == nullptr || maxLen == 0)
 		{
@@ -230,7 +233,7 @@ namespace GFX
 			len++;
 		}
 
-		renderer.ResetSprite();
+		renderer->ResetSprite();
 
 		vec2 charPos = {};
 
@@ -240,8 +243,37 @@ namespace GFX
 			PushChar(renderer, c, pos, &charPos, scale, color);
 		}
 	}
+
+	void Font::PushUTF8String(SpriteRenderer* renderer, const u8 *text, size_t arraySize, vec2 pos, vec2 scale, Color color)
+	{
+		if (text == nullptr || arraySize == 0)
+		{
+			return;
+		}
+
+		const u8* t = text;
+		size_t len = 0;
+		while (t < &text[arraySize - 1])
+		{
+			if (utf8::next(t, &text[arraySize - 1]) != 0)
+			{
+				len++;
+			}
+		}
+
+		t = text;
+		renderer->ResetSprite();
+
+		vec2 charPos = {};
+
+		for (size_t i = 0; i < len; i++)
+		{
+			u32 c = utf8::next(t, &text[arraySize - 1]);
+			PushChar(renderer, c, pos, &charPos, scale, color);
+		}
+	}
 	
-	void Font::PushChar(SpriteRenderer &renderer, char16_t c, vec2 basePos, vec2* charPos, vec2 scale, Color color)
+	void Font::PushChar(SpriteRenderer* renderer, u32 c, vec2 basePos, vec2* charPos, vec2 scale, Color color)
 	{
 		if (c == '\n')
 		{
@@ -250,7 +282,7 @@ namespace GFX
 			return;
 		}
 
-		unordered_map<char16_t, i32>::iterator glyphIt = glyphMap.find(c);
+		unordered_map<u32, i32>::iterator glyphIt = glyphMap.find(c);
 
 		const FontGlyph* glyph;
 		if (glyphIt == glyphMap.end())
@@ -270,17 +302,19 @@ namespace GFX
 
 		vec2 offset = vec2(static_cast<float>(glyph->XOffset), static_cast<float>(glyph->YOffset));
 
-		renderer.SetSpritePosition((*charPos + basePos + offset) * scale);
-		renderer.SetSpriteScale({glyph->Width * scale.x, glyph->Height * scale.y});
-		renderer.SetSpriteColor(color);
+		renderer->SetSpritePosition((*charPos + basePos + offset) * scale);
+		renderer->SetSpriteScale(vec2 {glyph->Width * scale.x, glyph->Height * scale.y});
+		renderer->SetSpriteColor(color);
 
-		renderer.SetSpriteSource(texture,
-								 {static_cast<float>(glyph->X),
-								  static_cast<float>(glyph->Y),
-								  static_cast<float>(glyph->Width),
-								  static_cast<float>(glyph->Height)});
+		renderer->SetSpriteSource(texture, RectangleF 
+			{ 
+				static_cast<float>(glyph->X), 
+				static_cast<float>(glyph->Y),
+				static_cast<float>(glyph->Width), 
+				static_cast<float>(glyph->Height)
+			});
 
-		renderer.PushSprite(texture);
+		renderer->PushSprite(texture);
 
 		charPos->x += static_cast<float>(glyph->XAdvance);
 	}

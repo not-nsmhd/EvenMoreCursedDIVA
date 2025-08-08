@@ -1,6 +1,5 @@
 #pragma once
 #include "../game.h"
-#include "../gfx/sprite_renderer.h"
 
 namespace Dev
 {
@@ -17,6 +16,5 @@ namespace Dev
 		void Update();
 		void Draw();
 	private:
-		GFX::SpriteRenderer spriteRenderer;
 	};
 }

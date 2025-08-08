@@ -1,13 +1,12 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "../../common/int_types.h"
+#include "../../common/types.h"
 #include "../../common/color.h"
 #include "buffers.h"
 #include "shader.h"
 #include "vertex_desc.h"
 #include "texture.h"
 #include "blend_state.h"
-#include <string>
 
 namespace GFX
 {
@@ -17,10 +16,9 @@ namespace GFX
 
 		enum class BackendType
 		{
-			BACKEND_NONE = -1,
-			BACKEND_OPENGL_ARB,
-			BACKEND_D3D9,
-			BACKEND_COUNT
+			None = -1,
+			OpenGL_ARB,
+			Count
 		};
 
 		enum ClearFlags : u32
@@ -42,10 +40,10 @@ namespace GFX
 			PRIMITIVE_TRIANGLE_FAN
 		};
 
-		constexpr const char* BackendNames[static_cast<int>(BackendType::BACKEND_COUNT)] = 
+		constexpr DIVA::EnumStringMappingTable<BackendType> BackendTypeNames
 		{
-			"OpenGL_ARB",
-			"D3D9"
+			DIVA::EnumStringMapping<BackendType>
+			{ BackendType::OpenGL_ARB, "OpenGL_ARB" }
 		};
 
 		class Backend
@@ -86,6 +84,8 @@ namespace GFX
 			virtual void SetShaderMatrix(u32 index, const float* matrix) = 0;
 			virtual void SetShaderMatrix(u32 index, const mat4* matrix) = 0;
 
+			virtual void SetShaderVector4(u32 index, vec4 value) = 0;
+
 			virtual VertexDescription* CreateVertexDescription(const VertexAttribute* attribs, u32 attribCount, u32 stride, const Shader* shader) = 0;
 			virtual void DestroyVertexDescription(VertexDescription* desc) = 0;
 
@@ -104,7 +104,7 @@ namespace GFX
 
 			BackendType GetType() { return type; }
 		protected:
-			BackendType type = BackendType::BACKEND_NONE;
+			BackendType type = BackendType::None;
 			bool initialized = false;
 
 			SDL_Window* targetWindow = nullptr;

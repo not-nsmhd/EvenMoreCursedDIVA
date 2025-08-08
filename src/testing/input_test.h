@@ -2,7 +2,6 @@
 #include <string>
 #include "../game.h"
 #include "../gfx/font.h"
-#include "../gfx/sprite_renderer.h"
 
 namespace Testing
 {
@@ -19,7 +18,6 @@ namespace Testing
 		void Update();
 		void Draw();
 	private:
-		GFX::SpriteRenderer spriteRenderer;
 		GFX::Font* debugFont;
 
 		i32 scrollTest = 0;

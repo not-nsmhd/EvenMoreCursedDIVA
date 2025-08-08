@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "../common/int_types.h"
+#include "../common/types.h"
 #include <unordered_map>
 
 namespace Input
@@ -27,5 +27,25 @@ namespace Input
 	private:
 		std::unordered_map<SDL_Scancode, u8> curKeyboardState = {};
 		std::unordered_map<SDL_Scancode, u8> prevKeyboardState = {};
+	};
+
+	class KeyBind
+	{
+	public:
+		KeyBind(Keyboard* keyboard, SDL_Scancode primary, SDL_Scancode alternative);
+		KeyBind(KeyBind& other) = delete;
+		void operator=(const KeyBind&) = delete;
+
+		SDL_Scancode PrimaryKey;
+		SDL_Scancode AlternativeKey;
+
+		bool IsDown(bool* primary, bool* alternative) const;
+		bool IsUp(bool* primary, bool* alternative) const;
+		bool IsTapped(bool* primary, bool* alternative) const;
+		bool IsReleased(bool* primary, bool* alternative) const;
+	public:
+		static constexpr SDL_Scancode UnsetScancode = SDL_SCANCODE_UNKNOWN;
+	private:
+		Keyboard* keyboard = nullptr;
 	};
 }

@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{3C8C880B-A895-887C-3111-9F7C9D19947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\glad">
+      <UniqueIdentifier>{C36442A2-AF31-9DAD-D84A-8B55C476D23B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\glad\src">
+      <UniqueIdentifier>{5ACCB812-462F-48B7-EFB4-806DDBF6133A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\tinyxml2">
+      <UniqueIdentifier>{72E5184B-5E48-A8EF-07CE-E0A5F30F7472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\build">
+      <UniqueIdentifier>{2C65EBB4-98CF-9F2B-E10D-51D14DB77D80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{E5D74254-D18F-84A1-3A97-5DFD266E1F92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\dev">
+      <UniqueIdentifier>{5BF62FA9-C7D5-AE44-D0ED-391B3C4C15A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gfx">
+      <UniqueIdentifier>{410330A9-ADE2-AE44-B6FA-391B225915A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gfx\helpers">
+      <UniqueIdentifier>{23FD547B-8F88-C23F-9899-453404A41E40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gfx\lowlevel">
+      <UniqueIdentifier>{1AC122B2-06BA-4104-2FEC-26891B442110}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gfx\lowlevel\opengl">
+      <UniqueIdentifier>{6E011185-DA38-591C-E342-BD3F4FF97F15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\input">
+      <UniqueIdentifier>{0C5966B5-78C3-1A2C-C101-CCD12DABF880}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\io">
+      <UniqueIdentifier>{F44D661C-E0EF-90F2-C9AA-A446B5EB1743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\main_game">
+      <UniqueIdentifier>{7A51F0E9-E611-6C20-AF4C-B59D1BCCB0FC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\pcg">
+      <UniqueIdentifier>{162930A9-8208-AF44-8B20-3A1BF77E15A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stb">
+      <UniqueIdentifier>{053830A9-7117-AF44-7A2F-3A1BE68D15A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\testing">
+      <UniqueIdentifier>{9A9758E2-064D-D1D7-8F41-CBAEFBF5C7DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\util">
+      <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\build\build_info.h">
+      <Filter>src\build</Filter>
+    </ClInclude>
+    <ClInclude Include="src\build\build_info_dummy.h">
+      <Filter>src\build</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\color.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\int_types.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\math_ext.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\rect.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dev\state_selector.h">
+      <Filter>src\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\font.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\helpers\shader_helpers.h">
+      <Filter>src\gfx\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\helpers\tex_helpers.h">
+      <Filter>src\gfx\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\backend.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\blend_state.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\buffers.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_backend.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_buffers.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_defs.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_shader.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_texture.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\opengl\opengl_vertex_desc.h">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\resource.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\shader.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\texture.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\lowlevel\vertex_desc.h">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\sprite_renderer.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx\sprite_sheet.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\global_res.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\keyboard.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\mouse.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\binary_reader.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\binary_writer.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\filesystem.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\main_game\main_game.h">
+      <Filter>src\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pcg\pcg_basic.h">
+      <Filter>src\pcg</Filter>
+    </ClInclude>
+    <ClInclude Include="src\testing\input_test.h">
+      <Filter>src\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\testing\u16_test.h">
+      <Filter>src\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\logging.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\string_utils.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\types.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\main_game\chart.h">
+      <Filter>src\main_game</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lib\glad\src\glad.c">
+      <Filter>lib\glad\src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
+      <Filter>lib\tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\color.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\math_ext.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dev\state_selector.cpp">
+      <Filter>src\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\font.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\helpers\shader_helpers.cpp">
+      <Filter>src\gfx\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\helpers\tex_helpers.cpp">
+      <Filter>src\gfx\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\opengl\opengl_backend.cpp">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\opengl\opengl_buffers.cpp">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\opengl\opengl_shader.cpp">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\opengl\opengl_texture.cpp">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\opengl\opengl_vertex_desc.cpp">
+      <Filter>src\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\lowlevel\resource.cpp">
+      <Filter>src\gfx\lowlevel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\sprite_renderer.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx\sprite_sheet.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\global_res.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\keyboard.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\mouse.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\binary_reader.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\binary_writer.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\filesystem.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main_game\main_game.cpp">
+      <Filter>src\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pcg\pcg_basic.c">
+      <Filter>src\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stb\stb_image.cpp">
+      <Filter>src\stb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testing\input_test.cpp">
+      <Filter>src\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testing\u16_test.cpp">
+      <Filter>src\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\logging.cpp">
+      <Filter>src\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\string_utils.cpp">
+      <Filter>src\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main_game\chart.cpp">
+      <Filter>src\main_game</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\.editorconfig" />
+  </ItemGroup>
+</Project>

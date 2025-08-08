@@ -1,77 +1,75 @@
 #pragma once
+#include "../common/types.h"
 #include <vector>
-#include <unordered_map>
 #include <string>
-#include <glm/vec2.hpp>
-#include "../io/filesystem.h"
-#include "event.h"
-
-using glm::vec2;
 
 namespace MainGame
 {
-	enum class NoteShape
+	enum class NoteShape : u8
 	{
-		NOTE_NONE = -1,
+		Circle,
+		Cross,
+		Square,
+		Triangle,
+		//Star,
 
-		NOTE_TRIANGLE,
-		NOTE_CIRCLE,
-		NOTE_CROSS,
-		NOTE_SQUARE,
-		NOTE_STAR,
-
-		NOTE_SHAPE_COUNT
+		Count
 	};
 
-	enum class NoteType
+	enum class NoteType : u8
 	{
-		TYPE_NONE = -1,
+		Normal,
+		Double,
+		HoldStart,
+		HoldEnd,
 
-		TYPE_NORMAL,
-		TYPE_DOUBLE,
-		TYPE_HOLD_START,
-		TYPE_HOLD_END,
+		Count
+	};
 
-		NOTE_TYPE_COUNT
+	constexpr DIVA::EnumStringMappingTable<NoteShape> NoteShapeStringTable
+	{
+		DIVA::EnumStringMapping<NoteShape>
+		{ NoteShape::Circle, "Circle" },
+		{ NoteShape::Cross, "Cross" },
+		{ NoteShape::Square, "Square" },
+		{ NoteShape::Triangle, "Triangle" }
+	};
+
+	constexpr DIVA::EnumStringMappingTable<NoteType> NoteTypeStringTable
+	{
+		DIVA::EnumStringMapping<NoteType>
+		{ NoteType::Normal, "Normal" },
+		{ NoteType::Double, "Double" },
+		{ NoteType::HoldStart, "HoldStart" },
+		{ NoteType::HoldEnd, "HoldEnd" }
 	};
 
 	struct ChartNote
 	{
-		float AppearTime;
-
+		f32 AppearTime;
 		NoteShape Shape;
 		NoteType Type;
-		int ReferenceIndex;
 
-		vec2 Position;
+		float X;
+		float Y;
+
 		float Angle;
 		float Frequency;
 		float Amplitude;
 		float Distance;
-	};
 
-	extern const char* g_NoteShapeNames[];
-	extern const char* g_NoteTypeNames[];
-	extern const std::unordered_map<std::string, NoteShape> g_NoteShapeConversionTable;
-	extern const std::unordered_map<std::string, NoteType> g_NoteTypeConversionTable;
+		u32 NextNoteIndex = 0;
+	};
 
 	class Chart
 	{
 	public:
-		Chart();
-		~Chart();
-
 		std::vector<ChartNote> Notes;
-		std::vector<ChartEvent*> Events;
 
+	public:
+		void ProcessNoteReferences();
 		void Clear();
-
-		bool ReadFromXml(const char* xml, size_t size);
-		bool LoadFromXml(const std::filesystem::path& path);
-		std::string WriteToXml();
-
-		bool HasMusicStartCommand();
-	private:
-		bool hasMusicStartCommand = false;
 	};
+
+	void ReadXmlChart(Chart& outChart, const char* xml, size_t size);
 }

@@ -7,9 +7,16 @@
 
 namespace GFX
 {
-	SpriteSheet::SpriteSheet()
+	using std::string;
+	using std::vector;
+	using std::string_view;
+	using std::unordered_map;
+	using std::filesystem::path;
+	using LowLevel::Backend;
+	using LowLevel::Texture;
+
+	SpriteSheet::SpriteSheet() : Name{}, backend{}, sprites{}, textures{}
 	{
-		Name = string();
 	}
 	
 	void SpriteSheet::Destroy()
@@ -20,7 +27,6 @@ namespace GFX
 		}
 
 		textures.clear();
-		spriteMap.clear();
 		sprites.clear();	
 	}
 
@@ -67,6 +73,7 @@ namespace GFX
 
 					if (values.size() == 7)
 					{
+						sprite.name = keyAndValues[0];
 						sprite.texIndex = stoi(values[0]);
 						texCount = SDL_max(texCount, sprite.texIndex + 1);
 
@@ -80,10 +87,6 @@ namespace GFX
 
 						sprites.push_back(sprite);
 
-						spriteMapEntry.first = keyAndValues[0];
-						spriteMapEntry.second = spriteIndex;
-
-						spriteMap.insert(spriteMapEntry);
 						spriteIndex++;
 					}
 
@@ -122,95 +125,93 @@ namespace GFX
 		return &sprites[index];
 	}
 
-	Sprite* SpriteSheet::GetSprite(const string &name)
+	Sprite* SpriteSheet::GetSprite(string_view name)
 	{
 		u32 index = GetSpriteIndex(name);
 		return &sprites[index];
 	}
 
-	u32 SpriteSheet::GetSpriteIndex(const string &name)
+	u32 SpriteSheet::GetSpriteIndex(string_view name)
 	{
-		unordered_map<string, u32>::const_iterator index = spriteMap.find(name);
-
-		if (index == spriteMap.end())
+		for (size_t i = 0; i < sprites.size(); i++)
 		{
-			return 0;
+			if (sprites[i].name == name)
+			{
+				return static_cast<u32>(i);
+			}
 		}
 
-		return index->second;
+		return InvalidSpriteIndex;
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, Sprite &sprite)
+	LowLevel::Texture* SpriteSheet::GetTexture(u32 index)
+	{
+		if (index >= textures.size())
+		{
+			return textures[0];
+		}
+		return textures[index];
+	}
+
+	void SpriteSheet::SetSpriteState(SpriteRenderer* renderer, Sprite &sprite)
 	{
 		Texture* tex = textures[sprite.texIndex];
-		renderer.SetSpriteOrigin(sprite.origin);
-		renderer.SetSpriteScale({sprite.sourceRect.width, sprite.sourceRect.height});
-		renderer.SetSpriteSource(tex, sprite.sourceRect);
+		renderer->SetSpriteOrigin(sprite.origin);
+		renderer->SetSpriteScale(vec2 {sprite.sourceRect.width, sprite.sourceRect.height});
+		renderer->SetSpriteSource(tex, sprite.sourceRect);
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, u32 spriteIndex)
+	void SpriteSheet::SetSpriteState(SpriteRenderer* renderer, u32 spriteIndex)
 	{
 		Sprite* sprite = GetSprite(spriteIndex);
 		SetSpriteState(renderer, *sprite);
 	}
 
-	void SpriteSheet::SetSpriteState(SpriteRenderer &renderer, const string& spriteName)
+	void SpriteSheet::SetSpriteState(SpriteRenderer* renderer, string_view spriteName)
 	{
 		Sprite* sprite = GetSprite(spriteName);
 		SetSpriteState(renderer, *sprite);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite& sprite)
+	void SpriteSheet::PushSprite(SpriteRenderer* renderer, Sprite& sprite)
 	{
 		Texture* tex = textures[sprite.texIndex];
-		renderer.SetSpriteOrigin(sprite.origin);
-		renderer.SetSpriteScale({sprite.sourceRect.width, sprite.sourceRect.height});
-		renderer.SetSpriteSource(tex, sprite.sourceRect);
-		renderer.PushSprite(tex);
+		renderer->SetSpriteOrigin(sprite.origin);
+		renderer->SetSpriteScale(vec2 {sprite.sourceRect.width, sprite.sourceRect.height});
+		renderer->SetSpriteSource(tex, sprite.sourceRect);
+		renderer->PushSprite(tex);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite* sprite)
+	void SpriteSheet::PushSprite(SpriteRenderer* renderer, Sprite* sprite)
 	{
 		Texture* tex = textures[sprite->texIndex];
-		renderer.SetSpriteOrigin(sprite->origin);
-		renderer.SetSpriteScale({sprite->sourceRect.width, sprite->sourceRect.height});
-		renderer.SetSpriteSource(tex, sprite->sourceRect);
-		renderer.PushSprite(tex);
+		renderer->SetSpriteOrigin(sprite->origin);
+		renderer->SetSpriteScale(vec2 {sprite->sourceRect.width, sprite->sourceRect.height});
+		renderer->SetSpriteSource(tex, sprite->sourceRect);
+		renderer->PushSprite(tex);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, u32 spriteIndex)
+	void SpriteSheet::PushSprite(SpriteRenderer* renderer, u32 spriteIndex)
 	{
 		Sprite* sprite = GetSprite(spriteIndex);
 		PushSprite(renderer, *sprite);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string& spriteName)
-	{
-		Sprite* sprite = GetSprite(spriteName);
-		PushSprite(renderer, *sprite);
-	}
-	
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite &sprite, vec2& scale)
+	void SpriteSheet::PushSprite(SpriteRenderer* renderer, Sprite &sprite, vec2& scale)
 	{
 		Texture* tex = textures[sprite.texIndex];
-		renderer.SetSpriteOrigin(sprite.origin * scale);
-		renderer.SetSpriteScale({sprite.sourceRect.width * scale.x, sprite.sourceRect.height * scale.y});
-		renderer.SetSpriteSource(tex, sprite.sourceRect);
-		renderer.PushSprite(tex);
+		renderer->SetSpriteOrigin(sprite.origin * scale);
+		renderer->SetSpriteScale(vec2 {sprite.sourceRect.width * scale.x, sprite.sourceRect.height * scale.y});
+		renderer->SetSpriteSource(tex, sprite.sourceRect);
+		renderer->PushSprite(tex);
 	}
 
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, Sprite* sprite, vec2 scale)
+	void SpriteSheet::PushSprite(SpriteRenderer* renderer, Sprite* sprite, vec2 scale)
 	{
 		Texture* tex = textures[sprite->texIndex];
-		renderer.SetSpriteOrigin(sprite->origin * scale);
-		renderer.SetSpriteScale({sprite->sourceRect.width * scale.x, sprite->sourceRect.height * scale.y});
-		renderer.SetSpriteSource(tex, sprite->sourceRect);
-		renderer.PushSprite(tex);
-	}
-
-	void SpriteSheet::PushSprite(SpriteRenderer &renderer, const string &spriteName, vec2& scale)
-	{
-		Sprite* sprite = GetSprite(spriteName);
-		PushSprite(renderer, *sprite, scale);
+		renderer->SetSpriteOrigin(sprite->origin * scale);
+		renderer->SetSpriteScale(vec2 {sprite->sourceRect.width * scale.x, sprite->sourceRect.height * scale.y});
+		renderer->SetSpriteSource(tex, sprite->sourceRect);
+		renderer->PushSprite(tex);
 	}
 };

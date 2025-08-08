@@ -1,19 +1,17 @@
 #pragma once
 #include <string>
 #include <SDL2/SDL.h>
-#include "common/int_types.h"
+#include "common/types.h"
 #include "io/filesystem.h"
 #include "input/keyboard.h"
 #include "input/mouse.h"
 #include "gfx/lowlevel/backend.h"
-#include "audio/audio.h"
 
 using std::string;
 
 using IO::FileSystem;
 using Input::Keyboard;
 using Input::Mouse;
-using Audio::AudioEngine;
 
 using GFXBackend = GFX::LowLevel::Backend;
 using GFXBackendType = GFX::LowLevel::BackendType;
@@ -23,26 +21,24 @@ class GameState;
 
 enum class GameStates
 {
-	STATE_UNREGISTIRED = -2,
-	STATE_NONE = -1,
+	UnregisteredState = -2,
+	None = -1,
 
-	STATE_MAINGAME,
+	MainGame,
 
-	DEVSTATE_U16_TEST,
-	DEVSTATE_INPUT_TEST,
-	DEVSTATE_GFX_BACKEND_TEST,
+	DevTest_UnicodeText,
+	DevTest_Input,
 
-	DEVSTATE_STATE_SELECTOR,
+	Dev_StateSelector,
 
-	STATE_COUNT
+	Count
 };
 
-constexpr const char* GameStateNames[static_cast<int>(GameStates::STATE_COUNT)] = 
+constexpr const char* GameStateNames[DIVA::EnumCount<GameStates>()] = 
 {
 	"Main Game",
 	"[Dev] UTF-16 Text Test",
 	"[Dev] Input Test",
-	"[Dev] Graphics Backend Test",
 	"[Dev] State Selector"
 };
 
@@ -57,7 +53,7 @@ public:
 
 	/* Graphics rendering */
 
-	GFXBackendType gfxBackendType = GFXBackendType::BACKEND_OPENGL_ARB;
+	GFXBackendType gfxBackendType = GFXBackendType::None;
 	bool fullscreen = false;
 
 	/* State properties */
@@ -68,15 +64,15 @@ public:
 
 	/* Timing */
 
-	double ticks_lastFrame = 0.0;
-	double ticks_now = 0.0;
-	double ticks_delta = 0.0;
+	u64 ticks_lastFrame = 0;
+	u64 ticks_now = 0;
+	u64 ticks_delta = 0;
 	double deltaTime_ms = 0.0;
 	double actualFrameTime_ms = 0.0;
 
 	/* Game state list */
-	GameStates currentGameState = GameStates::STATE_NONE;
-	GameState* stateList[static_cast<int>(GameStates::STATE_COUNT)] = {};
+	GameStates currentGameState = GameStates::None;
+	GameState* stateList[static_cast<int>(GameStates::Count)] = {};
 
 	/* Constructor and destructor */
 
@@ -94,7 +90,8 @@ public:
 	bool IsActive();
 
 	void GetVersionNumber(int* year, int* month);
-	const char* GetPlatformName();
+
+	GFXBackend* GetGraphicsBackend();
 private:
 	bool initialized = false;
 	bool active = true;
@@ -102,9 +99,6 @@ private:
 	/* File system */
 	FileSystem* fileSystem;
 	GFXBackend* graphicsBackend;
-
-	/* Audio engine */
-	AudioEngine* audioEngine;
 
 	/* Game state */
 	bool changeState;
@@ -128,7 +122,6 @@ public:
 	Input::Keyboard* keyboardState = nullptr;
 	Input::Mouse* mouseState = nullptr;
 	GFXBackend* graphicsBackend = nullptr;
-	AudioEngine* audio = nullptr;
 
 	GameState() { };
 

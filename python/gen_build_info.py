@@ -12,10 +12,10 @@ def main():
     
     genDateString = genDate.strftime("%Y.%m.%dT%H:%M:%S")
     
-    process = subprocess.run("git rev-parse --abbrev-ref HEAD", capture_output=True, encoding="ASCII")
+    process = subprocess.run("git rev-parse --abbrev-ref HEAD", capture_output=True, encoding="ASCII", shell=True)
     gitBranch = process.stdout
     
-    process = subprocess.run("git rev-parse --short=7 HEAD", capture_output=True, encoding="ASCII")
+    process = subprocess.run("git rev-parse --short=7 HEAD", capture_output=True, encoding="ASCII", shell=True)
     gitCommitHash = process.stdout
 
     # Writing

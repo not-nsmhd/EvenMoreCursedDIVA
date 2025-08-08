@@ -10,9 +10,9 @@ namespace Common
 		u8 B;
 		u8 A;
 
-		Color() { R = 0; G = 0; B = 0; A = 0; };
-		Color(u8 r, u8 g, u8 b) { R = r; G = g; B = b; A = 255; };
-		Color(u8 r, u8 g, u8 b, u8 a) { R = r; G = g; B = b; A = a; };
+		constexpr Color() : R{}, G{}, B{}, A{} {};
+		constexpr Color(u8 r, u8 g, u8 b) : R{ r }, G{ g }, B{ b }, A{ 255 } {};
+		constexpr Color(u8 r, u8 g, u8 b, u8 a) : R{ r }, G{ g }, B{ b }, A{ a } {};
 	};
 
 	struct HSVColor

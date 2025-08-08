@@ -18,8 +18,9 @@ using namespace std::filesystem;
 
 void WriteText(std::vector<Sprite>& spritesToPack, std::vector<path>& spriteImagePaths, i32 sheetWidth, i32 sheetHeight, std::string name)
 {
-	u8* sheetImageData = new u8[sheetWidth * sheetHeight * 4];
-	memset(sheetImageData, 0, sheetWidth * sheetHeight * 4);
+	size_t sheetImageSize = static_cast<size_t>(sheetWidth * sheetHeight * 4);
+	u8* sheetImageData = new u8[sheetImageSize];
+	memset(sheetImageData, 0, sheetImageSize);
 
 	int dummy = 0;
 	for (std::vector<Sprite>::iterator it = spritesToPack.begin(); it != spritesToPack.end(); it++)
@@ -86,6 +87,18 @@ void WriteText(std::vector<Sprite>& spritesToPack, std::vector<path>& spriteImag
 	outputMapFile.close();
 }
 
+int nextPowerOf2(int value)
+{
+	value--;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	value++;
+	return value;
+}
+
 int main(int argc, char** argv)
 {
 	if (argc < 3)
@@ -148,6 +161,9 @@ int main(int argc, char** argv)
 	int sheetWidth = 0;
 	int sheetHeight = 0;
 	rectPack.GetActualPackArea(&sheetWidth, &sheetHeight);
+
+	sheetWidth = nextPowerOf2(sheetWidth);
+	sheetHeight = nextPowerOf2(sheetHeight);
 
 	WriteText(spritesToPack, spriteImagePaths, sheetWidth, sheetHeight, argv[2]);
 

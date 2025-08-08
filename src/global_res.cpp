@@ -2,12 +2,16 @@
 
 namespace GlobalResources
 {
-	GFX::Font* DebugFont = nullptr;
+	GFX::Font* DebugFont;
+	GFX::SpriteRenderer* SpriteRenderer;
 
 	bool Load(GFX::LowLevel::Backend* backend)
 	{
 		DebugFont = new GFX::Font();
 		DebugFont->LoadBMFont(backend, "fonts/debug.fnt");
+
+		SpriteRenderer = new GFX::SpriteRenderer();
+		SpriteRenderer->Initialize(backend);
 
 		return true;
 	}
@@ -18,6 +22,12 @@ namespace GlobalResources
 		{
 			DebugFont->Destroy();
 			delete DebugFont;
+		}
+
+		if (SpriteRenderer != nullptr)
+		{
+			SpriteRenderer->Destroy();
+			delete SpriteRenderer;
 		}
 	}
 }

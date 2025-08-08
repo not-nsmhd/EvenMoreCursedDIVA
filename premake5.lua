@@ -1,21 +1,14 @@
 workspace "EvenMoreCursedDIVA"
 	configurations { "Debug", "Release" }
-	platforms { "Win32", "Win64" }
+	platforms { "Linux64" }
 
 project "DIVA"
 	kind "ConsoleApp"
 	language "C++"
 	targetname "game"
-	targetdir "bin_%{cfg.architecture}/%{cfg.buildcfg}"
+	targetdir "bin/%{cfg.platform}_%{cfg.buildcfg}"
 	cdialect "C17"
 	cppdialect "C++17"
-
-	buildDate = os.date("%Y.%m.%dT%H:%M:%S")
-
-	newoption {
-		trigger = "gfx_d3d9",
-		description = "Enable Direct3D 9 graphics backend. (Windows only)"
-	}
 
 	files { 
 		"src/**.h",
@@ -31,27 +24,17 @@ project "DIVA"
 	includedirs {
 		"lib/glm/include", 
 		"lib/stb/include", 
-		"lib/tinyxml2",
-		"src/" }
-
-	defines {
-		"PREMAKE_BUILD_DATE=\"" .. buildDate .. "\""
+		"lib/tinyxml2", 
+		"lib/utf8cpp/include" 
 	}
-		
-	filter { "platforms:Win32" }
-		system "Windows"
-		architecture "x86"
 
-	filter { "platforms:Win64" }
-		system "Windows"
+	filter { "platforms:Linux64" }
+		system "Linux"
 		architecture "x86_64"
 
-	filter { "system:windows" }
-		links { "shell32", "shlwapi", "winmm", "d3d9" }
-
-	filter { "options:gfx_d3d9" }
-		defines { "STARSHINE_GFX_D3D9" }
-		links { "d3d9" }
+	filter { "system:linux" }
+		prebuildcommands { "python python/gen_build_info.py src/build/build_info.h" }
+		links { "m" }
 	
 	filter { "configurations:Debug" }
 		includedirs { "lib/glad_debug/glad/include" }
@@ -64,8 +47,8 @@ project "DIVA"
 	filter { "configurations:Debug" }
 		defines { "_DEBUG" }
 		symbols "On"
-		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio vorbisfile --cflags`", "-mconsole" }
-		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`", "-mconsole" }
+		buildoptions { "`sdl2-config --cflags`", "`pkg-config FAudio vorbisfile --cflags`" }
+		linkoptions { "`sdl2-config --libs`", "`pkg-config FAudio vorbisfile --libs`" }
 		
 	filter { "configurations:Release" }
 		defines { "_NDEBUG" }
@@ -96,14 +79,6 @@ project "SpritePack"
 		"lib/fmt/include",
 		"lib/qoi/include",
 		"src_tools/SpritePack/" }
-
-	filter { "platforms:Win32" }
-		system "Windows"
-		architecture "x86"
-
-	filter { "platforms:Win64" }
-		system "Windows"
-		architecture "x86_64"
 
 	filter { "configurations:Debug" }
 		defines { "_DEBUG" }

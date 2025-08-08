@@ -1,8 +1,11 @@
 #include "filesystem.h"
 #include <string>
-#ifdef _WIN32
+#if defined (_WIN32)
 #include <shlobj.h>
 #include <shlwapi.h>
+#elif defined(__linux__)
+#include <sys/errno.h>
+#include <sys/stat.h>
 #endif
 #include "../util/logging.h"
 
@@ -21,7 +24,7 @@ namespace IO
 	{
 		contentPaths = std::vector<std::filesystem::path>();
 
-#ifdef _WIN32
+#if defined (_WIN32)
 		CHAR myDocuments[MAX_PATH];
 		BOOL result = SHGetSpecialFolderPathA(NULL, myDocuments, CSIDL_MYDOCUMENTS, FALSE);
 
@@ -55,6 +58,52 @@ namespace IO
 
 			saveDataPath = std::filesystem::path(savePath);
 		}
+#elif defined(__linux__)
+		string homeDir = {};
+		string savePath = {};
+		char* homeDataDir = SDL_getenv("XDG_DATA_HOME");
+
+		if (homeDataDir == NULL)
+		{
+			char* homePath = SDL_getenv("HOME");
+			homeDir = string(homePath);
+			homeDir.append("/.local/share");
+		}
+		else
+		{
+			homeDir = string(homeDataDir);
+		}
+
+		savePath = homeDir;
+		savePath.append("/Starshine/EvenMoreCursedDIVA");
+		LOG_INFO_ARGS("Save data path: %s", savePath.c_str());
+
+		struct stat tempStat = {};
+
+		if (stat(savePath.c_str(), &tempStat) != 0)
+		{
+			if (errno == ENOENT)
+			{
+				LOG_WARN("Save data directory does not exist. Creating...");
+
+				string tempPath = homeDir;
+				tempPath.append("/Starshine");
+
+				if (mkdir(tempPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
+				{
+					if (errno != EEXIST)
+					{
+						LOG_ERROR_ARGS("Failed to create save data directory. Error: %s\n", strerror(errno));
+						return;
+					}
+				}
+
+				tempPath.append("/EvenMoreCursedDIVA");
+				mkdir(tempPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+			}
+		}
+
+		saveDataPath = std::filesystem::path(savePath);
 #endif
 	}
 	

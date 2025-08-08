@@ -1,8 +1,12 @@
+#include "../global_res.h"
 #include "u16_test.h"
+#include <utf8.h>
 #include <fstream>
 
 namespace Testing
 {
+	static GFX::SpriteRenderer* spriteRenderer;
+
 	bool U16Test::Initialize()
 	{
 		alphaBlend.srcColor = GFX::LowLevel::BlendFactor::BLEND_SRC_ALPHA;
@@ -16,7 +20,7 @@ namespace Testing
 	
 	bool U16Test::LoadContent()
 	{
-		std::filesystem::path u16test_filePath = fileSystem->GetContentFilePath("resources/u16_test.txt");
+		std::filesystem::path u16test_filePath = fileSystem->GetContentFilePath("resources/u8_test.txt");
 
 		std::fstream u16test_file;
 		u16test_file.open(u16test_filePath, std::ios::in | std::ios::binary);
@@ -28,15 +32,23 @@ namespace Testing
 
 		size_t fileSize = std::filesystem::file_size(u16test_filePath);
 
-		char16_t* buf = new char16_t[(fileSize / 2) + 1];
+		u8* buf = new u8[fileSize + 1];
 		u16test_file.read((char*)buf, fileSize);
-		buf[fileSize / 2] = 0x0000;
+		buf[fileSize] = 0x00;
 		u16test_file.close();
 
-		testText = u16string(buf);
-		delete[] buf;
+		bool valid = utf8::is_valid(buf, &buf[fileSize - 1]);
 
-		spriteRenderer.Initialize(graphicsBackend);
+		if (!valid)
+		{
+			delete[] buf;
+			return false;
+		}
+
+		testTextBuffer = buf;
+		testTextBufferSize = fileSize;
+
+		spriteRenderer = GlobalResources::SpriteRenderer;
 		font.LoadBMFont(graphicsBackend, "fonts/u16_test.fnt");
 
 		return true;
@@ -44,13 +56,12 @@ namespace Testing
 	
 	void U16Test::UnloadContent()
 	{
-		spriteRenderer.Destroy();
 		font.Destroy();
 	}
 	
 	void U16Test::Destroy()
 	{
-		testText.clear();
+		delete[] testTextBuffer;
 	}
 	
 	void U16Test::OnResize(u32 newWidth, u32 newHeight)
@@ -65,10 +76,10 @@ namespace Testing
 	{
 		graphicsBackend->Clear(GFX::LowLevel::ClearFlags::GFX_CLEAR_COLOR, Common::Color(0, 24, 24, 255), 1.0f, 0);
 
-		font.PushString(spriteRenderer, testText, vec2(16.0f), vec2(1.0f), Common::DefaultColors::White);
+		font.PushUTF8String(spriteRenderer, testTextBuffer, testTextBufferSize, vec2(16.0f), vec2(1.0f), Common::DefaultColors::White);
 
 		graphicsBackend->SetBlendState(&alphaBlend);
-		spriteRenderer.RenderSprites(nullptr);
+		spriteRenderer->RenderSprites(nullptr);
 
 		graphicsBackend->SwapBuffers();
 	}
