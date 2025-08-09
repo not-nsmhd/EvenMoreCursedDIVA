@@ -147,6 +147,7 @@
     <ClInclude Include="src\io\binary_writer.h" />
     <ClInclude Include="src\io\filesystem.h" />
     <ClInclude Include="src\main_game\chart.h" />
+    <ClInclude Include="src\main_game\hit_evaluation.h" />
     <ClInclude Include="src\main_game\main_game.h" />
     <ClInclude Include="src\pcg\pcg_basic.h" />
     <ClInclude Include="src\testing\input_test.h" />

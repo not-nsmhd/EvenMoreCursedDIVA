@@ -11,41 +11,60 @@ namespace MainGame
 		xmlDoc.Parse(xml, size);
 
 		XMLElement* root = xmlDoc.RootElement();
-		size_t noteCount = static_cast<size_t>(root->ChildElementCount("Note"));
 
-		XMLElement* xmlNote = root->FirstChildElement("Note");
+		const XMLAttribute* curAttrib = root->FindAttribute("Duration");
+		curAttrib->QueryFloatValue(&outChart.Duration);
+
+		size_t noteCount = static_cast<size_t>(root->ChildElementCount("Note"));
+		size_t noteTimeChangesCount = static_cast<size_t>(root->ChildElementCount("SetNoteTime"));
+		outChart.Notes.reserve(noteCount);
+		outChart.NoteTimeChanges.reserve(noteTimeChangesCount);
+
+		XMLElement* xmlElement = root->FirstChildElement("Note");
 		for (size_t i = 0; i < noteCount; i++)
 		{
 			ChartNote& newNote = outChart.Notes.emplace_back();
 			
-			const XMLAttribute* curAttrib = xmlNote->FindAttribute("Time");
+			curAttrib = xmlElement->FindAttribute("Time");
 			curAttrib->QueryFloatValue(&newNote.AppearTime);
 
-			curAttrib = xmlNote->FindAttribute("Shape");
+			curAttrib = xmlElement->FindAttribute("Shape");
 			newNote.Shape = DIVA::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
 
-			curAttrib = xmlNote->FindAttribute("Type");
+			curAttrib = xmlElement->FindAttribute("Type");
 			newNote.Type = DIVA::EnumFromString<NoteType>(NoteTypeStringTable, curAttrib->Value());
 
-			curAttrib = xmlNote->FindAttribute("X");
+			curAttrib = xmlElement->FindAttribute("X");
 			curAttrib->QueryFloatValue(&newNote.X);
 
-			curAttrib = xmlNote->FindAttribute("Y");
+			curAttrib = xmlElement->FindAttribute("Y");
 			curAttrib->QueryFloatValue(&newNote.Y);
 
-			curAttrib = xmlNote->FindAttribute("Angle");
+			curAttrib = xmlElement->FindAttribute("Angle");
 			curAttrib->QueryFloatValue(&newNote.Angle);
 
-			curAttrib = xmlNote->FindAttribute("Frequency");
+			curAttrib = xmlElement->FindAttribute("Frequency");
 			curAttrib->QueryFloatValue(&newNote.Frequency);
 
-			curAttrib = xmlNote->FindAttribute("Amplitude");
+			curAttrib = xmlElement->FindAttribute("Amplitude");
 			curAttrib->QueryFloatValue(&newNote.Amplitude);
 
-			curAttrib = xmlNote->FindAttribute("Distance");
+			curAttrib = xmlElement->FindAttribute("Distance");
 			curAttrib->QueryFloatValue(&newNote.Distance);
 
-			xmlNote = xmlNote->NextSiblingElement("Note");
+			xmlElement = xmlElement->NextSiblingElement("Note");
+		}
+
+		xmlElement = root->FirstChildElement("SetNoteTime");
+		for (size_t i = 0; i < noteTimeChangesCount; i++)
+		{
+			NoteTimeChange& newTimeChange = outChart.NoteTimeChanges.emplace_back();
+
+			curAttrib = xmlElement->FindAttribute("Time");
+			curAttrib->QueryFloatValue(&newTimeChange.Time);
+
+			curAttrib = xmlElement->FindAttribute("Value");
+			curAttrib->QueryFloatValue(&newTimeChange.Value);
 		}
 
 		outChart.ProcessNoteReferences();
@@ -72,6 +91,22 @@ namespace MainGame
 						break;
 					}
 				}
+			}
+		}
+	}
+
+	f32 Chart::GetNoteTime(f32 timeSeconds)
+	{
+		if (NoteTimeChanges.size() == 0)
+		{
+			return 2.0f;
+		}
+
+		for (auto& noteTimeChange : NoteTimeChanges)
+		{
+			if (noteTimeChange.Time <= timeSeconds)
+			{
+				return noteTimeChange.Value;
 			}
 		}
 	}

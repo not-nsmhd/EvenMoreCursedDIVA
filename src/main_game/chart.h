@@ -61,14 +61,25 @@ namespace MainGame
 		u32 NextNoteIndex = 0;
 	};
 
+	struct NoteTimeChange
+	{
+		f32 Time;
+		f32 Value;
+	};
+
 	class Chart
 	{
 	public:
+		f32 Duration;
+	public:
 		std::vector<ChartNote> Notes;
+		std::vector<NoteTimeChange> NoteTimeChanges;
 
 	public:
 		void ProcessNoteReferences();
 		void Clear();
+
+		f32 GetNoteTime(f32 timeSeconds);
 	};
 
 	void ReadXmlChart(Chart& outChart, const char* xml, size_t size);

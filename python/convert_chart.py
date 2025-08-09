@@ -70,6 +70,7 @@ nextCommandTime_divaTime = 0
 
 prevShapeString = ""
 prevTypeString = ""
+prevNoteTime = 0
 while True:
     if opcodeIdx >= (int)(dscDataSize / 4):
         break
@@ -78,13 +79,7 @@ while True:
     
     match opcode:
         case 0: # END
-            xmlChartNote = XmlET.SubElement(xmlChart, "Event", 
-            {
-                "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "Type": "SongEnd"
-            })
-            
-            XmlET.indent(xmlChart, space="\t")
+            xmlChart.attrib["Duration"] = "{0:.3f}".format(nextCommandTime_divaTime / 100000.0)
         case 1: # TIME
             nextCommandTime_divaTime = dscData[opcodeIdx + 1]
         case 6: # TARGET
@@ -106,6 +101,17 @@ while True:
             frequency = dscData[opcodeIdx + 7]
             distance = dscData[opcodeIdx + 8]
             amplitude = dscData[opcodeIdx + 9]
+            noteTime = dscData[opcodeIdx + 10]
+            
+            if (prevNoteTime != noteTime):
+                xmlChartNote = XmlET.SubElement(xmlChart, "SetNoteTime", 
+                {
+                    "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
+                    "Value": "{0}".format(noteTime / 1000.0)
+                })
+                XmlET.indent(xmlChart, space="\t")
+                
+            prevNoteTime = noteTime
             
             xmlChartNote = XmlET.SubElement(xmlChart, "Note", 
             {
@@ -124,27 +130,24 @@ while True:
             
             XmlET.indent(xmlChart, space="\t")
         case 25: # MUSIC_PLAY
-            xmlChartNote = XmlET.SubElement(xmlChart, "Event", 
-            {
-                "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "Type": "PlayMusic"
-            })
-            
-            XmlET.indent(xmlChart, space="\t")
+            xmlChart.attrib["MusicStart"] = "{0:.3f}".format(nextCommandTime_divaTime / 100000.0)
         case 26: # MODE_SELECT
-            mode = dscData[opcodeIdx + 1]
+            difficulty = dscData[opcodeIdx + 1]
+            mode = dscData[opcodeIdx + 2]
         
-            if mode == 1:
-                xmlChartNote = XmlET.SubElement(xmlChart, "Event", 
+            if difficulty & 1 != 0:
+                eventName = ""
+                match mode:
+                    case 1:
+                        eventName = "ChanceTimeStart"
+                    case 3:
+                        eventName = "ChanceTimeEnd"
+                    case _:
+                        eventName = ""
+                
+                xmlEvent = XmlET.SubElement(xmlChart, eventName, 
                 {
                     "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                    "Type": "ChanceTimeStart"
-                })
-            elif mode == 3:
-                xmlChartNote = XmlET.SubElement(xmlChart, "Event", 
-                {
-                    "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                    "Type": "ChanceTimeEnd"
                 })
             
             XmlET.indent(xmlChart, space="\t")
@@ -152,13 +155,10 @@ while True:
             bpm = dscData[opcodeIdx + 1]
             beatsPerBar = dscData[opcodeIdx + 2]
         
-            xmlChartNote = XmlET.SubElement(xmlChart, "Event", 
+            xmlChartNote = XmlET.SubElement(xmlChart, "SetNoteTime", 
             {
                 "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "Type": "SetBPM",
-                
-                "BPM": "{0}".format(bpm),
-                "BeatsPerBar": "{0}".format(beatsPerBar + 1),
+                "Value": "{0}".format(60 / bpm * 4)
             })
             
             XmlET.indent(xmlChart, space="\t")

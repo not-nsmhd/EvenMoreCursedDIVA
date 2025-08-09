@@ -1,5 +1,5 @@
-<Chart>
-	<Event Time="0.000" Type="PlayMusic" />
+<Chart MusicStart="0.000" Duration="194.887">
+	<SetNoteTime Time="10.832" Value="1.8" />
 	<Note Time="10.832" Shape="Circle" Type="Normal" X="448.000" Y="256.765" Angle="190.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="11.283" Shape="Square" Type="Normal" X="352.000" Y="256.765" Angle="175.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="11.734" Shape="Triangle" Type="Normal" X="256.000" Y="256.765" Angle="160.000" Frequency="2" Amplitude="500" Distance="1212.000" />
@@ -383,6 +383,7 @@
 	<Note Time="157.674" Shape="Triangle" Type="Normal" X="808.000" Y="177.353" Angle="173.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="157.899" Shape="Triangle" Type="HoldStart" X="760.000" Y="177.353" Angle="173.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="158.350" Shape="Triangle" Type="HoldEnd" X="760.000" Y="177.353" Angle="173.000" Frequency="2" Amplitude="500" Distance="1212.000" />
+	<ChanceTimeStart Time="158.600" />
 	<Note Time="158.802" Shape="Cross" Type="HoldStart" X="664.000" Y="177.353" Angle="171.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="159.253" Shape="Cross" Type="HoldEnd" X="664.000" Y="177.353" Angle="171.000" Frequency="2" Amplitude="500" Distance="1212.000" />
 	<Note Time="159.478" Shape="Cross" Type="Normal" X="616.000" Y="177.353" Angle="171.000" Frequency="2" Amplitude="500" Distance="1212.000" />
@@ -464,5 +465,5 @@
 	<Note Time="185.418" Shape="Triangle" Type="Double" X="768.000" Y="232.941" Angle="186.000" Frequency="-2" Amplitude="500" Distance="1212.000" />
 	<Note Time="185.869" Shape="Square" Type="HoldStart" X="864.000" Y="232.941" Angle="192.000" Frequency="-2" Amplitude="500" Distance="1212.000" />
 	<Note Time="189.027" Shape="Square" Type="HoldEnd" X="864.000" Y="232.941" Angle="192.000" Frequency="-2" Amplitude="500" Distance="1212.000" />
-	<Event Time="194.887" Type="SongEnd" />
+	<ChanceTimeEnd Time="191.000" />
 </Chart>
