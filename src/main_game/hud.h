@@ -20,6 +20,6 @@ namespace MainGame
 		Context& mainGameContext;
 
 		struct Implementation;
-		Implementation* implementation;
+		Implementation* implementation{ nullptr };
 	};
 }

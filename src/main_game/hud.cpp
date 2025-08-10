@@ -65,9 +65,11 @@ namespace MainGame
 				Color valuColor = HitEvaluationColors[static_cast<size_t>(ComboDisplayState.HitEvaluation)];
 				Color comboColor = DefaultColors::White;
 
+				vec2 valuTextPos = { ComboDisplayState.Position.x - 30.0f, ComboDisplayState.Position.y - 35.0f };
+
 				if (ComboDisplayState.Combo <= 1)
 				{
-					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, ComboDisplayState.Position, vec2(1.0f), valuColor);
+					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, valuTextPos, vec2(1.0f), valuColor);
 				}
 				else
 				{
@@ -75,11 +77,9 @@ namespace MainGame
 					size_t comboTextLength = SDL_snprintf(comboText, sizeof(comboText) - 1, "%u", ComboDisplayState.Combo);
 
 					vec2 valuTextSize = debugFont->MeasureString(valuText);
-					vec2 comboTextPos = ComboDisplayState.Position + valuTextSize;
-					comboTextPos.x += 4.0f;
-					comboTextPos.y = ComboDisplayState.Position.y;
+					vec2 comboTextPos = { valuTextPos.x + valuTextSize.x + 4.0f, valuTextPos.y };
 
-					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, ComboDisplayState.Position, vec2(1.0f), valuColor);
+					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, valuTextPos, vec2(1.0f), valuColor);
 					debugFont->PushString(mainGameContext.SpriteRenderer, comboText, comboTextLength, comboTextPos, vec2(1.0f), comboColor);
 				}
 			}

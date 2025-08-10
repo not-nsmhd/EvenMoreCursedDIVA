@@ -88,7 +88,7 @@ namespace MainGame
 	class Chart
 	{
 	public:
-		f32 Duration;
+		f32 Duration{};
 	public:
 		std::vector<ChartNote> Notes;
 		std::vector<NoteTimeChange> NoteTimeChanges;

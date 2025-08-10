@@ -31,7 +31,7 @@ namespace MainGame
 
 	private:
 		struct StateInternal;
-		StateInternal* stateInternal = nullptr;
+		StateInternal* stateInternal{ nullptr };
 
 		Context context;
 	};
