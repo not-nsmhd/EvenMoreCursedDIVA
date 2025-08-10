@@ -10,9 +10,6 @@
     <Filter Include="lib\glad\src">
       <UniqueIdentifier>{5ACCB812-462F-48B7-EFB4-806DDBF6133A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\tinyxml2">
-      <UniqueIdentifier>{72E5184B-5E48-A8EF-07CE-E0A5F30F7472}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,12 @@
     </Filter>
     <Filter Include="src\util">
       <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\tinyxml2">
+      <UniqueIdentifier>{3525acc3-85d4-472c-8a0f-930780dc0a0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\tinyxml2\src">
+      <UniqueIdentifier>{da1feffc-868d-49fb-b7e9-9d61e9a8a12e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -186,13 +189,13 @@
     <ClInclude Include="src\main_game\hud.h">
       <Filter>src\main_game</Filter>
     </ClInclude>
+    <ClInclude Include="src\io\xml.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glad\src\glad.c">
       <Filter>lib\glad\src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
-      <Filter>lib\tinyxml2</Filter>
     </ClCompile>
     <ClCompile Include="src\common\color.cpp">
       <Filter>src\common</Filter>
@@ -286,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="src\main_game\hud.cpp">
       <Filter>src\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\tinyxml2\src\tinyxml2.cpp">
+      <Filter>lib\tinyxml2\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

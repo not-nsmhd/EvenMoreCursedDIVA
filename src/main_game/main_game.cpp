@@ -130,10 +130,6 @@ namespace MainGame
 			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind(keyboard, SDL_SCANCODE_W, SDL_SCANCODE_I) }
 		};
 
-		// HACK: This is to make sure that any hold notes aren't being evaluated
-		// early after the release of the keybind on normal note
-		u32 IgnoreKeybindReleaseDelay = 0;
-
 		HUD hud = HUD(MainGameContext);
 
 		char debugText[512] = {};
@@ -207,7 +203,7 @@ namespace MainGame
 
 			// ---------------
 
-			fstream chartFile = fstream("diva/songdata/test/test_hold_edgecase.xml", ios_base::binary | ios_base::in);
+			fstream chartFile = fstream("diva/songdata/test/test_f_chart.xml", ios_base::binary | ios_base::in);
 			chartFile.seekg(0, ios_base::end);
 			size_t chartFileSize = chartFile.tellg();
 			chartFile.seekg(0, ios_base::beg);
@@ -435,12 +431,6 @@ namespace MainGame
 			bool tapped = binding.IsTapped(&primTapped, &altTapped);
 			bool released = binding.IsReleased(nullptr, nullptr);
 
-			if (released)
-			{
-				released = released & (IgnoreKeybindReleaseDelay == 0);
-				IgnoreKeybindReleaseDelay--;
-			}
-
 			if (!tapped && !released)
 			{
 				return;
@@ -488,7 +478,7 @@ namespace MainGame
 				case NoteType::HoldStart:
 					note->HasBeenHit = note->HasBeenHit ? note->HasBeenHit : tapped;
 
-					if (note->NextNote->ElapsedTime < 0.0f && released)
+					if (note->HasBeenHit && note->NextNote->ElapsedTime < 0.0f && released)
 					{
 						note->NextNote->HasBeenHit = note->HasBeenHit;
 						note->HitEvaluation = HitEvaluation::Miss;
@@ -510,10 +500,6 @@ namespace MainGame
 
 				if (note->HasBeenHit)
 				{
-					if ((NoteTypeToNoteTypeFlags(note->Type) & NoteTypeFlags_NormalAll) != 0)
-					{
-						IgnoreKeybindReleaseDelay = 1;
-					}
 					note->RemainingTimeOnHit = remainingTimeOnHit;
 
 					if (remainingTimeOnHit <= HitThresholds::CoolThreshold && remainingTimeOnHit >= -HitThresholds::CoolThreshold)
