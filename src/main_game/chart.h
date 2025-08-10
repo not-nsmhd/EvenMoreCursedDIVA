@@ -26,6 +26,24 @@ namespace MainGame
 		Count
 	};
 
+	enum NoteTypeFlags : u8
+	{
+		NoteTypeFlags_None = 0,
+		NoteTypeFlags_Normal = 1 << static_cast<u8>(NoteType::Normal),
+		NoteTypeFlags_Double = 1 << static_cast<u8>(NoteType::Double),
+		NoteTypeFlags_HoldStart = 1 << static_cast<u8>(NoteType::HoldStart),
+		NoteTypeFlags_HoldEnd = 1 << static_cast<u8>(NoteType::HoldEnd),
+
+		NoteTypeFlags_NormalAll = (NoteTypeFlags_Normal | NoteTypeFlags_Double),
+		NoteTypeFlags_HoldAll = (NoteTypeFlags_HoldStart | NoteTypeFlags_HoldEnd),
+		NoteTypeFlags_All = (NoteTypeFlags_NormalAll | NoteTypeFlags_HoldAll)
+	};
+
+	constexpr NoteTypeFlags NoteTypeToNoteTypeFlags(NoteType type)
+	{
+		return static_cast<NoteTypeFlags>(1 << static_cast<u8>(type));
+	}
+
 	constexpr DIVA::EnumStringMappingTable<NoteShape> NoteShapeStringTable
 	{
 		DIVA::EnumStringMapping<NoteShape>

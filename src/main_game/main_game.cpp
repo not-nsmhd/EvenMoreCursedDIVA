@@ -25,7 +25,7 @@ namespace MainGame
 	using std::ios_base;
 
 	constexpr vec2 DefaultIconPosition { std::numeric_limits<float>().infinity(), std::numeric_limits<float>().infinity() };
-	constexpr float MaxNoteLifetime { 1.0f };
+	constexpr float MaxNoteLifetime { 1000.0f };
 	constexpr float TrailResolution { 1.0f / 64.0f };
 	constexpr float TrailLengthFactor { 64.0f / 1.25f };
 	constexpr float TrailScrollSpeed { 64.0f * TrailResolution };
@@ -93,6 +93,7 @@ namespace MainGame
 		bool HitWrong = false;
 
 		// NOTE: Functions
+		// NOTE: Returned value is specified in seconds
 		float GetRemainingTime() const { return NoteTime - ElapsedTime; }
 		float GetNormalizedElapsedTime() const { return Common::MathExtensions::ConvertRange(0.0f, NoteTime, 0.0f, 1.0f, ElapsedTime); }
 
@@ -214,7 +215,7 @@ namespace MainGame
 
 			// ---------------
 
-			fstream chartFile = fstream("diva/songdata/test/test_dt2_chart.xml", ios_base::binary | ios_base::in);
+			fstream chartFile = fstream("diva/songdata/test/test_hold.xml", ios_base::binary | ios_base::in);
 			chartFile.seekg(0, ios_base::end);
 			size_t chartFileSize = chartFile.tellg();
 			chartFile.seekg(0, ios_base::beg);
@@ -367,56 +368,70 @@ namespace MainGame
 		void UpdateNote(GameNote& note, float deltaTime_ms)
 		{
 			note.ElapsedTime += deltaTime_ms / 1000.0f;
-			float remainingTime = note.GetRemainingTime();
 
-			if (remainingTime <= -MaxNoteLifetime)
+			bool isHoldNote = (NoteTypeToNoteTypeFlags(note.Type) & NoteTypeFlags_HoldAll) != 0;
+			float remainingTime = note.GetRemainingTime() * 1000.0f;
+			if (!isHoldNote)
 			{
-				if (note.NextNote != nullptr)
+				if (!note.HasBeenEvaluated() && !note.Expired && !note.ShouldBeRemoved && note.ElapsedTime > 0.0f)
 				{
-					note.ShouldBeRemoved = note.NextNote->ShouldBeRemoved;
-				}
-				else
-				{
-					note.ShouldBeRemoved = true;
-				}
-			}
-
-			if (!note.Expired && !note.ShouldBeRemoved && note.ElapsedTime > 0.0f)
-			{
-				if (note.HasBeenEvaluated() && note.Type != NoteType::HoldStart && note.Type != NoteType::HoldEnd)
-				{
-					return;
-				}
-
-				if (note.NextNote != nullptr)
-				{
-					if (note.NextNote->Expired)
-					{
-						note.HitEvaluation = HitEvaluation::Miss;
-						note.ShouldBeRemoved = true;
-						note.NextNote->ShouldBeRemoved = true;
-					}
-				}
-
-				if (note.GetRemainingTime() < HitThresholds::ThresholdMiss)
-				{
-					if (note.NextNote != nullptr)
-					{
-						if (note.Type == NoteType::HoldStart && note.NextNote->Expired)
-						{
-							note.Expired = true;
-							note.NextNote->Expired = true;
-						}
-					}
-					else
+					if (remainingTime < HitThresholds::ThresholdMiss)
 					{
 						note.Expired = true;
 					}
 				}
 
-				float iconProgress = 1.0f - note.GetNormalizedElapsedTime();
-				note.IconPosition = MathExtensions::GetSinePoint(iconProgress, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
+				if (remainingTime <= -MaxNoteLifetime)
+				{
+					note.ShouldBeRemoved = true;
+				}
 			}
+			else if (note.Type == NoteType::HoldStart)
+			{
+				GameNote* nextNote = note.NextNote;
+				float nextNoteRemainingTime = nextNote->GetRemainingTime() * 1000.0f;
+				if (!note.Expired && !note.ShouldBeRemoved && !note.HasBeenEvaluated())
+				{
+					if (remainingTime < HitThresholds::ThresholdMiss)
+					{
+						note.Expired = true;
+						nextNote->Expired = true;
+						nextNote->ShouldBeRemoved = true;
+					}
+				}
+				else if (note.HasBeenEvaluated())
+				{
+					if (!nextNote->Expired && !nextNote->ShouldBeRemoved && !nextNote->HasBeenEvaluated())
+					{
+						if (nextNoteRemainingTime < HitThresholds::ThresholdMiss)
+						{
+							nextNote->Expired = true;
+						}
+					}
+				}
+
+				if (remainingTime <= -MaxNoteLifetime && !note.HasBeenEvaluated())
+				{
+					note.ShouldBeRemoved = true;
+					nextNote->ShouldBeRemoved = true;
+				}
+				else if (note.HasBeenEvaluated())
+				{
+					if (nextNoteRemainingTime < HitThresholds::ThresholdMiss && !nextNote->HasBeenEvaluated())
+					{
+						nextNote->Expired = true;
+					}
+
+					if (nextNoteRemainingTime <= -MaxNoteLifetime)
+					{
+						note.ShouldBeRemoved = true;
+						nextNote->ShouldBeRemoved = true;
+					}
+				}
+			}
+
+			float iconProgress = 1.0f - note.GetNormalizedElapsedTime();
+			note.IconPosition = MathExtensions::GetSinePoint(iconProgress, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
 		}
 
 		void UpdateInputBinding(NoteShape shape, const KeyBind& binding)
@@ -510,6 +525,10 @@ namespace MainGame
 					{
 						note->HitEvaluation = HitEvaluation::Bad;
 						note->HitWrong = !shapeMatches;
+					}
+					else
+					{
+						note->HitEvaluation = HitEvaluation::Miss;
 					}
 
 					currentHitValu = note->HitEvaluation;
