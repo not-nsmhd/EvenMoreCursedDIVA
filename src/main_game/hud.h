@@ -16,6 +16,9 @@ namespace MainGame
 		void Draw(float deltaTime_ms);
 
 		void SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, vec2& position);
+		void SetScoreBonusDisplayState(u32 value, vec2& position);
+		void HoldScoreBonus();
+		void ReleaseScoreBonus(bool drop);
 	private:
 		Context& mainGameContext;
 

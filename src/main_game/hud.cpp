@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "../common/color.h"
+#include "../common/math_ext.h"
 #include "../global_res.h"
 #include <SDL2/SDL.h>
 
@@ -34,7 +35,7 @@ namespace MainGame
 		MainGame::Context& mainGameContext;
 		GFX::Font* debugFont = nullptr;
 
-		struct ComboDisplayStateData
+		struct ComboDisplayData
 		{
 			vec2 Position{};
 			HitEvaluation HitEvaluation{};
@@ -42,6 +43,15 @@ namespace MainGame
 
 			float ElapsedDisplayTime{};
 		} ComboDisplayState;
+
+		struct ScoreBonusDisplayData
+		{
+			vec2 Position{};
+			u32 Value{};
+			bool Held{};
+
+			float ElapsedDisplayTime{};
+		} ScoreBonusDisplay;
 
 		Implementation(MainGame::Context& context) : mainGameContext{ context }
 		{
@@ -54,7 +64,18 @@ namespace MainGame
 
 		void UpdateComboDisplay(float deltaTime_ms)
 		{
-			ComboDisplayState.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
+			if (ComboDisplayState.ElapsedDisplayTime <= 2.0f)
+			{
+				ComboDisplayState.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
+			}
+		}
+
+		void UpdateScoreBonusDisplay(float deltaTime_ms)
+		{
+			if (ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f && !ScoreBonusDisplay.Held)
+			{
+				ScoreBonusDisplay.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
+			}
 		}
 
 		void DrawComboDisplay(float deltaTime_ms)
@@ -85,12 +106,49 @@ namespace MainGame
 			}
 		}
 
+		void DrawScoreBonusDisplay(float deltaTime_ms)
+		{
+			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f)
+			{
+				char text[8] = {};
+				size_t textLength = SDL_snprintf(text, sizeof(text) - 1, "+%u", ScoreBonusDisplay.Value);
+
+				vec2 textSize = debugFont->MeasureString(text, textLength);
+
+				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, -20.0f, ScoreBonusDisplay.ElapsedDisplayTime);
+				vec2 textPos = { ScoreBonusDisplay.Position.x - textSize.x / 2.0f, ScoreBonusDisplay.Position.y + textPosY - 45.0f };
+
+				debugFont->PushString(mainGameContext.SpriteRenderer, text, textLength, textPos, vec2(1.0f), DefaultColors::White);
+			}
+		}
+
 		void SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, vec2& position)
 		{
 			ComboDisplayState.Position = position;
 			ComboDisplayState.HitEvaluation = hitEvaluation;
 			ComboDisplayState.Combo = combo;
 			ComboDisplayState.ElapsedDisplayTime = 0.0f;
+		}
+
+		void SetScoreBonusDisplayState(u32 value, vec2& position)
+		{
+			ScoreBonusDisplay.Position = position;
+			ScoreBonusDisplay.Value = value;
+			ScoreBonusDisplay.ElapsedDisplayTime = 0.0f;
+		}
+
+		void HoldScoreBonusDisplay()
+		{
+			ScoreBonusDisplay.Held = true;
+		}
+
+		void ReleaseScoreBonusDisplay(bool drop)
+		{
+			if (drop)
+			{
+				ScoreBonusDisplay.ElapsedDisplayTime = 2.0f;
+			}
+			ScoreBonusDisplay.Held = false;
 		}
 	};
 
@@ -108,11 +166,13 @@ namespace MainGame
 	void HUD::Update(float deltaTime_ms)
 	{
 		implementation->UpdateComboDisplay(deltaTime_ms);
+		implementation->UpdateScoreBonusDisplay(deltaTime_ms);
 	}
 
 	void HUD::Draw(float deltaTime_ms)
 	{
 		implementation->DrawComboDisplay(deltaTime_ms);
+		implementation->DrawScoreBonusDisplay(deltaTime_ms);
 	}
 
 	void HUD::SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, vec2& position)
@@ -121,5 +181,23 @@ namespace MainGame
 		{
 			implementation->SetComboDisplayState(hitEvaluation, combo, position);
 		}
+	}
+
+	void HUD::SetScoreBonusDisplayState(u32 value, vec2& position)
+	{
+		if (value > 0)
+		{
+			implementation->SetScoreBonusDisplayState(value, position);
+		}
+	}
+
+	void HUD::HoldScoreBonus()
+	{
+		implementation->HoldScoreBonusDisplay();
+	}
+
+	void HUD::ReleaseScoreBonus(bool drop)
+	{
+		implementation->ReleaseScoreBonusDisplay(drop);
 	}
 }

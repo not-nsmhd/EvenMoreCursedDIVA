@@ -203,7 +203,7 @@ namespace MainGame
 
 			// ---------------
 
-			fstream chartFile = fstream("diva/songdata/test/test_hold.xml", ios_base::binary | ios_base::in);
+			fstream chartFile = fstream("diva/songdata/test/test_dt2_chart.xml", ios_base::binary | ios_base::in);
 			chartFile.seekg(0, ios_base::end);
 			size_t chartFileSize = chartFile.tellg();
 			chartFile.seekg(0, ios_base::beg);
@@ -447,6 +447,7 @@ namespace MainGame
 			{
 				float remainingTimeOnHit = note->GetRemainingTime() * 1000.0f;
 				bool shapeMatches = note->Shape == shape;
+				bool doubleGiveBonus = false;
 
 				switch (note->Type)
 				{
@@ -461,13 +462,18 @@ namespace MainGame
 					if (note->HasBeenHitPrimary && !note->HasBeenHitAlternative)
 					{
 						binding.IsDown(nullptr, &note->HasBeenHitAlternative);
+						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
+						break;
 					}
 					else if (!note->HasBeenHitPrimary && note->HasBeenHitAlternative)
 					{
 						binding.IsDown(&note->HasBeenHitPrimary, nullptr);
+						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
+						break;
 					}
 
 					note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
+					doubleGiveBonus = note->HasBeenHit && shapeMatches;
 					break;
 				case NoteType::HoldStart:
 					note->HasBeenHit = note->HasBeenHit ? note->HasBeenHit : tapped;
@@ -527,6 +533,10 @@ namespace MainGame
 					}
 
 					hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->TargetPosition);
+					if (doubleGiveBonus)
+					{
+						hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+					}
 				}
 			}
 		}
