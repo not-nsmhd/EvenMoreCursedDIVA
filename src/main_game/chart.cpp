@@ -99,7 +99,7 @@ namespace MainGame
 	{
 		if (NoteTimeChanges.size() == 0)
 		{
-			return 2.0f;
+			return 2.0f; // 120 BPM
 		}
 
 		for (auto& noteTimeChange : NoteTimeChanges)
@@ -109,5 +109,7 @@ namespace MainGame
 				return noteTimeChange.Value;
 			}
 		}
+
+		return 2.0f; // 120 BPM
 	}
 };

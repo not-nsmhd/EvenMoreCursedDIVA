@@ -142,13 +142,18 @@ while True:
                         eventName = "ChanceTimeStart"
                     case 3:
                         eventName = "ChanceTimeEnd"
+                    #case 8:
+                        #eventName = "TechnicalZoneStart"
+                    #case 9:
+                        #eventName = "TechnicalZoneEnd"
                     case _:
                         eventName = ""
                 
-                xmlEvent = XmlET.SubElement(xmlChart, eventName, 
-                {
-                    "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                })
+                if len(eventName) > 0:
+                     xmlEvent = XmlET.SubElement(xmlChart, eventName, 
+                    {
+                        "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
+                    })
             
             XmlET.indent(xmlChart, space="\t")
         case 28: # BAR_TIME_SET
@@ -158,7 +163,7 @@ while True:
             xmlChartNote = XmlET.SubElement(xmlChart, "SetNoteTime", 
             {
                 "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "Value": "{0}".format(60 / bpm * 4)
+                "Value": "{0:.3f}".format(60 / bpm * 4)
             })
             
             XmlET.indent(xmlChart, space="\t")

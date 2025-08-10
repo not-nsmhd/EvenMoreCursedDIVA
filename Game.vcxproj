@@ -46,6 +46,8 @@
     <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
     <TargetName>game_debug</TargetName>
     <TargetExt>.exe</TargetExt>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,6 +55,8 @@
     <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
     <TargetName>game</TargetName>
     <TargetExt>.exe</TargetExt>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -75,10 +79,12 @@
     <CustomBuildStep>
       <Command>
       </Command>
+      <Message>
+      </Message>
     </CustomBuildStep>
     <PreBuildEvent>
       <Command>python python/gen_build_info.py src/build/build_info.h</Command>
-      <Message>Generating build information...</Message>
+      <Message>Generating build version information...</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -106,10 +112,12 @@
     <CustomBuildStep>
       <Command>
       </Command>
+      <Message>
+      </Message>
     </CustomBuildStep>
     <PreBuildEvent>
       <Command>python python/gen_build_info.py src/build/build_info.h</Command>
-      <Message>Generating build information...</Message>
+      <Message>Generating build version information...</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
