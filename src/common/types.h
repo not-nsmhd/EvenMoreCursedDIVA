@@ -27,6 +27,15 @@ using u8vec4 = glm::vec<4, u8, glm::defaultp>;
 
 using mat4 = glm::mat<4, 4, f32, glm::defaultp>;
 
+struct NonCopyable
+{
+	NonCopyable() = default;
+	~NonCopyable() = default;
+
+	NonCopyable(const NonCopyable&) = delete;
+	NonCopyable& operator=(const NonCopyable&) = delete;
+};
+
 namespace DIVA
 {
 	// NOTE: This assumes the enum class EnumType follows the { ..., Count }; convention

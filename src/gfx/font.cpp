@@ -147,6 +147,114 @@ namespace GFX
 		this->backend = backend;
 	}
 
+	vec2 Font::MeasureString(std::string_view text)
+	{
+		if (text.size() == 0)
+		{
+			return vec2(0.0f);
+		}
+
+		vec2 pos = vec2(0.0f);
+		vec2 size = vec2(0.0f);
+
+		for (string_view::const_iterator c = text.begin(); c != text.end(); c++)
+		{
+			if (*c == '\n')
+			{
+				pos.x = 0.0f;
+				pos.y += LineHeight;
+				continue;
+			}
+
+			unordered_map<u32, i32>::iterator glyphIt = glyphMap.find(*c);
+
+			const FontGlyph* glyph;
+			if (glyphIt == glyphMap.end())
+			{
+				glyph = &replacementGlyph;
+			}
+			else
+			{
+				glyph = &glyphs[glyphIt->second];
+			}
+
+			float x = static_cast<float>(glyph->Width) + static_cast<float>(glyph->XOffset);
+			float y = static_cast<float>(glyph->Height);
+
+			if (size.x < x + pos.x)
+			{
+				size.x += x;
+			}
+			if (size.y < y + pos.y)
+			{
+				size.y += y;
+			}
+
+			pos.x += static_cast<float>(glyph->XAdvance);
+		}
+
+		return size;
+	}
+
+	vec2 Font::MeasureString(const char* text, size_t maxLen)
+	{
+		if (text == nullptr || maxLen == 0)
+		{
+			vec2(0.0f);
+		}
+
+		size_t len = 0;
+		for (size_t i = 0; i < maxLen; i++)
+		{
+			if (text[i] == '\0')
+			{
+				break;
+			}
+			len++;
+		}
+
+		vec2 pos = vec2(0.0f);
+		vec2 size = vec2(0.0f);
+
+		for (const char* c = text; c < text + len; c++)
+		{
+			if (*c == '\n')
+			{
+				pos.x = 0.0f;
+				pos.y += LineHeight;
+				continue;
+			}
+
+			unordered_map<u32, i32>::iterator glyphIt = glyphMap.find(*c);
+
+			const FontGlyph* glyph;
+			if (glyphIt == glyphMap.end())
+			{
+				glyph = &replacementGlyph;
+			}
+			else
+			{
+				glyph = &glyphs[glyphIt->second];
+			}
+
+			float x = static_cast<float>(glyph->Width) + static_cast<float>(glyph->XOffset);
+			float y = static_cast<float>(glyph->Height);
+
+			if (size.x < x + pos.x)
+			{
+				size.x += x;
+			}
+			if (size.y < y + pos.y)
+			{
+				size.y += y;
+			}
+
+			pos.x += static_cast<float>(glyph->XAdvance);
+		}
+
+		return size;
+	}
+
 	void Font::PushString(SpriteRenderer* renderer, string_view text, vec2 pos, vec2 scale, Color color)
 	{
 		if (text.size() == 0)

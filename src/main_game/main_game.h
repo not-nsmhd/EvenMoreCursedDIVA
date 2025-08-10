@@ -1,8 +1,20 @@
 #pragma once
 #include "../game.h"
+#include "../gfx/sprite_renderer.h"
 
 namespace MainGame
 {
+	struct Context
+	{
+		GFX::SpriteRenderer* SpriteRenderer;
+
+		struct ScoreData
+		{
+			u32 Combo{};
+			u32 MaxCombo{};
+		} Score;
+	};
+
 	class MainGameState : public GameState
 	{
 	public:
@@ -20,5 +32,7 @@ namespace MainGame
 	private:
 		struct StateInternal;
 		StateInternal* stateInternal = nullptr;
+
+		Context context;
 	};
 }

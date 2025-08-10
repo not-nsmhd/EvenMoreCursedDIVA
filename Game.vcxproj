@@ -148,6 +148,7 @@
     <ClInclude Include="src\io\filesystem.h" />
     <ClInclude Include="src\main_game\chart.h" />
     <ClInclude Include="src\main_game\hit_evaluation.h" />
+    <ClInclude Include="src\main_game\hud.h" />
     <ClInclude Include="src\main_game\main_game.h" />
     <ClInclude Include="src\pcg\pcg_basic.h" />
     <ClInclude Include="src\testing\input_test.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="src\io\filesystem.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\main_game\chart.cpp" />
+    <ClCompile Include="src\main_game\hud.cpp" />
     <ClCompile Include="src\main_game\main_game.cpp" />
     <ClCompile Include="src\pcg\pcg_basic.c" />
     <ClCompile Include="src\stb\stb_image.cpp" />

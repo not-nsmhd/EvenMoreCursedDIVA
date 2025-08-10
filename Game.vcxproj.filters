@@ -183,6 +183,9 @@
     <ClInclude Include="src\main_game\hit_evaluation.h">
       <Filter>src\main_game</Filter>
     </ClInclude>
+    <ClInclude Include="src\main_game\hud.h">
+      <Filter>src\main_game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glad\src\glad.c">
@@ -279,6 +282,9 @@
       <Filter>src\util</Filter>
     </ClCompile>
     <ClCompile Include="src\main_game\chart.cpp">
+      <Filter>src\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main_game\hud.cpp">
       <Filter>src\main_game</Filter>
     </ClCompile>
   </ItemGroup>

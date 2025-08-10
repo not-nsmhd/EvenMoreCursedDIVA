@@ -1,6 +1,7 @@
 #include "main_game.h"
 #include "chart.h"
 #include "hit_evaluation.h"
+#include "hud.h"
 #include "../common/types.h"
 #include "../common/math_ext.h"
 #include "../global_res.h"
@@ -39,25 +40,7 @@ namespace MainGame
 	};
 
 	// TODO: Replace this with sprites
-	constexpr EnumStringMappingTable<HitEvaluation> HitEvaluationNames
-	{
-		{ HitEvaluation::None, "" },
-		{ HitEvaluation::Cool, "Cool" },
-		{ HitEvaluation::Good, "Good" },
-		{ HitEvaluation::Safe, "Safe" },
-		{ HitEvaluation::Bad, "Bad" },
-		{ HitEvaluation::Miss, "Miss" }
-	};
-
-	constexpr Color HitEvaluationColors[EnumCount<HitEvaluation>()]
-	{
-		{   0,   0,   0,   0 },
-		{ 255, 255,   0, 255 },
-		{ 255, 255, 255, 255 },
-		{   0, 255,   0, 255 },
-		{ 128, 128, 255, 255 },
-		{ 255,   0, 255, 255 }
-	};
+	
 
 	struct GameNote
 	{
@@ -103,6 +86,7 @@ namespace MainGame
 	struct MainGameState::StateInternal
 	{
 		GFXBackend* gfxBackend;
+		Context& MainGameContext;
 
 		SpriteRenderer* spriteRenderer;
 		SpriteSheet iconSet;
@@ -146,13 +130,17 @@ namespace MainGame
 			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind(keyboard, SDL_SCANCODE_W, SDL_SCANCODE_I) }
 		};
 
+		HUD hud = HUD(MainGameContext);
+
 		char debugText[512] = {};
 
-		HitEvaluation currentHitValu = HitEvaluation::None;
-		vec2 hitValu_DisplayPosition;
+		StateInternal(MainGame::Context& context) : MainGameContext{ context }
+		{
+		}
 
 		void Initialize()
 		{
+			hud.Initialize();
 		}
 
 		bool LoadContent()
@@ -238,6 +226,11 @@ namespace MainGame
 			iconSet.Destroy();
 		}
 
+		void Destroy()
+		{
+			hud.Destroy();
+		}
+
 		void Update(float deltaTime_ms)
 		{
 			if (ElapsedTime_Seconds >= songChart.Duration)
@@ -273,6 +266,8 @@ namespace MainGame
 
 				TrailScrollOffset += TrailScrollSpeed * (16.6667f / deltaTime_ms);
 				TrailScrollOffset = SDL_fmodf(TrailScrollOffset, 128.0f);
+
+				hud.Update(deltaTime_ms);
 			}
 
 			if (PauseKeybind.IsTapped(nullptr, nullptr))
@@ -292,7 +287,7 @@ namespace MainGame
 			}
 		}
 
-		void Draw()
+		void Draw(float deltaTime_ms)
 		{
 			gfxBackend->Clear(GFX::LowLevel::ClearFlags::GFX_CLEAR_COLOR, Common::Color(0, 24, 24, 255), 1.0f, 0);
 			gfxBackend->SetBlendState(&GFX::LowLevel::DefaultBlendStates::AlphaBlend);
@@ -302,12 +297,7 @@ namespace MainGame
 				DrawNote(note);
 			}
 
-			if (currentHitValu != HitEvaluation::None)
-			{
-				string_view hitValuName = EnumToString<HitEvaluation>(HitEvaluationNames, currentHitValu);
-				Color hitValuColor = HitEvaluationColors[static_cast<size_t>(currentHitValu)];
-				GlobalResources::DebugFont->PushString(spriteRenderer, hitValuName, hitValu_DisplayPosition, vec2(1.0f), hitValuColor);
-			}
+			hud.Draw(deltaTime_ms);
 
 			GlobalResources::DebugFont->PushString(spriteRenderer, debugText, sizeof(debugText), vec2(0.0f, 0.0f), vec2(1.0f), Common::DefaultColors::White);
 			spriteRenderer->RenderSprites(nullptr);
@@ -510,29 +500,33 @@ namespace MainGame
 					{
 						note->HitEvaluation = HitEvaluation::Cool;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
 					}
 					else if (remainingTimeOnHit <= HitThresholds::GoodThreshold && remainingTimeOnHit >= -HitThresholds::GoodThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Good;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
 					}
 					else if (remainingTimeOnHit <= HitThresholds::SafeThreshold && remainingTimeOnHit >= -HitThresholds::SafeThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Safe;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Combo = 0;
 					}
 					else if(remainingTimeOnHit <= HitThresholds::BadThreshold && remainingTimeOnHit >= -HitThresholds::BadThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Bad;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Combo = 0;
 					}
 					else
 					{
 						note->HitEvaluation = HitEvaluation::Miss;
+						MainGameContext.Score.Combo = 0;
 					}
 
-					currentHitValu = note->HitEvaluation;
-					hitValu_DisplayPosition = note->TargetPosition;
+					hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->TargetPosition);
 				}
 			}
 		}
@@ -792,7 +786,10 @@ namespace MainGame
 
 	MainGameState::MainGameState()
 	{
-		stateInternal = new MainGameState::StateInternal();
+		context.SpriteRenderer = GlobalResources::SpriteRenderer;
+
+		stateInternal = new MainGameState::StateInternal(context);
+		stateInternal->MainGameContext = context;
 	}
 
 	MainGameState::~MainGameState()
@@ -818,6 +815,7 @@ namespace MainGame
 	
 	void MainGameState::Destroy()
 	{
+		stateInternal->Destroy();
 		delete stateInternal;
 	}
 	
@@ -832,6 +830,6 @@ namespace MainGame
 	
 	void MainGameState::Draw()
 	{
-		stateInternal->Draw();
+		stateInternal->Draw(static_cast<float>(game->deltaTime_ms));
 	}
 }

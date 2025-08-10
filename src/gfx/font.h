@@ -45,6 +45,9 @@ namespace GFX
 
 		void LoadBMFont(LowLevel::Backend *backend, const std::filesystem::path& filePath);
 
+		vec2 MeasureString(std::string_view text);
+		vec2 MeasureString(const char* text, size_t maxLen);
+
 		void PushString(SpriteRenderer* renderer, std::string_view text, vec2 pos, vec2 scale, Common::Color color);
 		void PushString(SpriteRenderer* renderer, std::u16string_view text, vec2 pos, vec2 scale, Common::Color color);
 		void PushString(SpriteRenderer* renderer, const char *text, size_t maxLen, vec2 pos, vec2 scale, Common::Color color);
