@@ -1,0 +1,335 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\lib\glad\src\glad.c">
+      <Filter>lib\glad\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp">
+      <Filter>lib\tinyxml2\src</Filter>
+    </ClCompile>
+    <ClCompile Include="game\common\color.cpp">
+      <Filter>src\game\common</Filter>
+    </ClCompile>
+    <ClCompile Include="game\common\math_ext.cpp">
+      <Filter>src\game\common</Filter>
+    </ClCompile>
+    <ClCompile Include="game\dev\state_selector.cpp">
+      <Filter>src\game\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="game\game.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\font.cpp">
+      <Filter>src\game\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\helpers\shader_helpers.cpp">
+      <Filter>src\game\gfx\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\helpers\tex_helpers.cpp">
+      <Filter>src\game\gfx\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_backend.cpp">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_buffers.cpp">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_shader.cpp">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_texture.cpp">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_vertex_desc.cpp">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\lowlevel\resource.cpp">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\sprite_renderer.cpp">
+      <Filter>src\game\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\sprite_sheet.cpp">
+      <Filter>src\game\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="game\global_res.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\input\keyboard.cpp">
+      <Filter>src\game\input</Filter>
+    </ClCompile>
+    <ClCompile Include="game\input\mouse.cpp">
+      <Filter>src\game\input</Filter>
+    </ClCompile>
+    <ClCompile Include="game\io\binary_reader.cpp">
+      <Filter>src\game\io</Filter>
+    </ClCompile>
+    <ClCompile Include="game\io\binary_writer.cpp">
+      <Filter>src\game\io</Filter>
+    </ClCompile>
+    <ClCompile Include="game\io\filesystem.cpp">
+      <Filter>src\game\io</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main_game\chart.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main_game\hud.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main_game\main_game.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\pcg\pcg_basic.c">
+      <Filter>src\game\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="game\stb\stb_image.cpp">
+      <Filter>src\game\stb</Filter>
+    </ClCompile>
+    <ClCompile Include="game\testing\input_test.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="game\testing\u16_test.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="game\util\logging.cpp">
+      <Filter>src\game\util</Filter>
+    </ClCompile>
+    <ClCompile Include="game\util\string_utils.cpp">
+      <Filter>src\game\util</Filter>
+    </ClCompile>
+    <ClCompile Include="game\testing\audio_test.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\fmt\src\format.cc">
+      <Filter>lib\fmt\src</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\audio_engine.cpp">
+      <Filter>src\game\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="game\game_new.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game\audio\audio_engine.h">
+      <Filter>src\game\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="game\build\build_info.h">
+      <Filter>src\game\build</Filter>
+    </ClInclude>
+    <ClInclude Include="game\build\build_info_dummy.h">
+      <Filter>src\game\build</Filter>
+    </ClInclude>
+    <ClInclude Include="game\common\color.h">
+      <Filter>src\game\common</Filter>
+    </ClInclude>
+    <ClInclude Include="game\common\int_types.h">
+      <Filter>src\game\common</Filter>
+    </ClInclude>
+    <ClInclude Include="game\common\math_ext.h">
+      <Filter>src\game\common</Filter>
+    </ClInclude>
+    <ClInclude Include="game\common\rect.h">
+      <Filter>src\game\common</Filter>
+    </ClInclude>
+    <ClInclude Include="game\common\types.h">
+      <Filter>src\game\common</Filter>
+    </ClInclude>
+    <ClInclude Include="game\dev\state_selector.h">
+      <Filter>src\game\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="game\game.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\font.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\helpers\shader_helpers.h">
+      <Filter>src\game\gfx\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\helpers\tex_helpers.h">
+      <Filter>src\game\gfx\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\backend.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\blend_state.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\buffers.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_backend.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_buffers.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_defs.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_shader.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_texture.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_vertex_desc.h">
+      <Filter>src\game\gfx\lowlevel\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\resource.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\shader.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\texture.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\lowlevel\vertex_desc.h">
+      <Filter>src\game\gfx\lowlevel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\sprite_renderer.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\sprite_sheet.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\global_res.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\input\keyboard.h">
+      <Filter>src\game\input</Filter>
+    </ClInclude>
+    <ClInclude Include="game\input\mouse.h">
+      <Filter>src\game\input</Filter>
+    </ClInclude>
+    <ClInclude Include="game\io\binary_reader.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
+    <ClInclude Include="game\io\binary_writer.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
+    <ClInclude Include="game\io\filesystem.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
+    <ClInclude Include="game\io\xml.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\chart.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\hit_evaluation.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\hud.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\main_game.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\pcg\pcg_basic.h">
+      <Filter>src\game\pcg</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\input_test.h">
+      <Filter>src\game\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\u16_test.h">
+      <Filter>src\game\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="game\util\logging.h">
+      <Filter>src\game\util</Filter>
+    </ClInclude>
+    <ClInclude Include="game\util\string_utils.h">
+      <Filter>src\game\util</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\audio_test.h">
+      <Filter>src\game\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="game\game_new.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{612deef4-ff27-42bf-9fd4-48a97a36cc7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\glad">
+      <UniqueIdentifier>{301f0989-7bbf-44d5-b08e-050bec22b62a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\glad\src">
+      <UniqueIdentifier>{bf5e71b7-dcd3-4234-83a8-30655ef399b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\tinyxml2">
+      <UniqueIdentifier>{cad3976b-9f90-4c5b-857c-135f8e65c080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\tinyxml2\src">
+      <UniqueIdentifier>{d7a9e1fd-cc22-4e9d-ba68-514a53670f75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{009eb1fd-59c3-47ce-b7d2-27c734134923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game">
+      <UniqueIdentifier>{08dcbe40-1568-4367-8bc5-da14270a58b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\common">
+      <UniqueIdentifier>{ea77930c-7d88-4cd0-969f-005c29fe4266}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\dev">
+      <UniqueIdentifier>{54fc8fc1-889d-4ee7-a8d4-bac40d058373}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx">
+      <UniqueIdentifier>{3a34a654-14b2-434c-abeb-905b5fadb08f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\helpers">
+      <UniqueIdentifier>{5fc29c48-b16c-4b1d-a98a-0e55a3fa5bac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\lowlevel">
+      <UniqueIdentifier>{58593225-7b6b-426c-be63-f8b06366cb61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\lowlevel\opengl">
+      <UniqueIdentifier>{87d82df1-5532-41b8-acaf-91d2496f6cc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\input">
+      <UniqueIdentifier>{17dd7525-f9fc-4fb9-814b-3d9619d0a836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\io">
+      <UniqueIdentifier>{c581a64b-b9f8-495d-82f3-4d1ce5e92b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\main_game">
+      <UniqueIdentifier>{a0b9677d-9edb-4cf4-8f12-fb12c28f34a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\pcg">
+      <UniqueIdentifier>{aee02285-4768-4951-b05a-a582d0a72bf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\stb">
+      <UniqueIdentifier>{c43fb75a-742c-4d18-8402-e504629b89fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\testing">
+      <UniqueIdentifier>{d5a6558e-b6b2-4dfc-9eff-d38e147a1bd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\util">
+      <UniqueIdentifier>{042b8263-96fd-41d5-90ab-770cc67fdb5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\audio">
+      <UniqueIdentifier>{da5821fc-a8c6-47e3-994a-4cf36d12f0b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\build">
+      <UniqueIdentifier>{7425f36f-6c8c-4f06-be29-c7d207489033}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\fmt">
+      <UniqueIdentifier>{75c579ed-3ef8-43bf-8bcc-01878f03d454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\fmt\src">
+      <UniqueIdentifier>{8c98a807-7cdf-4ea2-974f-536c9132fdde}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="game\.editorconfig">
+      <Filter>src\game</Filter>
+    </None>
+  </ItemGroup>
+</Project>

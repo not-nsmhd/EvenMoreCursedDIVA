@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7FA9857C-6BE0-860D-14CD-6C1000E3020F}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
+    <TargetName>game_debug</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
+    <TargetName>game</TargetName>
+    <TargetExt>.exe</TargetExt>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib\fmt\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\FAudio\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>python ..\python\gen_build_info.py game\build\build_info.h</Command>
+      <Message>Generating build version information...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib\fmt\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\FAudio\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>python ..\python\gen_build_info.py game\build\build_info.h</Command>
+      <Message>Generating build version information...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="game\audio\audio_engine.h" />
+    <ClInclude Include="game\build\build_info.h" />
+    <ClInclude Include="game\build\build_info_dummy.h" />
+    <ClInclude Include="game\common\color.h" />
+    <ClInclude Include="game\common\int_types.h" />
+    <ClInclude Include="game\common\math_ext.h" />
+    <ClInclude Include="game\common\rect.h" />
+    <ClInclude Include="game\common\types.h" />
+    <ClInclude Include="game\dev\state_selector.h" />
+    <ClInclude Include="game\game.h" />
+    <ClInclude Include="game\game_new.h" />
+    <ClInclude Include="game\gfx\font.h" />
+    <ClInclude Include="game\gfx\helpers\shader_helpers.h" />
+    <ClInclude Include="game\gfx\helpers\tex_helpers.h" />
+    <ClInclude Include="game\gfx\lowlevel\backend.h" />
+    <ClInclude Include="game\gfx\lowlevel\blend_state.h" />
+    <ClInclude Include="game\gfx\lowlevel\buffers.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_backend.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_buffers.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_defs.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_shader.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_texture.h" />
+    <ClInclude Include="game\gfx\lowlevel\opengl\opengl_vertex_desc.h" />
+    <ClInclude Include="game\gfx\lowlevel\resource.h" />
+    <ClInclude Include="game\gfx\lowlevel\shader.h" />
+    <ClInclude Include="game\gfx\lowlevel\texture.h" />
+    <ClInclude Include="game\gfx\lowlevel\vertex_desc.h" />
+    <ClInclude Include="game\gfx\sprite_renderer.h" />
+    <ClInclude Include="game\gfx\sprite_sheet.h" />
+    <ClInclude Include="game\global_res.h" />
+    <ClInclude Include="game\input\keyboard.h" />
+    <ClInclude Include="game\input\mouse.h" />
+    <ClInclude Include="game\io\binary_reader.h" />
+    <ClInclude Include="game\io\binary_writer.h" />
+    <ClInclude Include="game\io\filesystem.h" />
+    <ClInclude Include="game\io\xml.h" />
+    <ClInclude Include="game\main_game\chart.h" />
+    <ClInclude Include="game\main_game\hit_evaluation.h" />
+    <ClInclude Include="game\main_game\hud.h" />
+    <ClInclude Include="game\main_game\main_game.h" />
+    <ClInclude Include="game\pcg\pcg_basic.h" />
+    <ClInclude Include="game\testing\audio_test.h" />
+    <ClInclude Include="game\testing\input_test.h" />
+    <ClInclude Include="game\testing\u16_test.h" />
+    <ClInclude Include="game\util\logging.h" />
+    <ClInclude Include="game\util\string_utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\lib\fmt\src\format.cc" />
+    <ClCompile Include="..\lib\glad\src\glad.c" />
+    <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp" />
+    <ClCompile Include="game\audio\audio_engine.cpp" />
+    <ClCompile Include="game\common\color.cpp" />
+    <ClCompile Include="game\common\math_ext.cpp" />
+    <ClCompile Include="game\dev\state_selector.cpp" />
+    <ClCompile Include="game\game.cpp" />
+    <ClCompile Include="game\game_new.cpp" />
+    <ClCompile Include="game\gfx\font.cpp" />
+    <ClCompile Include="game\gfx\helpers\shader_helpers.cpp" />
+    <ClCompile Include="game\gfx\helpers\tex_helpers.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_backend.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_buffers.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_shader.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_texture.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\opengl\opengl_vertex_desc.cpp" />
+    <ClCompile Include="game\gfx\lowlevel\resource.cpp" />
+    <ClCompile Include="game\gfx\sprite_renderer.cpp" />
+    <ClCompile Include="game\gfx\sprite_sheet.cpp" />
+    <ClCompile Include="game\global_res.cpp" />
+    <ClCompile Include="game\input\keyboard.cpp" />
+    <ClCompile Include="game\input\mouse.cpp" />
+    <ClCompile Include="game\io\binary_reader.cpp" />
+    <ClCompile Include="game\io\binary_writer.cpp" />
+    <ClCompile Include="game\io\filesystem.cpp" />
+    <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\main_game\chart.cpp" />
+    <ClCompile Include="game\main_game\hud.cpp" />
+    <ClCompile Include="game\main_game\main_game.cpp" />
+    <ClCompile Include="game\pcg\pcg_basic.c" />
+    <ClCompile Include="game\stb\stb_image.cpp" />
+    <ClCompile Include="game\testing\audio_test.cpp" />
+    <ClCompile Include="game\testing\input_test.cpp" />
+    <ClCompile Include="game\testing\u16_test.cpp" />
+    <ClCompile Include="game\util\logging.cpp" />
+    <ClCompile Include="game\util\string_utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="game\.editorconfig" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
