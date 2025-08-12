@@ -11,7 +11,7 @@ content/
 bin/
 obj/
 
-src/build/build_info.h
+src/game/build/build_info.h
 
 .vs/
 lib_vs/FAudio

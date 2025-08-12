@@ -150,6 +150,7 @@
     <ClInclude Include="game\gfx\lowlevel\shader.h" />
     <ClInclude Include="game\gfx\lowlevel\texture.h" />
     <ClInclude Include="game\gfx\lowlevel\vertex_desc.h" />
+    <ClInclude Include="game\gfx\new\Renderer.h" />
     <ClInclude Include="game\gfx\sprite_renderer.h" />
     <ClInclude Include="game\gfx\sprite_sheet.h" />
     <ClInclude Include="game\global_res.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="game\gfx\lowlevel\opengl\opengl_texture.cpp" />
     <ClCompile Include="game\gfx\lowlevel\opengl\opengl_vertex_desc.cpp" />
     <ClCompile Include="game\gfx\lowlevel\resource.cpp" />
+    <ClCompile Include="game\gfx\new\Renderer.cpp" />
     <ClCompile Include="game\gfx\sprite_renderer.cpp" />
     <ClCompile Include="game\gfx\sprite_sheet.cpp" />
     <ClCompile Include="game\global_res.cpp" />

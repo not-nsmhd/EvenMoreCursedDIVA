@@ -112,6 +112,9 @@
     <ClCompile Include="game\game_new.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
+    <ClCompile Include="game\gfx\new\Renderer.cpp">
+      <Filter>src\game\gfx\new</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\audio\audio_engine.h">
@@ -252,6 +255,9 @@
     <ClInclude Include="game\game_new.h">
       <Filter>src\game</Filter>
     </ClInclude>
+    <ClInclude Include="game\gfx\new\Renderer.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -325,6 +331,9 @@
     </Filter>
     <Filter Include="lib\fmt\src">
       <UniqueIdentifier>{8c98a807-7cdf-4ea2-974f-536c9132fdde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\new">
+      <UniqueIdentifier>{164841b4-2c0a-4a59-8a78-f48c75b5b58c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

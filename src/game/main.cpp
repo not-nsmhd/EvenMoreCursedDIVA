@@ -2,6 +2,8 @@
 #include "util/logging.h"
 #include "game_new.h"
 
+using Starshine::Game;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -12,11 +14,13 @@ extern "C"
 		Logging::ToggleLoggingToConsole(true);
 		Logging::ToggleLoggingToFile(true);
 #endif
-
 		Logging::LoggingInit();
 
-		Starshine::Game game;
-		int returnCode = game.Run();
+		Game::CreateInstance();
+		Game& gameInstance = Game::GetInstance();
+
+		int returnCode = gameInstance.Run();
+		Game::DeleteInstance();
 
 		Logging::LoggingQuit();
 		return returnCode;
