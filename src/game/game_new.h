@@ -1,5 +1,6 @@
 #pragma once
 #include "common/types.h"
+#include "game_state.h"
 
 namespace Starshine
 {
@@ -21,6 +22,10 @@ namespace Starshine
 
 	public:
 		f64 GetDeltaTime_Milliseconds() const;
+
+	public:
+		// NOTE: This assumes you have an existing game state instance where you haven't called any of the base functions
+		bool SetCurrentGameState(GameState* stateInstance);
 		
 	private:
 		struct Impl;

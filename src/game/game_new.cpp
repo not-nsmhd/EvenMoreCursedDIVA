@@ -16,6 +16,104 @@ namespace Starshine
 
 	Game* GameInstance = nullptr;
 
+	class TestGameState;
+	class TestGameState2;
+
+	class TestGameState : public GameState
+	{
+		Renderer* GFXRenderer = nullptr;
+		f64 ElapsedTime = 0.0;
+
+		bool Initialize()
+		{
+			GFXRenderer = &Renderer::GetInstance();
+			return true;
+		}
+
+		bool LoadContent()
+		{
+			return true;
+		}
+
+		void UnloadContent()
+		{
+		}
+
+		void Destroy()
+		{
+			GFXRenderer = nullptr;
+		}
+
+		void Update(f64 deltaTime_milliseconds)
+		{
+			ElapsedTime += deltaTime_milliseconds / 1000.0;
+
+			if (ElapsedTime >= 10.0)
+			{
+				GameState* newState = GameStateHelpers::CreateGameStateInstance<TestGameState2>();
+				Game::GetInstance().SetCurrentGameState(newState);
+			}
+		}
+
+		void Draw(f64 deltaTime_milliseconds)
+		{
+			GFXRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+			GFXRenderer->SwapBuffers();
+		}
+
+		std::string_view GetStateName() const
+		{
+			return "Testing Game State";
+		}
+	};
+
+	class TestGameState2 : public GameState
+	{
+		Renderer* GFXRenderer = nullptr;
+		f64 ElapsedTime = 0.0;
+
+		bool Initialize()
+		{
+			GFXRenderer = &Renderer::GetInstance();
+			return true;
+		}
+
+		bool LoadContent()
+		{
+			return true;
+		}
+
+		void UnloadContent()
+		{
+		}
+
+		void Destroy()
+		{
+		}
+
+		void Update(f64 deltaTime_milliseconds)
+		{
+			ElapsedTime += deltaTime_milliseconds / 1000.0;
+
+			if (ElapsedTime >= 10.0)
+			{
+				GameState* newState = GameStateHelpers::CreateGameStateInstance<TestGameState>();
+				Game::GetInstance().SetCurrentGameState(newState);
+			}
+		}
+
+		void Draw(f64 deltaTime_milliseconds)
+		{
+			GFXRenderer->Clear(ClearFlags_Color, Color(24, 24, 24, 255), 1.0f, 0);
+			GFXRenderer->SwapBuffers();
+		}
+
+		std::string_view GetStateName() const
+		{
+			return "Testing Game State Switching";
+		}
+	};
+
 	struct Game::Impl
 	{
 		SDL_Window* GameWindow{};
@@ -40,8 +138,10 @@ namespace Starshine
 		struct GFXRendererData
 		{
 			RendererBackend Backend{};
-			Renderer* Renderer;
+			Renderer* Renderer = nullptr;
 		} GFX;
+
+		GameState* CurrentGameState = nullptr;
 
 		bool Initialize()
 		{
@@ -66,7 +166,7 @@ namespace Starshine
 				windowCreationFlags |= SDL_WINDOW_OPENGL;
 			}
 
-			GameWindow = SDL_CreateWindow("DIVA (Rewrite)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, windowCreationFlags);
+			GameWindow = SDL_CreateWindow("DIVA", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, windowCreationFlags);
 
 			Running = true;
 
@@ -85,11 +185,22 @@ namespace Starshine
 
 			GFX.Renderer->Initialize(GameWindow);
 
+			GameState* testState = GameStateHelpers::CreateGameStateInstance<TestGameState>();
+			SetCurrentGameStateInstance(testState);
+
 			return true;
 		}
 
 		void Destroy()
 		{
+			if (CurrentGameState != nullptr)
+			{
+				CurrentGameState->UnloadContent();
+				CurrentGameState->Destroy();
+				GameStateHelpers::DeleteGameStateInstance(CurrentGameState);
+				LogInfo(LogName, "Current state destroyed");
+			}
+
 			SDL_DestroyWindow(GameWindow);
 			SDL_Quit();
 		}
@@ -132,11 +243,55 @@ namespace Starshine
 					}
 				}
 
-				GFX.Renderer->Clear(ClearFlags_Color, Color(24, 24, 24, 255), 1.0f, 0);
-				GFX.Renderer->SwapBuffers();
+				if (CurrentGameState != nullptr)
+				{
+					CurrentGameState->Update(Timing.DeltaTime_Milliseconds);
+				}
+
+				if (CurrentGameState != nullptr)
+				{
+					CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
+				}
 			}
 
 			Destroy();
+		}
+
+		bool SetCurrentGameStateInstance(GameState* stateInstance)
+		{
+			if (stateInstance == nullptr)
+			{
+				return false;
+			}
+
+			if (CurrentGameState != nullptr)
+			{
+				LogInfo(LogName, "Changing state: [%s] -> [%s]",
+					CurrentGameState->GetStateName().data(), stateInstance->GetStateName().data());
+
+				CurrentGameState->UnloadContent();
+				CurrentGameState->Destroy();
+				GameStateHelpers::DeleteGameStateInstance(CurrentGameState);
+				LogInfo(LogName, "Previous state destroyed");
+			}
+			else
+			{
+				LogInfo(LogName, "Setting initial state: [%s]", stateInstance->GetStateName().data());
+			}
+
+			if (stateInstance->Initialize() != true)
+			{
+				return false;
+			}
+			LogInfo(LogName, "Initialized new state");
+
+			if (stateInstance->LoadContent() != true)
+			{
+				return false;
+			}
+			LogInfo(LogName, "Loaded content of the new state");
+
+			CurrentGameState = stateInstance;
 		}
 	};
 
@@ -179,5 +334,10 @@ namespace Starshine
 	f64 Game::GetDeltaTime_Milliseconds() const
 	{
 		return impl->Timing.DeltaTime_Milliseconds;
+	}
+
+	bool Game::SetCurrentGameState(GameState* stateInstance)
+	{
+		return impl->SetCurrentGameStateInstance(stateInstance);
 	}
 }

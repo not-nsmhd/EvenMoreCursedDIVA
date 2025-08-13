@@ -134,6 +134,7 @@
     <ClInclude Include="game\dev\state_selector.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\game_new.h" />
+    <ClInclude Include="game\game_state.h" />
     <ClInclude Include="game\gfx\font.h" />
     <ClInclude Include="game\gfx\helpers\shader_helpers.h" />
     <ClInclude Include="game\gfx\helpers\tex_helpers.h" />

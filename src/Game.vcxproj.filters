@@ -258,6 +258,9 @@
     <ClInclude Include="game\gfx\new\Renderer.h">
       <Filter>src\game\gfx\new</Filter>
     </ClInclude>
+    <ClInclude Include="game\game_state.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
