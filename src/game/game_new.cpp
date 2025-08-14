@@ -3,6 +3,7 @@
 #include "util/logging.h"
 #include <SDL2/SDL.h>
 #include "gfx/new/Renderer.h"
+#include "testing/RenderingTest.h"
 
 namespace Starshine
 {
@@ -16,104 +17,6 @@ namespace Starshine
 
 	Game* GameInstance = nullptr;
 
-	class TestGameState;
-	class TestGameState2;
-
-	class TestGameState : public GameState
-	{
-		Renderer* GFXRenderer = nullptr;
-		f64 ElapsedTime = 0.0;
-
-		bool Initialize()
-		{
-			GFXRenderer = &Renderer::GetInstance();
-			return true;
-		}
-
-		bool LoadContent()
-		{
-			return true;
-		}
-
-		void UnloadContent()
-		{
-		}
-
-		void Destroy()
-		{
-			GFXRenderer = nullptr;
-		}
-
-		void Update(f64 deltaTime_milliseconds)
-		{
-			ElapsedTime += deltaTime_milliseconds / 1000.0;
-
-			if (ElapsedTime >= 10.0)
-			{
-				GameState* newState = GameStateHelpers::CreateGameStateInstance<TestGameState2>();
-				Game::GetInstance().SetCurrentGameState(newState);
-			}
-		}
-
-		void Draw(f64 deltaTime_milliseconds)
-		{
-			GFXRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
-			GFXRenderer->SwapBuffers();
-		}
-
-		std::string_view GetStateName() const
-		{
-			return "Testing Game State";
-		}
-	};
-
-	class TestGameState2 : public GameState
-	{
-		Renderer* GFXRenderer = nullptr;
-		f64 ElapsedTime = 0.0;
-
-		bool Initialize()
-		{
-			GFXRenderer = &Renderer::GetInstance();
-			return true;
-		}
-
-		bool LoadContent()
-		{
-			return true;
-		}
-
-		void UnloadContent()
-		{
-		}
-
-		void Destroy()
-		{
-		}
-
-		void Update(f64 deltaTime_milliseconds)
-		{
-			ElapsedTime += deltaTime_milliseconds / 1000.0;
-
-			if (ElapsedTime >= 10.0)
-			{
-				GameState* newState = GameStateHelpers::CreateGameStateInstance<TestGameState>();
-				Game::GetInstance().SetCurrentGameState(newState);
-			}
-		}
-
-		void Draw(f64 deltaTime_milliseconds)
-		{
-			GFXRenderer->Clear(ClearFlags_Color, Color(24, 24, 24, 255), 1.0f, 0);
-			GFXRenderer->SwapBuffers();
-		}
-
-		std::string_view GetStateName() const
-		{
-			return "Testing Game State Switching";
-		}
-	};
-
 	struct Game::Impl
 	{
 		SDL_Window* GameWindow{};
@@ -123,6 +26,7 @@ namespace Starshine
 
 		struct TimingData
 		{
+			bool FirstFrame = true;
 			u64 Ticks_Frequency = 0;
 
 			u64 Ticks_LastFrame = 0;
@@ -137,7 +41,7 @@ namespace Starshine
 
 		struct GFXRendererData
 		{
-			RendererBackend Backend{};
+			RendererBackendType Backend{};
 			Renderer* Renderer = nullptr;
 		} GFX;
 
@@ -154,7 +58,7 @@ namespace Starshine
 			SDL_Init(SDL_INIT_EVERYTHING);
 
 			u32 windowCreationFlags = 0;
-			if (GFX.Backend == RendererBackend::OpenGL)
+			if (GFX.Backend == RendererBackendType::OpenGL)
 			{
 				SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 				SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -181,11 +85,11 @@ namespace Starshine
 			LogInfo(LogName, "Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 
 			Renderer::CreateInstance(GFX.Backend);
-			GFX.Renderer = &Renderer::GetInstance();
+			GFX.Renderer = Renderer::GetInstance();
 
 			GFX.Renderer->Initialize(GameWindow);
 
-			GameState* testState = GameStateHelpers::CreateGameStateInstance<TestGameState>();
+			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::RenderingTest>();
 			SetCurrentGameStateInstance(testState);
 
 			return true;
@@ -200,6 +104,10 @@ namespace Starshine
 				GameStateHelpers::DeleteGameStateInstance(CurrentGameState);
 				LogInfo(LogName, "Current state destroyed");
 			}
+
+			GFX.Renderer->Destroy();
+			Renderer::DeleteInstance();
+			GFX.Renderer = nullptr;
 
 			SDL_DestroyWindow(GameWindow);
 			SDL_Quit();
@@ -233,6 +141,13 @@ namespace Starshine
 			while (Running)
 			{
 				UpdateTimingData();
+
+				if (Timing.FirstFrame)
+				{
+					Timing.FirstFrame = false;
+					continue;
+				}
+
 				if (SDL_PollEvent(&SDLEvent) != 0)
 				{
 					switch (SDLEvent.type)
@@ -292,6 +207,7 @@ namespace Starshine
 			LogInfo(LogName, "Loaded content of the new state");
 
 			CurrentGameState = stateInstance;
+			return true;
 		}
 	};
 

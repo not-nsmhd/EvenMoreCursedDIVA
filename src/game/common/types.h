@@ -36,7 +36,7 @@ struct NonCopyable
 	NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
-namespace DIVA
+namespace Starshine
 {
 	// NOTE: This assumes the enum class EnumType follows the { ..., Count }; convention
 	template <typename EnumType>

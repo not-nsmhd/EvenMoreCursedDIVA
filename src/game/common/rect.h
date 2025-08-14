@@ -1,5 +1,5 @@
 #pragma once
-#include "int_types.h"
+#include "types.h"
 
 namespace Common
 {

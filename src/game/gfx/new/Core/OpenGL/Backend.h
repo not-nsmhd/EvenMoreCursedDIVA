@@ -1,22 +1,14 @@
 #pragma once
 #include "common/types.h"
-#include "common/color.h"
-#include "Types.h"
-#include <SDL2/SDL.h>
+#include "gfx/new/Core/IBackend.h"
 
-namespace Starshine::GFX
+namespace Starshine::GFX::Core::OpenGL
 {
-	class Renderer : NonCopyable
+	class Backend : public IBackend, NonCopyable
 	{
 	public:
-		Renderer(RendererBackendType backend);
-		~Renderer() = default;
-
-	public:
-		static void CreateInstance(RendererBackendType backend);
-		static void DeleteInstance();
-
-		static Renderer* GetInstance();
+		Backend();
+		~Backend();
 
 	public:
 		bool Initialize(SDL_Window* gameWindow);
