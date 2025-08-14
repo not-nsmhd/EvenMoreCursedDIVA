@@ -40,8 +40,11 @@
     <ClCompile Include="game\testing\RenderingTest.cpp">
       <Filter>src\game\testing</Filter>
     </ClCompile>
-    <ClCompile Include="game\gfx\new\Core\OpenGL\Backend.cpp">
+    <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp">
       <Filter>src\game\gfx\new\Core\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp">
+      <Filter>src\game\gfx\new\Core\D3D9</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -90,8 +93,11 @@
     <ClInclude Include="game\gfx\new\Types.h">
       <Filter>src\game\gfx\new</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\Core\OpenGL\Backend.h">
+    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLBackend.h">
       <Filter>src\game\gfx\new\Core\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\Core\D3D9\D3D9Backend.h">
+      <Filter>src\game\gfx\new\Core\D3D9</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +172,9 @@
     </Filter>
     <Filter Include="src\game\gfx\new\Core\OpenGL">
       <UniqueIdentifier>{0e78b484-8e46-4071-a2e9-778b63dd6aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\new\Core\D3D9">
+      <UniqueIdentifier>{fc22504d-d1bf-47b1-a6be-04ab7a439c0b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

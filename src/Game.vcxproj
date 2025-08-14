@@ -75,7 +75,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -109,7 +109,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -131,8 +131,9 @@
     <ClInclude Include="game\common\types.h" />
     <ClInclude Include="game\game_new.h" />
     <ClInclude Include="game\game_state.h" />
+    <ClInclude Include="game\gfx\new\Core\D3D9\D3D9Backend.h" />
     <ClInclude Include="game\gfx\new\Core\IBackend.h" />
-    <ClInclude Include="game\gfx\new\Core\OpenGL\Backend.h" />
+    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLBackend.h" />
     <ClInclude Include="game\gfx\new\Renderer.h" />
     <ClInclude Include="game\gfx\new\Types.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
@@ -147,7 +148,8 @@
     <ClCompile Include="game\common\color.cpp" />
     <ClCompile Include="game\common\math_ext.cpp" />
     <ClCompile Include="game\game_new.cpp" />
-    <ClCompile Include="game\gfx\new\Core\OpenGL\Backend.cpp" />
+    <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp" />
+    <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp" />
     <ClCompile Include="game\gfx\new\Renderer.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />

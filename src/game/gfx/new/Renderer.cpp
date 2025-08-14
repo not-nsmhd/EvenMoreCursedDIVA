@@ -1,12 +1,14 @@
+#include "Core/OpenGL/OpenGLBackend.h"
+#include "Core/D3D9/D3D9Backend.h"
 #include "Renderer.h"
-#include "Core/OpenGL/Backend.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX
 {
 	using namespace Logging;
 	using namespace Core;
-	using OpenGLBackend = Core::OpenGL::Backend;
+	using OpenGLBackend = Core::OpenGL::OpenGLBackend;
+	using D3D9Backend = Core::D3D9::D3D9Backend;
 
 	constexpr const char* LogName = "Starshine::GFX";
 
@@ -14,17 +16,23 @@ namespace Starshine::GFX
 
 	struct Renderer::Impl
 	{
+		RendererBackendType CurrentBackendType{};
 		IBackend* CurrentBackend = nullptr;
 
 		void SetBackendType(RendererBackendType type)
 		{
 			if (CurrentBackend == nullptr)
 			{
+				CurrentBackendType = type;
+
 				switch (type)
 				{
 				case RendererBackendType::OpenGL:
 				default:
 					CurrentBackend = new OpenGLBackend();
+					break;
+				case RendererBackendType::D3D9:
+					CurrentBackend = new D3D9Backend();
 					break;
 				}
 			}
@@ -32,6 +40,8 @@ namespace Starshine::GFX
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
+			LogInfo(LogName, "Backend: %s", RendererBackendNames[static_cast<size_t>(CurrentBackendType)]);
+
 			CurrentBackend->Initialize(gameWindow);
 			return true;
 		}

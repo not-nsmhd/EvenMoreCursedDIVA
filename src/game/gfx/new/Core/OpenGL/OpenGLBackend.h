@@ -4,11 +4,11 @@
 
 namespace Starshine::GFX::Core::OpenGL
 {
-	class Backend : public IBackend, NonCopyable
+	class OpenGLBackend : public IBackend, NonCopyable
 	{
 	public:
-		Backend();
-		~Backend();
+		OpenGLBackend();
+		~OpenGLBackend();
 
 	public:
 		bool Initialize(SDL_Window* gameWindow);

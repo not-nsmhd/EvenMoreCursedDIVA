@@ -41,7 +41,7 @@ namespace Starshine
 
 		struct GFXRendererData
 		{
-			RendererBackendType Backend{};
+			RendererBackendType BackendType{};
 			Renderer* Renderer = nullptr;
 		} GFX;
 
@@ -57,8 +57,20 @@ namespace Starshine
 
 			SDL_Init(SDL_INIT_EVERYTHING);
 
+			SDL_version sdlVersion{};
+			SDL_GetVersion(&sdlVersion);
+			const char* platformName = SDL_GetPlatform();
+
+			LogInfo(LogName, "SDL Version: %d.%d.%d", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
+			LogInfo(LogName, "SDL Platform: %s", platformName);
+
+			LogInfo(LogName, "Build Date: %s", BuildInfo::BuildDateString);
+			LogInfo(LogName, "Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
+
+			GFX.BackendType = GFX::RendererBackendType::D3D9;
+
 			u32 windowCreationFlags = 0;
-			if (GFX.Backend == RendererBackendType::OpenGL)
+			if (GFX.BackendType == RendererBackendType::OpenGL)
 			{
 				SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 				SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -74,17 +86,7 @@ namespace Starshine
 
 			Running = true;
 
-			SDL_version sdlVersion{};
-			SDL_GetVersion(&sdlVersion);
-			const char* platformName = SDL_GetPlatform();
-
-			LogInfo(LogName, "SDL Version: %d.%d.%d", sdlVersion.major, sdlVersion.minor, sdlVersion.patch);
-			LogInfo(LogName, "SDL Platform: %s", platformName);
-
-			LogInfo(LogName, "Build Date: %s", BuildInfo::BuildDateString);
-			LogInfo(LogName, "Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
-
-			Renderer::CreateInstance(GFX.Backend);
+			Renderer::CreateInstance(GFX.BackendType);
 			GFX.Renderer = Renderer::GetInstance();
 
 			GFX.Renderer->Initialize(GameWindow);

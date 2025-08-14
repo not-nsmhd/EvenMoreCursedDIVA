@@ -1,5 +1,5 @@
 #include <glad/glad.h>
-#include "Backend.h"
+#include "OpenGLBackend.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::OpenGL
@@ -7,7 +7,7 @@ namespace Starshine::GFX::Core::OpenGL
 	using namespace Logging;
 	constexpr const char* LogName = "Starshine::GFX::Core::OpenGL";
 
-	struct Backend::Impl
+	struct OpenGLBackend::Impl
 	{
 		SDL_Window* GameWindow = nullptr;
 		SDL_GLContext GLContext{};
@@ -101,36 +101,36 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 	};
 
-	Backend::Backend() : impl(new Backend::Impl())
+	OpenGLBackend::OpenGLBackend() : impl(new OpenGLBackend::Impl())
 	{
 	}
 
-	Backend::~Backend()
+	OpenGLBackend::~OpenGLBackend()
 	{
 	}
 
-	bool Backend::Initialize(SDL_Window* gameWindow)
+	bool OpenGLBackend::Initialize(SDL_Window* gameWindow)
 	{
 		return impl->Initialize(gameWindow);
 	}
 
-	void Backend::Destroy()
+	void OpenGLBackend::Destroy()
 	{
 		impl->Destroy();
 		delete impl;
 	}
 
-	RendererBackendType Backend::GetType() const
+	RendererBackendType OpenGLBackend::GetType() const
 	{
 		return RendererBackendType::OpenGL;
 	}
 
-	void Backend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
+	void OpenGLBackend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
 	{
 		impl->Clear(flags, color, depth, stencil);
 	}
 
-	void Backend::SwapBuffers()
+	void OpenGLBackend::SwapBuffers()
 	{
 		impl->SwapBuffers();
 	}
