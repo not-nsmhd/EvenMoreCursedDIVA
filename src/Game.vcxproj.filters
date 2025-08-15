@@ -46,6 +46,9 @@
     <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp">
       <Filter>src\game\gfx\new\Core\D3D9</Filter>
     </ClCompile>
+    <ClCompile Include="game\io\File.cpp">
+      <Filter>src\game\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -98,6 +101,24 @@
     </ClInclude>
     <ClInclude Include="game\gfx\new\Core\D3D9\D3D9Backend.h">
       <Filter>src\game\gfx\new\Core\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\Resource.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\Buffers.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\Shader.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
+    <ClInclude Include="game\io\File.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\VertexDesc.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLVertexDesc.h">
+      <Filter>src\game\gfx\new\Core\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,12 +1,22 @@
+#if 0
 #include <d3d9.h>
 #include <SDL2/SDL_syswm.h>
 #include "D3D9Backend.h"
+#include <vector>
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::D3D9
 {
 	using namespace Logging;
+	using std::vector;
+
 	constexpr const char* LogName = "Starshine::GFX::Core::D3D9";
+
+	struct ResourceContext
+	{
+		IDirect3DResource9* BaseResource = nullptr;
+		size_t Size = 0;
+	};
 
 	struct D3D9Backend::Impl
 	{
@@ -17,6 +27,8 @@ namespace Starshine::GFX::Core::D3D9
 			IDirect3D9* D3D9 = nullptr;
 			IDirect3DDevice9* Device = nullptr;
 		} BaseState;
+
+		vector<ResourceContext> Resources;
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
@@ -78,6 +90,9 @@ namespace Starshine::GFX::Core::D3D9
 				return false;
 			}
 
+			constexpr size_t reasonableInitialResources = 512;
+			Resources.reserve(reasonableInitialResources);
+
 			return true;
 		}
 
@@ -115,6 +130,22 @@ namespace Starshine::GFX::Core::D3D9
 		{
 			BaseState.Device->Present(NULL, NULL, NULL, NULL);
 		}
+
+		ResourceHandle FindFreeResourceContext()
+		{
+			for (size_t i = 0; i < Resources.size(); i++)
+			{
+				ResourceContext& ctx = Resources[i];
+
+				if (ctx.BaseResource == nullptr && ctx.Size == 0)
+				{
+					return i;
+				}
+			}
+
+			Resources.emplace_back();
+			return static_cast<ResourceHandle>(Resources.size() - 1);
+		}
 	};
 
 	D3D9Backend::D3D9Backend() : impl(new D3D9Backend::Impl())
@@ -150,4 +181,105 @@ namespace Starshine::GFX::Core::D3D9
 	{
 		impl->SwapBuffers();
 	}
+
+	VertexBuffer* D3D9Backend::CreateVertexBuffer(size_t size, void* initialData, bool dynamic)
+	{
+		if (!dynamic && initialData == nullptr || size == 0)
+		{
+			return nullptr;
+		}
+
+		IDirect3DDevice9* d3dDevice = impl->BaseState.Device;
+		IDirect3DVertexBuffer9* d3dBuffer = nullptr;
+		HRESULT result = D3D_OK;
+
+		UINT bufferLength = static_cast<UINT>(size);
+		DWORD bufferUsage = (dynamic) ? D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY;
+		if ((result = d3dDevice->CreateVertexBuffer(bufferLength, bufferUsage, 0, D3DPOOL_DEFAULT, &d3dBuffer, NULL)) != D3D_OK)
+		{
+			LogError(LogName, "Failed to create a new vertex buffer. Error: %08x", result);
+			return nullptr;
+		}
+
+		void* bufferData = new u8[size];
+
+		if (initialData != nullptr)
+		{
+			SDL_memcpy(bufferData, initialData, size);
+
+			void* d3dBufferData = nullptr;
+			d3dBuffer->Lock(0, bufferLength, &d3dBufferData, D3DLOCK_DISCARD);
+			SDL_memcpy(d3dBufferData, bufferData, size);
+			d3dBuffer->Unlock();
+		}
+		else
+		{
+			SDL_memset(bufferData, 0, size);
+		}
+
+		ResourceHandle handle = impl->FindFreeResourceContext();
+		ResourceContext* ctx = &impl->Resources.at(static_cast<size_t>(handle));
+
+		ctx->BaseResource = d3dBuffer;
+		ctx->Size = size;
+
+		VertexBuffer_D3D9* buffer = new VertexBuffer_D3D9();
+		buffer->Handle = handle;
+		buffer->Type = ResourceType::VertexBuffer;
+		buffer->Context = ctx;
+
+		buffer->Data = bufferData;
+		buffer->Size = size;
+		buffer->Dynamic = dynamic;
+
+		LogInfo(LogName, "Created a new vertex buffer (handle %d)", handle);
+		return buffer;
+	}
+
+	void D3D9Backend::DeleteResource(Resource* resource)
+	{
+		if (resource->Handle == InvalidResourceHandle)
+		{
+			return;
+		}
+
+		ResourceContext* resourceCtx = &impl->Resources.at(static_cast<size_t>(resource->Handle));
+		resourceCtx->BaseResource->Release();
+		resourceCtx->BaseResource = nullptr;
+		resourceCtx->Size = 0;
+
+		switch (resource->Type)
+		{
+		case ResourceType::VertexBuffer:
+			VertexBuffer_D3D9* buffer = static_cast<VertexBuffer_D3D9*>(resource);
+			delete buffer->Data;
+			delete buffer;
+			break;
+		}
+	}
+
+	void VertexBuffer_D3D9::SetData(void* source, size_t offset, size_t size)
+	{
+		if (Handle == InvalidResourceHandle || Context == nullptr)
+		{
+			return;
+		}
+
+		if (offset + size > Size || !Dynamic)
+		{
+			return;
+		}
+
+		SDL_memcpy((u8*)Data + offset, source, size);
+
+		IDirect3DVertexBuffer9* buffer = static_cast<IDirect3DVertexBuffer9*>(Context->BaseResource);
+		UINT lockOffset = static_cast<UINT>(offset);
+		UINT lockSize = static_cast<UINT>(size);
+
+		void* bufferData = nullptr;
+		buffer->Lock(lockOffset, lockSize, &bufferData, D3DLOCK_DISCARD);
+		SDL_memcpy(bufferData, source, size);
+		buffer->Unlock();
+	}
 }
+#endif

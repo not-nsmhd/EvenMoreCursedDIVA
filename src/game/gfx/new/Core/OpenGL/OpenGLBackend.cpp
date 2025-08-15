@@ -1,16 +1,55 @@
 #include <glad/glad.h>
 #include "OpenGLBackend.h"
+#include <array>
+#include <vector>
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::OpenGL
 {
 	using namespace Logging;
+	using std::array;
+	using std::vector;
+
 	constexpr const char* LogName = "Starshine::GFX::Core::OpenGL";
+
+	namespace ConversionTables
+	{
+		constexpr array<GLenum, EnumCount<PrimitiveType>()> GLPrimitiveTypes =
+		{
+			GL_POINTS,
+			GL_LINES,
+			GL_LINE_STRIP,
+			GL_TRIANGLES,
+			GL_TRIANGLE_STRIP
+		};
+
+		constexpr array<GLenum, EnumCount<IndexFormat>()> GLIndexFormats =
+		{
+			GL_UNSIGNED_SHORT,
+			GL_UNSIGNED_INT
+		};
+	}
+
+	struct ResourceContext
+	{
+		GLuint BaseResourceHandle = 0;
+		size_t Size = 0;
+	};
 
 	struct OpenGLBackend::Impl
 	{
 		SDL_Window* GameWindow = nullptr;
 		SDL_GLContext GLContext{};
+
+		vector<ResourceContext> ResourceContexts;
+
+		bool VertexBufferSet = false;
+		bool VertexDescSet = false;
+
+		bool IndexBufferSet = false;
+		GLenum CurrentIndexFormat = 0;
+
+		bool ShaderSet = false;
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
@@ -46,7 +85,7 @@ namespace Starshine::GFX::Core::OpenGL
 			LogInfo(LogName, "OpenGL Version: %s", glGetString(GL_VERSION));
 			LogInfo(LogName, "OpenGL Renderer: %s", glGetString(GL_RENDERER));
 
-			//glEnable(GL_CULL_FACE);
+			glDisable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			glFrontFace(GL_CW);
 
@@ -65,39 +104,119 @@ namespace Starshine::GFX::Core::OpenGL
 			SDL_GL_DeleteContext(GLContext);
 		}
 
-		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
-		{
-			GLenum clearFlags = 0;
-
-			if ((flags & ClearFlags::ClearFlags_Color) != 0)
-			{
-				glClearColor(
-					static_cast<float>(color.R) / 255.0f,
-					static_cast<float>(color.G) / 255.0f,
-					static_cast<float>(color.B) / 255.0f,
-					static_cast<float>(color.A) / 255.0f);
-
-				clearFlags |= GL_COLOR_BUFFER_BIT;
-			}
-
-			if ((flags & ClearFlags::ClearFlags_Depth) != 0)
-			{
-				glClearDepth(static_cast<double>(depth));
-				clearFlags |= GL_DEPTH_BUFFER_BIT;
-			}
-
-			if ((flags & ClearFlags::ClearFlags_Stencil) != 0)
-			{
-				glClearStencil(stencil);
-				clearFlags |= GL_STENCIL_BUFFER_BIT;
-			}
-
-			glClear(clearFlags);
-		}
-
 		void SwapBuffers()
 		{
 			SDL_GL_SwapWindow(GameWindow);
+		}
+
+		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
+		{
+			if (VertexBufferSet && VertexDescSet && ShaderSet)
+			{
+				GLenum primType = ConversionTables::GLPrimitiveTypes[static_cast<size_t>(type)];
+				glDrawArrays(primType, firstVertex, vertexCount);
+			}
+		}
+
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+		{
+			if (VertexBufferSet && IndexBufferSet && VertexDescSet && ShaderSet)
+			{
+				GLenum primType = ConversionTables::GLPrimitiveTypes[static_cast<size_t>(type)];
+				size_t firstIndexPointer = static_cast<size_t>(firstIndex) * ((CurrentIndexFormat == GL_UNSIGNED_SHORT) ? 2 : 4);
+
+				glDrawElements(primType, indexCount, CurrentIndexFormat, (const void*)firstIndexPointer);
+			}
+		}
+
+		void SetVertexBuffer(const VertexBuffer_OpenGL* buffer)
+		{
+			if (buffer == nullptr)
+			{
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				VertexBufferSet = false;
+			}
+			else
+			{
+				GLuint glBufferHandle = ResourceContexts[static_cast<size_t>(buffer->Handle)].BaseResourceHandle;
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, glBufferHandle);
+				VertexBufferSet = true;
+			}
+		}
+
+		void SetIndexBuffer(const IndexBuffer_OpenGL* buffer)
+		{
+			if (buffer == nullptr)
+			{
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+				IndexBufferSet = false;
+			}
+			else
+			{
+				GLuint glBufferHandle = ResourceContexts[static_cast<size_t>(buffer->Handle)].BaseResourceHandle;
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, glBufferHandle);
+				CurrentIndexFormat = ConversionTables::GLIndexFormats[static_cast<size_t>(buffer->Format)];
+				IndexBufferSet = true;
+			}
+		}
+
+		void SetVertexDesc(const VertexDesc_OpenGL* desc)
+		{
+			if (desc != nullptr)
+			{
+				for (auto& attrib : desc->GLAttribs)
+				{
+					switch (attrib.Type)
+					{
+					case VertexAttribType::Position:
+						glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::Color:
+						glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::TexCoord:
+						glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					}
+				}
+
+				VertexDescSet = true;
+			}
+		}
+
+		void SetShader(const Shader_OpenGL* shader)
+		{
+			if (shader == nullptr)
+			{
+				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, 0);
+				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
+				ShaderSet = false;
+			}
+			else
+			{
+				GLuint vertHandle = ResourceContexts[static_cast<size_t>(shader->VertexHandle)].BaseResourceHandle;
+				GLuint fragHandle = ResourceContexts[static_cast<size_t>(shader->FragmentHandle)].BaseResourceHandle;
+
+				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vertHandle);
+				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragHandle);
+				ShaderSet = true;
+			}
+		}
+
+		ResourceHandle FindFreeResourceContext()
+		{
+			for (size_t i = 0; i < ResourceContexts.size(); i++)
+			{
+				ResourceContext& ctx = ResourceContexts[i];
+
+				if (ctx.BaseResourceHandle == 0 && ctx.Size == 0)
+				{
+					return i;
+				}
+			}
+
+			ResourceContexts.emplace_back();
+			return static_cast<ResourceHandle>(ResourceContexts.size() - 1);
 		}
 	};
 
@@ -125,13 +244,417 @@ namespace Starshine::GFX::Core::OpenGL
 		return RendererBackendType::OpenGL;
 	}
 
+	ResourceContext* OpenGLBackend::GetResourceContext(ResourceHandle handle)
+	{
+		if (handle != InvalidResourceHandle)
+		{
+			return &impl->ResourceContexts.at(static_cast<size_t>(handle));
+		}
+		return nullptr;
+	}
+
 	void OpenGLBackend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
 	{
-		impl->Clear(flags, color, depth, stencil);
+		GLenum clearFlags = 0;
+
+		if ((flags & ClearFlags::ClearFlags_Color) != 0)
+		{
+			glClearColor(
+				static_cast<float>(color.R) / 255.0f,
+				static_cast<float>(color.G) / 255.0f,
+				static_cast<float>(color.B) / 255.0f,
+				static_cast<float>(color.A) / 255.0f);
+
+			clearFlags |= GL_COLOR_BUFFER_BIT;
+		}
+
+		if ((flags & ClearFlags::ClearFlags_Depth) != 0)
+		{
+			glClearDepth(static_cast<double>(depth));
+			clearFlags |= GL_DEPTH_BUFFER_BIT;
+		}
+
+		if ((flags & ClearFlags::ClearFlags_Stencil) != 0)
+		{
+			glClearStencil(stencil);
+			clearFlags |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		glClear(clearFlags);
 	}
 
 	void OpenGLBackend::SwapBuffers()
 	{
 		impl->SwapBuffers();
+	}
+
+	void OpenGLBackend::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
+	{
+		impl->DrawArrays(type, firstVertex, vertexCount);
+	}
+
+	void OpenGLBackend::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+	{
+		impl->DrawIndexed(type, firstIndex, indexCount);
+	}
+
+	VertexBuffer* OpenGLBackend::CreateVertexBuffer(size_t size, void* initialData, bool dynamic)
+	{
+		if (!dynamic && initialData == nullptr || size == 0)
+		{
+			return nullptr;
+		}
+
+		GLsizeiptr bufferLength = static_cast<GLsizeiptr>(size);
+		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
+
+		GLuint baseBuffer = 0;
+		glGenBuffersARB(1, &baseBuffer);
+
+		void* bufferData = new u8[size];
+
+		if (initialData != nullptr)
+		{
+			SDL_memcpy(bufferData, initialData, size);
+		}
+		else
+		{
+			SDL_memset(bufferData, 0, size);
+		}
+
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, baseBuffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, bufferData, bufferUsage);
+
+		ResourceHandle handle = impl->FindFreeResourceContext();
+		ResourceContext* ctx = &impl->ResourceContexts.at(static_cast<size_t>(handle));
+
+		ctx->BaseResourceHandle = baseBuffer;
+		ctx->Size = size;
+
+		VertexBuffer_OpenGL* buffer = new VertexBuffer_OpenGL();
+		buffer->Handle = handle;
+		buffer->Backend = this;
+
+		buffer->Data = bufferData;
+		buffer->Size = size;
+		buffer->Dynamic = dynamic;
+
+		LogInfo(LogName, "Created a new vertex buffer (handle %d)", handle);
+		return buffer;
+	}
+
+	// TODO: Make this less copy-pasty
+	IndexBuffer* OpenGLBackend::CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic)
+	{
+		if (!dynamic && initialData == nullptr || size == 0)
+		{
+			return nullptr;
+		}
+
+		GLsizeiptr bufferLength = static_cast<GLsizeiptr>(size);
+		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
+
+		GLuint baseBuffer = 0;
+		glGenBuffersARB(1, &baseBuffer);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, baseBuffer);
+
+		void* bufferData = new u8[size];
+
+		if (initialData != nullptr)
+		{
+			SDL_memcpy(bufferData, initialData, size);
+			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, bufferData, bufferUsage);
+		}
+		else
+		{
+			SDL_memset(bufferData, 0, size);
+			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, NULL, bufferUsage);
+		}
+
+		ResourceHandle handle = impl->FindFreeResourceContext();
+		ResourceContext* ctx = &impl->ResourceContexts.at(static_cast<size_t>(handle));
+
+		ctx->BaseResourceHandle = baseBuffer;
+		ctx->Size = size;
+
+		IndexBuffer_OpenGL* buffer = new IndexBuffer_OpenGL();
+		buffer->Handle = handle;
+		buffer->Backend = this;
+
+		buffer->Data = bufferData;
+		buffer->Format = format;
+		buffer->Size = size;
+		buffer->Dynamic = dynamic;
+
+		LogInfo(LogName, "Created a new index buffer (handle %d)", handle);
+		return buffer;
+	}
+
+	VertexDesc* OpenGLBackend::CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount)
+	{
+		if (attribs == nullptr || attribCount == 0)
+		{
+			return nullptr;
+		}
+
+		VertexDesc_OpenGL* desc = new VertexDesc_OpenGL(attribs, attribCount);
+
+		for (size_t i = 0; i < attribCount; i++)
+		{
+			const VertexAttrib& gfxAttrib = attribs[i];
+			VertexAttrib_OpenGL& glAttrib = desc->GLAttribs[i];
+
+			glAttrib.Type = gfxAttrib.Type;
+			glAttrib.Index = gfxAttrib.Index;
+			glAttrib.Format = ConversionTables::GLVertexAttribFormat[static_cast<size_t>(gfxAttrib.Format)];
+			glAttrib.Components = gfxAttrib.Components;
+			glAttrib.VertexSize = gfxAttrib.VertexSize;
+			glAttrib.Offset = gfxAttrib.Offset;
+		}
+
+		LogInfo(LogName, "Created a new vertex description");
+		return desc;
+	}
+
+	Shader* OpenGLBackend::LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize)
+	{
+		if (vsData == nullptr || vsSize == 0 || fsData == nullptr || fsSize == 0)
+		{
+			return nullptr;
+		}
+
+		GLuint vsHandle = 0;
+		GLuint fsHandle = 0;
+
+		u8* vsSource = new u8[vsSize];
+		SDL_memcpy(vsSource, vsData, vsSize);
+
+		u8* fsSource = new u8[fsSize];
+		SDL_memcpy(fsSource, fsData, fsSize);
+
+		glGenProgramsARB(1, &vsHandle);
+		glGenProgramsARB(1, &fsHandle);
+
+		glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vsHandle);
+		glProgramStringARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, vsSize, vsSource);
+
+		GLint errorPos = -1;
+		const GLubyte* errorString = nullptr;
+
+		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+		if (errorPos != -1)
+		{
+			errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+			LogError(LogName, "Failed to assemble vertex program. Error: %s", errorString);
+		}
+
+		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fsHandle);
+		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, fsSize, fsSource);
+
+		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+		if (errorPos != -1)
+		{
+			errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+			LogError(LogName, "Failed to assemble fragment program. Error: %s", errorString);
+		}
+
+		ResourceHandle vertHandle = impl->FindFreeResourceContext();
+		ResourceContext* vertCtx = &impl->ResourceContexts.at(static_cast<size_t>(vertHandle));
+
+		vertCtx->BaseResourceHandle = vsHandle;
+		vertCtx->Size = vsSize;
+
+		ResourceHandle fragHandle = impl->FindFreeResourceContext();
+		ResourceContext* fragCtx = &impl->ResourceContexts.at(static_cast<size_t>(fragHandle));
+
+		fragCtx->BaseResourceHandle = fsHandle;
+		fragCtx->Size = fsSize;
+
+		Shader_OpenGL* shader = new Shader_OpenGL(vsSource, vsSize, fsSource, fsSize);
+		shader->Handle = vertHandle;
+		shader->VertexHandle = vertHandle;
+		shader->FragmentHandle = fragHandle;
+
+		shader->Backend = this;
+
+		LogInfo(LogName, "Created a new shader program (vert: %d, frag: %d)", vertHandle, fragHandle);
+		return shader;
+	}
+
+	void OpenGLBackend::DeleteResource(Resource* resource)
+	{
+		if (resource->Handle == InvalidResourceHandle)
+		{
+			if (resource->Type == ResourceType::VertexDesc)
+			{
+				VertexDesc_OpenGL* desc = static_cast<VertexDesc_OpenGL*>(resource);
+				desc->GLAttribs.clear();
+
+				delete desc;
+				LogInfo(LogName, "Vertex description has been deleted");
+				return;
+			}
+			return;
+		}
+
+		ResourceHandle handle = resource->Handle;
+		ResourceContext* resourceCtx = &impl->ResourceContexts.at(static_cast<size_t>(handle));
+
+		switch (resource->Type)
+		{
+		case ResourceType::VertexBuffer:
+		{
+			glDeleteBuffersARB(1, &resourceCtx->BaseResourceHandle);
+			resourceCtx->BaseResourceHandle = 0;
+
+			VertexBuffer_OpenGL* buffer = static_cast<VertexBuffer_OpenGL*>(resource);
+			delete buffer->Data;
+			delete buffer;
+
+			LogInfo(LogName, "Vertex buffer with handle %d has been deleted", handle);
+			break;
+		}
+		case ResourceType::IndexBuffer:
+		{
+			glDeleteBuffersARB(1, &resourceCtx->BaseResourceHandle);
+			resourceCtx->BaseResourceHandle = 0;
+
+			IndexBuffer_OpenGL* buffer = static_cast<IndexBuffer_OpenGL*>(resource);
+			delete buffer->Data;
+			delete buffer;
+
+			LogInfo(LogName, "Index buffer with handle %d has been deleted", handle);
+			break;
+		}
+		case ResourceType::Shader:
+		{
+			Shader_OpenGL* shader = static_cast<Shader_OpenGL*>(resource);
+
+			ResourceContext* vertexCtx = &impl->ResourceContexts.at(static_cast<size_t>(shader->VertexHandle));
+			ResourceContext* fragmentCtx = &impl->ResourceContexts.at(static_cast<size_t>(shader->FragmentHandle));
+
+			glDeleteProgramsARB(1, &vertexCtx->BaseResourceHandle);
+			glDeleteProgramsARB(1, &fragmentCtx->BaseResourceHandle);
+
+			vertexCtx->BaseResourceHandle = 0;
+			vertexCtx->Size = 0;
+
+			fragmentCtx->BaseResourceHandle = 0;
+			fragmentCtx->Size = 0;
+
+			ResourceHandle vsHandle = handle;
+			ResourceHandle fsHandle = shader->FragmentHandle;
+
+			delete shader->VertexShaderSource;
+			delete shader->FragmentShaderSource;
+			delete shader;
+
+			LogInfo(LogName, "Shader program (vert: %d, frag: %d) has been deleted", vsHandle, fsHandle);
+			break;
+		}
+		}
+	}
+
+	void OpenGLBackend::SetVertexBuffer(const VertexBuffer* buffer)
+	{
+		if (buffer == nullptr)
+		{
+			impl->SetVertexBuffer(nullptr);
+		}
+		else
+		{
+			const VertexBuffer_OpenGL* glBuffer = static_cast<const VertexBuffer_OpenGL*>(buffer);
+			impl->SetVertexBuffer(glBuffer);
+		}
+	}
+
+	void OpenGLBackend::SetIndexBuffer(const IndexBuffer* buffer)
+	{
+		if (buffer == nullptr)
+		{
+			impl->SetIndexBuffer(nullptr);
+		}
+		else
+		{
+			const IndexBuffer_OpenGL* glBuffer = static_cast<const IndexBuffer_OpenGL*>(buffer);
+			impl->SetIndexBuffer(glBuffer);
+		}
+	}
+
+	void OpenGLBackend::SetVertexDesc(const VertexDesc* desc)
+	{
+		if (desc != nullptr)
+		{
+			const VertexDesc_OpenGL* glDesc = static_cast<const VertexDesc_OpenGL*>(desc);
+			impl->SetVertexDesc(glDesc);
+		}
+	}
+
+	void OpenGLBackend::SetShader(const Shader* shader)
+	{
+		if (shader == nullptr)
+		{
+			impl->SetShader(nullptr);
+		}
+		else
+		{
+			const Shader_OpenGL* glShader = static_cast<const Shader_OpenGL*>(shader);
+			impl->SetShader(glShader);
+		}
+	}
+
+	void SetBufferData(GLuint glHandle, ResourceType bufferType, void* bufferData, void* source, size_t offset, size_t size)
+	{
+		SDL_memcpy((u8*)bufferData + offset, source, size);
+
+		GLenum bindTarget = 0;
+
+		switch (bufferType)
+		{
+		case ResourceType::VertexBuffer:
+			bindTarget = GL_ARRAY_BUFFER_ARB;
+			break;
+		case ResourceType::IndexBuffer:
+			bindTarget = GL_ELEMENT_ARRAY_BUFFER_ARB;
+			break;
+		}
+
+		GLintptr copyOffset = static_cast<GLintptr>(offset);
+		GLsizeiptr copySize = static_cast<GLsizeiptr>(size);
+
+		glBindBufferARB(bindTarget, glHandle);
+		glBufferSubDataARB(bindTarget, copyOffset, copySize, source);
+	}
+
+	void VertexBuffer_OpenGL::SetData(void* source, size_t offset, size_t size)
+	{
+		if (Handle == InvalidResourceHandle)
+		{
+			return;
+		}
+
+		if (offset + size > Size || !Dynamic)
+		{
+			return;
+		}
+
+		ResourceContext* ctx = Backend->GetResourceContext(Handle);
+		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
+	}
+
+	void IndexBuffer_OpenGL::SetData(void* source, size_t offset, size_t size)
+	{
+		if (Handle == InvalidResourceHandle)
+		{
+			return;
+		}
+
+		if (offset + size > Size || !Dynamic)
+		{
+			return;
+		}
+
+		ResourceContext* ctx = Backend->GetResourceContext(Handle);
+		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
 	}
 }

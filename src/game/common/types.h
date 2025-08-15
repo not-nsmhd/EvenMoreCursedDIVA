@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
+#include <array>
 #include <string>
 
 using i8 = int8_t;
@@ -53,8 +54,8 @@ namespace Starshine
 		MValue MappedValue;
 	};
 
-	template <typename Enum, typename MValue>
-	using EnumValueMappingTable = EnumValueMapping<Enum, MValue>[EnumCount<Enum>()];
+	template <typename Enum, typename MappedValue>
+	using EnumValueMappingTable = std::array<EnumValueMapping<Enum, MappedValue>, EnumCount<Enum>()>;
 
 	template <typename Enum>
 	struct EnumStringMapping
@@ -64,7 +65,7 @@ namespace Starshine
 	};
 
 	template <typename Enum>
-	using EnumStringMappingTable = EnumStringMapping<Enum>[EnumCount<Enum>()];
+	using EnumStringMappingTable = std::array<EnumStringMapping<Enum>, EnumCount<Enum>()>;
 
 	template <typename Enum>
 	constexpr std::string_view EnumToString(const EnumStringMappingTable<Enum>& mapTable, Enum value)

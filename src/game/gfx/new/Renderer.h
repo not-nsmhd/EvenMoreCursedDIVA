@@ -2,6 +2,10 @@
 #include "common/types.h"
 #include "common/color.h"
 #include "Types.h"
+#include "Resource.h"
+#include "Buffers.h"
+#include "VertexDesc.h"
+#include "Shader.h"
 #include <SDL2/SDL.h>
 
 namespace Starshine::GFX
@@ -28,6 +32,23 @@ namespace Starshine::GFX
 	public:
 		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
+
+		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount);
+
+	public:
+		VertexBuffer* CreateVertexBuffer(size_t size, void* initialData, bool dynamic);
+		IndexBuffer* CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic);
+		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
+		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
+
+		void DeleteResource(Resource* resource);
+
+	public:
+		void SetVertexBuffer(const VertexBuffer* buffer);
+		void SetIndexBuffer(const IndexBuffer* buffer);
+		void SetVertexDesc(const VertexDesc* desc);
+		void SetShader(const Shader* shader);
 
 	private:
 		struct Impl;

@@ -1,9 +1,48 @@
 #pragma once
 #include "common/types.h"
 #include "gfx/new/Core/IBackend.h"
+#include "OpenGLVertexDesc.h"
+#include <vector>
 
 namespace Starshine::GFX::Core::OpenGL
 {
+	class OpenGLBackend;
+	struct ResourceContext;
+
+	struct VertexBuffer_OpenGL : public VertexBuffer
+	{
+		OpenGLBackend* Backend = nullptr;
+
+		void SetData(void* source, size_t offset, size_t size);
+	};
+
+	struct IndexBuffer_OpenGL : public IndexBuffer
+	{
+		OpenGLBackend* Backend = nullptr;
+
+		void SetData(void* source, size_t offset, size_t size);
+	};
+
+	struct Shader_OpenGL : public Shader
+	{
+	public:
+		Shader_OpenGL(void* vsData, size_t vsSize, void* fsData, size_t fsSize) 
+			: Shader(vsData, vsSize, fsData, fsSize) {}
+
+		OpenGLBackend* Backend = nullptr;
+
+		ResourceHandle VertexHandle = InvalidResourceHandle;
+		ResourceHandle FragmentHandle = InvalidResourceHandle;
+	};
+
+	struct VertexDesc_OpenGL : public VertexDesc
+	{
+	public:
+		VertexDesc_OpenGL(const VertexAttrib* attribs, size_t attribCount) : GLAttribs(attribCount) {}
+
+		std::vector<VertexAttrib_OpenGL> GLAttribs;
+	};
+
 	class OpenGLBackend : public IBackend, NonCopyable
 	{
 	public:
@@ -18,8 +57,30 @@ namespace Starshine::GFX::Core::OpenGL
 		RendererBackendType GetType() const;
 
 	public:
+		ResourceContext* GetResourceContext(ResourceHandle handle);
+
+	public:
 		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
+
+		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount);
+
+	public:
+		VertexBuffer* CreateVertexBuffer(size_t size, void* initialData, bool dynamic);
+		IndexBuffer* CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic);
+
+		// NOTE: Vertex descriptions do not have their own contexts in OpenGL
+		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
+		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
+
+		void DeleteResource(Resource* resource);
+
+	public:
+		void SetVertexBuffer(const VertexBuffer* buffer);
+		void SetIndexBuffer(const IndexBuffer* buffer);
+		void SetVertexDesc(const VertexDesc* desc);
+		void SetShader(const Shader* shader);
 
 	private:
 		struct Impl;

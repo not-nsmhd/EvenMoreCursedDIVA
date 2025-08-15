@@ -67,7 +67,7 @@ namespace Starshine
 			LogInfo(LogName, "Build Date: %s", BuildInfo::BuildDateString);
 			LogInfo(LogName, "Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 
-			GFX.BackendType = GFX::RendererBackendType::D3D9;
+			//GFX.BackendType = GFX::RendererBackendType::D3D9;
 
 			u32 windowCreationFlags = 0;
 			if (GFX.BackendType == RendererBackendType::OpenGL)

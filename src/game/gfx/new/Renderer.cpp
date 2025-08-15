@@ -8,7 +8,7 @@ namespace Starshine::GFX
 	using namespace Logging;
 	using namespace Core;
 	using OpenGLBackend = Core::OpenGL::OpenGLBackend;
-	using D3D9Backend = Core::D3D9::D3D9Backend;
+	//using D3D9Backend = Core::D3D9::D3D9Backend;
 
 	constexpr const char* LogName = "Starshine::GFX";
 
@@ -32,7 +32,12 @@ namespace Starshine::GFX
 					CurrentBackend = new OpenGLBackend();
 					break;
 				case RendererBackendType::D3D9:
+#if 0
 					CurrentBackend = new D3D9Backend();
+#else
+					CurrentBackendType = RendererBackendType::OpenGL;
+					CurrentBackend = new OpenGLBackend();
+#endif
 					break;
 				}
 			}
@@ -40,7 +45,7 @@ namespace Starshine::GFX
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
-			LogInfo(LogName, "Backend: %s", RendererBackendNames[static_cast<size_t>(CurrentBackendType)]);
+			LogInfo(LogName, "Backend: %s", RendererBackendTypeNames[static_cast<size_t>(CurrentBackendType)]);
 
 			CurrentBackend->Initialize(gameWindow);
 			return true;
@@ -114,5 +119,64 @@ namespace Starshine::GFX
 	void Renderer::SwapBuffers()
 	{
 		impl->SwapBuffers();
+	}
+
+	void Renderer::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
+	{
+		impl->CurrentBackend->DrawArrays(type, firstVertex, vertexCount);
+	}
+
+	void Renderer::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+	{
+		impl->CurrentBackend->DrawIndexed(type, firstIndex, indexCount);
+	}
+
+	VertexBuffer* Renderer::CreateVertexBuffer(size_t size, void* initialData, bool dynamic)
+	{
+		return impl->CurrentBackend->CreateVertexBuffer(size, initialData, dynamic);
+	}
+
+	IndexBuffer* Renderer::CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic)
+	{
+		return impl->CurrentBackend->CreateIndexBuffer(size, format, initialData, dynamic);
+	}
+
+	VertexDesc* Renderer::CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount)
+	{
+		return impl->CurrentBackend->CreateVertexDesc(attribs, attribCount);
+	}
+
+	Shader* Renderer::LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize)
+	{
+		return impl->CurrentBackend->LoadShader(vsData, vsSize, fsData, fsSize);
+	}
+
+	void Renderer::DeleteResource(Resource* resource)
+	{
+		if (resource == nullptr)
+		{
+			return;
+		}
+		impl->CurrentBackend->DeleteResource(resource);
+	}
+
+	void Renderer::SetVertexBuffer(const VertexBuffer* buffer)
+	{
+		impl->CurrentBackend->SetVertexBuffer(buffer);
+	}
+
+	void Renderer::SetIndexBuffer(const IndexBuffer* buffer)
+	{
+		impl->CurrentBackend->SetIndexBuffer(buffer);
+	}
+
+	void Renderer::SetVertexDesc(const VertexDesc* desc)
+	{
+		impl->CurrentBackend->SetVertexDesc(desc);
+	}
+
+	void Renderer::SetShader(const Shader* shader)
+	{
+		impl->CurrentBackend->SetShader(shader);
 	}
 }

@@ -131,11 +131,17 @@
     <ClInclude Include="game\common\types.h" />
     <ClInclude Include="game\game_new.h" />
     <ClInclude Include="game\game_state.h" />
+    <ClInclude Include="game\gfx\new\Buffers.h" />
     <ClInclude Include="game\gfx\new\Core\D3D9\D3D9Backend.h" />
     <ClInclude Include="game\gfx\new\Core\IBackend.h" />
     <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLBackend.h" />
+    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLVertexDesc.h" />
     <ClInclude Include="game\gfx\new\Renderer.h" />
+    <ClInclude Include="game\gfx\new\Resource.h" />
+    <ClInclude Include="game\gfx\new\Shader.h" />
     <ClInclude Include="game\gfx\new\Types.h" />
+    <ClInclude Include="game\gfx\new\VertexDesc.h" />
+    <ClInclude Include="game\io\File.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
     <ClInclude Include="game\util\logging.h" />
@@ -151,6 +157,7 @@
     <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp" />
     <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp" />
     <ClCompile Include="game\gfx\new\Renderer.cpp" />
+    <ClCompile Include="game\io\File.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />
     <ClCompile Include="game\stb\stb_image.cpp" />

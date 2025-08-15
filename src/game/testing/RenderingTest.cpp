@@ -1,16 +1,50 @@
 #include "RenderingTest.h"
 #include "common/color.h"
 #include "gfx/new/Renderer.h"
+#include "io/File.h"
 
 namespace Starshine::Testing
 {
 	using namespace Starshine::GFX;
+	using namespace Starshine::IO;
 	using namespace Common;
 	using std::string_view;
+
+	struct TestVertex
+	{
+		vec2 Position;
+		u8vec4 Color;
+	};
+
+	constexpr std::array<TestVertex, 4> TestVertexData =
+	{
+		TestVertex
+		{ vec2(0.0f, 0.0f), u8vec4(255, 0, 0, 255) },
+		{ vec2(1.0f, 1.0f), u8vec4(0, 255, 0, 255) },
+		{ vec2(1.0f, 0.0f), u8vec4(0, 0, 255, 255) },
+		{ vec2(0.0f, 1.0f), u8vec4(255, 255, 255, 255) }
+	};
+
+	constexpr std::array<u16, 6> TestIndexData =
+	{
+		0, 2, 1,
+		1, 3, 0
+	};
+
+	constexpr std::array<VertexAttrib, 2> TestVertexDesc =
+	{
+		VertexAttrib
+		{ VertexAttribType::Position, 0, VertexAttribFormat::Float, 2, false, sizeof(TestVertex), offsetof(TestVertex, Position) },
+		{ VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte, 4, false, sizeof(TestVertex), offsetof(TestVertex, Color) }
+	};
 
 	struct RenderingTest::Impl
 	{
 		Renderer* renderer = nullptr;
+		VertexBuffer* testVertexBuffer = nullptr;
+		VertexDesc* testVertexDesc = nullptr;
+		IndexBuffer* testIndexBuffer = nullptr;
+		Shader* testShader = nullptr;
 
 		bool Initialize()
 		{
@@ -18,14 +52,53 @@ namespace Starshine::Testing
 			return true;
 		}
 
+		bool LoadContent()
+		{
+			testVertexBuffer = renderer->CreateVertexBuffer(TestVertexData.size() * sizeof(TestVertex), nullptr, true);
+			testVertexBuffer->SetData((void*)TestVertexData.data(), 0, TestVertexData.size() * sizeof(TestVertex));
+
+			testVertexDesc = renderer->CreateVertexDesc(TestVertexDesc.data(), TestVertexDesc.size());
+
+			testIndexBuffer = renderer->CreateIndexBuffer(TestIndexData.size() * sizeof(u16), IndexFormat::Index16bit, (void*)TestIndexData.data(), false);
+
+			u8* vsData = nullptr;
+			size_t vsSize = File::ReadAllBytes("diva/shaders/opengl/VS_Test1.vp", &vsData);
+
+			u8* fsData = nullptr;
+			size_t fsSize = File::ReadAllBytes("diva/shaders/opengl/FS_Test1.fp", &fsData);
+
+			testShader = renderer->LoadShader(vsData, vsSize, fsData, fsSize);
+			delete[] vsData;
+			delete[] fsData;
+
+			return true;
+		}
+
 		void Destroy()
 		{
+			renderer->DeleteResource(testVertexBuffer);
+			renderer->DeleteResource(testVertexDesc);
+			renderer->DeleteResource(testIndexBuffer);
+			renderer->DeleteResource(testShader);
+
+			testShader = nullptr;
+			testVertexBuffer = nullptr;
+			testVertexDesc = nullptr;
+			testIndexBuffer = nullptr;
 			renderer = nullptr;
 		}
 
 		void Draw(f64 deltaTime_milliseconds)
 		{
 			renderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+
+			renderer->SetVertexBuffer(testVertexBuffer);
+			renderer->SetVertexDesc(testVertexDesc);
+			renderer->SetIndexBuffer(testIndexBuffer);
+			renderer->SetShader(testShader);
+
+			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);
+
 			renderer->SwapBuffers();
 		}
 	};
@@ -41,7 +114,7 @@ namespace Starshine::Testing
 
 	bool RenderingTest::LoadContent()
 	{
-		return true;
+		return impl->LoadContent();
 	}
 
 	void RenderingTest::UnloadContent()
