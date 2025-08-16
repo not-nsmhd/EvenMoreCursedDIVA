@@ -4,6 +4,7 @@
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <stb_image.h>
 
 namespace Starshine::Testing
 {
@@ -15,16 +16,17 @@ namespace Starshine::Testing
 	struct TestVertex
 	{
 		vec2 Position;
+		vec2 TexCoord;
 		u8vec4 Color;
 	};
 
 	constexpr std::array<TestVertex, 4> TestVertexData =
 	{
 		TestVertex
-		{ vec2(0.0f, 0.0f), u8vec4(255, 0, 0, 255) },
-		{ vec2(128.0f, 128.0f), u8vec4(0, 255, 0, 255) },
-		{ vec2(128.0f, 0.0f), u8vec4(0, 0, 255, 255) },
-		{ vec2(0.0f, 128.0f), u8vec4(255, 255, 255, 255) }
+		{ vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), u8vec4(255, 0, 0, 255) },
+		{ vec2(128.0f, 128.0f), vec2(1.0f, 1.0f), u8vec4(0, 255, 0, 255) },
+		{ vec2(128.0f, 0.0f), vec2(1.0f, 0.0f), u8vec4(0, 0, 255, 255) },
+		{ vec2(0.0f, 128.0f), vec2(0.0f, 1.0f), u8vec4(255, 255, 255, 255) }
 	};
 
 	constexpr std::array<u16, 6> TestIndexData =
@@ -33,10 +35,11 @@ namespace Starshine::Testing
 		1, 3, 0
 	};
 
-	constexpr std::array<VertexAttrib, 2> TestVertexDesc =
+	constexpr std::array<VertexAttrib, 3> TestVertexDesc =
 	{
 		VertexAttrib
 		{ VertexAttribType::Position, 0, VertexAttribFormat::Float, 2, false, sizeof(TestVertex), offsetof(TestVertex, Position) },
+		{ VertexAttribType::TexCoord, 0, VertexAttribFormat::Float, 2, false, sizeof(TestVertex), offsetof(TestVertex, TexCoord) },
 		{ VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte, 4, false, sizeof(TestVertex), offsetof(TestVertex, Color) }
 	};
 
@@ -47,6 +50,7 @@ namespace Starshine::Testing
 		VertexDesc* testVertexDesc = nullptr;
 		IndexBuffer* testIndexBuffer = nullptr;
 		Shader* testShader = nullptr;
+		Texture* testTexture = nullptr;
 
 		mat4 TransformMatrix{};
 		ShaderVariableIndex VS_TransformMatrix{};
@@ -67,10 +71,21 @@ namespace Starshine::Testing
 
 			testIndexBuffer = renderer->CreateIndexBuffer(TestIndexData.size() * sizeof(u16), IndexFormat::Index16bit, (void*)TestIndexData.data(), false);
 
-			testShader = renderer->LoadShaderFromXml("diva/shaders/Test_MatrixTransform1.xml");
+			testShader = renderer->LoadShaderFromXml("diva/shaders/SpriteDefault.xml");
 
 			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
+
+			u8* fileData = nullptr;
+			size_t fileSize = File::ReadAllBytes("diva/sprites/test.png", &fileData);
+
+			int width, height, channels;
+			u8* texData = stbi_load_from_memory(fileData, static_cast<int>(fileSize), &width, &height, &channels, 4);
+			testTexture = renderer->CreateTexture(width, height, TextureFormat::RGBA8, false, true);
+			testTexture->SetData(0, 0, width, height, texData);
+
+			delete[] fileData;
+			stbi_image_free(texData);
 
 			return true;
 		}
@@ -81,6 +96,7 @@ namespace Starshine::Testing
 			renderer->DeleteResource(testVertexDesc);
 			renderer->DeleteResource(testIndexBuffer);
 			renderer->DeleteResource(testShader);
+			renderer->DeleteResource(testTexture);
 
 			testShader = nullptr;
 			testVertexBuffer = nullptr;
@@ -97,6 +113,7 @@ namespace Starshine::Testing
 			renderer->SetVertexDesc(testVertexDesc);
 			renderer->SetIndexBuffer(testIndexBuffer);
 			renderer->SetShader(testShader);
+			renderer->SetTexture(testTexture, 0);
 
 			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);
 

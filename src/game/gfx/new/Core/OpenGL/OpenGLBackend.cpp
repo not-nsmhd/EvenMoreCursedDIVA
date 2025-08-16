@@ -4,11 +4,13 @@
 #include <vector>
 #include "io/Xml.h"
 #include "io/File.h"
+#include "common/math_ext.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::OpenGL
 {
 	using namespace Logging;
+	using namespace Common;
 	using std::array;
 	using std::vector;
 	using std::string_view;
@@ -36,6 +38,20 @@ namespace Starshine::GFX::Core::OpenGL
 		{
 			GL_VERTEX_PROGRAM_ARB,
 			GL_FRAGMENT_PROGRAM_ARB
+		};
+
+		constexpr array<GLenum, EnumCount<TextureFormat>()> GLTextureDataFormats =
+		{
+			GL_RGBA,
+			2,
+			GL_RED
+		};
+
+		constexpr array<GLenum, EnumCount<TextureFormat>()> GLTextureDisplayFormats =
+		{
+			GL_RGBA,
+			GL_LUMINANCE_ALPHA,
+			GL_RED
 		};
 	}
 
@@ -238,6 +254,20 @@ namespace Starshine::GFX::Core::OpenGL
 				}
 
 				ShaderSet = true;
+			}
+		}
+
+		void SetTexture(const Texture_OpenGL* texture, u32 slot)
+		{
+			glActiveTexture(GL_TEXTURE0 + slot);
+			if (texture == nullptr)
+			{
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				GLuint glTexture = ResourceContexts[static_cast<size_t>(texture->Handle)].BaseResourceHandle;
+				glBindTexture(GL_TEXTURE_2D, glTexture);
 			}
 		}
 
@@ -519,6 +549,44 @@ namespace Starshine::GFX::Core::OpenGL
 		return shader;
 	}
 
+	Texture* OpenGLBackend::CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp)
+	{
+		if (width == 0 || height == 0)
+		{
+			return nullptr;
+		}
+
+		if (!MathExtensions::IsPowerOf2(width) || !MathExtensions::IsPowerOf2(height))
+		{
+			return nullptr;
+		}
+
+		GLuint texHandle = 0;
+		glGenTextures(1, &texHandle);
+		glBindTexture(GL_TEXTURE_2D, texHandle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, nearestFilter ? GL_NEAREST : GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, nearestFilter ? GL_NEAREST : GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+
+		GLenum pixelFormat = ConversionTables::GLTextureDisplayFormats[static_cast<size_t>(format)];
+		GLenum dataFormat = ConversionTables::GLTextureDataFormats[static_cast<size_t>(format)];
+		glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, NULL);
+
+		ResourceHandle resHandle = impl->FindFreeResourceContext();
+		ResourceContext* resCtx = &impl->ResourceContexts.at(static_cast<size_t>(resHandle));
+
+		resCtx->BaseResourceHandle = texHandle;
+		resCtx->Size = static_cast<size_t>(width * height) * TextureFormatPixelSizes[static_cast<size_t>(format)];
+
+		Texture_OpenGL* texture = new Texture_OpenGL(width, height, format, clamp, nearestFilter);
+		texture->Handle = resHandle;
+		texture->Backend = this;
+
+		LogInfo(LogName, "Created a new texture with handle %d", resHandle);
+		return texture;
+	}
+
 	void OpenGLBackend::DeleteResource(Resource* resource)
 	{
 		if (resource->Handle == InvalidResourceHandle)
@@ -544,6 +612,7 @@ namespace Starshine::GFX::Core::OpenGL
 		{
 			glDeleteBuffersARB(1, &resourceCtx->BaseResourceHandle);
 			resourceCtx->BaseResourceHandle = 0;
+			resourceCtx->Size = 0;
 
 			VertexBuffer_OpenGL* buffer = static_cast<VertexBuffer_OpenGL*>(resource);
 			delete buffer->Data;
@@ -556,6 +625,7 @@ namespace Starshine::GFX::Core::OpenGL
 		{
 			glDeleteBuffersARB(1, &resourceCtx->BaseResourceHandle);
 			resourceCtx->BaseResourceHandle = 0;
+			resourceCtx->Size = 0;
 
 			IndexBuffer_OpenGL* buffer = static_cast<IndexBuffer_OpenGL*>(resource);
 			delete buffer->Data;
@@ -588,6 +658,18 @@ namespace Starshine::GFX::Core::OpenGL
 			delete shader;
 
 			LogInfo(LogName, "Shader program (vert: %d, frag: %d) has been deleted", vsHandle, fsHandle);
+			break;
+		}
+		case ResourceType::Texture:
+		{
+			glDeleteTextures(1, &resourceCtx->BaseResourceHandle);
+			resourceCtx->BaseResourceHandle = 0;
+			resourceCtx->Size = 0;
+
+			Texture_OpenGL* texture = static_cast<Texture_OpenGL*>(resource);
+			delete texture;
+
+			LogInfo(LogName, "Texture with handle %d has been deleted", handle);
 			break;
 		}
 		}
@@ -638,6 +720,19 @@ namespace Starshine::GFX::Core::OpenGL
 		{
 			const Shader_OpenGL* glShader = static_cast<const Shader_OpenGL*>(shader);
 			impl->SetShader(glShader);
+		}
+	}
+
+	void OpenGLBackend::SetTexture(const Texture* texture, u32 slot)
+	{
+		if (texture == nullptr)
+		{
+			impl->SetTexture(nullptr, slot);
+		}
+		else
+		{
+			const Texture_OpenGL* glTexture = static_cast<const Texture_OpenGL*>(texture);
+			impl->SetTexture(glTexture, slot);
 		}
 	}
 
@@ -725,5 +820,24 @@ namespace Starshine::GFX::Core::OpenGL
 		varToUpdate.Value = value;
 
 		UpdateVariables = true;
+	}
+
+	void Texture_OpenGL::SetData(u32 x, u32 y, u32 width, u32 height, const void* data)
+	{
+		if (Handle == InvalidResourceHandle)
+		{
+			return;
+		}
+
+		if (x + width > Width || y + height > Height)
+		{
+			return;
+		}
+
+		ResourceContext* ctx = Backend->GetResourceContext(Handle);
+		GLenum pixelFormat = ConversionTables::GLTextureDisplayFormats[static_cast<size_t>(Format)];
+
+		glBindTexture(GL_TEXTURE_2D, ctx->BaseResourceHandle);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, pixelFormat, GL_UNSIGNED_BYTE, data);
 	}
 }

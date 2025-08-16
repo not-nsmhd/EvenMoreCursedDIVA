@@ -5,6 +5,7 @@
 #include "gfx/new/Buffers.h"
 #include "gfx/new/VertexDesc.h"
 #include "gfx/new/Shader.h"
+#include "gfx/new/Texture.h"
 #include <SDL2/SDL.h>
 
 namespace Starshine::GFX::Core
@@ -33,12 +34,14 @@ namespace Starshine::GFX::Core
 		virtual IndexBuffer* CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic) = 0;
 		virtual VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount) = 0;
 		virtual Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize) = 0;
+		virtual Texture* CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp) = 0;
 
 	public:
 		virtual void SetVertexBuffer(const VertexBuffer* buffer) = 0;
 		virtual void SetIndexBuffer(const IndexBuffer* buffer) = 0;
 		virtual void SetVertexDesc(const VertexDesc* desc) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
+		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
 
 		virtual void DeleteResource(Resource* resource) = 0;
 	};

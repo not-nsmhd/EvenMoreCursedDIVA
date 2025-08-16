@@ -6,6 +6,7 @@
 #include "Buffers.h"
 #include "VertexDesc.h"
 #include "Shader.h"
+#include "Texture.h"
 #include <string_view>
 #include <SDL2/SDL.h>
 
@@ -46,6 +47,8 @@ namespace Starshine::GFX
 		Shader* LoadShaderFromXml(const u8* xmlData, size_t xmlSize);
 		Shader* LoadShaderFromXml(const std::string_view filePath);
 
+		Texture* CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp);
+
 		void DeleteResource(Resource* resource);
 
 	public:
@@ -53,6 +56,7 @@ namespace Starshine::GFX
 		void SetIndexBuffer(const IndexBuffer* buffer);
 		void SetVertexDesc(const VertexDesc* desc);
 		void SetShader(const Shader* shader);
+		void SetTexture(const Texture* texture, u32 slot);
 
 	private:
 		struct Impl;

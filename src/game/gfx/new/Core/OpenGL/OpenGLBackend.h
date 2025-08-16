@@ -51,6 +51,17 @@ namespace Starshine::GFX::Core::OpenGL
 		std::vector<VertexAttrib_OpenGL> GLAttribs;
 	};
 
+	struct Texture_OpenGL : public Texture
+	{
+	public:
+		Texture_OpenGL(u32 width, u32 height, TextureFormat format, bool clamp, bool nearestFilter)	
+			: Texture(width, height, format, clamp, nearestFilter) {}
+
+		OpenGLBackend* Backend = nullptr;
+
+		void SetData(u32 x, u32 y, u32 width, u32 height, const void* data);
+	};
+
 	class OpenGLBackend : public IBackend, NonCopyable
 	{
 	public:
@@ -82,6 +93,8 @@ namespace Starshine::GFX::Core::OpenGL
 		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
 		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
 
+		Texture* CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp);
+
 		void DeleteResource(Resource* resource);
 
 	public:
@@ -89,6 +102,7 @@ namespace Starshine::GFX::Core::OpenGL
 		void SetIndexBuffer(const IndexBuffer* buffer);
 		void SetVertexDesc(const VertexDesc* desc);
 		void SetShader(const Shader* shader);
+		void SetTexture(const Texture* texture, u32 slot);
 
 	private:
 		struct Impl;

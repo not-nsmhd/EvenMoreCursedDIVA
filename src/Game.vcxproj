@@ -139,6 +139,7 @@
     <ClInclude Include="game\gfx\new\Renderer.h" />
     <ClInclude Include="game\gfx\new\Resource.h" />
     <ClInclude Include="game\gfx\new\Shader.h" />
+    <ClInclude Include="game\gfx\new\Texture.h" />
     <ClInclude Include="game\gfx\new\Types.h" />
     <ClInclude Include="game\gfx\new\VertexDesc.h" />
     <ClInclude Include="game\io\File.h" />

@@ -26,6 +26,14 @@ namespace Common
 			return (value >= start && value <= end);
 		}
 
+		template <typename N>
+		constexpr bool IsPowerOf2(N value)
+		{
+			// https://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
+			static_assert(std::is_integral_v<N>);
+			return (value & (value - 1)) == 0;
+		};
+
 		float CalculateBarDuration_Seconds(float bpm, int beatsPerBar);
 
 		constexpr bool ApproxiamtelyEqual(float a, float b, float range = 0.0001f) { return glm::abs(a - b) < range; };

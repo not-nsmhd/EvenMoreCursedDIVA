@@ -296,6 +296,11 @@ namespace Starshine::GFX
 		return shader;
 	}
 
+	Texture* Renderer::CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp)
+	{
+		return impl->CurrentBackend->CreateTexture(width, height, format, nearestFilter, clamp);
+	}
+
 	void Renderer::DeleteResource(Resource* resource)
 	{
 		if (resource == nullptr)
@@ -323,5 +328,10 @@ namespace Starshine::GFX
 	void Renderer::SetShader(const Shader* shader)
 	{
 		impl->CurrentBackend->SetShader(shader);
+	}
+
+	void Renderer::SetTexture(const Texture* texture, u32 slot)
+	{
+		impl->CurrentBackend->SetTexture(texture, slot);
 	}
 }

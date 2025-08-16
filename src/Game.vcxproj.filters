@@ -123,6 +123,9 @@
     <ClInclude Include="game\io\Xml.h">
       <Filter>src\game\io</Filter>
     </ClInclude>
+    <ClInclude Include="game\gfx\new\Texture.h">
+      <Filter>src\game\gfx\new</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
