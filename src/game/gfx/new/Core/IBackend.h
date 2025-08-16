@@ -33,6 +33,7 @@ namespace Starshine::GFX::Core
 		virtual IndexBuffer* CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic) = 0;
 		virtual VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount) = 0;
 		virtual Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize) = 0;
+		virtual Shader* LoadShaderFromXml(const u8* xmlData, size_t xmlSize) = 0;
 
 	public:
 		virtual void SetVertexBuffer(const VertexBuffer* buffer) = 0;

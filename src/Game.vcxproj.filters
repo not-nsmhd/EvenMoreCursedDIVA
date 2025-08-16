@@ -120,6 +120,9 @@
     <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLVertexDesc.h">
       <Filter>src\game\gfx\new\Core\OpenGL</Filter>
     </ClInclude>
+    <ClInclude Include="game\io\Xml.h">
+      <Filter>src\game\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">

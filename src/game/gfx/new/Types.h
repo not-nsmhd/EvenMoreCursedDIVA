@@ -11,7 +11,7 @@ namespace Starshine::GFX
 		Count
 	};
 
-	constexpr std::array<const char*, EnumCount<RendererBackendType>()> RendererBackendTypeNames =
+	constexpr std::array<std::string_view, EnumCount<RendererBackendType>()> RendererBackendTypeNames =
 	{
 		"OpenGL",
 		"D3D9"

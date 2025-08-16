@@ -2,6 +2,8 @@
 #include "OpenGLBackend.h"
 #include <array>
 #include <vector>
+#include "io/Xml.h"
+#include "io/File.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::OpenGL
@@ -481,6 +483,62 @@ namespace Starshine::GFX::Core::OpenGL
 		return shader;
 	}
 
+	Shader* OpenGLBackend::LoadShaderFromXml(const u8* xmlData, size_t xmlSize)
+	{
+		if (xmlData == nullptr || xmlSize == 0)
+		{
+			return nullptr;
+		}
+
+		Xml::Document document = Xml::Document();
+		document.Parse(reinterpret_cast<const char*>(xmlData), xmlSize);
+
+		if (document.Error())
+		{
+			LogError(LogName, "Failed to parse shader XML file. Error: %s", document.ErrorStr());
+			document.Clear();
+			return nullptr;
+		}
+
+		Xml::Element* rootElement = document.FirstChildElement("Shader");
+
+		auto findBackendSpecificElement = [&](std::string_view name, Xml::Element* root, Xml::Element** output)
+		{
+			const Xml::Attribute* backendAttrib = nullptr;
+			std::string_view backendName = RendererBackendTypeNames[static_cast<size_t>(GetType())];
+
+			while (true)
+			{
+				*output = Xml::FindElement(root, name);
+				backendAttrib = (*output)->FindAttribute("Backend");
+
+				if (SDL_strncmp(backendAttrib->Value(), backendName.data(), backendName.size()) == 0)
+				{
+					break;
+				}
+			}
+		};
+
+		Xml::Element* filesElement = nullptr;
+		findBackendSpecificElement("Files", rootElement, &filesElement);
+
+		Xml::Element* vertexFilePathElement = filesElement->FirstChildElement("Vertex");
+		Xml::Element* fragmentFilePathElement = filesElement->FirstChildElement("Fragment");
+
+		u8* vsData = nullptr;
+		size_t vsSize = IO::File::ReadAllBytes(vertexFilePathElement->GetText(), &vsData);
+
+		u8* fsData = nullptr;
+		size_t fsSize = IO::File::ReadAllBytes(fragmentFilePathElement->GetText(), &fsData);
+
+		Shader* shader = LoadShader(vsData, vsSize, fsData, fsSize);
+
+		document.Clear();
+		delete[] vsData;
+		delete[] fsData;
+		return shader;
+	}
+
 	void OpenGLBackend::DeleteResource(Resource* resource)
 	{
 		if (resource->Handle == InvalidResourceHandle)
@@ -656,5 +714,14 @@ namespace Starshine::GFX::Core::OpenGL
 
 		ResourceContext* ctx = Backend->GetResourceContext(Handle);
 		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
+	}
+
+	ShaderVariableIndex Shader_OpenGL::GetVariableIndex(std::string_view name)
+	{
+		return ShaderVariableIndex();
+	}
+
+	void Shader_OpenGL::SetVariableValue(ShaderVariableIndex varIndex, void* value)
+	{
 	}
 }

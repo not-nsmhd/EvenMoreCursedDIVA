@@ -47,7 +47,7 @@ namespace Xml
 
 			u32 r = 0, g = 0, b = 0, a = 0;
 			SDL_sscanf(value, "%02x%02x%02x%02x", &r, &g, &b, &a);
-			return Common::Color{ r, g, b, a };
+			return Common::Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
 		}
 		else
 		{

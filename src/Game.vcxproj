@@ -142,6 +142,7 @@
     <ClInclude Include="game\gfx\new\Types.h" />
     <ClInclude Include="game\gfx\new\VertexDesc.h" />
     <ClInclude Include="game\io\File.h" />
+    <ClInclude Include="game\io\Xml.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
     <ClInclude Include="game\util\logging.h" />

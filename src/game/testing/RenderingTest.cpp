@@ -2,6 +2,7 @@
 #include "common/color.h"
 #include "gfx/new/Renderer.h"
 #include "io/File.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Starshine::Testing
 {
@@ -46,9 +47,12 @@ namespace Starshine::Testing
 		IndexBuffer* testIndexBuffer = nullptr;
 		Shader* testShader = nullptr;
 
+		mat4 TransformMatrix{};
+
 		bool Initialize()
 		{
 			renderer = Renderer::GetInstance();
+			TransformMatrix = glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
 			return true;
 		}
 
@@ -61,15 +65,11 @@ namespace Starshine::Testing
 
 			testIndexBuffer = renderer->CreateIndexBuffer(TestIndexData.size() * sizeof(u16), IndexFormat::Index16bit, (void*)TestIndexData.data(), false);
 
-			u8* vsData = nullptr;
-			size_t vsSize = File::ReadAllBytes("diva/shaders/opengl/VS_Test1.vp", &vsData);
+			u8* xmlShaderData = nullptr;
+			size_t xmlShaderSize = File::ReadAllBytes("diva/shaders/Test_MatrixTransform1.xml", &xmlShaderData);
 
-			u8* fsData = nullptr;
-			size_t fsSize = File::ReadAllBytes("diva/shaders/opengl/FS_Test1.fp", &fsData);
-
-			testShader = renderer->LoadShader(vsData, vsSize, fsData, fsSize);
-			delete[] vsData;
-			delete[] fsData;
+			testShader = renderer->LoadShaderFromXml(xmlShaderData, xmlShaderSize);
+			delete[] xmlShaderData;
 
 			return true;
 		}

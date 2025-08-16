@@ -45,7 +45,7 @@ namespace Starshine::GFX
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
-			LogInfo(LogName, "Backend: %s", RendererBackendTypeNames[static_cast<size_t>(CurrentBackendType)]);
+			LogInfo(LogName, "Backend: %s", RendererBackendTypeNames[static_cast<size_t>(CurrentBackendType)].data());
 
 			CurrentBackend->Initialize(gameWindow);
 			return true;
@@ -149,6 +149,11 @@ namespace Starshine::GFX
 	Shader* Renderer::LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize)
 	{
 		return impl->CurrentBackend->LoadShader(vsData, vsSize, fsData, fsSize);
+	}
+
+	Shader* Renderer::LoadShaderFromXml(const u8* xmlData, size_t xmlSize)
+	{
+		return impl->CurrentBackend->LoadShaderFromXml(xmlData, xmlSize);
 	}
 
 	void Renderer::DeleteResource(Resource* resource)

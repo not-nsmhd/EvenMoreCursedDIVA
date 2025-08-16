@@ -33,6 +33,10 @@ namespace Starshine::GFX::Core::OpenGL
 
 		ResourceHandle VertexHandle = InvalidResourceHandle;
 		ResourceHandle FragmentHandle = InvalidResourceHandle;
+
+		std::vector<ShaderVariable> Variables;
+		ShaderVariableIndex GetVariableIndex(std::string_view name);
+		void SetVariableValue(ShaderVariableIndex varIndex, void* value);
 	};
 
 	struct VertexDesc_OpenGL : public VertexDesc
@@ -73,6 +77,7 @@ namespace Starshine::GFX::Core::OpenGL
 		// NOTE: Vertex descriptions do not have their own contexts in OpenGL
 		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
 		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
+		Shader* LoadShaderFromXml(const u8* xmlData, size_t xmlSize);
 
 		void DeleteResource(Resource* resource);
 
