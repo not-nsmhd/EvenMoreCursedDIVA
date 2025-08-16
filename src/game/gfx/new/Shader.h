@@ -5,7 +5,7 @@
 
 namespace Starshine::GFX
 {
-	enum class ShaderType
+	enum class ShaderType : u8
 	{
 		Vertex,
 		Fragment,
@@ -20,7 +20,7 @@ namespace Starshine::GFX
 		{ShaderType::Fragment, "Fragment"},
 	};
 
-	enum class ShaderVariableType
+	enum class ShaderVariableType : u8
 	{
 		Matrix4,
 
@@ -60,6 +60,9 @@ namespace Starshine::GFX
 
 		void* FragmentShaderSource = nullptr;
 		size_t FragmentShaderSize = 0;
+
+		// NOTE: This function is intended for use in rendering backends only
+		virtual void AddVariable(ShaderVariable& variable) = 0;
 
 		virtual ShaderVariableIndex GetVariableIndex(std::string_view name) = 0;
 		virtual void SetVariableValue(ShaderVariableIndex varIndex, void* value) = 0;

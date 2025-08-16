@@ -3,6 +3,7 @@
 #include "gfx/new/Renderer.h"
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Starshine::Testing
 {
@@ -21,9 +22,9 @@ namespace Starshine::Testing
 	{
 		TestVertex
 		{ vec2(0.0f, 0.0f), u8vec4(255, 0, 0, 255) },
-		{ vec2(1.0f, 1.0f), u8vec4(0, 255, 0, 255) },
-		{ vec2(1.0f, 0.0f), u8vec4(0, 0, 255, 255) },
-		{ vec2(0.0f, 1.0f), u8vec4(255, 255, 255, 255) }
+		{ vec2(128.0f, 128.0f), u8vec4(0, 255, 0, 255) },
+		{ vec2(128.0f, 0.0f), u8vec4(0, 0, 255, 255) },
+		{ vec2(0.0f, 128.0f), u8vec4(255, 255, 255, 255) }
 	};
 
 	constexpr std::array<u16, 6> TestIndexData =
@@ -48,6 +49,7 @@ namespace Starshine::Testing
 		Shader* testShader = nullptr;
 
 		mat4 TransformMatrix{};
+		ShaderVariableIndex VS_TransformMatrix{};
 
 		bool Initialize()
 		{
@@ -70,6 +72,9 @@ namespace Starshine::Testing
 
 			testShader = renderer->LoadShaderFromXml(xmlShaderData, xmlShaderSize);
 			delete[] xmlShaderData;
+
+			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
+			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
 
 			return true;
 		}

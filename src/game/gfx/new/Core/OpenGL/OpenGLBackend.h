@@ -35,6 +35,10 @@ namespace Starshine::GFX::Core::OpenGL
 		ResourceHandle FragmentHandle = InvalidResourceHandle;
 
 		std::vector<ShaderVariable> Variables;
+		bool UpdateVariables = false;
+
+		void AddVariable(ShaderVariable& variable);
+
 		ShaderVariableIndex GetVariableIndex(std::string_view name);
 		void SetVariableValue(ShaderVariableIndex varIndex, void* value);
 	};

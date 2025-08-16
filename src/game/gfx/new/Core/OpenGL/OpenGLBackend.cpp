@@ -11,6 +11,7 @@ namespace Starshine::GFX::Core::OpenGL
 	using namespace Logging;
 	using std::array;
 	using std::vector;
+	using std::string_view;
 
 	constexpr const char* LogName = "Starshine::GFX::Core::OpenGL";
 
@@ -29,6 +30,12 @@ namespace Starshine::GFX::Core::OpenGL
 		{
 			GL_UNSIGNED_SHORT,
 			GL_UNSIGNED_INT
+		};
+
+		constexpr array<GLenum, EnumCount<ShaderType>()> GLShaderTypes =
+		{
+			GL_VERTEX_PROGRAM_ARB,
+			GL_FRAGMENT_PROGRAM_ARB
 		};
 	}
 
@@ -186,6 +193,12 @@ namespace Starshine::GFX::Core::OpenGL
 			}
 		}
 
+		void SetShaderVariableValue(ShaderType shaderType, u32 index, const float* value)
+		{
+			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
+			glProgramLocalParameter4fvARB(glShaderType, index, value);
+		}
+
 		void SetShader(const Shader_OpenGL* shader)
 		{
 			if (shader == nullptr)
@@ -201,6 +214,30 @@ namespace Starshine::GFX::Core::OpenGL
 
 				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vertHandle);
 				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragHandle);
+
+				if (shader->UpdateVariables)
+				{
+					for (size_t i = 0; i < shader->Variables.size(); i++)
+					{
+						const ShaderVariable& variable = shader->Variables.at(i);
+
+						switch (variable.Type)
+						{
+						case ShaderVariableType::Matrix4:
+							// HACK: this is dumb
+							//const vec4* mat = static_cast<const vec4*>(variable.Value);
+							mat4* originalMatrix = static_cast<mat4*>(variable.Value);
+							mat4 transposedMatrix = glm::transpose(*originalMatrix);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, reinterpret_cast<const float*>(&transposedMatrix[0]));
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 1, reinterpret_cast<const float*>(&transposedMatrix[1]));
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 2, reinterpret_cast<const float*>(&transposedMatrix[2]));
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 3, reinterpret_cast<const float*>(&transposedMatrix[3]));
+							break;
+						}
+					}
+				}
+
 				ShaderSet = true;
 			}
 		}
@@ -533,6 +570,43 @@ namespace Starshine::GFX::Core::OpenGL
 
 		Shader* shader = LoadShader(vsData, vsSize, fsData, fsSize);
 
+		Xml::Element* variablesElement = nullptr;
+		findBackendSpecificElement("Variables", rootElement, &variablesElement);
+
+		Xml::Element* xmlShaderVariable = variablesElement->FirstChildElement();
+		while (xmlShaderVariable != nullptr)
+		{
+			string_view varTypeString = xmlShaderVariable->Name();
+
+			const Xml::Attribute* nameAttrib = xmlShaderVariable->FindAttribute("Name");
+			const Xml::Attribute* locationAttrib = xmlShaderVariable->FindAttribute("Location");
+
+			string_view varName = nameAttrib->Value();
+			string_view varLocation = locationAttrib->Value();
+
+			string_view varLocationShader = "";
+			string_view varLocationIndex = "";
+
+			for (size_t i = 0; i < varLocation.size(); i++)
+			{
+				if (varLocation.at(i) == ':')
+				{
+					varLocationShader = varLocation.substr(0, i);
+					varLocationIndex = varLocation.substr(i + 1, varLocation.size() - (i + 1));
+					break;
+				}
+			}
+
+			ShaderVariable shaderVar = {};
+			shaderVar.Name = varName;
+			shaderVar.Type = EnumFromString<ShaderVariableType>(ShaderVariableTypeStrings, varTypeString);
+			shaderVar.LocationShader = EnumFromString<ShaderType>(ShaderTypeStrings, varLocationShader);
+			shaderVar.LocationIndex = SDL_atoi(varLocationIndex.data());
+
+			shader->AddVariable(shaderVar);
+			xmlShaderVariable = xmlShaderVariable->NextSiblingElement();
+		}
+
 		document.Clear();
 		delete[] vsData;
 		delete[] fsData;
@@ -716,12 +790,34 @@ namespace Starshine::GFX::Core::OpenGL
 		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
 	}
 
+	void Shader_OpenGL::AddVariable(ShaderVariable& variable)
+	{
+		Variables.push_back(variable);
+	}
+
 	ShaderVariableIndex Shader_OpenGL::GetVariableIndex(std::string_view name)
 	{
-		return ShaderVariableIndex();
+		for (size_t i = 0; i < Variables.size(); i++)
+		{
+			if (Variables.at(i).Name == name)
+			{
+				return static_cast<ShaderVariableIndex>(i);
+			}
+		}
+
+		return InvalidShaderVariable;
 	}
 
 	void Shader_OpenGL::SetVariableValue(ShaderVariableIndex varIndex, void* value)
 	{
+		if (varIndex == InvalidShaderVariable)
+		{
+			return;
+		}
+
+		ShaderVariable& varToUpdate = Variables.at(static_cast<size_t>(varIndex));
+		varToUpdate.Value = value;
+
+		UpdateVariables = true;
 	}
 }
