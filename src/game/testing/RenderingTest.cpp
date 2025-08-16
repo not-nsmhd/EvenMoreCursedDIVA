@@ -67,11 +67,7 @@ namespace Starshine::Testing
 
 			testIndexBuffer = renderer->CreateIndexBuffer(TestIndexData.size() * sizeof(u16), IndexFormat::Index16bit, (void*)TestIndexData.data(), false);
 
-			u8* xmlShaderData = nullptr;
-			size_t xmlShaderSize = File::ReadAllBytes("diva/shaders/Test_MatrixTransform1.xml", &xmlShaderData);
-
-			testShader = renderer->LoadShaderFromXml(xmlShaderData, xmlShaderSize);
-			delete[] xmlShaderData;
+			testShader = renderer->LoadShaderFromXml("diva/shaders/Test_MatrixTransform1.xml");
 
 			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);

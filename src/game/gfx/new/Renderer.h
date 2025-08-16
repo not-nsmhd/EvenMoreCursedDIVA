@@ -6,6 +6,7 @@
 #include "Buffers.h"
 #include "VertexDesc.h"
 #include "Shader.h"
+#include <string_view>
 #include <SDL2/SDL.h>
 
 namespace Starshine::GFX
@@ -41,7 +42,9 @@ namespace Starshine::GFX
 		IndexBuffer* CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic);
 		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
 		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
+
 		Shader* LoadShaderFromXml(const u8* xmlData, size_t xmlSize);
+		Shader* LoadShaderFromXml(const std::string_view filePath);
 
 		void DeleteResource(Resource* resource);
 

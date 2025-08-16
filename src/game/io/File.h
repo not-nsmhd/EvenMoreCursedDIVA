@@ -11,5 +11,7 @@ namespace Starshine::IO
 
 		// NOTE: Allocates a new "u8" buffer which must be disposed of by using "delete[]" when it's no longer needed
 		size_t ReadAllBytes(std::string_view filePath, u8** dest);
+
+		std::string_view GetParentDirectory(std::string_view path);
 	}
 }

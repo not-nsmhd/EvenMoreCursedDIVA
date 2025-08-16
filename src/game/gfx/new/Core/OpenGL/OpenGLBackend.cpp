@@ -193,7 +193,7 @@ namespace Starshine::GFX::Core::OpenGL
 			}
 		}
 
-		void SetShaderVariableValue(ShaderType shaderType, u32 index, const float* value)
+		inline void SetShaderVariableValue(ShaderType shaderType, u32 index, const float* value)
 		{
 			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
 			glProgramLocalParameter4fvARB(glShaderType, index, value);
@@ -225,7 +225,6 @@ namespace Starshine::GFX::Core::OpenGL
 						{
 						case ShaderVariableType::Matrix4:
 							// HACK: this is dumb
-							//const vec4* mat = static_cast<const vec4*>(variable.Value);
 							mat4* originalMatrix = static_cast<mat4*>(variable.Value);
 							mat4 transposedMatrix = glm::transpose(*originalMatrix);
 
@@ -517,99 +516,6 @@ namespace Starshine::GFX::Core::OpenGL
 		shader->Backend = this;
 
 		LogInfo(LogName, "Created a new shader program (vert: %d, frag: %d)", vertHandle, fragHandle);
-		return shader;
-	}
-
-	Shader* OpenGLBackend::LoadShaderFromXml(const u8* xmlData, size_t xmlSize)
-	{
-		if (xmlData == nullptr || xmlSize == 0)
-		{
-			return nullptr;
-		}
-
-		Xml::Document document = Xml::Document();
-		document.Parse(reinterpret_cast<const char*>(xmlData), xmlSize);
-
-		if (document.Error())
-		{
-			LogError(LogName, "Failed to parse shader XML file. Error: %s", document.ErrorStr());
-			document.Clear();
-			return nullptr;
-		}
-
-		Xml::Element* rootElement = document.FirstChildElement("Shader");
-
-		auto findBackendSpecificElement = [&](std::string_view name, Xml::Element* root, Xml::Element** output)
-		{
-			const Xml::Attribute* backendAttrib = nullptr;
-			std::string_view backendName = RendererBackendTypeNames[static_cast<size_t>(GetType())];
-
-			while (true)
-			{
-				*output = Xml::FindElement(root, name);
-				backendAttrib = (*output)->FindAttribute("Backend");
-
-				if (SDL_strncmp(backendAttrib->Value(), backendName.data(), backendName.size()) == 0)
-				{
-					break;
-				}
-			}
-		};
-
-		Xml::Element* filesElement = nullptr;
-		findBackendSpecificElement("Files", rootElement, &filesElement);
-
-		Xml::Element* vertexFilePathElement = filesElement->FirstChildElement("Vertex");
-		Xml::Element* fragmentFilePathElement = filesElement->FirstChildElement("Fragment");
-
-		u8* vsData = nullptr;
-		size_t vsSize = IO::File::ReadAllBytes(vertexFilePathElement->GetText(), &vsData);
-
-		u8* fsData = nullptr;
-		size_t fsSize = IO::File::ReadAllBytes(fragmentFilePathElement->GetText(), &fsData);
-
-		Shader* shader = LoadShader(vsData, vsSize, fsData, fsSize);
-
-		Xml::Element* variablesElement = nullptr;
-		findBackendSpecificElement("Variables", rootElement, &variablesElement);
-
-		Xml::Element* xmlShaderVariable = variablesElement->FirstChildElement();
-		while (xmlShaderVariable != nullptr)
-		{
-			string_view varTypeString = xmlShaderVariable->Name();
-
-			const Xml::Attribute* nameAttrib = xmlShaderVariable->FindAttribute("Name");
-			const Xml::Attribute* locationAttrib = xmlShaderVariable->FindAttribute("Location");
-
-			string_view varName = nameAttrib->Value();
-			string_view varLocation = locationAttrib->Value();
-
-			string_view varLocationShader = "";
-			string_view varLocationIndex = "";
-
-			for (size_t i = 0; i < varLocation.size(); i++)
-			{
-				if (varLocation.at(i) == ':')
-				{
-					varLocationShader = varLocation.substr(0, i);
-					varLocationIndex = varLocation.substr(i + 1, varLocation.size() - (i + 1));
-					break;
-				}
-			}
-
-			ShaderVariable shaderVar = {};
-			shaderVar.Name = varName;
-			shaderVar.Type = EnumFromString<ShaderVariableType>(ShaderVariableTypeStrings, varTypeString);
-			shaderVar.LocationShader = EnumFromString<ShaderType>(ShaderTypeStrings, varLocationShader);
-			shaderVar.LocationIndex = SDL_atoi(varLocationIndex.data());
-
-			shader->AddVariable(shaderVar);
-			xmlShaderVariable = xmlShaderVariable->NextSiblingElement();
-		}
-
-		document.Clear();
-		delete[] vsData;
-		delete[] fsData;
 		return shader;
 	}
 

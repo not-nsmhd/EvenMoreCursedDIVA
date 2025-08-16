@@ -81,7 +81,6 @@ namespace Starshine::GFX::Core::OpenGL
 		// NOTE: Vertex descriptions do not have their own contexts in OpenGL
 		VertexDesc* CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
 		Shader* LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize);
-		Shader* LoadShaderFromXml(const u8* xmlData, size_t xmlSize);
 
 		void DeleteResource(Resource* resource);
 

@@ -9,9 +9,13 @@ namespace Starshine::IO
 	{
 		using std::fstream;
 		using std::ios;
+		using std::string_view;
 		using namespace Logging;
 
 		constexpr const char* LogName = "Starshine::IO::File";
+
+		constexpr const char PathSeparator = '/';
+		constexpr const char PathSeparator_Windows = '\\';
 
 		bool Exists(std::string_view filePath)
 		{
@@ -61,6 +65,22 @@ namespace Starshine::IO
 
 			*dest = fileData;
 			return fileSize;
+		}
+
+		std::string_view GetParentDirectory(std::string_view path)
+		{
+			if (path.empty())
+			{
+				return string_view();
+			}
+
+			for (size_t i = path.size() - 1; i > 0; i--)
+			{
+				if (path.at(i) == PathSeparator || path.at(i) == PathSeparator_Windows)
+				{
+					return path.substr(0, i);
+				}
+			}
 		}
 	}
 }

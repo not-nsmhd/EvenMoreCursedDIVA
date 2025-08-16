@@ -1,16 +1,24 @@
 #include "Core/OpenGL/OpenGLBackend.h"
 #include "Core/D3D9/D3D9Backend.h"
 #include "Renderer.h"
+#include "io/Xml.h"
+#include "io/File.h"
+#include <string>
+#include <string_view>
 #include "util/logging.h"
 
 namespace Starshine::GFX
 {
 	using namespace Logging;
 	using namespace Core;
+	using namespace IO;
 	using OpenGLBackend = Core::OpenGL::OpenGLBackend;
 	//using D3D9Backend = Core::D3D9::D3D9Backend;
+	using std::string;
+	using std::string_view;
 
 	constexpr const char* LogName = "Starshine::GFX";
+	constexpr char ShaderVariableLocationSeparator = ':';
 
 	Renderer* RendererInstance = nullptr;
 
@@ -66,6 +74,125 @@ namespace Starshine::GFX
 		void SwapBuffers()
 		{
 			CurrentBackend->SwapBuffers();
+		}
+
+		Shader* LoadShaderFromXml(const std::string_view basePath, const u8* xmlData, size_t xmlSize)
+		{
+			if (xmlData == nullptr || xmlSize == 0)
+			{
+				return nullptr;
+			}
+
+			Xml::Document document = Xml::Document();
+			document.Parse(reinterpret_cast<const char*>(xmlData), xmlSize);
+
+			if (document.Error())
+			{
+				LogError(LogName, "Failed to parse shader XML file. Error: %s", document.ErrorStr());
+				document.Clear();
+				return nullptr;
+			}
+
+			Xml::Element* rootElement = document.FirstChildElement("Shader");
+
+			auto findBackendSpecificElement = [&](std::string_view name, Xml::Element* root, Xml::Element** output)
+			{
+				const Xml::Attribute* backendAttrib = nullptr;
+				std::string_view backendName = RendererBackendTypeNames[static_cast<size_t>(CurrentBackendType)];
+
+				while (true)
+				{
+					*output = Xml::FindElement(root, name);
+					backendAttrib = (*output)->FindAttribute("Backend");
+
+					if (SDL_strncmp(backendAttrib->Value(), backendName.data(), backendName.size()) == 0)
+					{
+						break;
+					}
+				}
+			};
+
+
+			Xml::Element* filesElement = nullptr;
+			findBackendSpecificElement("Files", rootElement, &filesElement);
+
+			Xml::Element* vertexFilePathElement = filesElement->FirstChildElement("Vertex");
+			Xml::Element* fragmentFilePathElement = filesElement->FirstChildElement("Fragment");
+
+			string vertexFilePath = string(basePath);
+			vertexFilePath.append("/");
+			vertexFilePath.append(vertexFilePathElement->GetText());
+
+			string fragmentFilePath = string(basePath);
+			fragmentFilePath.append("/");
+			fragmentFilePath.append(fragmentFilePathElement->GetText());
+
+			u8* vsFileData = nullptr;
+			size_t vsFileSize = IO::File::ReadAllBytes(vertexFilePath, &vsFileData);
+
+			u8* fsFileData = nullptr;
+			size_t fsFileSize = IO::File::ReadAllBytes(fragmentFilePath, &fsFileData);
+
+			Shader* shader = CurrentBackend->LoadShader(vsFileData, vsFileSize, fsFileData, fsFileSize);
+
+			if (shader == nullptr)
+			{
+				document.Clear();
+				delete[] vsFileData;
+				delete[] fsFileData;
+				return nullptr;
+			}
+
+			// NOTE: Variable parsing
+
+			Xml::Element* variablesElement = nullptr;
+			findBackendSpecificElement("Variables", rootElement, &variablesElement);
+
+			if (variablesElement != nullptr)
+			{
+				Xml::Element* xmlShaderVariable = variablesElement->FirstChildElement();
+				while (xmlShaderVariable != nullptr)
+				{
+					string_view varTypeString = xmlShaderVariable->Name();
+
+					const Xml::Attribute* nameAttrib = xmlShaderVariable->FindAttribute("Name");
+					const Xml::Attribute* locationAttrib = xmlShaderVariable->FindAttribute("Location");
+
+					if (nameAttrib != nullptr && locationAttrib != nullptr)
+					{
+						string_view varName = nameAttrib->Value();
+						string_view varLocation = locationAttrib->Value();
+
+						string_view varLocationShader;
+						string_view varLocationIndex;
+
+						for (size_t i = 0; i < varLocation.size(); i++)
+						{
+							if (varLocation.at(i) == ShaderVariableLocationSeparator)
+							{
+								varLocationShader = varLocation.substr(0, i);
+								varLocationIndex = varLocation.substr(i + 1, varLocation.size() - (i + 1));
+								break;
+							}
+						}
+
+						ShaderVariable shaderVar = {};
+						shaderVar.Name = varName;
+						shaderVar.Type = EnumFromString<ShaderVariableType>(ShaderVariableTypeStrings, varTypeString);
+						shaderVar.LocationShader = EnumFromString<ShaderType>(ShaderTypeStrings, varLocationShader);
+						shaderVar.LocationIndex = SDL_atoi(varLocationIndex.data());
+
+						shader->AddVariable(shaderVar);
+					}
+
+					xmlShaderVariable = xmlShaderVariable->NextSiblingElement();
+				}
+			}
+
+			document.Clear();
+			delete[] vsFileData;
+			delete[] fsFileData;
+			return shader;
 		}
 	};
 
@@ -153,7 +280,20 @@ namespace Starshine::GFX
 
 	Shader* Renderer::LoadShaderFromXml(const u8* xmlData, size_t xmlSize)
 	{
-		return impl->CurrentBackend->LoadShaderFromXml(xmlData, xmlSize);
+		return impl->LoadShaderFromXml("", xmlData, xmlSize);
+	}
+
+	Shader* Renderer::LoadShaderFromXml(const std::string_view filePath)
+	{
+		string_view basePath = File::GetParentDirectory(filePath);
+
+		u8* xmlShaderData = nullptr;
+		size_t xmlShaderSize = File::ReadAllBytes(filePath, &xmlShaderData);
+
+		Shader* shader = impl->LoadShaderFromXml(basePath, xmlShaderData, xmlShaderSize);
+
+		delete[] xmlShaderData;
+		return shader;
 	}
 
 	void Renderer::DeleteResource(Resource* resource)
