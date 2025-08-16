@@ -4,7 +4,6 @@
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <stb_image.h>
 
 namespace Starshine::Testing
 {
@@ -76,16 +75,7 @@ namespace Starshine::Testing
 			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
 
-			u8* fileData = nullptr;
-			size_t fileSize = File::ReadAllBytes("diva/sprites/test.png", &fileData);
-
-			int width, height, channels;
-			u8* texData = stbi_load_from_memory(fileData, static_cast<int>(fileSize), &width, &height, &channels, 4);
-			testTexture = renderer->CreateTexture(width, height, TextureFormat::RGBA8, false, true);
-			testTexture->SetData(0, 0, width, height, texData);
-
-			delete[] fileData;
-			stbi_image_free(texData);
+			testTexture = renderer->LoadTexture("diva/sprites/test.png");
 
 			return true;
 		}

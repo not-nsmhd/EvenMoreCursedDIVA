@@ -5,6 +5,7 @@
 #include "io/File.h"
 #include <string>
 #include <string_view>
+#include <stb_image.h>
 #include "util/logging.h"
 
 namespace Starshine::GFX
@@ -194,6 +195,28 @@ namespace Starshine::GFX
 			delete[] fsFileData;
 			return shader;
 		}
+
+		Texture* LoadTextureFromFile(const u8* fileData, size_t fileSize)
+		{
+			if (fileData == nullptr || fileSize == 0)
+			{
+				return nullptr;
+			}
+
+			int width, height, channels;
+			u8* texData = stbi_load_from_memory(fileData, static_cast<int>(fileSize), &width, &height, &channels, 4);
+
+			if (texData == nullptr)
+			{
+				return nullptr;
+			}
+
+			Texture* texture = CurrentBackend->CreateTexture(width, height, TextureFormat::RGBA8, false, true);
+			texture->SetData(0, 0, width, height, texData);
+
+			stbi_image_free(texData);
+			return texture;
+		}
 	};
 
 	Renderer::Renderer(RendererBackendType backend) : impl(new Impl())
@@ -290,6 +313,11 @@ namespace Starshine::GFX
 		u8* xmlShaderData = nullptr;
 		size_t xmlShaderSize = File::ReadAllBytes(filePath, &xmlShaderData);
 
+		if (xmlShaderData == nullptr || xmlShaderSize == 0)
+		{
+			return nullptr;
+		}
+
 		Shader* shader = impl->LoadShaderFromXml(basePath, xmlShaderData, xmlShaderSize);
 
 		delete[] xmlShaderData;
@@ -299,6 +327,27 @@ namespace Starshine::GFX
 	Texture* Renderer::CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp)
 	{
 		return impl->CurrentBackend->CreateTexture(width, height, format, nearestFilter, clamp);
+	}
+
+	Texture* Renderer::LoadTexture(const u8* fileData, size_t fileSize)
+	{
+		return impl->LoadTextureFromFile(fileData, fileSize);
+	}
+
+	Texture* Renderer::LoadTexture(const std::string_view filePath)
+	{
+		u8* fileData = nullptr;
+		size_t fileSize = File::ReadAllBytes(filePath, &fileData);
+
+		if (fileData == nullptr || fileSize == 0)
+		{
+			return nullptr;
+		}
+
+		Texture* texture = impl->LoadTextureFromFile(fileData, fileSize);
+
+		delete[] fileData;
+		return texture;
 	}
 
 	void Renderer::DeleteResource(Resource* resource)

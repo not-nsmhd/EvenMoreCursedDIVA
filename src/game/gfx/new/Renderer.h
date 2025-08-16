@@ -48,6 +48,8 @@ namespace Starshine::GFX
 		Shader* LoadShaderFromXml(const std::string_view filePath);
 
 		Texture* CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp);
+		Texture* LoadTexture(const u8* fileData, size_t fileSize);
+		Texture* LoadTexture(const std::string_view filePath);
 
 		void DeleteResource(Resource* resource);
 
