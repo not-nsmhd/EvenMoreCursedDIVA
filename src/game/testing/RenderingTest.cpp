@@ -105,10 +105,6 @@ namespace Starshine::Testing
 			renderer->SetVertexDesc(testVertexDesc);
 			renderer->SetIndexBuffer(testIndexBuffer);
 			renderer->SetShader(testShader);
-
-			vec2 invViewportSize = vec2(1.0f / 1280.0f, 1.0f / 720.0f);
-			testShader->SetVariableValue(VS_InvViewportSize, &invViewportSize);
-
 			renderer->SetTexture(testTexture, 0);
 
 			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);

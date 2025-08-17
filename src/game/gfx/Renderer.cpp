@@ -374,7 +374,7 @@ namespace Starshine::GFX
 		impl->CurrentBackend->SetVertexDesc(desc);
 	}
 
-	void Renderer::SetShader(const Shader* shader)
+	void Renderer::SetShader(Shader* shader)
 	{
 		impl->CurrentBackend->SetShader(shader);
 	}

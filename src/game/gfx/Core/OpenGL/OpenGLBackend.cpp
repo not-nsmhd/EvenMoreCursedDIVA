@@ -110,7 +110,6 @@ namespace Starshine::GFX::Core::OpenGL
 			LogInfo(LogName, "OpenGL Version: %s", glGetString(GL_VERSION));
 			LogInfo(LogName, "OpenGL Renderer: %s", glGetString(GL_RENDERER));
 
-			glDisable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			glFrontFace(GL_CW);
 
@@ -209,13 +208,19 @@ namespace Starshine::GFX::Core::OpenGL
 			}
 		}
 
-		inline void SetShaderVariableValue(ShaderType shaderType, u32 index, const float* value)
+		inline void SetShaderVariableValue(ShaderType shaderType, u32 index, float x, float y, float z, float w)
+		{
+			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
+			glProgramLocalParameter4fARB(glShaderType, index, x, y, z, w);
+		}
+
+		inline void SetShaderVariableValuePtr(ShaderType shaderType, u32 index, const float* value)
 		{
 			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
 			glProgramLocalParameter4fvARB(glShaderType, index, value);
 		}
 
-		void SetShader(const Shader_OpenGL* shader)
+		void SetShader(Shader_OpenGL* shader)
 		{
 			if (shader == nullptr)
 			{
@@ -237,20 +242,57 @@ namespace Starshine::GFX::Core::OpenGL
 					{
 						const ShaderVariable& variable = shader->Variables.at(i);
 
+						if (variable.Value == nullptr)
+						{
+							continue;
+						}
+
 						switch (variable.Type)
 						{
-						case ShaderVariableType::Matrix4:
-							// HACK: this is dumb
-							mat4* originalMatrix = static_cast<mat4*>(variable.Value);
-							mat4 transposedMatrix = glm::transpose(*originalMatrix);
+						case ShaderVariableType::Float:
+						{
+							float* value = reinterpret_cast<float*>(variable.Value);
 
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, reinterpret_cast<const float*>(&transposedMatrix[0]));
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 1, reinterpret_cast<const float*>(&transposedMatrix[1]));
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 2, reinterpret_cast<const float*>(&transposedMatrix[2]));
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex + 3, reinterpret_cast<const float*>(&transposedMatrix[3]));
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, *value, 0.0f, 0.0f, 0.0f);
 							break;
 						}
+						case ShaderVariableType::Vector2:
+						{
+							vec2* value = reinterpret_cast<vec2*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, 0.0f, 0.0f);
+							break;
+						}
+						case ShaderVariableType::Vector3:
+						{
+							vec3* value = reinterpret_cast<vec3*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, 0.0f);
+							break;
+						}
+						case ShaderVariableType::Vector4:
+						{
+							vec4* value = reinterpret_cast<vec4*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, value->w);
+							break;
+						}
+						case ShaderVariableType::Matrix4:
+						{
+							// HACK: this is dumb
+							mat4* originalMatrix = reinterpret_cast<mat4*>(variable.Value);
+							mat4 transposedMatrix = glm::transpose(*originalMatrix);
+
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex, reinterpret_cast<const float*>(&transposedMatrix[0]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 1, reinterpret_cast<const float*>(&transposedMatrix[1]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 2, reinterpret_cast<const float*>(&transposedMatrix[2]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 3, reinterpret_cast<const float*>(&transposedMatrix[3]));
+							break;
+						}
+						}
 					}
+
+					shader->UpdateVariables = false;
 				}
 
 				ShaderSet = true;
@@ -685,7 +727,7 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 	}
 
-	void OpenGLBackend::SetShader(const Shader* shader)
+	void OpenGLBackend::SetShader(Shader* shader)
 	{
 		if (shader == nullptr)
 		{
@@ -693,7 +735,7 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 		else
 		{
-			const Shader_OpenGL* glShader = static_cast<const Shader_OpenGL*>(shader);
+			Shader_OpenGL* glShader = static_cast<Shader_OpenGL*>(shader);
 			impl->SetShader(glShader);
 		}
 	}

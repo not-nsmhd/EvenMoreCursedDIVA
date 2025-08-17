@@ -57,7 +57,7 @@ namespace Starshine::GFX
 		void SetVertexBuffer(const VertexBuffer* buffer);
 		void SetIndexBuffer(const IndexBuffer* buffer);
 		void SetVertexDesc(const VertexDesc* desc);
-		void SetShader(const Shader* shader);
+		void SetShader(Shader* shader);
 		void SetTexture(const Texture* texture, u32 slot);
 
 	private:

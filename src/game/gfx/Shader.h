@@ -22,6 +22,10 @@ namespace Starshine::GFX
 
 	enum class ShaderVariableType : u8
 	{
+		Float,
+		Vector2,
+		Vector3,
+		Vector4,
 		Matrix4,
 
 		Count
@@ -30,6 +34,10 @@ namespace Starshine::GFX
 	constexpr EnumStringMappingTable<ShaderVariableType> ShaderVariableTypeStrings =
 	{
 		EnumStringMapping<ShaderVariableType>
+		{ShaderVariableType::Float, "Float"},
+		{ShaderVariableType::Vector2, "Vector2"},
+		{ShaderVariableType::Vector3, "Vector3"},
+		{ShaderVariableType::Vector4, "Vector4"},
 		{ShaderVariableType::Matrix4, "Matrix4"}
 	};
 
