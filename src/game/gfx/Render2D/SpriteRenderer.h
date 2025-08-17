@@ -5,6 +5,16 @@
 
 namespace Starshine::GFX::Render2D
 {
+	enum class BlendMode : u8
+	{
+		Normal,
+		Add,
+		Mulitply,
+		Overlay,
+
+		Count
+	};
+
 	class SpriteRenderer
 	{
 	public:
@@ -29,6 +39,8 @@ namespace Starshine::GFX::Render2D
 		// NOTE: Coloring order: top-left, top-right, bottom-left, bottom-right
 		void SetSpriteColors(const Common::Color colors[4]);
 		void SetSpriteColors(Common::Color& topLeft, Common::Color& topRight, Common::Color& bottomLeft, Common::Color& bottomRight);
+
+		void SetBlendMode(BlendMode mode);
 
 		void PushSprite(Texture* texture);
 

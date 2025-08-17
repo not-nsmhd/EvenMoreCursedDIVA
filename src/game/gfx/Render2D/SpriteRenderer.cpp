@@ -58,6 +58,24 @@ namespace Starshine::GFX::Render2D
 		Detail::ConstructVertexAttrib(VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte, 4, true, sizeof(SpriteVertex), offsetof(SpriteVertex, Color))
 	};
 
+	struct BlendModeDescriptor
+	{
+		BlendFactor SourceColor{};
+		BlendFactor DestinationColor{};
+		BlendFactor SourceAlpha{};
+		BlendFactor DestinationAlpha{};
+		BlendOperation Operation{};
+	};
+
+	constexpr array<BlendModeDescriptor, EnumCount<BlendMode>()> BlendModes =
+	{
+		BlendModeDescriptor
+		{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add },
+		{ BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add },
+		{ BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add },
+		{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add }
+	};
+
 	struct SpriteRenderer::Impl
 	{
 		Renderer* BaseRenderer = nullptr;
@@ -311,6 +329,13 @@ namespace Starshine::GFX::Render2D
 			ResetSprite();
 			ResetList();
 		}
+
+		void SetBlendMode(BlendMode mode)
+		{
+			const BlendModeDescriptor& desc = BlendModes[static_cast<size_t>(mode)];
+			BaseRenderer->SetBlendState(true, desc.SourceColor, desc.DestinationColor, desc.SourceAlpha, desc.DestinationAlpha);
+			BaseRenderer->SetBlendOperation(desc.Operation);
+		}
 	};
 
 	SpriteRenderer::SpriteRenderer() : impl(new Impl())
@@ -399,6 +424,11 @@ namespace Starshine::GFX::Render2D
 		impl->CurrentSprite.VertexColors.TopRight = topRight;
 		impl->CurrentSprite.VertexColors.BottomLeft = bottomLeft;
 		impl->CurrentSprite.VertexColors.BottomRight = bottomRight;
+	}
+
+	void SpriteRenderer::SetBlendMode(BlendMode mode)
+	{
+		impl->SetBlendMode(mode);
 	}
 
 	void SpriteRenderer::PushSprite(Texture* texture)

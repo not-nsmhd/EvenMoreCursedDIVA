@@ -52,8 +52,6 @@ namespace Starshine::Testing
 
 			BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
 
-			BaseRenderer->SetBlendState(true, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
-
 			vec2 basePos = {};
 			float radians = Rotation;
 
@@ -70,6 +68,7 @@ namespace Starshine::Testing
 				radians += MathExtensions::TwoPi / 4.0f;
 			}
 
+			SpriteRenderer->SetBlendMode(BlendMode::Add);
 			SpriteRenderer->RenderSprites(nullptr);
 
 			BaseRenderer->SwapBuffers();
