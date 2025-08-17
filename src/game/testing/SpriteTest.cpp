@@ -34,7 +34,7 @@ namespace Starshine::Testing
 			BaseRenderer = Renderer::GetInstance();
 			SpriteRenderer = new Render2D::SpriteRenderer();
 
-			TestTexture = BaseRenderer->LoadTexture("diva/sprites/test.png");
+			TestTexture = BaseRenderer->LoadTexture("diva/sprites/test2.png");
 
 			return true;
 		}
@@ -51,6 +51,8 @@ namespace Starshine::Testing
 			Rotation += MathExtensions::ToRadians(diff);
 
 			BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+
+			BaseRenderer->SetBlendState(true, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
 
 			vec2 basePos = {};
 			float radians = Rotation;

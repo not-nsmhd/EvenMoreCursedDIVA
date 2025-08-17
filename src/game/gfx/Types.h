@@ -42,4 +42,31 @@ namespace Starshine::GFX
 
 		Count
 	};
+
+	enum class BlendFactor : u8
+	{
+		Zero,
+		One,
+		SrcColor,
+		OneMinusSrcColor,
+		DestColor,
+		OneMinusDestColor,
+		SrcAlpha,
+		OneMinusSrcAlpha,
+		DestAlpha,
+		OneMinusDestAlpha,
+
+		Count
+	};
+
+	enum class BlendOperation : u8
+	{
+		Add,
+		Subtract,
+		SubtractInverse,
+		Min,
+		Max,
+
+		Count
+	};
 }

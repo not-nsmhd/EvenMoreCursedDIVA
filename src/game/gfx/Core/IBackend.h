@@ -28,6 +28,10 @@ namespace Starshine::GFX::Core
 		virtual void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil) = 0;
 		virtual void SwapBuffers() = 0;
 
+	public:
+		virtual void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha) = 0;
+		virtual void SetBlendOperation(BlendOperation op) = 0;
+
 		virtual void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount) = 0;
 		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount) = 0;
 

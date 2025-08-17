@@ -53,6 +53,29 @@ namespace Starshine::GFX::Core::OpenGL
 			GL_LUMINANCE_ALPHA,
 			GL_RED
 		};
+
+		constexpr array<GLenum, EnumCount<BlendFactor>()> GLBlendFactors =
+		{
+			GL_ZERO,
+			GL_ONE,
+			GL_SRC_COLOR,
+			GL_ONE_MINUS_SRC_COLOR,
+			GL_DST_COLOR,
+			GL_ONE_MINUS_DST_COLOR,
+			GL_SRC_ALPHA,
+			GL_ONE_MINUS_SRC_ALPHA,
+			GL_DST_ALPHA,
+			GL_ONE_MINUS_DST_ALPHA
+		};
+
+		constexpr array<GLenum, EnumCount<BlendOperation>()> GLBlendOperations =
+		{
+			GL_FUNC_ADD,
+			GL_FUNC_SUBTRACT,
+			GL_FUNC_REVERSE_SUBTRACT,
+			GL_MIN,
+			GL_MAX
+		};
 	}
 
 	struct ResourceContext
@@ -403,6 +426,38 @@ namespace Starshine::GFX::Core::OpenGL
 	void OpenGLBackend::SwapBuffers()
 	{
 		impl->SwapBuffers();
+	}
+
+	void OpenGLBackend::SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
+	{
+		GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+		if (enable)
+		{
+			if (!blendEnabled)
+			{
+				glEnable(GL_BLEND);
+			}
+		}
+		else
+		{
+			if (blendEnabled)
+			{
+				glDisable(GL_BLEND);
+			}
+		}
+
+		GLenum glSrcColor = ConversionTables::GLBlendFactors[static_cast<size_t>(srcColor)];
+		GLenum glDstColor = ConversionTables::GLBlendFactors[static_cast<size_t>(destColor)];
+		GLenum glSrcAlpha = ConversionTables::GLBlendFactors[static_cast<size_t>(srcAlpha)];
+		GLenum glDstAlpha = ConversionTables::GLBlendFactors[static_cast<size_t>(destAlpha)];
+
+		glBlendFuncSeparate(glSrcColor, glDstColor, glSrcAlpha, glDstAlpha);
+	}
+
+	void OpenGLBackend::SetBlendOperation(BlendOperation op)
+	{
+		GLenum glOperation = ConversionTables::GLBlendOperations[static_cast<size_t>(op)];
+		glBlendEquation(glOperation);
 	}
 
 	void OpenGLBackend::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)

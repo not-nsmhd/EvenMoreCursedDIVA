@@ -212,6 +212,12 @@ namespace Starshine::GFX
 			}
 
 			Texture* texture = CurrentBackend->CreateTexture(width, height, TextureFormat::RGBA8, false, true);
+
+			if (texture == nullptr)
+			{
+				return nullptr;
+			}
+
 			texture->SetData(0, 0, width, height, texData);
 
 			stbi_image_free(texData);
@@ -274,6 +280,16 @@ namespace Starshine::GFX
 	void Renderer::SwapBuffers()
 	{
 		impl->SwapBuffers();
+	}
+
+	void Renderer::SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
+	{
+		impl->CurrentBackend->SetBlendState(enable, srcColor, destColor, srcAlpha, destAlpha);
+	}
+
+	void Renderer::SetBlendOperation(BlendOperation op)
+	{
+		impl->CurrentBackend->SetBlendOperation(op);
 	}
 
 	void Renderer::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)

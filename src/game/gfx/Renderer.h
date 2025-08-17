@@ -37,6 +37,10 @@ namespace Starshine::GFX
 		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
+	public:
+		void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha);
+		void SetBlendOperation(BlendOperation op);
+
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
 		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount);
 
