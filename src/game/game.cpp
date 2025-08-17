@@ -32,6 +32,7 @@ namespace Starshine
 			u64 Ticks_LastFrame = 0;
 			u64 Ticks_Current = 0;
 			u64 Ticks_Delta = 0;
+			u64 Ticks_Error = 0;
 
 			f64 ActualFrameTime_Milliseconds = 0.0;
 			u64 TargetFrameTime_Ticks = DefaultTargetFrameTime_Ticks;
@@ -128,13 +129,19 @@ namespace Starshine
 
 			Timing.ActualFrameTime_Milliseconds = static_cast<double>(Timing.Ticks_Delta) / 10000.0;
 
-			while (Timing.Ticks_Delta < Timing.TargetFrameTime_Ticks)
+			if (Timing.Ticks_Error > Timing.TargetFrameTime_Ticks)
+			{
+				Timing.Ticks_Error = 0;
+			}
+
+			while (Timing.Ticks_Delta < Timing.TargetFrameTime_Ticks - Timing.Ticks_Error)
 			{
 				SDL_Delay(1);
 				Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
 				Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
 			}
 
+			Timing.Ticks_Error = Timing.Ticks_Delta - Timing.TargetFrameTime_Ticks;
 			Timing.DeltaTime_Milliseconds = static_cast<double>(Timing.Ticks_Delta) / 10000.0;
 		}
 
