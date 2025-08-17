@@ -82,6 +82,9 @@ namespace Starshine::GFX::Core::OpenGL
 		bool NearestFilter = false;
 		bool Clamp = false;
 
+		u32 GetWidth() const;
+		u32 GetHeight() const;
+
 		void SetData(u32 x, u32 y, u32 width, u32 height, const void* data);
 	};
 
@@ -101,6 +104,7 @@ namespace Starshine::GFX::Core::OpenGL
 	public:
 		ResourceContext* GetResourceContext(ResourceHandle handle);
 
+		Common::RectangleF GetViewportSize() const;
 	public:
 		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();

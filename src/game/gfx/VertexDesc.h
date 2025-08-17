@@ -42,4 +42,29 @@ namespace Starshine::GFX
 	public:
 		VertexDesc(ResourceHandle handle) : Resource(ResourceType::VertexDesc, handle) {}
 	};
+
+	namespace Detail
+	{
+		constexpr VertexAttrib ConstructVertexAttrib(
+			VertexAttribType type,
+			u32 index,
+			VertexAttribFormat format,
+			u32 components,
+			bool normalized,
+			u32 vertexSize,
+			u32 attribOffset)
+		{
+			VertexAttrib attrib = {};
+
+			attrib.Type = type;
+			attrib.Index = index;
+			attrib.Format = format;
+			attrib.Components = components;
+			attrib.Normalized = normalized;
+			attrib.VertexSize = vertexSize;
+			attrib.Offset = attribOffset;
+
+			return attrib;
+		}
+	}
 }

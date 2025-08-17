@@ -261,6 +261,11 @@ namespace Starshine::GFX
 		return impl->CurrentBackend->GetType();
 	}
 
+	Common::RectangleF Renderer::GetViewportSize() const
+	{
+		return impl->CurrentBackend->GetViewportSize();
+	}
+
 	void Renderer::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
 	{
 		impl->Clear(flags, color, depth, stencil);

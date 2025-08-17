@@ -1,6 +1,7 @@
 #pragma once
 #include "common/types.h"
 #include "common/color.h"
+#include "common/rect.h"
 #include "gfx/Types.h"
 #include "gfx/Buffers.h"
 #include "gfx/VertexDesc.h"
@@ -22,6 +23,7 @@ namespace Starshine::GFX::Core
 	public:
 		virtual RendererBackendType GetType() const = 0;
 
+		virtual Common::RectangleF GetViewportSize() const = 0;
 	public:
 		virtual void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil) = 0;
 		virtual void SwapBuffers() = 0;

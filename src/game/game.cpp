@@ -3,7 +3,7 @@
 #include "util/logging.h"
 #include <SDL2/SDL.h>
 #include "gfx/Renderer.h"
-#include "testing/RenderingTest.h"
+#include "testing/SpriteTest.h"
 
 namespace Starshine
 {
@@ -91,7 +91,7 @@ namespace Starshine
 
 			GFX.Renderer->Initialize(GameWindow);
 
-			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::RenderingTest>();
+			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
 			SetCurrentGameStateInstance(testState);
 
 			return true;

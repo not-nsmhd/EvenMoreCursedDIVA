@@ -136,6 +136,7 @@
     <ClInclude Include="game\gfx\Core\IBackend.h" />
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLBackend.h" />
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLVertexDesc.h" />
+    <ClInclude Include="game\gfx\Render2D\SpriteRenderer.h" />
     <ClInclude Include="game\gfx\Renderer.h" />
     <ClInclude Include="game\gfx\Resource.h" />
     <ClInclude Include="game\gfx\Shader.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="game\io\Xml.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
+    <ClInclude Include="game\testing\SpriteTest.h" />
     <ClInclude Include="game\util\logging.h" />
     <ClInclude Include="game\util\string_utils.h" />
   </ItemGroup>
@@ -158,12 +160,14 @@
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp" />
     <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp" />
+    <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp" />
     <ClCompile Include="game\io\File.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />
     <ClCompile Include="game\stb\stb_image.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
+    <ClCompile Include="game\testing\SpriteTest.cpp" />
     <ClCompile Include="game\util\logging.cpp" />
     <ClCompile Include="game\util\string_utils.cpp" />
   </ItemGroup>

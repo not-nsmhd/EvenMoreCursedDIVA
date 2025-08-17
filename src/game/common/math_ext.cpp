@@ -56,7 +56,7 @@ namespace Common
 			}
 
 			float x = percentage * dist;
-			float y = SDL_sinf(percentage * MATH_EXT_PI * freq) / 12.0f * ampl;
+			float y = SDL_sinf(percentage * Pi * freq) / 12.0f * ampl;
 			float radians = glm::radians<float>(deg - 90.0f);
 
 			vec2 point = RotateVector(vec2(x, y), vec2(0.0f), radians);

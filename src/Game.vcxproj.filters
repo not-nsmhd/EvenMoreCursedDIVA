@@ -40,9 +40,6 @@
     <ClCompile Include="game\io\File.cpp">
       <Filter>src\game\io</Filter>
     </ClCompile>
-    <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp" />
-    <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp" />
-    <ClCompile Include="game\gfx\new\Renderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp">
       <Filter>src\game\gfx</Filter>
     </ClCompile>
@@ -51,6 +48,12 @@
     </ClCompile>
     <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp">
       <Filter>src\game\gfx\Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="game\testing\SpriteTest.cpp">
+      <Filter>src\game\testing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +132,12 @@
     <ClInclude Include="game\gfx\VertexDesc.h">
       <Filter>src\game\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="game\gfx\Render2D\SpriteRenderer.h">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\SpriteTest.h">
+      <Filter>src\game\testing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -202,6 +211,9 @@
     </Filter>
     <Filter Include="src\game\gfx\Core\D3D9">
       <UniqueIdentifier>{fc22504d-d1bf-47b1-a6be-04ab7a439c0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\gfx\Render2D">
+      <UniqueIdentifier>{0d1f7f42-8796-4f71-b429-5d60570b932a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

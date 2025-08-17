@@ -363,6 +363,13 @@ namespace Starshine::GFX::Core::OpenGL
 		return nullptr;
 	}
 
+	Common::RectangleF OpenGLBackend::GetViewportSize() const
+	{
+		RectangleF viewport = {};
+		glGetFloatv(GL_VIEWPORT, &viewport.X);
+		return viewport;
+	}
+
 	void OpenGLBackend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
 	{
 		GLenum clearFlags = 0;
@@ -835,6 +842,16 @@ namespace Starshine::GFX::Core::OpenGL
 		varToUpdate.Value = value;
 
 		UpdateVariables = true;
+	}
+
+	u32 Texture_OpenGL::GetWidth() const
+	{
+		return Width;
+	}
+
+	u32 Texture_OpenGL::GetHeight() const
+	{
+		return Height;
 	}
 
 	void Texture_OpenGL::SetData(u32 x, u32 y, u32 width, u32 height, const void* data)

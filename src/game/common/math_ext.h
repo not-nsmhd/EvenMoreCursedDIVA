@@ -6,8 +6,8 @@ namespace Common
 {
 	namespace MathExtensions
 	{
-		const float MATH_EXT_PI = 3.1415927f;
-		const float MATH_EXT_2PI = 6.2831854f;
+		constexpr float Pi = 3.1415927f;
+		constexpr float TwoPi = 6.2831854f;
 
 		vec2 RotateVector(vec2 point, vec2 origin, float cos, float sin);
 		vec2 RotateVector(vec2 point, vec2 origin, float radians);

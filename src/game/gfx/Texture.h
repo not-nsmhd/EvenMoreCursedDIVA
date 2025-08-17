@@ -24,6 +24,9 @@ namespace Starshine::GFX
 	public:
 		Texture(ResourceHandle handle) : Resource(ResourceType::Texture, handle) {}
 
+		virtual u32 GetWidth() const = 0;
+		virtual u32 GetHeight() const = 0;
+
 		virtual void SetData(u32 x, u32 y, u32 width, u32 height, const void* data) = 0;
 	};
 }
