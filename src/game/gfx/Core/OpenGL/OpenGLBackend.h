@@ -1,6 +1,6 @@
 #pragma once
 #include "common/types.h"
-#include "gfx/new/Core/IBackend.h"
+#include "gfx/Core/IBackend.h"
 #include "OpenGLVertexDesc.h"
 #include <vector>
 
@@ -11,14 +11,29 @@ namespace Starshine::GFX::Core::OpenGL
 
 	struct VertexBuffer_OpenGL : public VertexBuffer
 	{
+	public:
+		VertexBuffer_OpenGL(ResourceHandle handle, size_t size, bool dynamic) 
+			: VertexBuffer(handle), Size(size), Dynamic(dynamic) {}
+
 		OpenGLBackend* Backend = nullptr;
+
+		size_t Size = 0;
+		bool Dynamic = false;
 
 		void SetData(void* source, size_t offset, size_t size);
 	};
 
 	struct IndexBuffer_OpenGL : public IndexBuffer
 	{
+	public:
+		IndexBuffer_OpenGL(ResourceHandle handle, size_t size, IndexFormat format, bool dynamic)
+			: IndexBuffer(handle), Size(size), Format(format), Dynamic(dynamic) {}
+
 		OpenGLBackend* Backend = nullptr;
+
+		size_t Size = 0;
+		bool Dynamic = false;
+		IndexFormat Format = {};
 
 		void SetData(void* source, size_t offset, size_t size);
 	};
@@ -26,8 +41,7 @@ namespace Starshine::GFX::Core::OpenGL
 	struct Shader_OpenGL : public Shader
 	{
 	public:
-		Shader_OpenGL(void* vsData, size_t vsSize, void* fsData, size_t fsSize) 
-			: Shader(vsData, vsSize, fsData, fsSize) {}
+		Shader_OpenGL(ResourceHandle handle) : Shader(handle) {}
 
 		OpenGLBackend* Backend = nullptr;
 
@@ -46,7 +60,8 @@ namespace Starshine::GFX::Core::OpenGL
 	struct VertexDesc_OpenGL : public VertexDesc
 	{
 	public:
-		VertexDesc_OpenGL(const VertexAttrib* attribs, size_t attribCount) : GLAttribs(attribCount) {}
+		VertexDesc_OpenGL(ResourceHandle handle, const VertexAttrib* attribs, size_t attribCount) 
+			: VertexDesc(handle), GLAttribs(attribCount) {}
 
 		std::vector<VertexAttrib_OpenGL> GLAttribs;
 	};
@@ -54,10 +69,18 @@ namespace Starshine::GFX::Core::OpenGL
 	struct Texture_OpenGL : public Texture
 	{
 	public:
-		Texture_OpenGL(u32 width, u32 height, TextureFormat format, bool clamp, bool nearestFilter)	
-			: Texture(width, height, format, clamp, nearestFilter) {}
+		Texture_OpenGL(ResourceHandle handle, u32 width, u32 height, TextureFormat format, bool clamp, bool nearestFilter)
+			: Texture(handle),
+			Width(width), Height(height), Format(format), Clamp(clamp), NearestFilter(nearestFilter) {}
 
 		OpenGLBackend* Backend = nullptr;
+
+		u32 Width = 0;
+		u32 Height = 0;
+		TextureFormat Format{};
+
+		bool NearestFilter = false;
+		bool Clamp = false;
 
 		void SetData(u32 x, u32 y, u32 width, u32 height, const void* data);
 	};

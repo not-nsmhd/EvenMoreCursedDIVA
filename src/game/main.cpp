@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include "util/logging.h"
-#include "game_new.h"
+#include "game.h"
 
 using Starshine::Game;
 

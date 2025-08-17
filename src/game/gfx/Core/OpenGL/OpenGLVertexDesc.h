@@ -1,5 +1,5 @@
 #pragma once
-#include "gfx/new/VertexDesc.h"
+#include "gfx/VertexDesc.h"
 #include <array>
 #include <glad/glad.h>
 

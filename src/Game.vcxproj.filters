@@ -31,23 +31,26 @@
     <ClCompile Include="..\lib\fmt\src\format.cc">
       <Filter>lib\fmt\src</Filter>
     </ClCompile>
-    <ClCompile Include="game\game_new.cpp">
+    <ClCompile Include="game\game.cpp">
       <Filter>src\game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\gfx\new\Renderer.cpp">
-      <Filter>src\game\gfx\new</Filter>
     </ClCompile>
     <ClCompile Include="game\testing\RenderingTest.cpp">
       <Filter>src\game\testing</Filter>
     </ClCompile>
-    <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp">
-      <Filter>src\game\gfx\new\Core\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp">
-      <Filter>src\game\gfx\new\Core\D3D9</Filter>
-    </ClCompile>
     <ClCompile Include="game\io\File.cpp">
       <Filter>src\game\io</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\new\Core\D3D9\D3D9Backend.cpp" />
+    <ClCompile Include="game\gfx\new\Core\OpenGL\OpenGLBackend.cpp" />
+    <ClCompile Include="game\gfx\new\Renderer.cpp" />
+    <ClCompile Include="game\gfx\Renderer.cpp">
+      <Filter>src\game\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp">
+      <Filter>src\game\gfx\Core\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp">
+      <Filter>src\game\gfx\Core\D3D9</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,11 +81,8 @@
     <ClInclude Include="game\util\string_utils.h">
       <Filter>src\game\util</Filter>
     </ClInclude>
-    <ClInclude Include="game\game_new.h">
+    <ClInclude Include="game\game.h">
       <Filter>src\game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Renderer.h">
-      <Filter>src\game\gfx\new</Filter>
     </ClInclude>
     <ClInclude Include="game\game_state.h">
       <Filter>src\game</Filter>
@@ -90,41 +90,44 @@
     <ClInclude Include="game\testing\RenderingTest.h">
       <Filter>src\game\testing</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\Core\IBackend.h">
-      <Filter>src\game\gfx\new\Core</Filter>
+    <ClInclude Include="game\gfx\Core\IBackend.h">
+      <Filter>src\game\gfx\Core</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\Types.h">
-      <Filter>src\game\gfx\new</Filter>
+    <ClInclude Include="game\gfx\Core\OpenGL\OpenGLBackend.h">
+      <Filter>src\game\gfx\Core\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLBackend.h">
-      <Filter>src\game\gfx\new\Core\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Core\D3D9\D3D9Backend.h">
-      <Filter>src\game\gfx\new\Core\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Resource.h">
-      <Filter>src\game\gfx\new</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Buffers.h">
-      <Filter>src\game\gfx\new</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Shader.h">
-      <Filter>src\game\gfx\new</Filter>
+    <ClInclude Include="game\gfx\Core\D3D9\D3D9Backend.h">
+      <Filter>src\game\gfx\Core\D3D9</Filter>
     </ClInclude>
     <ClInclude Include="game\io\File.h">
       <Filter>src\game\io</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\VertexDesc.h">
-      <Filter>src\game\gfx\new</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\new\Core\OpenGL\OpenGLVertexDesc.h">
-      <Filter>src\game\gfx\new\Core\OpenGL</Filter>
+    <ClInclude Include="game\gfx\Core\OpenGL\OpenGLVertexDesc.h">
+      <Filter>src\game\gfx\Core\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="game\io\Xml.h">
       <Filter>src\game\io</Filter>
     </ClInclude>
-    <ClInclude Include="game\gfx\new\Texture.h">
-      <Filter>src\game\gfx\new</Filter>
+    <ClInclude Include="game\gfx\Buffers.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Renderer.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Resource.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Shader.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Texture.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Types.h">
+      <Filter>src\game\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\VertexDesc.h">
+      <Filter>src\game\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,16 +194,13 @@
     <Filter Include="lib\fmt\src">
       <UniqueIdentifier>{8c98a807-7cdf-4ea2-974f-536c9132fdde}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\game\gfx\new">
-      <UniqueIdentifier>{164841b4-2c0a-4a59-8a78-f48c75b5b58c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\game\gfx\new\Core">
+    <Filter Include="src\game\gfx\Core">
       <UniqueIdentifier>{7d1b1719-b36c-4a99-92f5-6e52e0296244}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\game\gfx\new\Core\OpenGL">
+    <Filter Include="src\game\gfx\Core\OpenGL">
       <UniqueIdentifier>{0e78b484-8e46-4071-a2e9-778b63dd6aa8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\game\gfx\new\Core\D3D9">
+    <Filter Include="src\game\gfx\Core\D3D9">
       <UniqueIdentifier>{fc22504d-d1bf-47b1-a6be-04ab7a439c0b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

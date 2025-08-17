@@ -22,16 +22,7 @@ namespace Starshine::GFX
 	struct Texture : public Resource
 	{
 	public:
-		Texture(u32 width, u32 height, TextureFormat format, bool clamp, bool nearestFilter)
-			: Resource(ResourceType::Texture), 
-			Width(width), Height(height), Format(format), Clamp(clamp), NearestFiltering(nearestFilter) {}
-
-		u32 Width = 0;
-		u32 Height = 0;
-		TextureFormat Format{};
-
-		bool NearestFiltering = false;
-		bool Clamp = false;
+		Texture(ResourceHandle handle) : Resource(ResourceType::Texture, handle) {}
 
 		virtual void SetData(u32 x, u32 y, u32 width, u32 height, const void* data) = 0;
 	};

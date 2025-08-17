@@ -378,20 +378,16 @@ namespace Starshine::GFX::Core::OpenGL
 
 		GLuint baseBuffer = 0;
 		glGenBuffersARB(1, &baseBuffer);
-
-		void* bufferData = new u8[size];
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, baseBuffer);
 
 		if (initialData != nullptr)
 		{
-			SDL_memcpy(bufferData, initialData, size);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, initialData, bufferUsage);
 		}
 		else
 		{
-			SDL_memset(bufferData, 0, size);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, NULL, bufferUsage);
 		}
-
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, baseBuffer);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, bufferData, bufferUsage);
 
 		ResourceHandle handle = impl->FindFreeResourceContext();
 		ResourceContext* ctx = &impl->ResourceContexts.at(static_cast<size_t>(handle));
@@ -399,13 +395,8 @@ namespace Starshine::GFX::Core::OpenGL
 		ctx->BaseResourceHandle = baseBuffer;
 		ctx->Size = size;
 
-		VertexBuffer_OpenGL* buffer = new VertexBuffer_OpenGL();
-		buffer->Handle = handle;
+		VertexBuffer_OpenGL* buffer = new VertexBuffer_OpenGL(handle, size, dynamic);
 		buffer->Backend = this;
-
-		buffer->Data = bufferData;
-		buffer->Size = size;
-		buffer->Dynamic = dynamic;
 
 		LogInfo(LogName, "Created a new vertex buffer (handle %d)", handle);
 		return buffer;
@@ -426,16 +417,12 @@ namespace Starshine::GFX::Core::OpenGL
 		glGenBuffersARB(1, &baseBuffer);
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, baseBuffer);
 
-		void* bufferData = new u8[size];
-
 		if (initialData != nullptr)
 		{
-			SDL_memcpy(bufferData, initialData, size);
-			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, bufferData, bufferUsage);
+			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, initialData, bufferUsage);
 		}
 		else
 		{
-			SDL_memset(bufferData, 0, size);
 			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, NULL, bufferUsage);
 		}
 
@@ -445,14 +432,8 @@ namespace Starshine::GFX::Core::OpenGL
 		ctx->BaseResourceHandle = baseBuffer;
 		ctx->Size = size;
 
-		IndexBuffer_OpenGL* buffer = new IndexBuffer_OpenGL();
-		buffer->Handle = handle;
+		IndexBuffer_OpenGL* buffer = new IndexBuffer_OpenGL(handle, size, format, dynamic);
 		buffer->Backend = this;
-
-		buffer->Data = bufferData;
-		buffer->Format = format;
-		buffer->Size = size;
-		buffer->Dynamic = dynamic;
 
 		LogInfo(LogName, "Created a new index buffer (handle %d)", handle);
 		return buffer;
@@ -465,7 +446,7 @@ namespace Starshine::GFX::Core::OpenGL
 			return nullptr;
 		}
 
-		VertexDesc_OpenGL* desc = new VertexDesc_OpenGL(attribs, attribCount);
+		VertexDesc_OpenGL* desc = new VertexDesc_OpenGL(InvalidResourceHandle, attribs, attribCount);
 
 		for (size_t i = 0; i < attribCount; i++)
 		{
@@ -513,7 +494,7 @@ namespace Starshine::GFX::Core::OpenGL
 		if (errorPos != -1)
 		{
 			errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-			LogError(LogName, "Failed to assemble vertex program. Error: %s", errorString);
+			LogError(LogName, "Failed to assemble vertex program. Error (pos: %d): %s", errorPos, errorString);
 		}
 
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fsHandle);
@@ -523,7 +504,7 @@ namespace Starshine::GFX::Core::OpenGL
 		if (errorPos != -1)
 		{
 			errorString = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-			LogError(LogName, "Failed to assemble fragment program. Error: %s", errorString);
+			LogError(LogName, "Failed to assemble fragment program. Error (pos: %d): %s", errorPos, errorString);
 		}
 
 		ResourceHandle vertHandle = impl->FindFreeResourceContext();
@@ -538,7 +519,7 @@ namespace Starshine::GFX::Core::OpenGL
 		fragCtx->BaseResourceHandle = fsHandle;
 		fragCtx->Size = fsSize;
 
-		Shader_OpenGL* shader = new Shader_OpenGL(vsSource, vsSize, fsSource, fsSize);
+		Shader_OpenGL* shader = new Shader_OpenGL(vertHandle);
 		shader->Handle = vertHandle;
 		shader->VertexHandle = vertHandle;
 		shader->FragmentHandle = fragHandle;
@@ -579,8 +560,7 @@ namespace Starshine::GFX::Core::OpenGL
 		resCtx->BaseResourceHandle = texHandle;
 		resCtx->Size = static_cast<size_t>(width * height) * TextureFormatPixelSizes[static_cast<size_t>(format)];
 
-		Texture_OpenGL* texture = new Texture_OpenGL(width, height, format, clamp, nearestFilter);
-		texture->Handle = resHandle;
+		Texture_OpenGL* texture = new Texture_OpenGL(resHandle, width, height, format, clamp, nearestFilter);
 		texture->Backend = this;
 
 		LogInfo(LogName, "Created a new texture with handle %d", resHandle);
@@ -615,7 +595,6 @@ namespace Starshine::GFX::Core::OpenGL
 			resourceCtx->Size = 0;
 
 			VertexBuffer_OpenGL* buffer = static_cast<VertexBuffer_OpenGL*>(resource);
-			delete buffer->Data;
 			delete buffer;
 
 			LogInfo(LogName, "Vertex buffer with handle %d has been deleted", handle);
@@ -628,7 +607,6 @@ namespace Starshine::GFX::Core::OpenGL
 			resourceCtx->Size = 0;
 
 			IndexBuffer_OpenGL* buffer = static_cast<IndexBuffer_OpenGL*>(resource);
-			delete buffer->Data;
 			delete buffer;
 
 			LogInfo(LogName, "Index buffer with handle %d has been deleted", handle);
@@ -650,11 +628,8 @@ namespace Starshine::GFX::Core::OpenGL
 			fragmentCtx->BaseResourceHandle = 0;
 			fragmentCtx->Size = 0;
 
-			ResourceHandle vsHandle = handle;
+			ResourceHandle vsHandle = shader->VertexHandle;
 			ResourceHandle fsHandle = shader->FragmentHandle;
-
-			delete shader->VertexShaderSource;
-			delete shader->FragmentShaderSource;
 			delete shader;
 
 			LogInfo(LogName, "Shader program (vert: %d, frag: %d) has been deleted", vsHandle, fsHandle);
@@ -736,10 +711,8 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 	}
 
-	void SetBufferData(GLuint glHandle, ResourceType bufferType, void* bufferData, void* source, size_t offset, size_t size)
+	void SetBufferData(GLuint glHandle, ResourceType bufferType, void* source, size_t offset, size_t size)
 	{
-		SDL_memcpy((u8*)bufferData + offset, source, size);
-
 		GLenum bindTarget = 0;
 
 		switch (bufferType)
@@ -772,7 +745,7 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 
 		ResourceContext* ctx = Backend->GetResourceContext(Handle);
-		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
+		SetBufferData(ctx->BaseResourceHandle, Type, source, offset, size);
 	}
 
 	void IndexBuffer_OpenGL::SetData(void* source, size_t offset, size_t size)
@@ -788,7 +761,7 @@ namespace Starshine::GFX::Core::OpenGL
 		}
 
 		ResourceContext* ctx = Backend->GetResourceContext(Handle);
-		SetBufferData(ctx->BaseResourceHandle, Type, Data, source, offset, size);
+		SetBufferData(ctx->BaseResourceHandle, Type, source, offset, size);
 	}
 
 	void Shader_OpenGL::AddVariable(ShaderVariable& variable)

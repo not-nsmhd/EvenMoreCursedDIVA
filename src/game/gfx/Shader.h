@@ -50,16 +50,7 @@ namespace Starshine::GFX
 	struct Shader : public Resource
 	{
 	public:
-		Shader(void* vsData, size_t vsSize, void* fsData, size_t fsSize) 
-			: Resource(ResourceType::Shader), 
-			VertexShaderSource(vsData), VertexShaderSize(vsSize),
-			FragmentShaderSource(fsData), FragmentShaderSize(fsSize) {}
-
-		void* VertexShaderSource = nullptr;
-		size_t VertexShaderSize = 0;
-
-		void* FragmentShaderSource = nullptr;
-		size_t FragmentShaderSize = 0;
+		Shader(ResourceHandle handle) : Resource(ResourceType::Shader, handle) {}
 
 		// NOTE: This function is intended for use in rendering backends only
 		virtual void AddVariable(ShaderVariable& variable) = 0;

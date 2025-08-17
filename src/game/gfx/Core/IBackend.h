@@ -1,11 +1,11 @@
 #pragma once
 #include "common/types.h"
 #include "common/color.h"
-#include "gfx/new/Types.h"
-#include "gfx/new/Buffers.h"
-#include "gfx/new/VertexDesc.h"
-#include "gfx/new/Shader.h"
-#include "gfx/new/Texture.h"
+#include "gfx/Types.h"
+#include "gfx/Buffers.h"
+#include "gfx/VertexDesc.h"
+#include "gfx/Shader.h"
+#include "gfx/Texture.h"
 #include <SDL2/SDL.h>
 
 namespace Starshine::GFX::Core

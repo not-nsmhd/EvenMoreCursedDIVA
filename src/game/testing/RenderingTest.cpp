@@ -1,6 +1,6 @@
 #include "RenderingTest.h"
 #include "common/color.h"
-#include "gfx/new/Renderer.h"
+#include "gfx/Renderer.h"
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -53,6 +53,7 @@ namespace Starshine::Testing
 
 		mat4 TransformMatrix{};
 		ShaderVariableIndex VS_TransformMatrix{};
+		ShaderVariableIndex VS_InvViewportSize{};
 
 		bool Initialize()
 		{
@@ -73,6 +74,7 @@ namespace Starshine::Testing
 			testShader = renderer->LoadShaderFromXml("diva/shaders/SpriteDefault.xml");
 
 			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
+			VS_InvViewportSize = testShader->GetVariableIndex("InvViewportSize");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
 
 			testTexture = renderer->LoadTexture("diva/sprites/test.png");
@@ -103,6 +105,10 @@ namespace Starshine::Testing
 			renderer->SetVertexDesc(testVertexDesc);
 			renderer->SetIndexBuffer(testIndexBuffer);
 			renderer->SetShader(testShader);
+
+			vec2 invViewportSize = vec2(1.0f / 1280.0f, 1.0f / 720.0f);
+			testShader->SetVariableValue(VS_InvViewportSize, &invViewportSize);
+
 			renderer->SetTexture(testTexture, 0);
 
 			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);

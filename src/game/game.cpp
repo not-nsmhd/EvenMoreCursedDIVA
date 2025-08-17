@@ -1,8 +1,8 @@
-#include "game_new.h"
+#include "game.h"
 #include "build/build_info.h"
 #include "util/logging.h"
 #include <SDL2/SDL.h>
-#include "gfx/new/Renderer.h"
+#include "gfx/Renderer.h"
 #include "testing/RenderingTest.h"
 
 namespace Starshine

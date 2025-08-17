@@ -40,6 +40,6 @@ namespace Starshine::GFX
 	struct VertexDesc : public Resource
 	{
 	public:
-		VertexDesc() : Resource(ResourceType::VertexDesc) {}
+		VertexDesc(ResourceHandle handle) : Resource(ResourceType::VertexDesc, handle) {}
 	};
 }

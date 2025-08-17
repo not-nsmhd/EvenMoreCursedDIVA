@@ -18,7 +18,7 @@ namespace Starshine::GFX
 	struct Resource
 	{
 	public:
-		Resource(ResourceType type) : Type(type) {}
+		Resource(ResourceType type, ResourceHandle handle) : Type(type), Handle(handle) {}
 
 		ResourceHandle Handle = InvalidResourceHandle;
 		const ResourceType Type{};
