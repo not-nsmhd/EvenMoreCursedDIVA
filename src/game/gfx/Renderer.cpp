@@ -196,7 +196,7 @@ namespace Starshine::GFX
 			return shader;
 		}
 
-		Texture* LoadTextureFromFile(const u8* fileData, size_t fileSize)
+		Texture* LoadTextureFromFile(const u8* fileData, size_t fileSize, bool nearestFilter, bool clamp)
 		{
 			if (fileData == nullptr || fileSize == 0)
 			{
@@ -211,7 +211,7 @@ namespace Starshine::GFX
 				return nullptr;
 			}
 
-			Texture* texture = CurrentBackend->CreateTexture(width, height, TextureFormat::RGBA8, false, true);
+			Texture* texture = CurrentBackend->CreateTexture(width, height, TextureFormat::RGBA8, nearestFilter, clamp);
 
 			if (texture == nullptr)
 			{
@@ -350,12 +350,12 @@ namespace Starshine::GFX
 		return impl->CurrentBackend->CreateTexture(width, height, format, nearestFilter, clamp);
 	}
 
-	Texture* Renderer::LoadTexture(const u8* fileData, size_t fileSize)
+	Texture* Renderer::LoadTexture(const u8* fileData, size_t fileSize, bool nearestFilter, bool clamp)
 	{
-		return impl->LoadTextureFromFile(fileData, fileSize);
+		return impl->LoadTextureFromFile(fileData, fileSize, nearestFilter, clamp);
 	}
 
-	Texture* Renderer::LoadTexture(const std::string_view filePath)
+	Texture* Renderer::LoadTexture(const std::string_view filePath, bool nearestFilter, bool clamp)
 	{
 		u8* fileData = nullptr;
 		size_t fileSize = File::ReadAllBytes(filePath, &fileData);
@@ -365,7 +365,7 @@ namespace Starshine::GFX
 			return nullptr;
 		}
 
-		Texture* texture = impl->LoadTextureFromFile(fileData, fileSize);
+		Texture* texture = impl->LoadTextureFromFile(fileData, fileSize, nearestFilter, clamp);
 
 		delete[] fileData;
 		return texture;

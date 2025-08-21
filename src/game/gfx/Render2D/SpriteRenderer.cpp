@@ -121,6 +121,8 @@ namespace Starshine::GFX::Render2D
 			Internal_CreateVertexBuffer();
 			Internal_CreateIndexBuffer();
 			Internal_CreateDefaultSpriteResources();
+
+			SetBlendMode(BlendMode::Normal);
 		}
 
 		void Destroy()

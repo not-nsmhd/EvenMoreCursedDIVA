@@ -3,12 +3,14 @@
 #include "util/logging.h"
 #include <SDL2/SDL.h>
 #include "gfx/Renderer.h"
+#include "input/Keyboard.h"
 #include "testing/SpriteTest.h"
 
 namespace Starshine
 {
 	using namespace Logging;
 	using namespace GFX;
+	using namespace Input;
 
 	using Common::Color;
 
@@ -89,8 +91,9 @@ namespace Starshine
 
 			Renderer::CreateInstance(GFX.BackendType);
 			GFX.Renderer = Renderer::GetInstance();
-
 			GFX.Renderer->Initialize(GameWindow);
+
+			Keyboard::Initialize();
 
 			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
 			SetCurrentGameStateInstance(testState);
@@ -107,6 +110,8 @@ namespace Starshine
 				GameStateHelpers::DeleteGameStateInstance(CurrentGameState);
 				LogInfo(LogName, "Current state destroyed");
 			}
+
+			Keyboard::Destroy();
 
 			GFX.Renderer->Destroy();
 			Renderer::DeleteInstance();
@@ -164,6 +169,10 @@ namespace Starshine
 					case SDL_QUIT:
 						Running = false;
 						break;
+					case SDL_KEYDOWN:
+					case SDL_KEYUP:
+						Keyboard::Poll(SDLEvent.key);
+						break;
 					}
 				}
 
@@ -176,6 +185,8 @@ namespace Starshine
 				{
 					CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
 				}
+
+				Keyboard::NextFrame();
 			}
 
 			Destroy();

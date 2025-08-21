@@ -1,35 +1,32 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "../common/types.h"
-#include <unordered_map>
+#include "common/types.h"
 
-namespace Input
+namespace Starshine::Input
 {
-	class Keyboard
+	class Keyboard : public NonCopyable
 	{
-	protected:
+	public:
 		Keyboard();
-		static Keyboard* instance;
 
 	public:
-		Keyboard(Keyboard& other) = delete;
-		void operator=(const Keyboard&) = delete;
+		static void Initialize();
+		static void Destroy();
 
-		static Keyboard* GetInstance();
+		static void Poll(const SDL_KeyboardEvent& event);
+		static void NextFrame();
 
-		void Poll(SDL_Event& event);
-		void NextFrame();
-
-		bool IsKeyDown(SDL_Scancode scancode);
-		bool IsKeyUp(SDL_Scancode scancode);
-		bool IsKeyTapped(SDL_Scancode scancode);
-		bool IsKeyReleased(SDL_Scancode scancode);
+	public:
+		static bool IsKeyDown(SDL_Keycode key);
+		static bool IsKeyUp(SDL_Keycode key);
+		static bool IsKeyTapped(SDL_Keycode key);
+		static bool IsKeyReleased(SDL_Keycode key);
 	private:
-		std::unordered_map<SDL_Scancode, u8> curKeyboardState = {};
-		std::unordered_map<SDL_Scancode, u8> prevKeyboardState = {};
+		struct Impl;
+		Impl* impl = nullptr;
 	};
 
-	class KeyBind
+	/*class KeyBind
 	{
 	public:
 		KeyBind(Keyboard* keyboard, SDL_Scancode primary, SDL_Scancode alternative);
@@ -47,5 +44,5 @@ namespace Input
 		static constexpr SDL_Scancode UnsetScancode = SDL_SCANCODE_UNKNOWN;
 	private:
 		Keyboard* keyboard = nullptr;
-	};
+	};*/
 }

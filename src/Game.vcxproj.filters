@@ -55,6 +55,9 @@
     <ClCompile Include="game\testing\SpriteTest.cpp">
       <Filter>src\game\testing</Filter>
     </ClCompile>
+    <ClCompile Include="game\input\Keyboard.cpp">
+      <Filter>src\game\input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="game\testing\SpriteTest.h">
       <Filter>src\game\testing</Filter>
+    </ClInclude>
+    <ClInclude Include="game\input\Keyboard.h">
+      <Filter>src\game\input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

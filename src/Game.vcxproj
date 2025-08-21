@@ -143,6 +143,7 @@
     <ClInclude Include="game\gfx\Texture.h" />
     <ClInclude Include="game\gfx\Types.h" />
     <ClInclude Include="game\gfx\VertexDesc.h" />
+    <ClInclude Include="game\input\Keyboard.h" />
     <ClInclude Include="game\io\File.h" />
     <ClInclude Include="game\io\Xml.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp" />
     <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp" />
+    <ClCompile Include="game\input\Keyboard.cpp" />
     <ClCompile Include="game\io\File.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />

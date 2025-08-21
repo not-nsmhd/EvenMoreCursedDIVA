@@ -77,7 +77,7 @@ namespace Starshine::Testing
 			VS_InvViewportSize = testShader->GetVariableIndex("InvViewportSize");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
 
-			testTexture = renderer->LoadTexture("diva/sprites/test.png");
+			testTexture = renderer->LoadTexture("diva/sprites/test.png", false, true);
 
 			return true;
 		}

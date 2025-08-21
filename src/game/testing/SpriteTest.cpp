@@ -20,9 +20,11 @@ namespace Starshine::Testing
 		Renderer* BaseRenderer = nullptr;
 		Texture* TestTexture = nullptr;
 
-		SpriteRenderer* SpriteRenderer = nullptr;
+		Shader* CheckeboardShader = nullptr;
+		ShaderVariableIndex Shader_CheckerboardSize = InvalidShaderVariable;
 
-		float Rotation = 0.0f;
+		SpriteRenderer* SpriteRenderer = nullptr;
+		float DrawTime = 0.0f;
 
 		bool Initialize()
 		{
@@ -34,7 +36,9 @@ namespace Starshine::Testing
 			BaseRenderer = Renderer::GetInstance();
 			SpriteRenderer = new Render2D::SpriteRenderer();
 
-			TestTexture = BaseRenderer->LoadTexture("diva/sprites/test2.png");
+			TestTexture = BaseRenderer->LoadTexture("diva/sprites/test2.png", false, true);
+			CheckeboardShader = BaseRenderer->LoadShaderFromXml("diva/shaders/SpriteCheckerboard.xml");
+			Shader_CheckerboardSize = CheckeboardShader->GetVariableIndex("CheckerboardSize");
 
 			return true;
 		}
@@ -42,34 +46,35 @@ namespace Starshine::Testing
 		void Destroy()
 		{
 			BaseRenderer->DeleteResource(TestTexture);
+			BaseRenderer->DeleteResource(CheckeboardShader);
 			SpriteRenderer->Destroy();
 		}
 
 		void Draw(f64 deltaTime_milliseconds)
 		{
-			float diff = deltaTime_milliseconds / 16.6667f;
-			Rotation += MathExtensions::ToRadians(diff);
+			//BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+			DrawTime += deltaTime_milliseconds / 1000.0f;
 
-			BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+			float checkerboardSize = SDL_sinf(DrawTime) / 2.0f + 0.5f;
+			checkerboardSize *= 10.0f;
+			checkerboardSize += 10.0f;
+			CheckeboardShader->SetVariableValue(Shader_CheckerboardSize, &checkerboardSize);
 
-			vec2 basePos = {};
-			float radians = Rotation;
+			SpriteRenderer->SetSpritePosition(vec2(0.0f, 0.0f));
+			SpriteRenderer->SetSpriteScale(vec2(1280.0f, 720.0f));
+			SpriteRenderer->SetSpriteOrigin(vec2(0.0f, 0.0f));
+			SpriteRenderer->SetSpriteColor(Color(64, 64, 64, 255));
+			SpriteRenderer->PushSprite(nullptr);
 
-			for (size_t i = 0; i < 4; i++)
-			{
-				basePos.x = SDL_cosf(radians) * 132.0f;
-				basePos.y = SDL_sinf(radians) * 132.0f;
-
-				SpriteRenderer->SetSpritePosition(vec2(640.0f + basePos.x, 360.0f + basePos.y));
-				SpriteRenderer->SetSpriteScale(vec2(128.0f, 128.0f));
-				SpriteRenderer->SetSpriteOrigin(vec2(64.0f, 64.0f));
-				SpriteRenderer->PushSprite(TestTexture);
-
-				radians += MathExtensions::TwoPi / 4.0f;
-			}
-
-			SpriteRenderer->SetBlendMode(BlendMode::Add);
 			SpriteRenderer->RenderSprites(nullptr);
+
+			SpriteRenderer->SetSpritePosition(vec2(0.0f, 0.0f));
+			SpriteRenderer->SetSpriteScale(vec2(1280.0f, 720.0f));
+			SpriteRenderer->SetSpriteOrigin(vec2(0.0f, 0.0f));
+			SpriteRenderer->SetSpriteColor(Color(92, 92, 92, 255));
+			SpriteRenderer->PushSprite(nullptr);
+
+			SpriteRenderer->RenderSprites(CheckeboardShader);
 
 			BaseRenderer->SwapBuffers();
 		}
