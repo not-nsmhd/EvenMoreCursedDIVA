@@ -2,6 +2,7 @@
 #include "common/rect.h"
 #include "common/color.h"
 #include "gfx/Renderer.h"
+#include "FontRenderer.h"
 
 namespace Starshine::GFX::Render2D
 {
@@ -45,6 +46,10 @@ namespace Starshine::GFX::Render2D
 		void PushSprite(Texture* texture);
 
 		void RenderSprites(Shader* shader);
+
+	public:
+		FontRenderer& Font();
+
 	private:
 		struct Impl;
 		Impl* impl = nullptr;

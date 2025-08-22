@@ -58,6 +58,12 @@
     <ClCompile Include="game\input\Keyboard.cpp">
       <Filter>src\game\input</Filter>
     </ClCompile>
+    <ClCompile Include="game\gfx\Render2D\Font.cpp">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Render2D\FontRenderer.cpp">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -143,6 +149,12 @@
     </ClInclude>
     <ClInclude Include="game\input\Keyboard.h">
       <Filter>src\game\input</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Render2D\Font.h">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Render2D\FontRenderer.h">
+      <Filter>src\game\gfx\Render2D</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -136,6 +136,8 @@
     <ClInclude Include="game\gfx\Core\IBackend.h" />
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLBackend.h" />
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLVertexDesc.h" />
+    <ClInclude Include="game\gfx\Render2D\Font.h" />
+    <ClInclude Include="game\gfx\Render2D\FontRenderer.h" />
     <ClInclude Include="game\gfx\Render2D\SpriteRenderer.h" />
     <ClInclude Include="game\gfx\Renderer.h" />
     <ClInclude Include="game\gfx\Resource.h" />
@@ -161,6 +163,8 @@
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp" />
     <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp" />
+    <ClCompile Include="game\gfx\Render2D\Font.cpp" />
+    <ClCompile Include="game\gfx\Render2D\FontRenderer.cpp" />
     <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp" />
     <ClCompile Include="game\input\Keyboard.cpp" />

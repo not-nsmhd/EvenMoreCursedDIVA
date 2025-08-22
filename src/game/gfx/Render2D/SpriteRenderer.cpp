@@ -80,6 +80,8 @@ namespace Starshine::GFX::Render2D
 	{
 		Renderer* BaseRenderer = nullptr;
 
+		FontRenderer FontRenderer;
+
 		struct
 		{
 			VertexBuffer* VertexBuffer = nullptr;
@@ -114,7 +116,7 @@ namespace Starshine::GFX::Render2D
 		SpriteList CurrentList{};
 
 	public:
-		Impl()
+		Impl(SpriteRenderer& parent) : FontRenderer(parent)
 		{
 			BaseRenderer = Renderer::GetInstance();
 
@@ -340,7 +342,7 @@ namespace Starshine::GFX::Render2D
 		}
 	};
 
-	SpriteRenderer::SpriteRenderer() : impl(new Impl())
+	SpriteRenderer::SpriteRenderer() : impl(new Impl(*this))
 	{
 	}
 
@@ -441,5 +443,10 @@ namespace Starshine::GFX::Render2D
 	void SpriteRenderer::RenderSprites(Shader* shader)
 	{
 		impl->RenderSprites(shader);
+	}
+
+	FontRenderer& SpriteRenderer::Font()
+	{
+		return impl->FontRenderer;
 	}
 };

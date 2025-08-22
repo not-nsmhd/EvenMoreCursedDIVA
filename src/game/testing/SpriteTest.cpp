@@ -13,7 +13,10 @@ namespace Starshine::Testing
 	using namespace Starshine::GFX::Render2D;
 	using namespace Starshine::IO;
 	using namespace Common;
+	using std::string;
 	using std::string_view;
+
+	constexpr const char* TestString = "The quick brown fox jumps over a lazy dog\n0123456789";
 
 	struct SpriteTest::Impl
 	{
@@ -22,6 +25,8 @@ namespace Starshine::Testing
 
 		Shader* CheckeboardShader = nullptr;
 		ShaderVariableIndex Shader_CheckerboardSize = InvalidShaderVariable;
+
+		Font TestFont;
 
 		SpriteRenderer* SpriteRenderer = nullptr;
 		float DrawTime = 0.0f;
@@ -40,11 +45,14 @@ namespace Starshine::Testing
 			CheckeboardShader = BaseRenderer->LoadShaderFromXml("diva/shaders/SpriteCheckerboard.xml");
 			Shader_CheckerboardSize = CheckeboardShader->GetVariableIndex("CheckerboardSize");
 
+			TestFont.ReadBMFont("diva/fonts/debug.fnt");
+
 			return true;
 		}
 
 		void Destroy()
 		{
+			TestFont.Destroy();
 			BaseRenderer->DeleteResource(TestTexture);
 			BaseRenderer->DeleteResource(CheckeboardShader);
 			SpriteRenderer->Destroy();
@@ -52,7 +60,7 @@ namespace Starshine::Testing
 
 		void Draw(f64 deltaTime_milliseconds)
 		{
-			//BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
+			BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
 			DrawTime += deltaTime_milliseconds / 1000.0f;
 
 			float checkerboardSize = SDL_sinf(DrawTime) / 2.0f + 0.5f;
@@ -75,6 +83,9 @@ namespace Starshine::Testing
 			SpriteRenderer->PushSprite(nullptr);
 
 			SpriteRenderer->RenderSprites(CheckeboardShader);
+
+			SpriteRenderer->Font().PushString(TestFont, TestString, vec2(0.0f), vec2(1.0f), DefaultColors::White);
+			SpriteRenderer->RenderSprites(nullptr);
 
 			BaseRenderer->SwapBuffers();
 		}

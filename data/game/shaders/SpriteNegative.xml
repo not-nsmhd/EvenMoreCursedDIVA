@@ -1,6 +1,0 @@
-<Shader>
-	<Files Backend="OpenGL_ARB">
-		<Vertex>opengl/VS_SpriteDefault.vp</Vertex>
-		<Fragment>opengl/FS_SpriteNegative.fp</Fragment>
-	</Files>
-</Shader>
