@@ -4,6 +4,14 @@
 
 namespace Starshine::Input
 {
+	constexpr SDL_Keycode UnboundKey = SDLK_UNKNOWN;
+
+	struct KeyBind
+	{
+		SDL_Keycode Primary{ UnboundKey };
+		SDL_Keycode Secondary{ UnboundKey };
+	};
+
 	class Keyboard : public NonCopyable
 	{
 	public:
@@ -21,28 +29,12 @@ namespace Starshine::Input
 		static bool IsKeyUp(SDL_Keycode key);
 		static bool IsKeyTapped(SDL_Keycode key);
 		static bool IsKeyReleased(SDL_Keycode key);
+
+		static bool IsAnyDown(const KeyBind& keybind, bool* primary, bool* secondary);
+		static bool IsAnyTapped(const KeyBind& keybind, bool* primary, bool* secondary);
+		static bool IsAnyReleased(const KeyBind& keybind, bool* primary, bool* secondary);
 	private:
 		struct Impl;
 		Impl* impl = nullptr;
 	};
-
-	/*class KeyBind
-	{
-	public:
-		KeyBind(Keyboard* keyboard, SDL_Scancode primary, SDL_Scancode alternative);
-		KeyBind(KeyBind& other) = delete;
-		void operator=(const KeyBind&) = delete;
-
-		SDL_Scancode PrimaryKey;
-		SDL_Scancode AlternativeKey;
-
-		bool IsDown(bool* primary, bool* alternative) const;
-		bool IsUp(bool* primary, bool* alternative) const;
-		bool IsTapped(bool* primary, bool* alternative) const;
-		bool IsReleased(bool* primary, bool* alternative) const;
-	public:
-		static constexpr SDL_Scancode UnsetScancode = SDL_SCANCODE_UNKNOWN;
-	private:
-		Keyboard* keyboard = nullptr;
-	};*/
 }

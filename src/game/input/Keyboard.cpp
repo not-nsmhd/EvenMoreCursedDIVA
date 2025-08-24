@@ -26,24 +26,44 @@ namespace Starshine::Input
 
 		bool IsKeyDown(SDL_Keycode key)
 		{
+			if (key == UnboundKey)
+			{
+				return false;
+			}
+
 			SDL_Scancode scancode = SDL_GetScancodeFromKey(key);
 			return State.CurrentKeyState[scancode] == true;
 		}
 
 		bool IsKeyUp(SDL_Keycode key)
 		{
+			if (key == UnboundKey)
+			{
+				return false;
+			}
+
 			SDL_Scancode scancode = SDL_GetScancodeFromKey(key);
 			return State.CurrentKeyState[scancode] == false;
 		}
 
 		bool IsKeyTapped(SDL_Keycode key)
 		{
+			if (key == UnboundKey)
+			{
+				return false;
+			}
+
 			SDL_Scancode scancode = SDL_GetScancodeFromKey(key);
 			return (State.CurrentKeyState[scancode] == true) && (State.PreviousKeyState[scancode] == false);
 		}
 
 		bool IsKeyReleased(SDL_Keycode key)
 		{
+			if (key == UnboundKey)
+			{
+				return false;
+			}
+
 			SDL_Scancode scancode = SDL_GetScancodeFromKey(key);
 			return (State.CurrentKeyState[scancode] == false) && (State.PreviousKeyState[scancode] == true);
 		}
@@ -93,5 +113,59 @@ namespace Starshine::Input
 	bool Keyboard::IsKeyReleased(SDL_Keycode key)
 	{
 		return GlobalInstance->impl->IsKeyReleased(key);
+	}
+
+	bool Keyboard::IsAnyDown(const KeyBind& keybind, bool* primary, bool* secondary)
+	{
+		bool primKey = IsKeyDown(keybind.Primary);
+		bool secondKey = IsKeyDown(keybind.Secondary);
+
+		if (primary != nullptr)
+		{
+			*primary = primKey;
+		}
+
+		if (secondary != nullptr)
+		{
+			*secondary = secondKey;
+		}
+
+		return primKey || secondKey;
+	}
+
+	bool Keyboard::IsAnyTapped(const KeyBind& keybind, bool* primary, bool* secondary)
+	{
+		bool primKey = IsKeyTapped(keybind.Primary);
+		bool secondKey = IsKeyTapped(keybind.Secondary);
+
+		if (primary != nullptr)
+		{
+			*primary = primKey;
+		}
+
+		if (secondary != nullptr)
+		{
+			*secondary = secondKey;
+		}
+
+		return primKey || secondKey;
+	}
+
+	bool Keyboard::IsAnyReleased(const KeyBind& keybind, bool* primary, bool* secondary)
+	{
+		bool primKey = IsKeyReleased(keybind.Primary);
+		bool secondKey = IsKeyReleased(keybind.Secondary);
+
+		if (primary != nullptr)
+		{
+			*primary = primKey;
+		}
+
+		if (secondary != nullptr)
+		{
+			*secondary = secondKey;
+		}
+
+		return primKey || secondKey;
 	}
 }
