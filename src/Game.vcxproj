@@ -123,6 +123,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="game\audio\AudioEngine.h" />
     <ClInclude Include="game\build\build_info.h" />
     <ClInclude Include="game\build\build_info_dummy.h" />
     <ClInclude Include="game\common\color.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="game\io\File.h" />
     <ClInclude Include="game\io\Xml.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
+    <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
     <ClInclude Include="game\testing\SpriteTest.h" />
     <ClInclude Include="game\util\logging.h" />
@@ -158,6 +160,7 @@
     <ClCompile Include="..\lib\fmt\src\format.cc" />
     <ClCompile Include="..\lib\glad\src\glad.c" />
     <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp" />
+    <ClCompile Include="game\audio\AudioEngine.cpp" />
     <ClCompile Include="game\common\color.cpp" />
     <ClCompile Include="game\common\math_ext.cpp" />
     <ClCompile Include="game\game.cpp" />
@@ -172,6 +175,7 @@
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />
     <ClCompile Include="game\stb\stb_image.cpp" />
+    <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
     <ClCompile Include="game\testing\SpriteTest.cpp" />
     <ClCompile Include="game\util\logging.cpp" />

@@ -64,6 +64,12 @@
     <ClCompile Include="game\gfx\Render2D\FontRenderer.cpp">
       <Filter>src\game\gfx\Render2D</Filter>
     </ClCompile>
+    <ClCompile Include="game\testing\AudioTest.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\AudioEngine.cpp">
+      <Filter>src\game\audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -156,6 +162,12 @@
     <ClInclude Include="game\gfx\Render2D\FontRenderer.h">
       <Filter>src\game\gfx\Render2D</Filter>
     </ClInclude>
+    <ClInclude Include="game\audio\AudioEngine.h">
+      <Filter>src\game\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\AudioTest.h">
+      <Filter>src\game\testing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -181,9 +193,6 @@
     </Filter>
     <Filter Include="src\game\common">
       <UniqueIdentifier>{ea77930c-7d88-4cd0-969f-005c29fe4266}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\game\dev">
-      <UniqueIdentifier>{54fc8fc1-889d-4ee7-a8d4-bac40d058373}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\gfx">
       <UniqueIdentifier>{3a34a654-14b2-434c-abeb-905b5fadb08f}</UniqueIdentifier>

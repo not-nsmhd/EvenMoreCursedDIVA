@@ -4,13 +4,15 @@
 #include <SDL2/SDL.h>
 #include "gfx/Renderer.h"
 #include "input/Keyboard.h"
-#include "testing/SpriteTest.h"
+#include "audio/AudioEngine.h"
+#include "testing/AudioTest.h"
 
 namespace Starshine
 {
 	using namespace Logging;
 	using namespace GFX;
 	using namespace Input;
+	using namespace Audio;
 
 	using Common::Color;
 
@@ -94,8 +96,9 @@ namespace Starshine
 			GFX.Renderer->Initialize(GameWindow);
 
 			Keyboard::Initialize();
+			AudioEngine::CreateInstance();
 
-			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
+			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::AudioTest>();
 			SetCurrentGameStateInstance(testState);
 
 			return true;
@@ -111,6 +114,7 @@ namespace Starshine
 				LogInfo(LogName, "Current state destroyed");
 			}
 
+			AudioEngine::DeleteInstance();
 			Keyboard::Destroy();
 
 			GFX.Renderer->Destroy();
