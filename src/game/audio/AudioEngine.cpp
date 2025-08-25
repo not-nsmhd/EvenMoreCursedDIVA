@@ -1,4 +1,5 @@
 #include "AudioEngine.h"
+#include "ChannelMixer.h"
 #include <FAudio.h>
 #include <SDL2/SDL.h>
 #include <array>
@@ -15,6 +16,8 @@ namespace Starshine::Audio
 	constexpr size_t DefaultBufferedSampleAmount = 2048;
 
 	AudioEngine* GlobalInstance = nullptr;
+	ChannelMixer ChannelMixer;
+	array<i16, DefaultBufferedSampleAmount> TempSampleBuffer;
 
 	enum VoiceStateFlags : u16
 	{
@@ -33,7 +36,7 @@ namespace Starshine::Audio
 		SourceHandle Source = InvalidSourceHandle;
 		size_t SamplePosition = 0;
 
-		i16 BufferData[DefaultBufferedSampleAmount] = {};
+		array<i16, DefaultBufferedSampleAmount> SampleBuffer{};
 
 		void SubmitNextBuffer(size_t sampleCount, bool lastBuffer)
 		{
@@ -50,7 +53,7 @@ namespace Starshine::Audio
 
 			FAudioBuffer buffer = {};
 
-			buffer.pAudioData = reinterpret_cast<u8*>(BufferData);
+			buffer.pAudioData = reinterpret_cast<u8*>(SampleBuffer.data());
 			buffer.AudioBytes = static_cast<u32>(sampleCount * sizeof(i16));
 			buffer.pContext = this;
 
@@ -205,16 +208,21 @@ namespace Starshine::Audio
 		}
 
 		ISampleProvider* source = GlobalInstance->GetSource(voiceCtx->Source);
+		u32 srcChannels = source->GetChannelCount();
 
-		size_t decodedSamples = source->GetSamples(voiceCtx->BufferData, voiceCtx->SamplePosition, DefaultBufferedSampleAmount);
+		size_t samplePosition = voiceCtx->SamplePosition / (AudioEngine::DefaultChannels / srcChannels);
+		size_t samplesToCopy = DefaultBufferedSampleAmount / (AudioEngine::DefaultChannels / srcChannels);
+		size_t decodedSamples = source->GetSamples(TempSampleBuffer.data(), samplePosition, samplesToCopy);
+		size_t mixedSamples = ChannelMixer.MixChannels(srcChannels, TempSampleBuffer.data(), decodedSamples, voiceCtx->SampleBuffer.data(), AudioEngine::DefaultChannels);
+
 		bool lastBuffer = false;
 
-		if (voiceCtx->SamplePosition + decodedSamples >= source->GetSampleCount() || decodedSamples < DefaultBufferedSampleAmount)
+		if (samplePosition + decodedSamples >= source->GetSampleCount() || decodedSamples < samplesToCopy)
 		{
 			lastBuffer = true;
 		}
 
-		voiceCtx->SubmitNextBuffer(decodedSamples, lastBuffer);
+		voiceCtx->SubmitNextBuffer(mixedSamples, lastBuffer);
 	}
 #pragma endregion
 
@@ -265,6 +273,8 @@ namespace Starshine::Audio
 			{
 				if (voiceCtx.VoiceFlags & VoiceState_RemoveOnEnd)
 				{
+					//LogInfo(LogName, "Voice %lld has been removed after reaching its end", i);
+
 					voiceCtx.Source = InvalidSourceHandle;
 					voiceCtx.SamplePosition = 0;
 					voiceCtx.VoiceFlags = VoiceState_Free;

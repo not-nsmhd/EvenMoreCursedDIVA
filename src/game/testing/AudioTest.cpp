@@ -43,7 +43,7 @@ namespace Starshine::Testing
 
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
-			SDL_RWops* testWavFile = SDL_RWFromFile("diva/sounds/test_wav.wav", "rb");
+			SDL_RWops* testWavFile = SDL_RWFromFile("diva/sounds/test_wav_mono.wav", "rb");
 			SDL_AudioSpec wavSpec = {};
 
 			u8* wavData = nullptr;

@@ -73,6 +73,9 @@
     <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp">
       <Filter>src\game\audio\SampleProvider</Filter>
     </ClCompile>
+    <ClCompile Include="game\audio\ChannelMixer.cpp">
+      <Filter>src\game\audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -176,6 +179,9 @@
     </ClInclude>
     <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h">
       <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\ChannelMixer.h">
+      <Filter>src\game\audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
