@@ -4,6 +4,7 @@
 #include "gfx/Renderer.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "audio/AudioEngine.h"
+#include "audio/SampleProvider/MemorySampleProvider.h"
 #include "input/Keyboard.h"
 #include "io/File.h"
 
@@ -26,8 +27,7 @@ namespace Starshine::Testing
 		SpriteRenderer* SpriteRenderer = nullptr;
 		Font TestFont;
 
-		i16* audioData = nullptr;
-		size_t audioDataSize = 0;
+		MemorySampleProvider sampleProvider;
 		SourceHandle source = InvalidSourceHandle;
 
 		bool Initialize()
@@ -50,13 +50,17 @@ namespace Starshine::Testing
 			u32 wavSize = 0;
 
 			SDL_LoadWAV_RW(testWavFile, 1, &wavSpec, &wavData, &wavSize);
-			audioDataSize = static_cast<size_t>(wavSize) / sizeof(i16);
-			audioData = new i16[audioDataSize];
-			SDL_memcpy(audioData, wavData, audioDataSize * 2);
+
+			sampleProvider.sampleCount = static_cast<size_t>(wavSize) / sizeof(i16);
+			sampleProvider.samples = new i16[sampleProvider.sampleCount];
+			sampleProvider.channelCount = wavSpec.channels;
+			sampleProvider.sampleRate = wavSpec.freq;
+
+			SDL_memcpy(sampleProvider.samples, wavData, sampleProvider.sampleCount * sizeof(i16));
 
 			SDL_FreeWAV(wavData);
 
-			source = AudioEngine->RegisterSource(audioData, audioDataSize);
+			source = AudioEngine->RegisterSource(&sampleProvider);
 
 			return true;
 		}
@@ -65,7 +69,7 @@ namespace Starshine::Testing
 		{
 			AudioEngine->FreeSource(source);
 
-			delete[] audioData;
+			sampleProvider.FreeSamples();
 			TestFont.Destroy();
 			SpriteRenderer->Destroy();
 		}

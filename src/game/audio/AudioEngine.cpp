@@ -16,23 +16,6 @@ namespace Starshine::Audio
 
 	AudioEngine* GlobalInstance = nullptr;
 
-	struct SampleProvider
-	{
-		i16* Samples = nullptr;
-		size_t SampleAmount = 0;
-
-		size_t GetSamples(i16* bufferToFill, size_t sampleOffset, size_t sampleCount)
-		{
-			assert(bufferToFill != nullptr);
-
-			void* copySource = Samples + sampleOffset;
-			size_t copyAmount = std::min(SampleAmount - sampleOffset, sampleCount);
-
-			SDL_memcpy(bufferToFill, copySource, copyAmount * sizeof(i16));
-			return copyAmount;
-		}
-	};
-
 	enum VoiceStateFlags : u16
 	{
 		VoiceState_Free = 0,
@@ -113,7 +96,17 @@ namespace Starshine::Audio
 		} Backend;
 
 		array<VoiceContext, MaxVoices> VoiceContexts;
-		vector<SampleProvider> RegisteredSources;
+
+		struct AudioData
+		{
+			AudioData() = default;
+			~AudioData() = default;
+
+			ISampleProvider* SampleProvider = nullptr;
+			std::string Name;
+		};
+
+		vector<AudioData> RegisteredSources;
 
 		Impl()
 		{
@@ -189,7 +182,7 @@ namespace Starshine::Audio
 			return &voiceCtx;
 		}
 
-		SampleProvider* GetSource(SourceHandle handle)
+		ISampleProvider* GetSource(SourceHandle handle)
 		{
 			if (handle == InvalidSourceHandle || handle >= RegisteredSources.size())
 			{
@@ -197,7 +190,7 @@ namespace Starshine::Audio
 			}
 
 			size_t index = static_cast<size_t>(handle);
-			return &RegisteredSources[index];
+			return RegisteredSources[index].SampleProvider;
 		}
 	};
 #pragma endregion
@@ -211,12 +204,12 @@ namespace Starshine::Audio
 			return;
 		}
 
-		SampleProvider* source = GlobalInstance->GetSource(voiceCtx->Source);
+		ISampleProvider* source = GlobalInstance->GetSource(voiceCtx->Source);
 
 		size_t decodedSamples = source->GetSamples(voiceCtx->BufferData, voiceCtx->SamplePosition, DefaultBufferedSampleAmount);
 		bool lastBuffer = false;
 
-		if (voiceCtx->SamplePosition + decodedSamples >= source->SampleAmount)
+		if (voiceCtx->SamplePosition + decodedSamples >= source->GetSampleCount() || decodedSamples < DefaultBufferedSampleAmount)
 		{
 			lastBuffer = true;
 		}
@@ -260,8 +253,8 @@ namespace Starshine::Audio
 				continue;
 			}
 
-			SampleProvider* voiceSource = impl->GetSource(voiceCtx.Source);
-			bool hasReachedEnd = (voiceCtx.SamplePosition >= voiceSource->SampleAmount);
+			ISampleProvider* voiceSource = impl->GetSource(voiceCtx.Source);
+			bool hasReachedEnd = (voiceCtx.SamplePosition >= voiceSource->GetSampleCount());
 
 			if (voiceCtx.VoiceFlags & VoiceState_Playing)
 			{
@@ -281,29 +274,28 @@ namespace Starshine::Audio
 		}
 	}
 
-	SourceHandle AudioEngine::RegisterSource(i16* data, size_t size)
+	SourceHandle AudioEngine::RegisterSource(ISampleProvider* sampleProvider)
 	{
-		if (data == nullptr || size == 0)
+		if (sampleProvider == nullptr)
 		{
 			return InvalidSourceHandle;
 		}
 
 		for (size_t i = 0; i < impl->RegisteredSources.size(); i++)
 		{
-			auto& sampleProvider = impl->RegisteredSources[i];
+			auto& source = impl->RegisteredSources[i];
 
-			if (sampleProvider.Samples != nullptr)
+			if (source.SampleProvider != nullptr)
 			{
 				continue;
 			}
 
-			sampleProvider.Samples = data;
-			sampleProvider.SampleAmount = size;
+			source.SampleProvider = sampleProvider;
 
 			return static_cast<SourceHandle>(i);
 		}
 
-		impl->RegisteredSources.push_back(SampleProvider { data, size });
+		impl->RegisteredSources.push_back(Impl::AudioData { sampleProvider, "" });
 		return static_cast<SourceHandle>(impl->RegisteredSources.size() - 1);
 	}
 
@@ -315,8 +307,7 @@ namespace Starshine::Audio
 		}
 
 		auto& sampleProvider = impl->RegisteredSources[handle];
-		sampleProvider.Samples = nullptr;
-		sampleProvider.SampleAmount = 0;
+		sampleProvider.SampleProvider = nullptr;
 	}
 
 	VoiceHandle AudioEngine::AllocateVoice(SourceHandle source)
@@ -396,7 +387,7 @@ namespace Starshine::Audio
 		}
 	}
 
-	SampleProvider* AudioEngine::GetSource(SourceHandle handle)
+	ISampleProvider* AudioEngine::GetSource(SourceHandle handle)
 	{
 		return impl->GetSource(handle);
 	}

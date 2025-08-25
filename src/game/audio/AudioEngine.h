@@ -1,5 +1,6 @@
 #pragma once
 #include "common/types.h"
+#include "SampleProvider/ISampleProvider.h"
 
 namespace Starshine::Audio
 {
@@ -12,8 +13,6 @@ namespace Starshine::Audio
 	using SourceHandle = u16;
 	constexpr VoiceHandle InvalidVoiceHandle = 0xFFFF;
 	constexpr SourceHandle InvalidSourceHandle = 0xFFFF;
-
-	struct SampleProvider;
 
 	struct Voice
 	{
@@ -70,7 +69,7 @@ namespace Starshine::Audio
 		// NOTE: Registers a source consisting of raw 16-bit PCM data in a WAV file
 		// 'data' is the array of PCM samples. Pointer must be valid until 'FreeSource' is called
 		// 'size' is the amount of samples, not bytes
-		SourceHandle RegisterSource(i16* data, size_t size);
+		SourceHandle RegisterSource(ISampleProvider* sampleProvider);
 		void FreeSource(SourceHandle handle);
 
 		VoiceHandle AllocateVoice(SourceHandle source);
@@ -79,7 +78,7 @@ namespace Starshine::Audio
 		void PlayOneShotSound(SourceHandle source);
 
 	public:
-		SampleProvider* GetSource(SourceHandle handle);
+		ISampleProvider* GetSource(SourceHandle handle);
 
 	private:
 		struct Impl;

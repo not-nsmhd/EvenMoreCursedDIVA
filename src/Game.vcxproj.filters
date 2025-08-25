@@ -70,6 +70,9 @@
     <ClCompile Include="game\audio\AudioEngine.cpp">
       <Filter>src\game\audio</Filter>
     </ClCompile>
+    <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -168,6 +171,12 @@
     <ClInclude Include="game\testing\AudioTest.h">
       <Filter>src\game\testing</Filter>
     </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -241,6 +250,9 @@
     </Filter>
     <Filter Include="src\game\gfx\Render2D">
       <UniqueIdentifier>{0d1f7f42-8796-4f71-b429-5d60570b932a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\audio\SampleProvider">
+      <UniqueIdentifier>{21a4185e-1d0d-4fb4-87aa-eb57aff30a1f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
