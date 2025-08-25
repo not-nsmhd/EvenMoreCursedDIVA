@@ -29,7 +29,6 @@ namespace Starshine::Testing
 		i16* audioData = nullptr;
 		size_t audioDataSize = 0;
 		SourceHandle source = InvalidSourceHandle;
-		Voice testVoice = {};
 
 		bool Initialize()
 		{
@@ -58,15 +57,12 @@ namespace Starshine::Testing
 			SDL_FreeWAV(wavData);
 
 			source = AudioEngine->RegisterSource(audioData, audioDataSize);
-			VoiceHandle voiceHandle = AudioEngine->AllocateVoice(source);
-			testVoice = Voice(voiceHandle);
 
 			return true;
 		}
 
 		void Destroy()
 		{
-			AudioEngine->FreeVoice(testVoice.GetHandle());
 			AudioEngine->FreeSource(source);
 
 			delete[] audioData;
@@ -78,7 +74,7 @@ namespace Starshine::Testing
 		{
 			if (Keyboard::IsKeyTapped(SDLK_SPACE))
 			{
-				testVoice.SetIsPlaying(true);
+				AudioEngine->PlayOneShotSound(source);
 			}
 		}
 
@@ -86,11 +82,12 @@ namespace Starshine::Testing
 		{
 			BaseRenderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
 
-			char debug_voicePos[64]{};
-			SDL_snprintf(debug_voicePos, sizeof(debug_voicePos) - 1, "\nVoice Position: %lld/%lld", testVoice.GetSamplePosition(), audioDataSize);
+			//char debug_voicePos[64]{};
+			//SDL_snprintf(debug_voicePos, sizeof(debug_voicePos) - 1, "\nVoice Position: %lld/%lld", testVoice.GetSamplePosition(), audioDataSize);
 
 			SpriteRenderer->Font().PushString(TestFont, "Audio Test", vec2(0.0f), vec2(1.0f), DefaultColors::White);
-			SpriteRenderer->Font().PushString(TestFont, debug_voicePos, vec2(0.0f), vec2(1.0f), DefaultColors::White);
+			SpriteRenderer->Font().PushString(TestFont, "\nPress space to play a sound", vec2(0.0f), vec2(1.0f), DefaultColors::White);
+			//SpriteRenderer->Font().PushString(TestFont, debug_voicePos, vec2(0.0f), vec2(1.0f), DefaultColors::White);
 			SpriteRenderer->RenderSprites(nullptr);
 
 			BaseRenderer->SwapBuffers();

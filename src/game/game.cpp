@@ -95,8 +95,8 @@ namespace Starshine
 			GFX.Renderer = Renderer::GetInstance();
 			GFX.Renderer->Initialize(GameWindow);
 
-			Keyboard::Initialize();
 			AudioEngine::CreateInstance();
+			Keyboard::Initialize();
 
 			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::AudioTest>();
 			SetCurrentGameStateInstance(testState);
@@ -190,6 +190,7 @@ namespace Starshine
 					CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
 				}
 
+				AudioEngine::GetInstance()->UpdateVoices();
 				Keyboard::NextFrame();
 			}
 

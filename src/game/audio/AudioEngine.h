@@ -64,6 +64,9 @@ namespace Starshine::Audio
 		static AudioEngine* GetInstance();
 
 	public:
+		void UpdateVoices();
+
+	public:
 		// NOTE: Registers a source consisting of raw 16-bit PCM data in a WAV file
 		// 'data' is the array of PCM samples. Pointer must be valid until 'FreeSource' is called
 		// 'size' is the amount of samples, not bytes
@@ -72,6 +75,8 @@ namespace Starshine::Audio
 
 		VoiceHandle AllocateVoice(SourceHandle source);
 		void FreeVoice(VoiceHandle voice);
+
+		void PlayOneShotSound(SourceHandle source);
 
 	public:
 		SampleProvider* GetSource(SourceHandle handle);

@@ -37,7 +37,8 @@ namespace Starshine::Audio
 	{
 		VoiceState_Free = 0,
 		VoiceState_Allocated = 1 << 0,
-		VoiceState_Playing = 1 << 1
+		VoiceState_Playing = 1 << 1,
+		VoiceState_RemoveOnEnd = 1 << 2,
 	};
 
 	struct VoiceContext
@@ -56,9 +57,9 @@ namespace Starshine::Audio
 			if (StopOnNextBuffer)
 			{
 				VoiceFlags &= ~VoiceState_Playing;
-				SamplePosition = 0;
 
 				FAudioSourceVoice_Stop(SourceVoice, 0, FAUDIO_COMMIT_NOW);
+				FAudioSourceVoice_FlushSourceBuffers(SourceVoice);
 
 				StopOnNextBuffer = false;
 				return;
@@ -150,6 +151,14 @@ namespace Starshine::Audio
 
 		void Destroy()
 		{
+			for (size_t i = 0; i < VoiceContexts.size(); i++)
+			{
+				if (VoiceContexts[i].SourceVoice != nullptr)
+				{
+					FAudioVoice_DestroyVoice(VoiceContexts[i].SourceVoice);
+				}
+			}
+
 			FAudioVoice_DestroyVoice(Backend.MasteringVoice);
 			FAudio_Release(Backend.FAudio);
 		}
@@ -241,6 +250,37 @@ namespace Starshine::Audio
 		return GlobalInstance;
 	}
 
+	void AudioEngine::UpdateVoices()
+	{
+		for (size_t i = 0; i < impl->VoiceContexts.size(); i++)
+		{
+			auto& voiceCtx = impl->VoiceContexts[i];
+			if (voiceCtx.VoiceFlags == VoiceState_Free)
+			{
+				continue;
+			}
+
+			SampleProvider* voiceSource = impl->GetSource(voiceCtx.Source);
+			bool hasReachedEnd = (voiceCtx.SamplePosition >= voiceSource->SampleAmount);
+
+			if (voiceCtx.VoiceFlags & VoiceState_Playing)
+			{
+				continue;
+			}
+
+			if (hasReachedEnd)
+			{
+				if (voiceCtx.VoiceFlags & VoiceState_RemoveOnEnd)
+				{
+					voiceCtx.Source = InvalidSourceHandle;
+					voiceCtx.SamplePosition = 0;
+					voiceCtx.VoiceFlags = VoiceState_Free;
+					continue;
+				}
+			}
+		}
+	}
+
 	SourceHandle AudioEngine::RegisterSource(i16* data, size_t size)
 	{
 		if (data == nullptr || size == 0)
@@ -289,16 +329,19 @@ namespace Starshine::Audio
 		for (size_t i = 0; i < impl->VoiceContexts.size(); i++)
 		{
 			auto& voice = impl->VoiceContexts[i];
-			if (voice.VoiceFlags != VoiceState_Free)
+			if (voice.VoiceFlags & VoiceState_Allocated)
 			{
 				continue;
 			}
 
+			voice.VoiceFlags = VoiceState_Allocated;
 			voice.Source = source;
 			voice.SamplePosition = 0;
-			voice.SourceVoice = impl->CreateFAudioVoice();
-
-			voice.VoiceFlags = VoiceState_Allocated;
+			
+			if (voice.SourceVoice == nullptr)
+			{
+				voice.SourceVoice = impl->CreateFAudioVoice();
+			}
 
 			LogInfo(LogName, "Voice %lld has been allocated", i);
 			return static_cast<VoiceHandle>(i);
@@ -317,12 +360,39 @@ namespace Starshine::Audio
 		VoiceContext* voiceCtx = impl->GetVoiceContext(handle);
 		if (voiceCtx != nullptr)
 		{
-			FAudioVoice_DestroyVoice(voiceCtx->SourceVoice);
-
 			voiceCtx->Source = InvalidSourceHandle;
 			voiceCtx->VoiceFlags = VoiceState_Free;
 
 			LogInfo(LogName, "Voice %lld has been freed", handle);
+		}
+	}
+
+	void AudioEngine::PlayOneShotSound(SourceHandle source)
+	{
+		if (source == InvalidSourceHandle)
+		{
+			return;
+		}
+
+		for (auto& voice : impl->VoiceContexts)
+		{
+			if (voice.VoiceFlags != VoiceState_Free)
+			{
+				continue;
+			}
+
+			voice.VoiceFlags = VoiceState_Allocated | VoiceState_Playing | VoiceState_RemoveOnEnd;
+			voice.Source = source;
+			if (voice.SourceVoice == nullptr)
+			{
+				voice.SourceVoice = impl->CreateFAudioVoice();
+			}
+			voice.SamplePosition = 0;
+
+			FAudioSourceVoice_Start(voice.SourceVoice, 0, FAUDIO_COMMIT_NOW);
+			VoiceCallbacks::OnBufferEnd(&voice);
+
+			return;
 		}
 	}
 
