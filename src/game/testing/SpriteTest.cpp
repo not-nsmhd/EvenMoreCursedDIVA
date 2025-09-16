@@ -3,6 +3,7 @@
 #include "common/math_ext.h"
 #include "gfx/Renderer.h"
 #include "gfx/Render2D/SpriteRenderer.h"
+#include "gfx/Render2D/SpriteSheet.h"
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -26,6 +27,7 @@ namespace Starshine::Testing
 		Shader* CheckeboardShader = nullptr;
 		ShaderVariableIndex Shader_CheckerboardSize = InvalidShaderVariable;
 
+		SpriteSheet TestSheet;
 		Font TestFont;
 
 		SpriteRenderer* SpriteRenderer = nullptr;
@@ -45,6 +47,7 @@ namespace Starshine::Testing
 			CheckeboardShader = BaseRenderer->LoadShaderFromXml("diva/shaders/SpriteCheckerboard.xml");
 			Shader_CheckerboardSize = CheckeboardShader->GetVariableIndex("CheckerboardSize");
 
+			TestSheet.ReadFromTextFile("diva/sprites/iconset_ps3");
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
 			return true;
@@ -52,6 +55,7 @@ namespace Starshine::Testing
 
 		void Destroy()
 		{
+			TestSheet.Destroy();
 			TestFont.Destroy();
 			BaseRenderer->DeleteResource(TestTexture);
 			BaseRenderer->DeleteResource(CheckeboardShader);
@@ -83,6 +87,9 @@ namespace Starshine::Testing
 			SpriteRenderer->PushSprite(nullptr);
 
 			SpriteRenderer->RenderSprites(CheckeboardShader);
+
+			SpriteRenderer->SpriteSheet().PushSprite(TestSheet, 4, vec2(640.0f, 360.0f), vec2(1.0f), DefaultColors::White);
+			SpriteRenderer->RenderSprites(nullptr);
 
 			SpriteRenderer->Font().PushString(TestFont, TestString, vec2(0.0f), vec2(1.0f), DefaultColors::White);
 			SpriteRenderer->RenderSprites(nullptr);

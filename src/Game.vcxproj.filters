@@ -85,6 +85,12 @@
     <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp">
       <Filter>src\game\audio\SampleProvider</Filter>
     </ClCompile>
+    <ClCompile Include="game\gfx\Render2D\SpriteSheet.cpp">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Render2D\SpriteSheetRenderer.cpp">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -203,6 +209,12 @@
     </ClInclude>
     <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h">
       <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Render2D\SpriteSheet.h">
+      <Filter>src\game\gfx\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Render2D\SpriteSheetRenderer.h">
+      <Filter>src\game\gfx\Render2D</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

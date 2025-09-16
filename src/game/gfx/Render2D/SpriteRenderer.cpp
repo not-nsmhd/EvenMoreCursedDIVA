@@ -80,6 +80,7 @@ namespace Starshine::GFX::Render2D
 	{
 		Renderer* BaseRenderer = nullptr;
 
+		SpriteSheetRenderer SpriteSheetRenderer;
 		FontRenderer FontRenderer;
 
 		struct
@@ -116,7 +117,7 @@ namespace Starshine::GFX::Render2D
 		SpriteList CurrentList{};
 
 	public:
-		Impl(SpriteRenderer& parent) : FontRenderer(parent)
+		Impl(SpriteRenderer& parent) : SpriteSheetRenderer(parent), FontRenderer(parent)
 		{
 			BaseRenderer = Renderer::GetInstance();
 
@@ -151,7 +152,7 @@ namespace Starshine::GFX::Render2D
 
 		void Internal_CreateIndexBuffer()
 		{
-			array<u16, MaxIndices> indexData;
+			array<u16, MaxIndices> indexData{};
 
 			// NOTE: Vertex order:
 			//		 [0] - Top left,  [1] - Bottom right,
@@ -360,17 +361,17 @@ namespace Starshine::GFX::Render2D
 		impl->ResetSprite();
 	}
 
-	void SpriteRenderer::SetSpritePosition(vec2& position)
+	void SpriteRenderer::SetSpritePosition(const vec2& position)
 	{
 		impl->CurrentSprite.Position = position;
 	}
 
-	void SpriteRenderer::SetSpriteScale(vec2& absScale)
+	void SpriteRenderer::SetSpriteScale(const vec2& absScale)
 	{
 		impl->CurrentSprite.Size = absScale;
 	}
 
-	void SpriteRenderer::SetSpriteOrigin(vec2& origin)
+	void SpriteRenderer::SetSpriteOrigin(const vec2& origin)
 	{
 		impl->CurrentSprite.Origin = origin;
 	}
@@ -381,12 +382,12 @@ namespace Starshine::GFX::Render2D
 		impl->CurrentSprite.RotationSin = SDL_sinf(radians);
 	}
 
-	void SpriteRenderer::SetSpriteSource(RectangleF& source)
+	void SpriteRenderer::SetSpriteSource(const RectangleF& source)
 	{
 		impl->CurrentSprite.SourceRect_TexSpace = source;
 	}
 
-	void SpriteRenderer::SetSpriteSource(const Texture* texture, RectangleF& absSource)
+	void SpriteRenderer::SetSpriteSource(const Texture* texture, const RectangleF& absSource)
 	{
 		u32 width = texture->GetWidth();
 		u32 height = texture->GetHeight();
@@ -406,7 +407,7 @@ namespace Starshine::GFX::Render2D
 		impl->CurrentSprite.FlipVertical = flipVertical;
 	}
 
-	void SpriteRenderer::SetSpriteColor(Color color)
+	void SpriteRenderer::SetSpriteColor(const Color& color)
 	{
 		impl->CurrentSprite.VertexColors.TopLeft = color;
 		impl->CurrentSprite.VertexColors.TopRight = color;
@@ -443,6 +444,11 @@ namespace Starshine::GFX::Render2D
 	void SpriteRenderer::RenderSprites(Shader* shader)
 	{
 		impl->RenderSprites(shader);
+	}
+
+	SpriteSheetRenderer& SpriteRenderer::SpriteSheet()
+	{
+		return impl->SpriteSheetRenderer;
 	}
 
 	FontRenderer& SpriteRenderer::Font()

@@ -147,6 +147,8 @@
     <ClInclude Include="game\gfx\Render2D\Font.h" />
     <ClInclude Include="game\gfx\Render2D\FontRenderer.h" />
     <ClInclude Include="game\gfx\Render2D\SpriteRenderer.h" />
+    <ClInclude Include="game\gfx\Render2D\SpriteSheet.h" />
+    <ClInclude Include="game\gfx\Render2D\SpriteSheetRenderer.h" />
     <ClInclude Include="game\gfx\Renderer.h" />
     <ClInclude Include="game\gfx\Resource.h" />
     <ClInclude Include="game\gfx\Shader.h" />
@@ -181,6 +183,8 @@
     <ClCompile Include="game\gfx\Render2D\Font.cpp" />
     <ClCompile Include="game\gfx\Render2D\FontRenderer.cpp" />
     <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp" />
+    <ClCompile Include="game\gfx\Render2D\SpriteSheet.cpp" />
+    <ClCompile Include="game\gfx\Render2D\SpriteSheetRenderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp" />
     <ClCompile Include="game\input\Keyboard.cpp" />
     <ClCompile Include="game\io\File.cpp" />

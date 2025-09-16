@@ -2,6 +2,7 @@
 #include "common/rect.h"
 #include "common/color.h"
 #include "gfx/Renderer.h"
+#include "SpriteSheetRenderer.h"
 #include "FontRenderer.h"
 
 namespace Starshine::GFX::Render2D
@@ -25,17 +26,17 @@ namespace Starshine::GFX::Render2D
 		void Destroy();
 
 		void ResetSprite();
-		void SetSpritePosition(vec2& position);
-		void SetSpriteScale(vec2& absScale);
-		void SetSpriteOrigin(vec2& origin);
+		void SetSpritePosition(const vec2& position);
+		void SetSpriteScale(const vec2& absScale);
+		void SetSpriteOrigin(const vec2& origin);
 		void SetSpriteRotation(float radians);
 
 		// NOTE: Source must be specified in texture space
-		void SetSpriteSource(Common::RectangleF& source);
-		void SetSpriteSource(const Texture* texture, Common::RectangleF& absSource);
+		void SetSpriteSource(const Common::RectangleF& source);
+		void SetSpriteSource(const Texture* texture, const Common::RectangleF& absSource);
 
 		void SetSpriteFlip(bool flipHorizontal, bool flipVertical);
-		void SetSpriteColor(Common::Color color);
+		void SetSpriteColor(const Common::Color& color);
 		
 		// NOTE: Coloring order: top-left, top-right, bottom-left, bottom-right
 		void SetSpriteColors(const Common::Color colors[4]);
@@ -48,6 +49,7 @@ namespace Starshine::GFX::Render2D
 		void RenderSprites(Shader* shader);
 
 	public:
+		SpriteSheetRenderer& SpriteSheet();
 		FontRenderer& Font();
 
 	private:

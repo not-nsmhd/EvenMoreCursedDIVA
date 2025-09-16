@@ -5,7 +5,7 @@
 #include "gfx/Renderer.h"
 #include "input/Keyboard.h"
 #include "audio/AudioEngine.h"
-#include "testing/AudioTest.h"
+#include "testing/SpriteTest.h"
 
 namespace Starshine
 {
@@ -102,7 +102,7 @@ namespace Starshine
 			AudioEngine::CreateInstance();
 			Keyboard::Initialize();
 
-			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::AudioTest>();
+			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
 			SetCurrentGameStateInstance(testState);
 
 			return true;
