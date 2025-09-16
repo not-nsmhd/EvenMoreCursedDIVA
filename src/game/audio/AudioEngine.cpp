@@ -1,5 +1,6 @@
 #include "AudioEngine.h"
 #include "ChannelMixer.h"
+#include "Decoder/DecoderFactory.h"
 #include <FAudio.h>
 #include <SDL2/SDL.h>
 #include <array>
@@ -16,7 +17,7 @@ namespace Starshine::Audio
 	constexpr size_t DefaultBufferedSampleAmount = 2048;
 
 	AudioEngine* GlobalInstance = nullptr;
-	ChannelMixer ChannelMixer;
+	ChannelMixer ChannelMixerInstance; // NOTE: named this way so that Visual Studio stops complaining (EVEN THOUGH IT COMPILES JUST FINE)
 	array<i16, DefaultBufferedSampleAmount> TempSampleBuffer;
 
 	enum VoiceStateFlags : u16
@@ -208,12 +209,23 @@ namespace Starshine::Audio
 		}
 
 		ISampleProvider* source = GlobalInstance->GetSource(voiceCtx->Source);
+		if (source == nullptr)
+		{
+			voiceCtx->SubmitNextBuffer(0, true);
+			return;
+		}
+
 		u32 srcChannels = source->GetChannelCount();
 
 		size_t samplePosition = voiceCtx->SamplePosition / (AudioEngine::DefaultChannels / srcChannels);
 		size_t samplesToCopy = DefaultBufferedSampleAmount / (AudioEngine::DefaultChannels / srcChannels);
 		size_t decodedSamples = source->GetSamples(TempSampleBuffer.data(), samplePosition, samplesToCopy);
-		size_t mixedSamples = ChannelMixer.MixChannels(srcChannels, TempSampleBuffer.data(), decodedSamples, voiceCtx->SampleBuffer.data(), AudioEngine::DefaultChannels);
+		size_t mixedSamples = ChannelMixerInstance.MixChannels(
+			srcChannels, 
+			TempSampleBuffer.data(),
+			decodedSamples, 
+			voiceCtx->SampleBuffer.data(),
+			AudioEngine::DefaultChannels);
 
 		bool lastBuffer = false;
 
@@ -316,8 +328,25 @@ namespace Starshine::Audio
 			return;
 		}
 
-		auto& sampleProvider = impl->RegisteredSources[handle];
-		sampleProvider.SampleProvider = nullptr;
+		auto& source = impl->RegisteredSources[handle];
+		source.SampleProvider = nullptr;
+	}
+
+	SourceHandle AudioEngine::LoadSourceFromFile(std::string_view filePath)
+	{
+		return RegisterSource(DecoderFactory::GetInstance().DecodeFile(filePath));
+	}
+
+	void AudioEngine::FreeLoadedSource(SourceHandle handle)
+	{
+		if (handle == InvalidSourceHandle || handle >= impl->RegisteredSources.size())
+		{
+			return;
+		}
+
+		auto& source = impl->RegisteredSources[handle];
+		source.SampleProvider->FreeSamples();
+		source.SampleProvider = nullptr;
 	}
 
 	VoiceHandle AudioEngine::AllocateVoice(SourceHandle source)

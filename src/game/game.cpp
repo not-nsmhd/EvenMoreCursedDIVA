@@ -54,7 +54,11 @@ namespace Starshine
 
 		bool Initialize()
 		{
-			LogMessage("--- Starshine %02d.%02d ---", 25, 8);
+			tm buildDate = {};
+			SDL_sscanf(BuildInfo::BuildDateString, "%04d.%02d.%02dT%02d:%02d%02d",
+				&buildDate.tm_year, &buildDate.tm_mon, &buildDate.tm_mday, &buildDate.tm_hour, &buildDate.tm_min, &buildDate.tm_sec);
+
+			LogMessage("--- Starshine %02d.%02d ---", buildDate.tm_year - 2000, buildDate.tm_mon);
 
 #if defined (_DEBUG)
 			LogMessage("--- DEBUG BUILD ---");

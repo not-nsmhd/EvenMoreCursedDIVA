@@ -76,6 +76,15 @@
     <ClCompile Include="game\audio\ChannelMixer.cpp">
       <Filter>src\game\audio</Filter>
     </ClCompile>
+    <ClCompile Include="game\audio\Decoder\Decoders\WavDecoder.cpp">
+      <Filter>src\game\audio\Decoder\Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\Decoder\DecoderFactory.cpp">
+      <Filter>src\game\audio\Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -183,6 +192,18 @@
     <ClInclude Include="game\audio\ChannelMixer.h">
       <Filter>src\game\audio</Filter>
     </ClInclude>
+    <ClInclude Include="game\audio\Decoder\IDecoder.h">
+      <Filter>src\game\audio\Decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\Decoder\Decoders\WavDecoder.h">
+      <Filter>src\game\audio\Decoder\Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\Decoder\DecoderFactory.h">
+      <Filter>src\game\audio\Decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -259,6 +280,12 @@
     </Filter>
     <Filter Include="src\game\audio\SampleProvider">
       <UniqueIdentifier>{21a4185e-1d0d-4fb4-87aa-eb57aff30a1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\audio\Decoder">
+      <UniqueIdentifier>{a98dab23-3a33-47a4-a1b6-25e27d7209b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\audio\Decoder\Decoders">
+      <UniqueIdentifier>{905244fe-0a80-4e1d-88a2-2c046f2e97a1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

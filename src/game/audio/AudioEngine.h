@@ -72,6 +72,9 @@ namespace Starshine::Audio
 		SourceHandle RegisterSource(ISampleProvider* sampleProvider);
 		void FreeSource(SourceHandle handle);
 
+		SourceHandle LoadSourceFromFile(std::string_view filePath);
+		void FreeLoadedSource(SourceHandle handle);
+
 		VoiceHandle AllocateVoice(SourceHandle source);
 		void FreeVoice(VoiceHandle voice);
 

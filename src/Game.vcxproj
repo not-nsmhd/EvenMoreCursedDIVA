@@ -75,7 +75,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;ogg.lib;vorbis.lib;vorbisfile.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -109,7 +109,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs\SDL2\lib\$(PlatformShortName);$(SolutionDir)lib_vs\FAudio\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libogg\lib\$(PlatformShortName);$(SolutionDir)lib_vs\libvorbis\lib\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;D3d9.lib;FAudio.lib;ogg.lib;vorbis.lib;vorbisfile.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -125,8 +125,12 @@
   <ItemGroup>
     <ClInclude Include="game\audio\AudioEngine.h" />
     <ClInclude Include="game\audio\ChannelMixer.h" />
+    <ClInclude Include="game\audio\Decoder\DecoderFactory.h" />
+    <ClInclude Include="game\audio\Decoder\Decoders\WavDecoder.h" />
+    <ClInclude Include="game\audio\Decoder\IDecoder.h" />
     <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h" />
     <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h" />
+    <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h" />
     <ClInclude Include="game\build\build_info.h" />
     <ClInclude Include="game\build\build_info_dummy.h" />
     <ClInclude Include="game\common\color.h" />
@@ -165,7 +169,10 @@
     <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="game\audio\AudioEngine.cpp" />
     <ClCompile Include="game\audio\ChannelMixer.cpp" />
+    <ClCompile Include="game\audio\Decoder\DecoderFactory.cpp" />
+    <ClCompile Include="game\audio\Decoder\Decoders\WavDecoder.cpp" />
     <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp" />
+    <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp" />
     <ClCompile Include="game\common\color.cpp" />
     <ClCompile Include="game\common\math_ext.cpp" />
     <ClCompile Include="game\game.cpp" />

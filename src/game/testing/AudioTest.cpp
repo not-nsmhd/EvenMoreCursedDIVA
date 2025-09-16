@@ -5,8 +5,10 @@
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "audio/AudioEngine.h"
 #include "audio/SampleProvider/MemorySampleProvider.h"
+#include "audio/SampleProvider/StreamingSampleProvider.h"
 #include "input/Keyboard.h"
 #include "io/File.h"
+#include "util/logging.h"
 
 namespace Starshine::Testing
 {
@@ -27,7 +29,7 @@ namespace Starshine::Testing
 		SpriteRenderer* SpriteRenderer = nullptr;
 		Font TestFont;
 
-		MemorySampleProvider sampleProvider;
+		StreamingSampleProvider* sampleProvider;
 		SourceHandle source = InvalidSourceHandle;
 
 		bool Initialize()
@@ -43,7 +45,7 @@ namespace Starshine::Testing
 
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
-			SDL_RWops* testWavFile = SDL_RWFromFile("diva/sounds/test_wav_mono.wav", "rb");
+			/*SDL_RWops* testWavFile = SDL_RWFromFile("diva/sounds/test_wav_mono.wav", "rb");
 			SDL_AudioSpec wavSpec = {};
 
 			u8* wavData = nullptr;
@@ -60,16 +62,77 @@ namespace Starshine::Testing
 
 			SDL_FreeWAV(wavData);
 
-			source = AudioEngine->RegisterSource(&sampleProvider);
+			source = AudioEngine->RegisterSource(&sampleProvider);*/
+
+			// -------------
+			/*OggVorbis_File oggFile{};
+			ov_fopen("diva/sounds/test_vorbis.ogg", &oggFile);
+
+			vorbis_info* info = ov_info(&oggFile, -1);
+			vorbis_comment* comments = ov_comment(&oggFile, -1);
+			for (int i = 0; i < comments->comments; i++)
+			{
+				Logging::LogInfo("VorbisTest", "Comment %d: %s", i, comments->user_comments[i]);
+			}
+
+			sampleProvider.sampleCount = static_cast<size_t>(ov_pcm_total(&oggFile, -1) * info->channels);
+			sampleProvider.samples = new i16[sampleProvider.sampleCount];
+			sampleProvider.channelCount = info->channels;
+			sampleProvider.sampleRate = info->rate;
+
+			int currentSection = 0;
+			char oggBuffer[4096] = {};
+			size_t copyOffset = 0;
+
+			while (true)
+			{
+				long bytesRead = ov_read(&oggFile, oggBuffer, sizeof(oggBuffer), 0, 2, 1, &currentSection);
+				if (bytesRead == 0 || copyOffset >= sampleProvider.sampleCount * static_cast<size_t>(sampleProvider.channelCount))
+				{
+					break;
+				}
+
+				// NOTE: Gotta love C++'s pointer arithmetic and trying to make it libraries which work with raw bytes specifically
+				// https://stackoverflow.com/a/394777
+				SDL_memcpy(reinterpret_cast<char*>(sampleProvider.samples) + copyOffset, oggBuffer, static_cast<size_t>(bytesRead));
+				copyOffset += static_cast<size_t>(bytesRead);
+			}
+
+			ov_clear(&oggFile);
+			source = AudioEngine->RegisterSource(&sampleProvider);*/
+			
+			// -------------
+
+			source = AudioEngine->LoadSourceFromFile("diva/sounds/test_wav_mono.wav");
+
+			u8* oggData = nullptr;
+			size_t oggSize = File::ReadAllBytes("diva/music/test.ogg", &oggData);
+
+			sampleProvider = new StreamingSampleProvider(oggSize, oggData);
+
+			SDL_RWops* outputDataFile = SDL_RWFromFile("diva/music/test_decoded.dat", "wb");
+			i16 outputBuffer[2048] = {};
+
+			while (true)
+			{
+				size_t decodedAmount = sampleProvider->GetNextSamples(outputBuffer, 2048);
+				if (decodedAmount == 0)
+				{
+					break;
+				}
+
+				SDL_RWwrite(outputDataFile, outputBuffer, sizeof(i16), decodedAmount);
+			}
+
+			SDL_RWclose(outputDataFile);
 
 			return true;
 		}
 
 		void Destroy()
 		{
-			AudioEngine->FreeSource(source);
+			AudioEngine->FreeLoadedSource(source);
 
-			sampleProvider.FreeSamples();
 			TestFont.Destroy();
 			SpriteRenderer->Destroy();
 		}
