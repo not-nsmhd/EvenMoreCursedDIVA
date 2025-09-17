@@ -91,6 +91,15 @@
     <ClCompile Include="game\gfx\Render2D\SpriteSheetRenderer.cpp">
       <Filter>src\game\gfx\Render2D</Filter>
     </ClCompile>
+    <ClCompile Include="game\main_game\HUD.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main_game\MainGame.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\main_game\Chart.cpp">
+      <Filter>src\game\main_game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -215,6 +224,18 @@
     </ClInclude>
     <ClInclude Include="game\gfx\Render2D\SpriteSheetRenderer.h">
       <Filter>src\game\gfx\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\HitEvaluation.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\HUD.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\MainGame.h">
+      <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\main_game\Chart.h">
+      <Filter>src\game\main_game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

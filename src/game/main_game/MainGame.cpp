@@ -1,25 +1,24 @@
-#include "main_game.h"
-#include "chart.h"
-#include "hit_evaluation.h"
-#include "hud.h"
 #include "common/types.h"
 #include "common/math_ext.h"
-#include "global_res.h"
-#include "gfx/helpers/tex_helpers.h"
-#include "gfx/sprite_renderer.h"
-#include "gfx/sprite_sheet.h"
-#include "gfx/font.h"
+#include "MainGame.h"
+#include "Chart.h"
+#include "HitEvaluation.h"
+#include "HUD.h"
+#include "input/Keyboard.h"
+//#include "global_res.h"
+#include "gfx/Render2D/SpriteRenderer.h"
 #include <string>
 #include <deque>
 #include <fstream>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/compatibility.hpp>
 
-namespace MainGame
+namespace DIVA::MainGame
 {
-	using namespace DIVA;
-	using namespace GFX;
-	using namespace Input;
+	using namespace Starshine;
+	using namespace Starshine::GFX;
+	using namespace Starshine::GFX::Render2D;
+	using namespace Starshine::Input;
 	using namespace Common;
 	using std::string_view;
 	using std::fstream;
@@ -86,32 +85,33 @@ namespace MainGame
 
 	struct MainGameState::StateInternal
 	{
-		GFXBackend* gfxBackend;
+		GFX::Renderer* BaseRenderer = nullptr;
 		Context& MainGameContext;
 
 		SpriteRenderer* spriteRenderer;
 		SpriteSheet iconSet;
+		Font debugFont;
 
 		float TrailScrollOffset = 0.0f;
 		bool Paused = false;
 
 		struct SpriteCache
 		{
-			Sprite* NoteTargets[EnumCount<NoteShape>()];
-			Sprite* NoteIcons[EnumCount<NoteShape>()];
-			Sprite* NoteTargetHand;
+			const Sprite* NoteTargets[EnumCount<NoteShape>()];
+			const Sprite* NoteIcons[EnumCount<NoteShape>()];
+			const Sprite* NoteTargetHand;
 
-			Sprite* DoubleNoteTargets[EnumCount<NoteShape>()];
-			Sprite* DoubleNoteIcons[EnumCount<NoteShape>()];
-			Sprite* DoubleNoteTargetHands[EnumCount<NoteShape>()];
+			const Sprite* DoubleNoteTargets[EnumCount<NoteShape>()];
+			const Sprite* DoubleNoteIcons[EnumCount<NoteShape>()];
+			const Sprite* DoubleNoteTargetHands[EnumCount<NoteShape>()];
 
-			Sprite* HoldNoteTargets[EnumCount<NoteShape>()];
-			Sprite* HoldNoteIcons[EnumCount<NoteShape>()];
+			const Sprite* HoldNoteTargets[EnumCount<NoteShape>()];
+			const Sprite* HoldNoteIcons[EnumCount<NoteShape>()];
 
-			Sprite* HoldNoteTrails[EnumCount<NoteShape>()];
+			const Sprite* HoldNoteTrails[EnumCount<NoteShape>()];
 
-			Sprite* Trail_Normal;
-			Sprite* Trail_CT;
+			const Sprite* Trail_Normal;
+			const Sprite* Trail_CT;
 		} spriteCache;
 
 		Chart songChart;
@@ -120,15 +120,14 @@ namespace MainGame
 		float ElapsedTime_Seconds = 0.0f;
 		std::deque<GameNote> ActiveNotes;
 
-		Keyboard* keyboard = Keyboard::GetInstance();
-		KeyBind AdvanceKeybind = KeyBind(keyboard, SDL_SCANCODE_PERIOD, KeyBind::UnsetScancode );
-		KeyBind PauseKeybind = KeyBind(keyboard, SDL_SCANCODE_ESCAPE, KeyBind::UnsetScancode );
+		KeyBind AdvanceKeybind = KeyBind{ SDLK_PERIOD, Input::UnboundKey };
+		KeyBind PauseKeybind = KeyBind{ SDLK_ESCAPE, Input::UnboundKey };
 		EnumValueMappingTable<NoteShape, KeyBind> NoteKeybinds
 		{
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Circle, KeyBind(keyboard, SDL_SCANCODE_D, SDL_SCANCODE_L) },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Cross, KeyBind(keyboard, SDL_SCANCODE_S, SDL_SCANCODE_K) },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Square, KeyBind(keyboard, SDL_SCANCODE_A, SDL_SCANCODE_J) },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind(keyboard, SDL_SCANCODE_W, SDL_SCANCODE_I) }
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Circle, KeyBind{ SDLK_d, SDLK_l } },
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Cross, KeyBind{ SDLK_s, SDLK_k } },
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Square, KeyBind{ SDLK_a, SDLK_j } },
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind{ SDLK_w, SDLK_i } }
 		};
 
 		HUD hud = HUD(MainGameContext);
@@ -141,23 +140,28 @@ namespace MainGame
 
 		void Initialize()
 		{
+			BaseRenderer = Renderer::GetInstance();
 			hud.Initialize();
 		}
 
 		bool LoadContent()
 		{
-			spriteRenderer = GlobalResources::SpriteRenderer;
+			spriteRenderer = new SpriteRenderer();
+			MainGameContext.SpriteRenderer = spriteRenderer;
+
+			debugFont.ReadBMFont("diva/fonts/debug.fnt");
+			MainGameContext.DebugFont = &debugFont;
 
 			// ---------------
-			iconSet.ReadFromTextFile(gfxBackend, "sprites/iconset_ps3");
+			iconSet.ReadFromTextFile("diva/sprites/iconset_ps3");
 
-			spriteCache.NoteTargetHand = iconSet.GetSprite("TargetHand");
-			spriteCache.Trail_Normal = iconSet.GetSprite("Trail_Normal");
-			spriteCache.Trail_CT = iconSet.GetSprite("Trail_CT");
+			spriteCache.NoteTargetHand = &iconSet.GetSprite("TargetHand");
+			spriteCache.Trail_Normal = &iconSet.GetSprite("Trail_Normal");
+			spriteCache.Trail_CT = &iconSet.GetSprite("Trail_CT");
 
-			auto fetchNoteShapeSpecificSprite = [&](NoteShape shape, std::string_view name, Sprite* spriteArray[])
+			auto fetchNoteShapeSpecificSprite = [&](NoteShape shape, std::string_view name, const Sprite* spriteArray[])
 			{
-				spriteArray[static_cast<size_t>(shape)] = iconSet.GetSprite(name);
+				spriteArray[static_cast<size_t>(shape)] = &iconSet.GetSprite(name);
 			};
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Target_Circle", spriteCache.NoteTargets);
@@ -260,7 +264,7 @@ namespace MainGame
 					noteIndex++;
 				}
 
-				for (size_t i = 0; i < DIVA::EnumCount<NoteShape>(); i++)
+				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
 					UpdateInputBinding(NoteKeybinds[i].EnumValue, NoteKeybinds[i].MappedValue);
 				}
@@ -271,7 +275,7 @@ namespace MainGame
 				hud.Update(deltaTime_ms);
 			}
 
-			if (PauseKeybind.IsTapped(nullptr, nullptr))
+			if (Keyboard::IsAnyTapped(PauseKeybind, nullptr, nullptr))
 			{
 				Paused = !Paused;
 			}
@@ -290,8 +294,8 @@ namespace MainGame
 
 		void Draw(float deltaTime_ms)
 		{
-			gfxBackend->Clear(GFX::LowLevel::ClearFlags::GFX_CLEAR_COLOR, Common::Color(0, 24, 24, 255), 1.0f, 0);
-			gfxBackend->SetBlendState(&GFX::LowLevel::DefaultBlendStates::AlphaBlend);
+			BaseRenderer->Clear(ClearFlags::ClearFlags_Color, Common::Color(0, 24, 24, 255), 1.0f, 0);
+			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
 			for (auto& note : ActiveNotes)
 			{
@@ -300,10 +304,10 @@ namespace MainGame
 
 			hud.Draw(deltaTime_ms);
 
-			GlobalResources::DebugFont->PushString(spriteRenderer, debugText, sizeof(debugText), vec2(0.0f, 0.0f), vec2(1.0f), Common::DefaultColors::White);
-			spriteRenderer->RenderSprites(nullptr);
+			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText, sizeof(debugText)), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
-			gfxBackend->SwapBuffers();
+			spriteRenderer->RenderSprites(nullptr);
+			BaseRenderer->SwapBuffers();
 		}
 
 		void UpdateChart(float deltaTime_ms)
@@ -439,8 +443,8 @@ namespace MainGame
 		{
 			bool primTapped = false;
 			bool altTapped = false;
-			bool tapped = binding.IsTapped(&primTapped, &altTapped);
-			bool released = binding.IsReleased(nullptr, nullptr);
+			bool tapped = Keyboard::IsAnyTapped(binding, &primTapped, &altTapped);
+			bool released = Keyboard::IsAnyReleased(binding, nullptr, nullptr);
 
 			if (!tapped && !released)
 			{
@@ -472,13 +476,13 @@ namespace MainGame
 					// NOTE: Hold transfer implementation
 					if (note->HasBeenHitPrimary && !note->HasBeenHitAlternative)
 					{
-						binding.IsDown(nullptr, &note->HasBeenHitAlternative);
+						Keyboard::IsAnyDown(binding, nullptr, &note->HasBeenHitAlternative);
 						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
 						break;
 					}
 					else if (!note->HasBeenHitPrimary && note->HasBeenHitAlternative)
 					{
-						binding.IsDown(&note->HasBeenHitPrimary, nullptr);
+						Keyboard::IsAnyDown(binding, &note->HasBeenHitPrimary, nullptr);
 						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
 						break;
 					}
@@ -513,8 +517,10 @@ namespace MainGame
 					{
 						note->HitEvaluation = HitEvaluation::Miss;
 						hud.ReleaseScoreBonus(true);
+						break;
 					}
 
+					MainGameContext.Score.Score += note->CurrentScoreBonus;
 					hud.ReleaseScoreBonus(false);
 					break;
 				}
@@ -527,24 +533,28 @@ namespace MainGame
 					{
 						note->HitEvaluation = HitEvaluation::Cool;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Cool : ScoreValues::CoolWrong;
 						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
 					}
 					else if (remainingTimeOnHit <= HitThresholds::GoodThreshold && remainingTimeOnHit >= -HitThresholds::GoodThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Good;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Good : ScoreValues::GoodWrong;
 						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
 					}
 					else if (remainingTimeOnHit <= HitThresholds::SafeThreshold && remainingTimeOnHit >= -HitThresholds::SafeThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Safe;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Safe : ScoreValues::SafeWrong;
 						MainGameContext.Score.Combo = 0;
 					}
 					else if(remainingTimeOnHit <= HitThresholds::BadThreshold && remainingTimeOnHit >= -HitThresholds::BadThreshold)
 					{
 						note->HitEvaluation = HitEvaluation::Bad;
 						note->HitWrong = !shapeMatches;
+						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Bad : ScoreValues::BadWrong;
 						MainGameContext.Score.Combo = 0;
 					}
 					else
@@ -556,6 +566,7 @@ namespace MainGame
 					hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->TargetPosition);
 					if (doubleGiveBonus)
 					{
+						MainGameContext.Score.Score += ScoreValues::DoubleBonus;
 						hud.SetScoreBonusDisplayState(200, note->TargetPosition);
 					}
 				}
@@ -658,8 +669,8 @@ namespace MainGame
 				vec2 curPoint = MathExtensions::GetSinePoint(trailOffset, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
 				vec2 prevPoint{ curPoint };
 
-				Sprite* trailSprite = spriteCache.HoldNoteTrails[static_cast<size_t>(note.Shape)];
-				LowLevel::Texture* trailTexture = iconSet.GetTexture(trailSprite->texIndex);
+				const Sprite* trailSprite = spriteCache.HoldNoteTrails[static_cast<size_t>(note.Shape)];
+				Texture* trailTexture = iconSet.GetTexture(trailSprite->TextureIndex);
 
 				size_t colorIndex = 0;
 				for (float f = 0.0f; f <= trailLength; f += TrailResolution)
@@ -672,55 +683,79 @@ namespace MainGame
 					spriteRenderer->SetSpriteColor(Color {DefaultColors::White});
 
 					float segmentLength = glm::distance(curPoint, prevPoint);
-					spriteRenderer->SetSpriteScale(vec2{ segmentLength, trailSprite->sourceRect.height });
-					spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, trailSprite->origin.y });
+					spriteRenderer->SetSpriteScale(vec2{ segmentLength, trailSprite->SourceRectangle.Height });
+					spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, trailSprite->Origin.y });
 
 					vec2 diff = { curPoint.y - prevPoint.y, curPoint.x - prevPoint.x };
 					float angle = glm::atan(diff.x, diff.y);
 
 					spriteRenderer->SetSpriteRotation(angle);
-					spriteRenderer->SetSpriteSource(trailTexture, trailSprite->sourceRect);
+					spriteRenderer->SetSpriteSource(trailTexture, trailSprite->SourceRectangle);
 					spriteRenderer->PushSprite(trailTexture);
 
 					prevPoint = curPoint;
 				}
 			}
 
-			spriteRenderer->SetSpritePosition(note.TargetPosition);
-			spriteRenderer->SetSpriteColor(DefaultColors::White);
 			switch (note.Type)
 			{
 			case NoteType::Normal:
-				iconSet.PushSprite(spriteRenderer, spriteCache.NoteTargets[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet, 
+					*spriteCache.NoteTargets[static_cast<size_t>(note.Shape)], 
+					note.TargetPosition, 
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			case NoteType::Double:
-				iconSet.PushSprite(spriteRenderer, spriteCache.DoubleNoteTargets[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.DoubleNoteTargets[static_cast<size_t>(note.Shape)],
+					note.TargetPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			case NoteType::HoldEnd:
-				iconSet.PushSprite(spriteRenderer, spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)],
+					note.TargetPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			}
 
 			if (note.Type == NoteType::HoldStart && note.NextNote->ElapsedTime < 0.0f)
 			{
-				iconSet.PushSprite(spriteRenderer, spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)],
+					note.TargetPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 			}
 
-			float targetHandRotation = Common::MathExtensions::ConvertRange(0.0f, note.NoteTime, 0.0f, Common::MathExtensions::MATH_EXT_2PI, note.ElapsedTime);
-			spriteRenderer->SetSpritePosition(note.TargetPosition);
+			float targetHandRotation = MathExtensions::ConvertRange(0.0f, note.NoteTime, 0.0f, MathExtensions::TwoPi, note.ElapsedTime);
+			//spriteRenderer->SetSpritePosition(note.TargetPosition);
 			spriteRenderer->SetSpriteRotation(holdStartHit ? 0.0f : targetHandRotation);
-			spriteRenderer->SetSpriteColor(DefaultColors::White);
+			//spriteRenderer->SetSpriteColor(DefaultColors::White);
 			switch (note.Type)
 			{
-			case NoteType::Normal:
-				iconSet.PushSprite(spriteRenderer, spriteCache.NoteTargetHand);
+			default:
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.NoteTargetHand,
+					note.TargetPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			case NoteType::Double:
-				iconSet.PushSprite(spriteRenderer, spriteCache.DoubleNoteTargetHands[static_cast<size_t>(note.Shape)]);
-				break;
-			case NoteType::HoldStart:
-			case NoteType::HoldEnd:
-				iconSet.PushSprite(spriteRenderer, spriteCache.NoteTargetHand);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.DoubleNoteTargetHands[static_cast<size_t>(note.Shape)],
+					note.TargetPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			}
 
@@ -730,34 +765,54 @@ namespace MainGame
 				float trailPixelLength = (note.Distance / 1000.0f) * (120.0f / note.NoteTime * 2.55f);
 				float trailLength = trailPixelLength / note.Distance;
 
-				Sprite* trailSprite = spriteCache.Trail_Normal;
+				const Sprite* trailSprite = spriteCache.Trail_Normal;
 				Color trailColor = NoteTrailColors[static_cast<size_t>(note.Shape)];
 				DrawNoteTrail(note, trailSprite, trailColor, false, trailOffset, trailLength, 20.0f);
 			}
 
-			spriteRenderer->SetSpritePosition(note.IconPosition);
-			spriteRenderer->SetSpriteColor(DefaultColors::White);
+			//spriteRenderer->SetSpritePosition(note.IconPosition);
+			//spriteRenderer->SetSpriteColor(DefaultColors::White);
 			switch (note.Type)
 			{
 			case NoteType::Normal:
-				iconSet.PushSprite(spriteRenderer, spriteCache.NoteIcons[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.NoteIcons[static_cast<size_t>(note.Shape)],
+					note.IconPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			case NoteType::Double:
-				iconSet.PushSprite(spriteRenderer, spriteCache.DoubleNoteIcons[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.DoubleNoteIcons[static_cast<size_t>(note.Shape)],
+					note.IconPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			case NoteType::HoldStart:
 				if (!holdStartHit)
 				{
-					iconSet.PushSprite(spriteRenderer, spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)]);
+					spriteRenderer->SpriteSheet().PushSprite(
+						iconSet,
+						*spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)],
+						note.IconPosition,
+						vec2(1.0f),
+						DefaultColors::White);
 				}
 				break;
 			case NoteType::HoldEnd:
-				iconSet.PushSprite(spriteRenderer, spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)]);
+				spriteRenderer->SpriteSheet().PushSprite(
+					iconSet,
+					*spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)],
+					note.IconPosition,
+					vec2(1.0f),
+					DefaultColors::White);
 				break;
 			}
 		}
 
-		void DrawNoteTrail(const GameNote& note, Sprite* sprite, Color& color, bool hold, float offset, float length, float thickness)
+		void DrawNoteTrail(const GameNote& note, const Sprite* sprite, Color& color, bool hold, float offset, float length, float thickness)
 		{
 			vec2 curPoint = MathExtensions::GetSinePoint(offset, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
 			vec2 prevPoint{ curPoint };
@@ -771,7 +826,7 @@ namespace MainGame
 			float trailAlpha = 0.5f;
 			float trailFadeThreshold = length / 2.0f;
 
-			LowLevel::Texture* trailTexture = iconSet.GetTexture(sprite->texIndex);
+			Texture* trailTexture = iconSet.GetTexture(sprite->TextureIndex);
 
 			for (float f = 0.0f; f <= length; f += TrailResolution)
 			{
@@ -802,10 +857,10 @@ namespace MainGame
 				spriteRenderer->SetSpriteRotation(angle);
 
 				spriteRenderer->SetSpriteSource(trailTexture, RectangleF 
-					{ trailSpriteOffset + sprite->sourceRect.x, 
-					sprite->sourceRect.y, 
+					{ trailSpriteOffset + sprite->SourceRectangle.X, 
+					sprite->SourceRectangle.Y, 
 					trailSpriteWidth, 
-					sprite->sourceRect.height });
+					sprite->SourceRectangle.Height });
 
 				spriteRenderer->PushSprite(trailTexture);
 
@@ -817,19 +872,12 @@ namespace MainGame
 
 	MainGameState::MainGameState()
 	{
-		context.SpriteRenderer = GlobalResources::SpriteRenderer;
-
 		stateInternal = new MainGameState::StateInternal(context);
-		stateInternal->MainGameContext = context;
-	}
-
-	MainGameState::~MainGameState()
-	{
+		//stateInternal->MainGameContext = context;
 	}
 	
 	bool MainGameState::Initialize()
 	{
-		stateInternal->gfxBackend = game->GetGraphicsBackend();
 		stateInternal->Initialize();
 		return true;
 	}
@@ -850,17 +898,18 @@ namespace MainGame
 		delete stateInternal;
 	}
 	
-	void MainGameState::OnResize(u32 newWidth, u32 newHeight)
+	void MainGameState::Update(f64 deltaTime_milliseconds)
 	{
+		stateInternal->Update(static_cast<float>(deltaTime_milliseconds));
 	}
 	
-	void MainGameState::Update()
+	void MainGameState::Draw(f64 deltaTime_milliseconds)
 	{
-		stateInternal->Update(static_cast<float>(game->deltaTime_ms));
+		stateInternal->Draw(static_cast<float>(deltaTime_milliseconds));
 	}
-	
-	void MainGameState::Draw()
+
+	std::string_view MainGameState::GetStateName() const
 	{
-		stateInternal->Draw(static_cast<float>(game->deltaTime_ms));
+		return "Main Game";
 	}
 }

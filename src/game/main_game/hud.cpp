@@ -1,17 +1,19 @@
 #include "hud.h"
 #include "common/color.h"
 #include "common/math_ext.h"
-#include "global_res.h"
+#include "gfx/Render2D/SpriteRenderer.h"
 #include <SDL2/SDL.h>
 
-namespace MainGame
+namespace DIVA::MainGame
 {
-	using namespace DIVA;
+	using namespace Starshine;
+	using namespace Starshine::GFX::Render2D;
 	using namespace Common;
 	using std::string_view;
 
 	constexpr EnumStringMappingTable<HitEvaluation> HitEvaluationNames
 	{
+		EnumStringMapping<HitEvaluation>
 		{ HitEvaluation::None, "" },
 		{ HitEvaluation::Cool, "Cool" },
 		{ HitEvaluation::Good, "Good" },
@@ -33,7 +35,7 @@ namespace MainGame
 	struct HUD::Implementation
 	{
 		MainGame::Context& mainGameContext;
-		GFX::Font* debugFont = nullptr;
+		Font* debugFont = nullptr;
 
 		struct ComboDisplayData
 		{
@@ -53,13 +55,41 @@ namespace MainGame
 			float ElapsedDisplayTime{};
 		} ScoreBonusDisplay;
 
+		struct ScoreDisplayData
+		{
+			vec2 Position{ 1152.0f, 160.0f };
+			u32 DisplayValue{};
+			float IncrementSpeed{ 0.02f };
+		} ScoreDisplay;
+
 		Implementation(MainGame::Context& context) : mainGameContext{ context }
 		{
 		}
 
 		void Initialize()
 		{
-			debugFont = GlobalResources::DebugFont;
+		}
+
+		void UpdateScoreDisplay(float deltaTime_ms)
+		{
+			i32 scoreDiff = mainGameContext.Score.Score - ScoreDisplay.DisplayValue;
+
+			if (scoreDiff < 61)
+			{
+				if (scoreDiff < 21)
+				{
+					ScoreDisplay.DisplayValue = mainGameContext.Score.Score;
+				}
+				else
+				{
+					ScoreDisplay.DisplayValue += 7;
+				}
+			}
+			else
+			{
+				float incrementSpeed = (deltaTime_ms / 16.6667f) * ScoreDisplay.IncrementSpeed;
+				ScoreDisplay.DisplayValue += static_cast<u32>((incrementSpeed * static_cast<float>((scoreDiff * 10))));
+			}
 		}
 
 		void UpdateComboDisplay(float deltaTime_ms)
@@ -78,10 +108,24 @@ namespace MainGame
 			}
 		}
 
+		void DrawScoreDisplay()
+		{
+			const Font& debugFont = *mainGameContext.DebugFont;
+			FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+
+			char scoreText[8] = {};
+			size_t scoreTextLength = SDL_snprintf(scoreText, sizeof(scoreText), "%07u", ScoreDisplay.DisplayValue);
+
+			fontRenderer.PushString(debugFont, std::string_view(scoreText, scoreTextLength), ScoreDisplay.Position, vec2(1.0f), DefaultColors::White);
+		}
+
 		void DrawComboDisplay(float deltaTime_ms)
 		{
 			if (ComboDisplayState.HitEvaluation != HitEvaluation::None && ComboDisplayState.ElapsedDisplayTime <= 2.0f)
 			{
+				const Font& debugFont = *mainGameContext.DebugFont;
+				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+
 				string_view valuText = EnumToString<HitEvaluation>(HitEvaluationNames, ComboDisplayState.HitEvaluation);
 				Color valuColor = HitEvaluationColors[static_cast<size_t>(ComboDisplayState.HitEvaluation)];
 				Color comboColor = DefaultColors::White;
@@ -90,18 +134,18 @@ namespace MainGame
 
 				if (ComboDisplayState.Combo <= 1)
 				{
-					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, valuTextPos, vec2(1.0f), valuColor);
+					fontRenderer.PushString(debugFont, valuText, valuTextPos, vec2(1.0f), valuColor);
 				}
 				else
 				{
 					char comboText[8] = {};
 					size_t comboTextLength = SDL_snprintf(comboText, sizeof(comboText) - 1, "%u", ComboDisplayState.Combo);
 
-					vec2 valuTextSize = debugFont->MeasureString(valuText);
+					vec2 valuTextSize = fontRenderer.MeasureString(debugFont, valuText);
 					vec2 comboTextPos = { valuTextPos.x + valuTextSize.x + 4.0f, valuTextPos.y };
 
-					debugFont->PushString(mainGameContext.SpriteRenderer, valuText, valuTextPos, vec2(1.0f), valuColor);
-					debugFont->PushString(mainGameContext.SpriteRenderer, comboText, comboTextLength, comboTextPos, vec2(1.0f), comboColor);
+					fontRenderer.PushString(debugFont, valuText, valuTextPos, vec2(1.0f), valuColor);
+					fontRenderer.PushString(debugFont, std::string_view(comboText, comboTextLength), comboTextPos, vec2(1.0f), comboColor);
 				}
 			}
 		}
@@ -110,15 +154,18 @@ namespace MainGame
 		{
 			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f)
 			{
+				const Font& debugFont = *mainGameContext.DebugFont;
+				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+
 				char text[8] = {};
 				size_t textLength = SDL_snprintf(text, sizeof(text) - 1, "+%u", ScoreBonusDisplay.Value);
 
-				vec2 textSize = debugFont->MeasureString(text, textLength);
+				vec2 textSize = fontRenderer.MeasureString(debugFont, std::string_view(text, textLength));
 
 				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, -20.0f, ScoreBonusDisplay.ElapsedDisplayTime);
 				vec2 textPos = { ScoreBonusDisplay.Position.x - textSize.x / 2.0f, ScoreBonusDisplay.Position.y + textPosY - 45.0f };
 
-				debugFont->PushString(mainGameContext.SpriteRenderer, text, textLength, textPos, vec2(1.0f), DefaultColors::White);
+				fontRenderer.PushString(debugFont, std::string_view(text, textLength), textPos, vec2(1.0f), DefaultColors::White);
 			}
 		}
 
@@ -165,6 +212,7 @@ namespace MainGame
 
 	void HUD::Update(float deltaTime_ms)
 	{
+		implementation->UpdateScoreDisplay(deltaTime_ms);
 		implementation->UpdateComboDisplay(deltaTime_ms);
 		implementation->UpdateScoreBonusDisplay(deltaTime_ms);
 	}
@@ -173,6 +221,7 @@ namespace MainGame
 	{
 		implementation->DrawComboDisplay(deltaTime_ms);
 		implementation->DrawScoreBonusDisplay(deltaTime_ms);
+		implementation->DrawScoreDisplay();
 	}
 
 	void HUD::SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, vec2& position)

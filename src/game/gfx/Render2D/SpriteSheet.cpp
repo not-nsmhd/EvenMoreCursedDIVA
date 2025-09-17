@@ -110,7 +110,7 @@ namespace Starshine::GFX::Render2D
 			}
 		}
 
-		return InvalidSpriteIndex;
+		return 0;
 	}
 
 	Texture* SpriteSheet::GetTexture(i32 index) const

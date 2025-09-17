@@ -5,7 +5,7 @@
 #include "gfx/Renderer.h"
 #include "input/Keyboard.h"
 #include "audio/AudioEngine.h"
-#include "testing/SpriteTest.h"
+#include "main_game/MainGame.h"
 
 namespace Starshine
 {
@@ -102,8 +102,8 @@ namespace Starshine
 			AudioEngine::CreateInstance();
 			Keyboard::Initialize();
 
-			GameState* testState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
-			SetCurrentGameStateInstance(testState);
+			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::MainGame::MainGameState>();
+			SetCurrentGameStateInstance(mainGameState);
 
 			return true;
 		}
@@ -170,6 +170,8 @@ namespace Starshine
 					continue;
 				}
 
+				Keyboard::NextFrame();
+
 				if (SDL_PollEvent(&SDLEvent) != 0)
 				{
 					switch (SDLEvent.type)
@@ -195,7 +197,6 @@ namespace Starshine
 				}
 
 				AudioEngine::GetInstance()->UpdateVoices();
-				Keyboard::NextFrame();
 			}
 
 			Destroy();

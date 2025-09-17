@@ -241,7 +241,7 @@ namespace Starshine::GFX::Render2D
 					PushedSpriteLists++;
 
 					CurrentList.Texture = listTex;
-					CurrentList.FirstSpriteIndex = PushedSprites;
+					CurrentList.FirstSpriteIndex = PushedSprites - 1;
 					CurrentList.SpriteCount = 1;
 				}
 			}
@@ -258,10 +258,7 @@ namespace Starshine::GFX::Render2D
 				return;
 			}
 
-			if (SpriteLists.size() == 0)
-			{
-				SpriteLists.push_back(CurrentList);
-			}
+			SpriteLists.push_back(CurrentList);
 
 			size_t spriteVertexCount = static_cast<size_t>(PushedSprites) * 4;
 			if (SpriteVertices.size() < spriteVertexCount)
@@ -319,7 +316,7 @@ namespace Starshine::GFX::Render2D
 			BaseRenderer->SetIndexBuffer(GraphicsResources.IndexBuffer);
 			BaseRenderer->SetShader(spriteShader);
 
-			for (auto& list = SpriteLists.cbegin(); list != SpriteLists.cbegin() + PushedSpriteLists; list++)
+			for (auto& list = SpriteLists.cbegin(); list != SpriteLists.cend(); list++)
 			{
 				BaseRenderer->SetTexture(list->Texture, 0);
 				BaseRenderer->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, list->SpriteCount * 6);

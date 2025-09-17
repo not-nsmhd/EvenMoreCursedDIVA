@@ -1,9 +1,9 @@
 #pragma once
 #include "common/types.h"
-#include "main_game.h"
-#include "hit_evaluation.h"
+#include "MainGame.h"
+#include "HitEvaluation.h"
 
-namespace MainGame
+namespace DIVA::MainGame
 {
 	class HUD : NonCopyable
 	{

@@ -1,7 +1,7 @@
 #include "chart.h"
 #include <tinyxml2.h>
 
-namespace MainGame
+namespace DIVA::MainGame
 {
 	constexpr f32 DefaultNoteDuration { 60.0f / 120.0f * 4.0f };
 
@@ -29,10 +29,10 @@ namespace MainGame
 			xmlElement->QueryFloatAttribute("Time", &newNote.AppearTime);
 
 			curAttrib = xmlElement->FindAttribute("Shape");
-			newNote.Shape = DIVA::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
+			newNote.Shape = Starshine::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
 
 			curAttrib = xmlElement->FindAttribute("Type");
-			newNote.Type = DIVA::EnumFromString<NoteType>(NoteTypeStringTable, curAttrib->Value());
+			newNote.Type = Starshine::EnumFromString<NoteType>(NoteTypeStringTable, curAttrib->Value());
 
 			xmlElement->QueryFloatAttribute("X", &newNote.X);
 			xmlElement->QueryFloatAttribute("Y", &newNote.Y);

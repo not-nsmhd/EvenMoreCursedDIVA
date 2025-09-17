@@ -158,6 +158,10 @@
     <ClInclude Include="game\input\Keyboard.h" />
     <ClInclude Include="game\io\File.h" />
     <ClInclude Include="game\io\Xml.h" />
+    <ClInclude Include="game\main_game\Chart.h" />
+    <ClInclude Include="game\main_game\HitEvaluation.h" />
+    <ClInclude Include="game\main_game\HUD.h" />
+    <ClInclude Include="game\main_game\MainGame.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
@@ -189,6 +193,9 @@
     <ClCompile Include="game\input\Keyboard.cpp" />
     <ClCompile Include="game\io\File.cpp" />
     <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\main_game\Chart.cpp" />
+    <ClCompile Include="game\main_game\HUD.cpp" />
+    <ClCompile Include="game\main_game\MainGame.cpp" />
     <ClCompile Include="game\pcg\pcg_basic.c" />
     <ClCompile Include="game\stb\stb_image.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />

@@ -22,6 +22,7 @@ namespace Starshine::Input
 		void NextFrame()
 		{
 			State.PreviousKeyState = State.CurrentKeyState;
+			//SDL_memset(&State.CurrentKeyState[0], 0, State.CurrentKeyState.size() * sizeof(bool));
 		}
 
 		bool IsKeyDown(SDL_Keycode key)

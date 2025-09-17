@@ -1,7 +1,7 @@
 #pragma once
 #include "common/types.h"
 
-namespace MainGame
+namespace DIVA::MainGame
 {
 	enum class HitEvaluation : u8
 	{
@@ -26,5 +26,20 @@ namespace MainGame
 
 		constexpr f32 ThresholdStart = 130.0f;
 		constexpr f32 ThresholdMiss = -130.0f;
+	}
+
+	namespace ScoreValues
+	{
+		constexpr u32 Cool = 500;
+		constexpr u32 Good = 300;
+		constexpr u32 Safe = 100;
+		constexpr u32 Bad = 50;
+
+		constexpr u32 CoolWrong = 250;
+		constexpr u32 GoodWrong = 150;
+		constexpr u32 SafeWrong = 50;
+		constexpr u32 BadWrong = 30;
+
+		constexpr u32 DoubleBonus = 200;
 	}
 }

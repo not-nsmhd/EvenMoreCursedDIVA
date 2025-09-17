@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-namespace MainGame
+namespace DIVA::MainGame
 {
 	enum class NoteShape : u8
 	{
@@ -44,18 +44,18 @@ namespace MainGame
 		return static_cast<NoteTypeFlags>(1 << static_cast<u8>(type));
 	}
 
-	constexpr DIVA::EnumStringMappingTable<NoteShape> NoteShapeStringTable
+	constexpr Starshine::EnumStringMappingTable<NoteShape> NoteShapeStringTable
 	{
-		DIVA::EnumStringMapping<NoteShape>
+		Starshine::EnumStringMapping<NoteShape>
 		{ NoteShape::Circle, "Circle" },
 		{ NoteShape::Cross, "Cross" },
 		{ NoteShape::Square, "Square" },
 		{ NoteShape::Triangle, "Triangle" }
 	};
 
-	constexpr DIVA::EnumStringMappingTable<NoteType> NoteTypeStringTable
+	constexpr Starshine::EnumStringMappingTable<NoteType> NoteTypeStringTable
 	{
-		DIVA::EnumStringMapping<NoteType>
+		Starshine::EnumStringMapping<NoteType>
 		{ NoteType::Normal, "Normal" },
 		{ NoteType::Double, "Double" },
 		{ NoteType::HoldStart, "HoldStart" },
