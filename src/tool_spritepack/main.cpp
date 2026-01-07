@@ -86,12 +86,12 @@ void WriteText(std::vector<Sprite>& spritesToPack, std::vector<path>& spriteImag
 		spriteName = spriteImagePaths[it->Index].filename().replace_extension("").string();
 		outputMapFile << spriteName;
 		outputMapFile << " = ";
-		//outputMapFile << fmt::format("{0} {1} {2} {3} {4} {5:.3g} {6:.3g}\n", 
-			//it->TexIndex, it->X, it->Y, it->Width, it->Height, it->OriginX, it->OriginY);
-
-		snprintf(spritePropertiesString, sizeof(spritePropertiesString) - 1, 
-			"%d %d %d %d %d %.3f %.3f", 
+		outputMapFile << fmt::format("{0} {1} {2} {3} {4} {5:.3f} {6:.3f}\n", 
 			it->TexIndex, it->X, it->Y, it->Width, it->Height, it->OriginX, it->OriginY);
+
+		//snprintf(spritePropertiesString, sizeof(spritePropertiesString) - 1, 
+			//"%d %d %d %d %d %.3f %.3f", 
+			//it->TexIndex, it->X, it->Y, it->Width, it->Height, it->OriginX, it->OriginY);
 	}
 	
 	outputMapFile.close();

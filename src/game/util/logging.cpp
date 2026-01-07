@@ -163,4 +163,23 @@ namespace Logging
 
 		va_end(list);
 	}
+
+	void SDLLogFunction(void* userdata, int category, SDL_LogPriority priority, const char* message)
+	{
+		switch (priority)
+		{
+		case SDL_LogPriority::SDL_LOG_PRIORITY_INFO:
+		case SDL_LogPriority::SDL_LOG_PRIORITY_DEBUG:
+		case SDL_LogPriority::SDL_LOG_PRIORITY_VERBOSE:
+			LogInfo("SDL", message);
+			break;
+		case SDL_LogPriority::SDL_LOG_PRIORITY_WARN:
+			LogWarn("SDL", message);
+			break;
+		case SDL_LogPriority::SDL_LOG_PRIORITY_CRITICAL:
+		case SDL_LogPriority::SDL_LOG_PRIORITY_ERROR:
+			LogError("SDL", message);
+			break;
+		}
+	}
 }

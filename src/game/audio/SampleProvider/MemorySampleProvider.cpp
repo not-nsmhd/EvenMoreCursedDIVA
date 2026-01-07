@@ -1,6 +1,5 @@
 #include "MemorySampleProvider.h"
 #include <SDL2/SDL.h>
-#include "util/logging.h"
 
 namespace Starshine::Audio
 {
@@ -10,59 +9,21 @@ namespace Starshine::Audio
 
 	MemorySampleProvider::~MemorySampleProvider()
 	{
-		FreeSamples();
 	}
 
-	void MemorySampleProvider::FreeSamples()
+	void MemorySampleProvider::Destroy()
 	{
-		if (samples != nullptr)
-		{
-			delete[] samples;
-			samples = nullptr;
-		}
+		delete[] samples;
 	}
 
-	size_t MemorySampleProvider::GetSamples(i16* dstBuffer, size_t sampleOffset, size_t sampleCount)
+	bool MemorySampleProvider::IsStreamingOnly() const
 	{
-		assert(dstBuffer != nullptr);
-		i16* copySource = &samples[sampleOffset];
-		size_t copyAmount = std::min(this->sampleCount - sampleOffset, sampleCount);
-
-		SDL_memcpy(dstBuffer, copySource, copyAmount * sizeof(i16));
-
-		return copyAmount;
-	}
-
-	size_t MemorySampleProvider::GetNextSamples(i16* dstBuffer, size_t sampleCount)
-	{
-		assert(dstBuffer != nullptr);
-		i16* copySource = &samples[samplePosition];
-		size_t copyAmount = std::min(this->sampleCount - samplePosition, sampleCount);
-
-		SDL_memcpy(dstBuffer, copySource, copyAmount * sizeof(i16));
-		samplePosition += copyAmount;
-
-		return copyAmount;
-	}
-
-	void MemorySampleProvider::SeekSamples(size_t sampleOffset)
-	{
-		if (sampleOffset >= sampleCount)
-		{
-			return;
-		}
-
-		samplePosition = sampleOffset;
-	}
-
-	size_t MemorySampleProvider::GetSampleCount() const
-	{
-		return sampleCount;
+		return false;
 	}
 
 	u32 MemorySampleProvider::GetChannelCount() const
 	{
-		return channelCount;
+		return channels;
 	}
 
 	u32 MemorySampleProvider::GetSampleRate() const
@@ -70,8 +31,48 @@ namespace Starshine::Audio
 		return sampleRate;
 	}
 
+	size_t MemorySampleProvider::GetSampleAmount() const
+	{
+		return sampleCount;
+	}
+
+	size_t MemorySampleProvider::ReadSamples(i16* dstBuffer, size_t offset, size_t size)
+	{
+		size_t remainingSamples = sampleCount - offset;
+		size_t samplesToRead = SDL_min(remainingSamples, size);
+
+		if (samplesToRead > 0)
+		{
+			SDL_memcpy(dstBuffer, &samples[offset], samplesToRead * sizeof(i16));
+		}
+
+		return samplesToRead;
+	}
+
 	size_t MemorySampleProvider::GetSamplePosition() const
 	{
 		return samplePosition;
+	}
+
+	size_t MemorySampleProvider::GetNextSamples(i16* dstBuffer, size_t size)
+	{
+		size_t remainingSamples = sampleCount - samplePosition;
+		size_t samplesToRead = SDL_min(remainingSamples, size);
+
+		if (samplesToRead > 0)
+		{
+			SDL_memcpy(dstBuffer, &samples[samplePosition], samplesToRead * sizeof(i16));
+			samplePosition += samplesToRead;
+		}
+
+		return samplesToRead;
+	}
+
+	void MemorySampleProvider::Seek(size_t samplePosition)
+	{
+		if (samplePosition < sampleCount)
+		{
+			this->samplePosition = samplePosition;
+		}
 	}
 }

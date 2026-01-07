@@ -14,7 +14,7 @@ namespace Starshine::GFX
 	using namespace Core;
 	using namespace IO;
 	using OpenGLBackend = Core::OpenGL::OpenGLBackend;
-	//using D3D9Backend = Core::D3D9::D3D9Backend;
+	using D3D9Backend = Core::D3D9::D3D9Backend;
 	using std::string;
 	using std::string_view;
 
@@ -41,12 +41,7 @@ namespace Starshine::GFX
 					CurrentBackend = new OpenGLBackend();
 					break;
 				case RendererBackendType::D3D9:
-#if 0
 					CurrentBackend = new D3D9Backend();
-#else
-					CurrentBackendType = RendererBackendType::OpenGL;
-					CurrentBackend = new OpenGLBackend();
-#endif
 					break;
 				}
 			}

@@ -81,6 +81,8 @@ namespace Starshine::IO
 					return path.substr(0, i);
 				}
 			}
+
+			return string_view();
 		}
 	}
 }

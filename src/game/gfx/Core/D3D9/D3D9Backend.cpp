@@ -1,105 +1,91 @@
-#if 0
 #include <d3d9.h>
 #include <SDL2/SDL_syswm.h>
 #include "D3D9Backend.h"
+#include <array>
 #include <vector>
+#include "io/Xml.h"
+#include "io/File.h"
+#include "common/math_ext.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::D3D9
 {
 	using namespace Logging;
+	using namespace Common;
+	using std::array;
 	using std::vector;
+	using std::string_view;
 
 	constexpr const char* LogName = "Starshine::GFX::Core::D3D9";
 
 	struct ResourceContext
 	{
-		IDirect3DResource9* BaseResource = nullptr;
+		u8* Data = 0;
 		size_t Size = 0;
+	};
+
+	struct VertexBuffer_D3D9 : public VertexBuffer
+	{
+	public:
+		VertexBuffer_D3D9(ResourceHandle handle, size_t size, bool dynamic)
+			: VertexBuffer(handle), Size(size), Dynamic(dynamic) {}
+
+		IDirect3DDevice9* Device = nullptr;
+		IDirect3DVertexBuffer9* BaseBuffer = nullptr;
+
+		size_t Size = 0;
+		bool Dynamic = false;
+
+		void SetData(void* source, size_t offset, size_t size)
+		{
+			if (Dynamic)
+			{
+				void* bufferData = nullptr;
+
+				BaseBuffer->Lock(static_cast<UINT>(offset), static_cast<UINT>(size), &bufferData, D3DLOCK_DISCARD);
+				SDL_memcpy(bufferData, source, size);
+				BaseBuffer->Unlock();
+			}
+		}
 	};
 
 	struct D3D9Backend::Impl
 	{
 		SDL_Window* GameWindow = nullptr;
-		
-		struct D3DBaseState
-		{
-			IDirect3D9* D3D9 = nullptr;
-			IDirect3DDevice9* Device = nullptr;
-		} BaseState;
 
-		vector<ResourceContext> Resources;
+		IDirect3D9* d3d9 = nullptr;
+		IDirect3DDevice9* device = nullptr;
+		D3DPRESENT_PARAMETERS presentParams = {};
+
+		vector<ResourceContext> ResourceContexts;
+
+		bool VertexBufferSet = false;
+		bool VertexDescSet = false;
+
+		bool IndexBufferSet = false;
+		//GLenum CurrentIndexFormat = 0;
+
+		bool ShaderSet = false;
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
-			HRESULT result = D3D_OK;
+			d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
 
-			BaseState.D3D9 = Direct3DCreate9(D3D_SDK_VERSION);
-			if (BaseState.D3D9 == nullptr)
-			{
-				LogError(LogName, "Failed to create a Direct3D 9 object");
-				return false;
-			}
-
-			GameWindow = gameWindow;
-
-			D3DADAPTER_IDENTIFIER9 adapterInfo = {};
-			BaseState.D3D9->GetAdapterIdentifier(0, 0, &adapterInfo);
-
-			LogInfo(LogName, "Adapter: %s", adapterInfo.Description);
-
-			SDL_SysWMinfo sysWindowInfo = {};
-			SDL_VERSION(&sysWindowInfo.version);
-
-			SDL_GetWindowWMInfo(GameWindow, &sysWindowInfo);
-			HWND windowHandle = sysWindowInfo.info.win.window;
-
-			int windowWidth = 0;
-			int windowHeight = 0;
-			SDL_GetWindowSizeInPixels(GameWindow, &windowWidth, &windowHeight);
-			u32 windowFlags = SDL_GetWindowFlags(GameWindow);
-
-			DWORD creationFlags = D3DCREATE_HARDWARE_VERTEXPROCESSING;
-			D3DPRESENT_PARAMETERS presentParams = {};
-			presentParams.BackBufferWidth = windowWidth;
-			presentParams.BackBufferHeight = windowHeight;
-			presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
-			presentParams.BackBufferCount = 1;
-			presentParams.MultiSampleType = D3DMULTISAMPLE_NONE;
-			presentParams.MultiSampleQuality = 0;
+			presentParams.Windowed = TRUE;
 			presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-			presentParams.hDeviceWindow = windowHandle;
-			presentParams.Windowed = static_cast<BOOL>((windowFlags & SDL_WINDOW_FULLSCREEN) == 0);
-			//presentParams.FullScreen_RefreshRateInHz = 0;
-			//presentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 
-			if ((result = BaseState.D3D9->CreateDevice(
-				D3DADAPTER_DEFAULT, 
-				D3DDEVTYPE_HAL, 
-				windowHandle, 
-				creationFlags, 
-				&presentParams, 
-				&BaseState.Device)) != D3D_OK)
-			{
-				char message[512] = {};
-				SDL_snprintf(message, 511, "Failed to create a Direct3D 9 device.\nError: %08x", result);
+			SDL_SysWMinfo wmInfo = {};
+			SDL_GetWindowWMInfo(gameWindow, &wmInfo);
 
-				LogError(LogName, message);
-				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error (GFX)", message, GameWindow);
-
-				return false;
-			}
-
-			constexpr size_t reasonableInitialResources = 512;
-			Resources.reserve(reasonableInitialResources);
+			d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wmInfo.info.win.window, D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentParams, &device);
 
 			return true;
 		}
 
 		void Destroy()
 		{
-			BaseState.Device->Release();
-			BaseState.D3D9->Release();
+			device->Release();
+			d3d9->Release();
 		}
 
 		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
@@ -109,8 +95,8 @@ namespace Starshine::GFX::Core::D3D9
 
 			if ((flags & ClearFlags::ClearFlags_Color) != 0)
 			{
-				clearFlags |= D3DCLEAR_TARGET;
 				clearColor = D3DCOLOR_ARGB(color.A, color.R, color.G, color.B);
+				clearFlags |= D3DCLEAR_TARGET;
 			}
 
 			if ((flags & ClearFlags::ClearFlags_Depth) != 0)
@@ -123,29 +109,255 @@ namespace Starshine::GFX::Core::D3D9
 				clearFlags |= D3DCLEAR_STENCIL;
 			}
 
-			BaseState.Device->Clear(0, NULL, clearFlags, clearColor, depth, stencil);
+			device->Clear(0, NULL, clearFlags, clearColor, depth, stencil);
 		}
 
 		void SwapBuffers()
 		{
-			BaseState.Device->Present(NULL, NULL, NULL, NULL);
+			device->Present(NULL, NULL, NULL, NULL);
 		}
 
 		ResourceHandle FindFreeResourceContext()
 		{
-			for (size_t i = 0; i < Resources.size(); i++)
+			for (size_t i = 0; i < ResourceContexts.size(); i++)
 			{
-				ResourceContext& ctx = Resources[i];
+				ResourceContext& ctx = ResourceContexts[i];
 
-				if (ctx.BaseResource == nullptr && ctx.Size == 0)
+				if (ctx.Data == nullptr && ctx.Size == 0)
 				{
 					return i;
 				}
 			}
 
-			Resources.emplace_back();
-			return static_cast<ResourceHandle>(Resources.size() - 1);
+			ResourceContexts.emplace_back();
+			return static_cast<ResourceHandle>(ResourceContexts.size() - 1);
 		}
+
+		VertexBuffer_D3D9* CreateVertexBuffer(size_t size, void* initialData, bool dynamic)
+		{
+			if (!dynamic && initialData == nullptr || size == 0)
+			{
+				return nullptr;
+			}
+
+			UINT length = static_cast<UINT>(size);
+			DWORD usage = dynamic ? D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY;
+
+			ResourceHandle handle = FindFreeResourceContext();
+			ResourceContext* ctx = &ResourceContexts.at(static_cast<size_t>(handle));
+
+			ctx->Data = new u8[size];
+			ctx->Size = size;
+
+			VertexBuffer_D3D9* buffer = new VertexBuffer_D3D9(handle, size, dynamic);
+
+			buffer->Device = device;
+			device->CreateVertexBuffer(length, usage, 0, D3DPOOL_DEFAULT, &buffer->BaseBuffer, NULL);
+
+			if (initialData != nullptr)
+			{
+				buffer->SetData(initialData, 0, size);
+			}
+
+			LogInfo(LogName, "Created a new vertex buffer (handle %d)", handle);
+			return buffer;
+		}
+
+		/*void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
+		{
+			if (VertexBufferSet && VertexDescSet && ShaderSet)
+			{
+				GLenum primType = ConversionTables::GLPrimitiveTypes[static_cast<size_t>(type)];
+				glDrawArrays(primType, firstVertex, vertexCount);
+			}
+		}
+
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+		{
+			if (VertexBufferSet && IndexBufferSet && VertexDescSet && ShaderSet)
+			{
+				GLenum primType = ConversionTables::GLPrimitiveTypes[static_cast<size_t>(type)];
+				size_t firstIndexPointer = static_cast<size_t>(firstIndex) * ((CurrentIndexFormat == GL_UNSIGNED_SHORT) ? 2 : 4);
+
+				glDrawElements(primType, indexCount, CurrentIndexFormat, (const void*)firstIndexPointer);
+			}
+		}
+
+		void SetVertexBuffer(const VertexBuffer_OpenGL* buffer)
+		{
+			if (buffer == nullptr)
+			{
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				VertexBufferSet = false;
+			}
+			else
+			{
+				GLuint glBufferHandle = ResourceContexts[static_cast<size_t>(buffer->Handle)].BaseResourceHandle;
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, glBufferHandle);
+				VertexBufferSet = true;
+			}
+		}
+
+		void SetIndexBuffer(const IndexBuffer_OpenGL* buffer)
+		{
+			if (buffer == nullptr)
+			{
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+				IndexBufferSet = false;
+			}
+			else
+			{
+				GLuint glBufferHandle = ResourceContexts[static_cast<size_t>(buffer->Handle)].BaseResourceHandle;
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, glBufferHandle);
+				CurrentIndexFormat = ConversionTables::GLIndexFormats[static_cast<size_t>(buffer->Format)];
+				IndexBufferSet = true;
+			}
+		}
+
+		void SetVertexDesc(const VertexDesc_OpenGL* desc)
+		{
+			if (desc != nullptr)
+			{
+				for (auto& attrib : desc->GLAttribs)
+				{
+					switch (attrib.Type)
+					{
+					case VertexAttribType::Position:
+						glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::Color:
+						glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::TexCoord:
+						glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					}
+				}
+
+				VertexDescSet = true;
+			}
+		}
+
+		inline void SetShaderVariableValue(ShaderType shaderType, u32 index, float x, float y, float z, float w)
+		{
+			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
+			glProgramLocalParameter4fARB(glShaderType, index, x, y, z, w);
+		}
+
+		inline void SetShaderVariableValuePtr(ShaderType shaderType, u32 index, const float* value)
+		{
+			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
+			glProgramLocalParameter4fvARB(glShaderType, index, value);
+		}
+
+		void SetShader(Shader_OpenGL* shader)
+		{
+			if (shader == nullptr)
+			{
+				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, 0);
+				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
+				ShaderSet = false;
+			}
+			else
+			{
+				GLuint vertHandle = ResourceContexts[static_cast<size_t>(shader->VertexHandle)].BaseResourceHandle;
+				GLuint fragHandle = ResourceContexts[static_cast<size_t>(shader->FragmentHandle)].BaseResourceHandle;
+
+				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vertHandle);
+				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragHandle);
+
+				if (shader->UpdateVariables)
+				{
+					for (size_t i = 0; i < shader->Variables.size(); i++)
+					{
+						const ShaderVariable& variable = shader->Variables.at(i);
+
+						if (variable.Value == nullptr)
+						{
+							continue;
+						}
+
+						switch (variable.Type)
+						{
+						case ShaderVariableType::Float:
+						{
+							float* value = reinterpret_cast<float*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, *value, 0.0f, 0.0f, 0.0f);
+							break;
+						}
+						case ShaderVariableType::Vector2:
+						{
+							vec2* value = reinterpret_cast<vec2*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, 0.0f, 0.0f);
+							break;
+						}
+						case ShaderVariableType::Vector3:
+						{
+							vec3* value = reinterpret_cast<vec3*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, 0.0f);
+							break;
+						}
+						case ShaderVariableType::Vector4:
+						{
+							vec4* value = reinterpret_cast<vec4*>(variable.Value);
+
+							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, value->w);
+							break;
+						}
+						case ShaderVariableType::Matrix4:
+						{
+							// HACK: this is dumb
+							mat4* originalMatrix = reinterpret_cast<mat4*>(variable.Value);
+							mat4 transposedMatrix = glm::transpose(*originalMatrix);
+
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex, reinterpret_cast<const float*>(&transposedMatrix[0]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 1, reinterpret_cast<const float*>(&transposedMatrix[1]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 2, reinterpret_cast<const float*>(&transposedMatrix[2]));
+							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 3, reinterpret_cast<const float*>(&transposedMatrix[3]));
+							break;
+						}
+						}
+					}
+
+					shader->UpdateVariables = false;
+				}
+
+				ShaderSet = true;
+			}
+		}
+
+		void SetTexture(const Texture_OpenGL* texture, u32 slot)
+		{
+			glActiveTexture(GL_TEXTURE0 + slot);
+			if (texture == nullptr)
+			{
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				GLuint glTexture = ResourceContexts[static_cast<size_t>(texture->Handle)].BaseResourceHandle;
+				glBindTexture(GL_TEXTURE_2D, glTexture);
+			}
+		}
+
+		ResourceHandle FindFreeResourceContext()
+		{
+			for (size_t i = 0; i < ResourceContexts.size(); i++)
+			{
+				ResourceContext& ctx = ResourceContexts[i];
+
+				if (ctx.BaseResourceHandle == 0 && ctx.Size == 0)
+				{
+					return i;
+				}
+			}
+
+			ResourceContexts.emplace_back();
+			return static_cast<ResourceHandle>(ResourceContexts.size() - 1);
+		}*/
 	};
 
 	D3D9Backend::D3D9Backend() : impl(new D3D9Backend::Impl())
@@ -169,7 +381,23 @@ namespace Starshine::GFX::Core::D3D9
 
 	RendererBackendType D3D9Backend::GetType() const
 	{
-		return RendererBackendType::D3D9;
+		return RendererBackendType::OpenGL;
+	}
+
+	ResourceContext* D3D9Backend::GetResourceContext(ResourceHandle handle)
+	{
+		/*if (handle != InvalidResourceHandle)
+		{
+			return &impl->ResourceContexts.at(static_cast<size_t>(handle));
+		}*/
+		return nullptr;
+	}
+
+	Common::RectangleF D3D9Backend::GetViewportSize() const
+	{
+		RectangleF viewport = {};
+		//glGetFloatv(GL_VIEWPORT, &viewport.X);
+		return viewport;
 	}
 
 	void D3D9Backend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
@@ -182,104 +410,71 @@ namespace Starshine::GFX::Core::D3D9
 		impl->SwapBuffers();
 	}
 
+	void D3D9Backend::SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
+	{
+	}
+
+	void D3D9Backend::SetBlendOperation(BlendOperation op)
+	{
+	}
+
+	void D3D9Backend::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
+	{
+		//impl->DrawArrays(type, firstVertex, vertexCount);
+	}
+
+	void D3D9Backend::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+	{
+		//impl->DrawIndexed(type, firstIndex, indexCount);
+	}
+
 	VertexBuffer* D3D9Backend::CreateVertexBuffer(size_t size, void* initialData, bool dynamic)
 	{
-		if (!dynamic && initialData == nullptr || size == 0)
-		{
-			return nullptr;
-		}
+		return impl->CreateVertexBuffer(size, initialData, dynamic);
+	}
 
-		IDirect3DDevice9* d3dDevice = impl->BaseState.Device;
-		IDirect3DVertexBuffer9* d3dBuffer = nullptr;
-		HRESULT result = D3D_OK;
+	// TODO: Make this less copy-pasty
+	IndexBuffer* D3D9Backend::CreateIndexBuffer(size_t size, IndexFormat format, void* initialData, bool dynamic)
+	{
+		return nullptr;
+	}
 
-		UINT bufferLength = static_cast<UINT>(size);
-		DWORD bufferUsage = (dynamic) ? D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY;
-		if ((result = d3dDevice->CreateVertexBuffer(bufferLength, bufferUsage, 0, D3DPOOL_DEFAULT, &d3dBuffer, NULL)) != D3D_OK)
-		{
-			LogError(LogName, "Failed to create a new vertex buffer. Error: %08x", result);
-			return nullptr;
-		}
+	VertexDesc* D3D9Backend::CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount)
+	{
+		return nullptr;
+	}
 
-		void* bufferData = new u8[size];
+	Shader* D3D9Backend::LoadShader(const u8* vsData, size_t vsSize, const u8* fsData, size_t fsSize)
+	{
+		return nullptr;
+	}
 
-		if (initialData != nullptr)
-		{
-			SDL_memcpy(bufferData, initialData, size);
-
-			void* d3dBufferData = nullptr;
-			d3dBuffer->Lock(0, bufferLength, &d3dBufferData, D3DLOCK_DISCARD);
-			SDL_memcpy(d3dBufferData, bufferData, size);
-			d3dBuffer->Unlock();
-		}
-		else
-		{
-			SDL_memset(bufferData, 0, size);
-		}
-
-		ResourceHandle handle = impl->FindFreeResourceContext();
-		ResourceContext* ctx = &impl->Resources.at(static_cast<size_t>(handle));
-
-		ctx->BaseResource = d3dBuffer;
-		ctx->Size = size;
-
-		VertexBuffer_D3D9* buffer = new VertexBuffer_D3D9();
-		buffer->Handle = handle;
-		buffer->Type = ResourceType::VertexBuffer;
-		buffer->Context = ctx;
-
-		buffer->Data = bufferData;
-		buffer->Size = size;
-		buffer->Dynamic = dynamic;
-
-		LogInfo(LogName, "Created a new vertex buffer (handle %d)", handle);
-		return buffer;
+	Texture* D3D9Backend::CreateTexture(u32 width, u32 height, TextureFormat format, bool nearestFilter, bool clamp)
+	{
+		return nullptr;
 	}
 
 	void D3D9Backend::DeleteResource(Resource* resource)
 	{
-		if (resource->Handle == InvalidResourceHandle)
-		{
-			return;
-		}
-
-		ResourceContext* resourceCtx = &impl->Resources.at(static_cast<size_t>(resource->Handle));
-		resourceCtx->BaseResource->Release();
-		resourceCtx->BaseResource = nullptr;
-		resourceCtx->Size = 0;
-
-		switch (resource->Type)
-		{
-		case ResourceType::VertexBuffer:
-			VertexBuffer_D3D9* buffer = static_cast<VertexBuffer_D3D9*>(resource);
-			delete buffer->Data;
-			delete buffer;
-			break;
-		}
 	}
 
-	void VertexBuffer_D3D9::SetData(void* source, size_t offset, size_t size)
+	void D3D9Backend::SetVertexBuffer(const VertexBuffer* buffer)
 	{
-		if (Handle == InvalidResourceHandle || Context == nullptr)
-		{
-			return;
-		}
+	}
 
-		if (offset + size > Size || !Dynamic)
-		{
-			return;
-		}
+	void D3D9Backend::SetIndexBuffer(const IndexBuffer* buffer)
+	{
+	}
 
-		SDL_memcpy((u8*)Data + offset, source, size);
+	void D3D9Backend::SetVertexDesc(const VertexDesc* desc)
+	{
+	}
 
-		IDirect3DVertexBuffer9* buffer = static_cast<IDirect3DVertexBuffer9*>(Context->BaseResource);
-		UINT lockOffset = static_cast<UINT>(offset);
-		UINT lockSize = static_cast<UINT>(size);
+	void D3D9Backend::SetShader(Shader* shader)
+	{
+	}
 
-		void* bufferData = nullptr;
-		buffer->Lock(lockOffset, lockSize, &bufferData, D3DLOCK_DISCARD);
-		SDL_memcpy(bufferData, source, size);
-		buffer->Unlock();
+	void D3D9Backend::SetTexture(const Texture* texture, u32 slot)
+	{
 	}
 }
-#endif

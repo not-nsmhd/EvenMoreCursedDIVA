@@ -1,5 +1,3 @@
-OpenGL Version: 1.4
-Extensions:
 GL_ARB_depth_texture
 GL_ARB_fragment_program
 GL_ARB_multitexture

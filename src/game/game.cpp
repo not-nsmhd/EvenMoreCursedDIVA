@@ -3,16 +3,18 @@
 #include "util/logging.h"
 #include <SDL2/SDL.h>
 #include "gfx/Renderer.h"
-#include "input/Keyboard.h"
 #include "audio/AudioEngine.h"
+#include "input/Keyboard.h"
+#include "testing/AudioTest.h"
+#include "testing/RenderingTest.h"
 #include "main_game/MainGame.h"
 
 namespace Starshine
 {
 	using namespace Logging;
 	using namespace GFX;
-	using namespace Input;
 	using namespace Audio;
+	using namespace Input;
 
 	using Common::Color;
 
@@ -63,7 +65,6 @@ namespace Starshine
 #if defined (_DEBUG)
 			LogMessage("--- DEBUG BUILD ---");
 #endif
-
 			SDL_Init(SDL_INIT_EVERYTHING);
 
 			SDL_version sdlVersion{};
@@ -75,8 +76,6 @@ namespace Starshine
 
 			LogInfo(LogName, "Build Date: %s", BuildInfo::BuildDateString);
 			LogInfo(LogName, "Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
-
-			//GFX.BackendType = GFX::RendererBackendType::D3D9;
 
 			u32 windowCreationFlags = 0;
 			if (GFX.BackendType == RendererBackendType::OpenGL)
@@ -100,9 +99,11 @@ namespace Starshine
 			GFX.Renderer->Initialize(GameWindow);
 
 			AudioEngine::CreateInstance();
+			AudioEngine::GetInstance()->Initialize();
+
 			Keyboard::Initialize();
 
-			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::MainGame::MainGameState>();
+			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<Testing::AudioTest>();
 			SetCurrentGameStateInstance(mainGameState);
 
 			return true;
@@ -118,7 +119,7 @@ namespace Starshine
 				LogInfo(LogName, "Current state destroyed");
 			}
 
-			AudioEngine::DeleteInstance();
+			AudioEngine::GetInstance()->Destroy();
 			Keyboard::Destroy();
 
 			GFX.Renderer->Destroy();
@@ -195,8 +196,6 @@ namespace Starshine
 				{
 					CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
 				}
-
-				AudioEngine::GetInstance()->UpdateVoices();
 			}
 
 			Destroy();

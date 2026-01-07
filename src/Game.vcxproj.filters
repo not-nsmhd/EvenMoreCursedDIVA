@@ -28,9 +28,6 @@
     <ClCompile Include="game\util\string_utils.cpp">
       <Filter>src\game\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\lib\fmt\src\format.cc">
-      <Filter>lib\fmt\src</Filter>
-    </ClCompile>
     <ClCompile Include="game\game.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
     </ClCompile>
     <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp">
       <Filter>src\game\gfx\Core\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp">
-      <Filter>src\game\gfx\Core\D3D9</Filter>
     </ClCompile>
     <ClCompile Include="game\gfx\Render2D\SpriteRenderer.cpp">
       <Filter>src\game\gfx\Render2D</Filter>
@@ -67,24 +61,6 @@
     <ClCompile Include="game\testing\AudioTest.cpp">
       <Filter>src\game\testing</Filter>
     </ClCompile>
-    <ClCompile Include="game\audio\AudioEngine.cpp">
-      <Filter>src\game\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp">
-      <Filter>src\game\audio\SampleProvider</Filter>
-    </ClCompile>
-    <ClCompile Include="game\audio\ChannelMixer.cpp">
-      <Filter>src\game\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="game\audio\Decoder\Decoders\WavDecoder.cpp">
-      <Filter>src\game\audio\Decoder\Decoders</Filter>
-    </ClCompile>
-    <ClCompile Include="game\audio\Decoder\DecoderFactory.cpp">
-      <Filter>src\game\audio\Decoder</Filter>
-    </ClCompile>
-    <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp">
-      <Filter>src\game\audio\SampleProvider</Filter>
-    </ClCompile>
     <ClCompile Include="game\gfx\Render2D\SpriteSheet.cpp">
       <Filter>src\game\gfx\Render2D</Filter>
     </ClCompile>
@@ -99,6 +75,18 @@
     </ClCompile>
     <ClCompile Include="game\main_game\Chart.cpp">
       <Filter>src\game\main_game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\AudioEngine.cpp">
+      <Filter>src\game\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp">
+      <Filter>src\game\gfx\Core\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClCompile>
+    <ClCompile Include="game\audio\Decoding\WavDecoder.cpp">
+      <Filter>src\game\audio\Decoding</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,9 +131,6 @@
     </ClInclude>
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLBackend.h">
       <Filter>src\game\gfx\Core\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gfx\Core\D3D9\D3D9Backend.h">
-      <Filter>src\game\gfx\Core\D3D9</Filter>
     </ClInclude>
     <ClInclude Include="game\io\File.h">
       <Filter>src\game\io</Filter>
@@ -192,32 +177,8 @@
     <ClInclude Include="game\gfx\Render2D\FontRenderer.h">
       <Filter>src\game\gfx\Render2D</Filter>
     </ClInclude>
-    <ClInclude Include="game\audio\AudioEngine.h">
-      <Filter>src\game\audio</Filter>
-    </ClInclude>
     <ClInclude Include="game\testing\AudioTest.h">
       <Filter>src\game\testing</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h">
-      <Filter>src\game\audio\SampleProvider</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h">
-      <Filter>src\game\audio\SampleProvider</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\ChannelMixer.h">
-      <Filter>src\game\audio</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\Decoder\IDecoder.h">
-      <Filter>src\game\audio\Decoder</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\Decoder\Decoders\WavDecoder.h">
-      <Filter>src\game\audio\Decoder\Decoders</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\Decoder\DecoderFactory.h">
-      <Filter>src\game\audio\Decoder</Filter>
-    </ClInclude>
-    <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h">
-      <Filter>src\game\audio\SampleProvider</Filter>
     </ClInclude>
     <ClInclude Include="game\gfx\Render2D\SpriteSheet.h">
       <Filter>src\game\gfx\Render2D</Filter>
@@ -236,6 +197,21 @@
     </ClInclude>
     <ClInclude Include="game\main_game\Chart.h">
       <Filter>src\game\main_game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\AudioEngine.h">
+      <Filter>src\game\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gfx\Core\D3D9\D3D9Backend.h">
+      <Filter>src\game\gfx\Core\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\Decoding\WavDecoder.h">
+      <Filter>src\game\audio\Decoding</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -293,12 +269,6 @@
     <Filter Include="src\game\build">
       <UniqueIdentifier>{7425f36f-6c8c-4f06-be29-c7d207489033}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\fmt">
-      <UniqueIdentifier>{75c579ed-3ef8-43bf-8bcc-01878f03d454}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\fmt\src">
-      <UniqueIdentifier>{8c98a807-7cdf-4ea2-974f-536c9132fdde}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\game\gfx\Core">
       <UniqueIdentifier>{7d1b1719-b36c-4a99-92f5-6e52e0296244}</UniqueIdentifier>
     </Filter>
@@ -312,13 +282,10 @@
       <UniqueIdentifier>{0d1f7f42-8796-4f71-b429-5d60570b932a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\audio\SampleProvider">
-      <UniqueIdentifier>{21a4185e-1d0d-4fb4-87aa-eb57aff30a1f}</UniqueIdentifier>
+      <UniqueIdentifier>{185f9855-e0f1-4120-b9e4-7a75f663e636}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\game\audio\Decoder">
-      <UniqueIdentifier>{a98dab23-3a33-47a4-a1b6-25e27d7209b4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\game\audio\Decoder\Decoders">
-      <UniqueIdentifier>{905244fe-0a80-4e1d-88a2-2c046f2e97a1}</UniqueIdentifier>
+    <Filter Include="src\game\audio\Decoding">
+      <UniqueIdentifier>{c7e3b211-d44f-4f19-88f0-a84d8b91dc6b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

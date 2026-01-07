@@ -53,18 +53,18 @@ namespace Starshine::Testing
 
 		mat4 TransformMatrix{};
 		ShaderVariableIndex VS_TransformMatrix{};
-		ShaderVariableIndex VS_InvViewportSize{};
 
 		bool Initialize()
 		{
 			renderer = Renderer::GetInstance();
-			TransformMatrix = glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
+			RectangleF viewportSize = renderer->GetViewportSize();
+			TransformMatrix = glm::ortho(0.0f, viewportSize.Width, viewportSize.Height, 0.0f, 0.0f, 1.0f);
 			return true;
 		}
 
 		bool LoadContent()
 		{
-			testVertexBuffer = renderer->CreateVertexBuffer(TestVertexData.size() * sizeof(TestVertex), nullptr, true);
+			/*testVertexBuffer = renderer->CreateVertexBuffer(TestVertexData.size() * sizeof(TestVertex), nullptr, true);
 			testVertexBuffer->SetData((void*)TestVertexData.data(), 0, TestVertexData.size() * sizeof(TestVertex));
 
 			testVertexDesc = renderer->CreateVertexDesc(TestVertexDesc.data(), TestVertexDesc.size());
@@ -74,17 +74,16 @@ namespace Starshine::Testing
 			testShader = renderer->LoadShaderFromXml("diva/shaders/SpriteDefault.xml");
 
 			VS_TransformMatrix = testShader->GetVariableIndex("TransformMatrix");
-			VS_InvViewportSize = testShader->GetVariableIndex("InvViewportSize");
 			testShader->SetVariableValue(VS_TransformMatrix, &TransformMatrix);
 
-			testTexture = renderer->LoadTexture("diva/sprites/test.png", false, true);
+			testTexture = renderer->LoadTexture("diva/sprites/test.png", false, true);*/
 
 			return true;
 		}
 
 		void Destroy()
 		{
-			renderer->DeleteResource(testVertexBuffer);
+			/*renderer->DeleteResource(testVertexBuffer);
 			renderer->DeleteResource(testVertexDesc);
 			renderer->DeleteResource(testIndexBuffer);
 			renderer->DeleteResource(testShader);
@@ -94,20 +93,20 @@ namespace Starshine::Testing
 			testVertexBuffer = nullptr;
 			testVertexDesc = nullptr;
 			testIndexBuffer = nullptr;
-			renderer = nullptr;
+			renderer = nullptr;*/
 		}
 
 		void Draw(f64 deltaTime_milliseconds)
 		{
 			renderer->Clear(ClearFlags_Color, Color(0, 24, 24, 255), 1.0f, 0);
 
-			renderer->SetVertexBuffer(testVertexBuffer);
+			/*renderer->SetVertexBuffer(testVertexBuffer);
 			renderer->SetVertexDesc(testVertexDesc);
 			renderer->SetIndexBuffer(testIndexBuffer);
 			renderer->SetShader(testShader);
 			renderer->SetTexture(testTexture, 0);
 
-			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);
+			renderer->DrawIndexed(PrimitiveType::Triangles, 0, 6);*/
 
 			renderer->SwapBuffers();
 		}

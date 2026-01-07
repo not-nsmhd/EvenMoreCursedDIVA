@@ -5,7 +5,6 @@
 #include "HitEvaluation.h"
 #include "HUD.h"
 #include "input/Keyboard.h"
-//#include "global_res.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 #include <string>
 #include <deque>
@@ -88,7 +87,7 @@ namespace DIVA::MainGame
 		GFX::Renderer* BaseRenderer = nullptr;
 		Context& MainGameContext;
 
-		SpriteRenderer* spriteRenderer;
+		SpriteRenderer* spriteRenderer{};
 		SpriteSheet iconSet;
 		Font debugFont;
 
@@ -97,21 +96,21 @@ namespace DIVA::MainGame
 
 		struct SpriteCache
 		{
-			const Sprite* NoteTargets[EnumCount<NoteShape>()];
-			const Sprite* NoteIcons[EnumCount<NoteShape>()];
-			const Sprite* NoteTargetHand;
+			const Sprite* NoteTargets[EnumCount<NoteShape>()]{};
+			const Sprite* NoteIcons[EnumCount<NoteShape>()]{};
+			const Sprite* NoteTargetHand{};
 
-			const Sprite* DoubleNoteTargets[EnumCount<NoteShape>()];
-			const Sprite* DoubleNoteIcons[EnumCount<NoteShape>()];
-			const Sprite* DoubleNoteTargetHands[EnumCount<NoteShape>()];
+			const Sprite* DoubleNoteTargets[EnumCount<NoteShape>()]{};
+			const Sprite* DoubleNoteIcons[EnumCount<NoteShape>()]{};
+			const Sprite* DoubleNoteTargetHands[EnumCount<NoteShape>()]{};
 
-			const Sprite* HoldNoteTargets[EnumCount<NoteShape>()];
-			const Sprite* HoldNoteIcons[EnumCount<NoteShape>()];
+			const Sprite* HoldNoteTargets[EnumCount<NoteShape>()]{};
+			const Sprite* HoldNoteIcons[EnumCount<NoteShape>()]{};
 
-			const Sprite* HoldNoteTrails[EnumCount<NoteShape>()];
+			const Sprite* HoldNoteTrails[EnumCount<NoteShape>()]{};
 
-			const Sprite* Trail_Normal;
-			const Sprite* Trail_CT;
+			const Sprite* Trail_Normal{};
+			const Sprite* Trail_CT{};
 		} spriteCache;
 
 		Chart songChart;

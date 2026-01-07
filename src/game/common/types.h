@@ -39,7 +39,7 @@ struct NonCopyable
 
 namespace Starshine
 {
-	// NOTE: This assumes the enum class EnumType follows the { ..., Count }; convention
+	// NOTE: This assumes the enum class type follows a "{ ..., Count }" declaration
 	template <typename EnumType>
 	constexpr size_t EnumCount()
 	{
@@ -89,4 +89,11 @@ namespace Starshine
 		// TODO: There must be a better way to do this without causing a program crash or returning the first value in the enum
 		return static_cast<Enum>(0);
 	}
+
+	enum class SeekOrigin
+	{
+		Start,
+		Current,
+		End
+	};
 }

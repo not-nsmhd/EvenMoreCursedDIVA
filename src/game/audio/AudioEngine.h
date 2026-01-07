@@ -1,45 +1,39 @@
 #pragma once
 #include "common/types.h"
-#include "SampleProvider/ISampleProvider.h"
 
 namespace Starshine::Audio
 {
-	// NOTE: Voice Handle: Index into an array of voices
-	// NOTE: Voice Context: Implementation-specifc context for voices
-	// NOTE: Sample: Single signed 16-bit PCM
+	// NOTE: Sample: Raw 16-bit PCM data for a single channel
 	// NOTE: Frame: A pair of samples for each channel
 
-	using VoiceHandle = u16;
-	using SourceHandle = u16;
-	constexpr VoiceHandle InvalidVoiceHandle = 0xFFFF;
-	constexpr SourceHandle InvalidSourceHandle = 0xFFFF;
+	enum class VoiceHandle : u16 { Invalid = 0xFFFF };
+	enum class SourceHandle : u16 { Invalid = 0xFFFF };
 
-	struct Voice
+	class Voice
 	{
 	public:
-		Voice() : Handle(InvalidVoiceHandle) {}
+		Voice() : Handle(VoiceHandle::Invalid) {}
 		Voice(VoiceHandle handle) : Handle(handle) {}
 
+		VoiceHandle Handle{};
+
+		inline operator VoiceHandle() const { return Handle; }
+
 	public:
-		bool GetIsPlaying() const;
-		void SetIsPlaying(bool playing);
+		bool IsValid() const;
 
-		size_t GetSamplePosition() const;
-		void SetSamplePosition(size_t position);
+		bool IsPlaying() const;
+		void SetPlaying(bool play);
 
-		VoiceHandle GetHandle() const;
+		bool IsLooped() const;
+		void SetLoopState(bool loop);
 
-	private:
-		VoiceHandle Handle{ InvalidVoiceHandle };
+		SourceHandle GetSource() const;
+		void SetSource(SourceHandle handle);
 
-		bool GetInternalFlag(u16 flag) const;
-		void SetInternalFlag(u16 flag, bool value);
+		size_t GetFramePosition() const;
+		void SetFramePosition(size_t position);
 	};
-
-	namespace VoiceCallbacks
-	{
-		void OnBufferEnd(void* context);
-	}
 
 	class AudioEngine : NonCopyable
 	{
@@ -47,41 +41,39 @@ namespace Starshine::Audio
 
 	public:
 		AudioEngine();
-		~AudioEngine() = default;
+		~AudioEngine();
 
 	public:
-		static constexpr u32 DefaultChannels = 2;
-		static constexpr u32 DefaultSampleRate = 44100;
-		static constexpr u32 DefaultBitsPerSample = 16;
+		static constexpr u8 DefaultChannelCount = 2;
+		static constexpr i32 DefaultSampleRate = 44100;
+		static constexpr u16 DefaultSampleBufferSize = 2048;
 
-		static constexpr size_t MaxVoices = 128;
+		static constexpr size_t MaxSimultaneousVoices = 128;
 
 	public:
 		static void CreateInstance();
-		static void DeleteInstance();
+		static void DestroyInstance();
 
 		static AudioEngine* GetInstance();
 
 	public:
-		void UpdateVoices();
+		bool Initialize();
+		void Destroy();
 
 	public:
-		// NOTE: Registers a source consisting of raw 16-bit PCM data in a WAV file
-		// 'data' is the array of PCM samples. Pointer must be valid until 'FreeSource' is called
-		// 'size' is the amount of samples, not bytes
-		SourceHandle RegisterSource(ISampleProvider* sampleProvider);
-		void FreeSource(SourceHandle handle);
-
-		SourceHandle LoadSourceFromFile(std::string_view filePath);
-		void FreeLoadedSource(SourceHandle handle);
+		// NOTE: This function makes a local copy of the "samples" array that is stored in the source context
+		SourceHandle RegisterSource(i16* samples, size_t sampleCount, i32 sampleRate, i32 channelCount);
+		SourceHandle LoadSource(const void* encodedData, size_t encodedDataSize);
+		SourceHandle LoadSource(std::string_view filePath);
+		void ReleaseSource(SourceHandle handle);
 
 		VoiceHandle AllocateVoice(SourceHandle source);
-		void FreeVoice(VoiceHandle voice);
-
-		void PlayOneShotSound(SourceHandle source);
+		void FreeVoice(VoiceHandle handle);
 
 	public:
-		ISampleProvider* GetSource(SourceHandle handle);
+		// NOTE: This function is meant to be used only as a callback for SDL's audio subsystem.
+		// 'length' is the amount of samples in the 'stream' array.
+		void QueueAudioCallback(f32* stream, size_t length);
 
 	private:
 		struct Impl;
