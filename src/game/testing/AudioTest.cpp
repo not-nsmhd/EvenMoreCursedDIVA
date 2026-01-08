@@ -48,11 +48,11 @@ namespace Starshine::Testing
 
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
-			testAudio = AudioEngine::GetInstance()->LoadSource("diva/sounds/test1.wav");
+			testAudio = AudioEngine::GetInstance()->LoadSource("diva/sounds/test1.ogg");
 			testVoice = AudioEngine::GetInstance()->AllocateVoice(testAudio);
 
-			testLoopingAudio_start = AudioEngine::GetInstance()->LoadSource("diva/sounds/test_loop.wav");
-			testLoopingAudio_end = AudioEngine::GetInstance()->LoadSource("diva/sounds/test_loop_end.wav");
+			testLoopingAudio_start = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_Loop.ogg");
+			testLoopingAudio_end = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
 			testLoopingVoice = AudioEngine::GetInstance()->AllocateVoice(testLoopingAudio_start);
 
 			return true;

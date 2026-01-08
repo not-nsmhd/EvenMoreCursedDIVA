@@ -1,5 +1,6 @@
 #include "DecoderFactory.h"
 #include "WavDecoder.h"
+#include "OggVorbisDecoder.h"
 
 #include "audio/SampleProvider/MemorySampleProvider.h"
 #include <SDL2/SDL_stdinc.h>
@@ -10,8 +11,9 @@ namespace Starshine::Audio
 
 	DecoderFactory::DecoderFactory()
 	{
-		decoders.reserve(1);
+		decoders.reserve(2);
 		RegisterDecoder<WavDecoder>();
+		RegisterDecoder<OggVorbisDecoder>();
 	}
 
 	DecoderFactory::~DecoderFactory()

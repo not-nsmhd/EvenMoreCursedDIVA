@@ -376,8 +376,16 @@ namespace Starshine::Audio
 			SourceHandle handle = AudioEngine::GetInstance()->LoadSource(fileData, fileSize);
 			delete[] fileData;
 
-			LogInfo(LogName, "Loaded wav file \"%s\"", filePath.data());
-			return handle;
+			if (handle != SourceHandle::Invalid)
+			{
+				LogInfo(LogName, "Loaded file \"%s\"", filePath.data());
+				return handle;
+			}
+			else
+			{
+				LogInfo(LogName, "Failed to load file \"%s\"", filePath.data());
+				return SourceHandle::Invalid;
+			}
 		}
 
 		return SourceHandle::Invalid;
