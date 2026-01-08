@@ -124,6 +124,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="game\audio\AudioEngine.h" />
+    <ClInclude Include="game\audio\Decoding\DecoderFactory.h" />
+    <ClInclude Include="game\audio\Decoding\IDecoder.h" />
     <ClInclude Include="game\audio\Decoding\WavDecoder.h" />
     <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h" />
     <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h" />
@@ -169,6 +171,7 @@
     <ClCompile Include="..\lib\glad\src\glad.c" />
     <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="game\audio\AudioEngine.cpp" />
+    <ClCompile Include="game\audio\Decoding\DecoderFactory.cpp" />
     <ClCompile Include="game\audio\Decoding\WavDecoder.cpp" />
     <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp" />
     <ClCompile Include="game\common\color.cpp" />

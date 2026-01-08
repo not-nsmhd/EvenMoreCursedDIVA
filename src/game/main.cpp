@@ -12,7 +12,7 @@ extern "C"
 	{
 #ifdef _DEBUG
 		Logging::ToggleLoggingToConsole(true);
-		Logging::ToggleLoggingToFile(true);
+		//Logging::ToggleLoggingToFile(true);
 #endif
 		Logging::LoggingInit();
 

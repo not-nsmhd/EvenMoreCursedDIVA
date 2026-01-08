@@ -15,6 +15,9 @@ namespace Starshine::Audio
 		virtual u32 GetSampleRate() const = 0;
 		virtual size_t GetSampleAmount() const = 0;
 
+		virtual size_t GetLoopStart_Frames() const = 0;
+		virtual size_t GetLoopEnd_Frames() const = 0;
+
 		virtual size_t ReadSamples(i16* dstBuffer, size_t offset, size_t size) = 0;
 
 	public:

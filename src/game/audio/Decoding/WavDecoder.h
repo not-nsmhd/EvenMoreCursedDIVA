@@ -1,24 +1,13 @@
 #pragma once
 #include "common/types.h"
+#include "IDecoder.h"
 
 namespace Starshine::Audio
 {
-	struct DecoderOutput
-	{
-		u32 ChannelCount{};
-		u32 SampleRate{};
-
-		size_t SampleCount{};
-		i16* SampleData{};
-
-		bool IsLooped{};
-		size_t LoopStart{};
-		size_t LoopEnd{};
-	};
-
-	class WavDecoder
+	class WavDecoder : public IDecoder
 	{
 	public:
-		bool ParseEncodedData(const void* encodedData, size_t encodedDataSize, DecoderOutput& output);
+		const char* GetFileExtension() const override;
+		bool ParseEncodedData(const void* encodedData, size_t encodedDataSize, DecoderOutput& output) override;
 	};
 }

@@ -36,6 +36,16 @@ namespace Starshine::Audio
 		return sampleCount;
 	}
 
+	size_t MemorySampleProvider::GetLoopStart_Frames() const
+	{
+		return loopStart_frames;
+	}
+
+	size_t MemorySampleProvider::GetLoopEnd_Frames() const
+	{
+		return loopEnd_frames;
+	}
+
 	size_t MemorySampleProvider::ReadSamples(i16* dstBuffer, size_t offset, size_t size)
 	{
 		size_t remainingSamples = sampleCount - offset;

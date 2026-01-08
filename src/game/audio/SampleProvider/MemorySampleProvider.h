@@ -6,6 +6,7 @@ namespace Starshine::Audio
 	class MemorySampleProvider : public ISampleProvider, NonCopyable
 	{
 		friend class AudioEngine;
+		friend class DecoderFactory;
 
 	public:
 		MemorySampleProvider();
@@ -17,6 +18,9 @@ namespace Starshine::Audio
 		u32 GetChannelCount() const;
 		u32 GetSampleRate() const;
 		size_t GetSampleAmount() const;
+
+		size_t GetLoopStart_Frames() const;
+		size_t GetLoopEnd_Frames() const;
 
 		size_t ReadSamples(i16* dstBuffer, size_t offset, size_t size);
 
@@ -34,5 +38,7 @@ namespace Starshine::Audio
 		i16* samples{};
 
 		size_t samplePosition{};
+		size_t loopStart_frames{};
+		size_t loopEnd_frames{};
 	};
 }

@@ -88,6 +88,11 @@ __pragma (pack(pop))
 		return result;
 	}
 
+	const char* WavDecoder::GetFileExtension() const
+	{
+		return ".wav";
+	}
+
 	bool WavDecoder::ParseEncodedData(const void* encodedData, size_t encodedDataSize, DecoderOutput& output)
 	{
 		if (encodedData != nullptr && encodedDataSize > 0)

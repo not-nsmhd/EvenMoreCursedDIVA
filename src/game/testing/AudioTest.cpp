@@ -60,6 +60,10 @@ namespace Starshine::Testing
 
 		void Destroy()
 		{
+			AudioEngine::GetInstance()->UnloadSource(testAudio);
+			AudioEngine::GetInstance()->UnloadSource(testLoopingAudio_start);
+			AudioEngine::GetInstance()->UnloadSource(testLoopingAudio_end);
+
 			TestFont.Destroy();
 			SpriteRenderer->Destroy();
 		}

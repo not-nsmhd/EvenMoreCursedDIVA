@@ -88,6 +88,9 @@
     <ClCompile Include="game\audio\Decoding\WavDecoder.cpp">
       <Filter>src\game\audio\Decoding</Filter>
     </ClCompile>
+    <ClCompile Include="game\audio\Decoding\DecoderFactory.cpp">
+      <Filter>src\game\audio\Decoding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -211,6 +214,12 @@
       <Filter>src\game\audio\SampleProvider</Filter>
     </ClInclude>
     <ClInclude Include="game\audio\Decoding\WavDecoder.h">
+      <Filter>src\game\audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\Decoding\DecoderFactory.h">
+      <Filter>src\game\audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\Decoding\IDecoder.h">
       <Filter>src\game\audio\Decoding</Filter>
     </ClInclude>
   </ItemGroup>

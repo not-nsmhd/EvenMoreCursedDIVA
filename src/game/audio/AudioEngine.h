@@ -1,10 +1,12 @@
 #pragma once
 #include "common/types.h"
+#include "SampleProvider/ISampleProvider.h"
 
 namespace Starshine::Audio
 {
 	// NOTE: Sample: Raw 16-bit PCM data for a single channel
-	// NOTE: Frame: A pair of samples for each channel
+	// NOTE: Frame: A set of samples spanning across each channel
+	// NOTE: Mixing Sample: 32-bit floating point representation of a 16-bit PCM sample
 
 	enum class VoiceHandle : u16 { Invalid = 0xFFFF };
 	enum class SourceHandle : u16 { Invalid = 0xFFFF };
@@ -62,10 +64,10 @@ namespace Starshine::Audio
 
 	public:
 		// NOTE: This function makes a local copy of the "samples" array that is stored in the source context
-		SourceHandle RegisterSource(i16* samples, size_t sampleCount, i32 sampleRate, i32 channelCount);
+		SourceHandle RegisterSource(ISampleProvider* sampleProvider);
 		SourceHandle LoadSource(const void* encodedData, size_t encodedDataSize);
 		SourceHandle LoadSource(std::string_view filePath);
-		void ReleaseSource(SourceHandle handle);
+		void UnloadSource(SourceHandle handle);
 
 		VoiceHandle AllocateVoice(SourceHandle source);
 		void FreeVoice(VoiceHandle handle);

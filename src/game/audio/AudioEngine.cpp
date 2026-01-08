@@ -1,8 +1,7 @@
 #include <array>
 #include <vector>
 #include "AudioEngine.h"
-#include "SampleProvider/MemorySampleProvider.h"
-#include "Decoding/WavDecoder.h"
+#include "Decoding/DecoderFactory.h"
 #include "io/File.h"
 #include "util/logging.h"
 
@@ -45,7 +44,6 @@ namespace Starshine::Audio
 		std::array<VoiceContext, MaxSimultaneousVoices> voiceContexts;
 		std::vector<SourceData> registeredSources;
 
-		WavDecoder wavDecoder;
 		std::array<i16, DefaultSampleBufferSize> workingBuffer;
 		std::array<f32, DefaultSampleBufferSize> mixingBuffer;
 
@@ -231,20 +229,12 @@ namespace Starshine::Audio
 			}
 		}
 
-		SourceHandle RegisterSource(i16* samples, size_t sampleCount, i32 sampleRate, i32 channelCount)
+		SourceHandle RegisterSource(ISampleProvider* sampleProvider)
 		{
-			if (samples == nullptr)
+			if (sampleProvider == nullptr)
 			{
 				return SourceHandle::Invalid;
 			}
-
-			MemorySampleProvider* sampleProvider = new MemorySampleProvider();
-			sampleProvider->samples = new i16[sampleCount];
-			SDL_memcpy(sampleProvider->samples, samples, sampleCount * sizeof(i16));
-
-			sampleProvider->sampleCount = sampleCount;
-			sampleProvider->sampleRate = sampleRate;
-			sampleProvider->channels = channelCount;
 
 			for (size_t i = 0; i < registeredSources.size(); i++)
 			{
@@ -256,13 +246,13 @@ namespace Starshine::Audio
 				}
 
 				source.SampleProvider = sampleProvider;
-				LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u, previously allocated)", sampleCount, i);
+				LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u, previously allocated)", sampleProvider->GetSampleAmount(), i);
 
 				return static_cast<SourceHandle>(i);
 			}
 
 			registeredSources.push_back(SourceData{ sampleProvider, 0, 0 });
-			LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u)", sampleCount, registeredSources.size() - 1);
+			LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u)", sampleProvider->GetSampleAmount(), registeredSources.size() - 1);
 			return static_cast<SourceHandle>(registeredSources.size() - 1);
 		}
 
@@ -270,25 +260,17 @@ namespace Starshine::Audio
 		{
 			if (encodedData != nullptr && encodedDataSize > 0)
 			{
-				DecoderOutput output{};
-				if (wavDecoder.ParseEncodedData(encodedData, encodedDataSize, output) != true)
+				ISampleProvider* sampleProvider = DecoderFactory::GetInstance()->DecodeFileData("", encodedData, encodedDataSize);
+				if (sampleProvider == nullptr)
 				{
 					return SourceHandle::Invalid;
 				}
 
-				SourceHandle handle = RegisterSource(output.SampleData, output.SampleCount, output.SampleRate, output.ChannelCount);
+				SourceHandle handle = RegisterSource(sampleProvider);
 
 				SourceData* sourceData = GetSourceData(handle);
-				if (output.IsLooped)
-				{
-					sourceData->LoopStart = output.LoopStart;
-					sourceData->LoopEnd = output.LoopEnd;
-				}
-				else
-				{
-					sourceData->LoopStart = 0;
-					sourceData->LoopEnd = output.SampleCount / output.ChannelCount;
-				}
+				sourceData->LoopStart = sampleProvider->GetLoopStart_Frames();
+				sourceData->LoopEnd = sampleProvider->GetLoopEnd_Frames();
 
 				return handle;
 			}
@@ -296,7 +278,7 @@ namespace Starshine::Audio
 			return SourceHandle::Invalid;
 		}
 
-		void ReleaseSource(SourceHandle handle)
+		void UnloadSource(SourceHandle handle)
 		{
 			if (handle != SourceHandle::Invalid && static_cast<size_t>(handle) < registeredSources.size())
 			{
@@ -305,6 +287,19 @@ namespace Starshine::Audio
 				{
 					source.SampleProvider->Destroy();
 					delete source.SampleProvider;
+
+					LogInfo(LogName, "Audio source with handle %u has been unloaded", handle);
+
+					for (size_t i = 0; i < voiceContexts.size(); i++)
+					{
+						VoiceContext* voiceCtx = &voiceContexts[i];
+						if (voiceCtx->Source == handle)
+						{
+							voiceCtx->Source = SourceHandle::Invalid;
+							LogInfo(LogName, "The audio source of the voice with handle %llu has been invalidated", i);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -361,9 +356,9 @@ namespace Starshine::Audio
 		impl->QueueAudio(stream, length);
 	}
 
-	SourceHandle AudioEngine::RegisterSource(i16* samples, size_t sampleCount, i32 sampleRate, i32 channelCount)
+	SourceHandle AudioEngine::RegisterSource(ISampleProvider* sampleProvider)
 	{
-		return impl->RegisterSource(samples, sampleCount, sampleRate, channelCount);
+		return impl->RegisterSource(sampleProvider);
 	}
 
 	SourceHandle AudioEngine::LoadSource(const void* encodedData, size_t encodedDataSize)
@@ -388,9 +383,9 @@ namespace Starshine::Audio
 		return SourceHandle::Invalid;
 	}
 
-	void AudioEngine::ReleaseSource(SourceHandle handle)
+	void AudioEngine::UnloadSource(SourceHandle handle)
 	{
-		impl->ReleaseSource(handle);
+		impl->UnloadSource(handle);
 	}
 
 	VoiceHandle AudioEngine::AllocateVoice(SourceHandle source)
