@@ -35,6 +35,9 @@ namespace Starshine::Audio
 
 		size_t GetFramePosition() const;
 		void SetFramePosition(size_t position);
+
+		f32 GetVolume() const;
+		void SetVolume(f32 volume);
 	};
 
 	class AudioEngine : NonCopyable
@@ -71,6 +74,10 @@ namespace Starshine::Audio
 
 		VoiceHandle AllocateVoice(SourceHandle source);
 		void FreeVoice(VoiceHandle handle);
+
+		/* NOTE: Add a voice, assign a provided source to it, play itand discard it when done 
+		(Sounds with set looping positions will not loop when played through this function) */
+		void PlaySound(SourceHandle source, f32 volume);
 
 	public:
 		// NOTE: This function is meant to be used only as a callback for SDL's audio subsystem.

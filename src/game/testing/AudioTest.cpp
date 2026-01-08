@@ -27,7 +27,6 @@ namespace Starshine::Testing
 		Font TestFont;
 
 		SourceHandle testAudio{};
-		Voice testVoice{};
 
 		Voice testLoopingVoice{};
 		SourceHandle testLoopingAudio_start{};
@@ -48,8 +47,7 @@ namespace Starshine::Testing
 
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
-			testAudio = AudioEngine::GetInstance()->LoadSource("diva/sounds/test1.ogg");
-			testVoice = AudioEngine::GetInstance()->AllocateVoice(testAudio);
+			testAudio = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Normal01.ogg");
 
 			testLoopingAudio_start = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_Loop.ogg");
 			testLoopingAudio_end = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
@@ -72,8 +70,7 @@ namespace Starshine::Testing
 		{
 			if (Keyboard::IsKeyTapped(SDLK_SPACE))
 			{
-				testVoice.SetFramePosition(0);
-				testVoice.SetPlaying(true);
+				AudioEngine::GetInstance()->PlaySound(testAudio, 0.7f);
 			}
 
 			if (Keyboard::IsKeyTapped(SDLK_h))
@@ -85,10 +82,10 @@ namespace Starshine::Testing
 			}
 			else if (Keyboard::IsKeyReleased(SDLK_h))
 			{
-				testLoopingVoice.SetSource(testLoopingAudio_end);
-				testLoopingVoice.SetLoopState(false);
 				testLoopingVoice.SetFramePosition(0);
-				testLoopingVoice.SetPlaying(true);
+				testLoopingVoice.SetPlaying(false);
+
+				AudioEngine::GetInstance()->PlaySound(testLoopingAudio_end, 1.0f);
 			}
 
 			SDL_memset(debugText, 0, sizeof(debugText));
@@ -96,7 +93,6 @@ namespace Starshine::Testing
 			int pos = SDL_snprintf(debugText, sizeof(debugText) - 1, "\n\n(Press spacebar to play a test sound)");
 			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\n(Hold the H key to test audio looping)");
 
-			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\n\nVoice Position: %llu", testVoice.GetFramePosition());
 			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\nLooping Voice Position: %llu", testLoopingVoice.GetFramePosition());
 		}
 

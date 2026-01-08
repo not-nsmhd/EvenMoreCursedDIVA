@@ -25,8 +25,11 @@ namespace Starshine::Audio
 	struct VoiceContext
 	{
 		SourceHandle Source{};
+		f32 Volume{ 1.0f };
 
 		bool Allocated{};
+		bool DeallocateOnEnd{};
+
 		bool Playing{};
 		bool Looped{};
 
@@ -84,6 +87,32 @@ namespace Starshine::Audio
 
 		void Destroy()
 		{
+			SDL_PauseAudioDevice(sdlDevID, 1);
+
+			for (auto& it = registeredSources.begin(); it != registeredSources.end(); it++)
+			{
+				if (it->SampleProvider == nullptr)
+				{
+					continue;
+				}
+
+				it->SampleProvider->Destroy();
+				delete it->SampleProvider;
+				it->SampleProvider = nullptr;
+			}
+
+			for (auto& it = voiceContexts.begin(); it != voiceContexts.end(); it++)
+			{
+				if (!it->Allocated)
+				{
+					continue;
+				}
+
+				it->Playing = false;
+				it->Allocated = false;
+				it->Source = SourceHandle::Invalid;
+			}
+
 			SDL_CloseAudioDevice(sdlDevID);
 		}
 
@@ -98,13 +127,25 @@ namespace Starshine::Audio
 					const SourceData* source = GetSourceData(it->Source);
 					ISampleProvider* sampleProvider = source->SampleProvider;
 					size_t channels = sampleProvider->GetChannelCount();
-					size_t endPosition = it->Looped ? (source->LoopEnd) : (sampleProvider->GetSampleAmount() / channels);
+					size_t endPosition = (it->Looped && !it->DeallocateOnEnd) ? (source->LoopEnd) : (sampleProvider->GetSampleAmount() / channels);
 				
 					if (it->FramePosition >= endPosition)
 					{
 						if (!it->Looped)
 						{
 							it->Playing = false;
+
+							if (it->DeallocateOnEnd)
+							{
+								it->Allocated = false;
+								it->DeallocateOnEnd = false;
+								it->Source = SourceHandle::Invalid;
+								it->FramePosition = 0;
+								it->Volume = 1.0f;
+
+								//LogInfo(LogName, "Voice %d has been deallocated because it has reached its source end", voiceIndex);
+							}
+
 							continue;
 						}
 
@@ -130,7 +171,7 @@ namespace Starshine::Audio
 					{
 						if (channels == 1)
 						{
-							f32 sample = ConvertSampleFromI16ToF32(workingBuffer[pos]);
+							f32 sample = ConvertSampleFromI16ToF32(workingBuffer[pos]) * it->Volume;
 							mixingBuffer[pos * 2 + 0] += sample;
 							mixingBuffer[pos * 2 + 1] += sample;
 
@@ -141,8 +182,8 @@ namespace Starshine::Audio
 						}
 						else // 2 channels
 						{
-							mixingBuffer[pos + 0] += ConvertSampleFromI16ToF32(workingBuffer[pos + 0]);
-							mixingBuffer[pos + 1] += ConvertSampleFromI16ToF32(workingBuffer[pos + 1]);
+							mixingBuffer[pos + 0] += ConvertSampleFromI16ToF32(workingBuffer[pos + 0]) * it->Volume;
+							mixingBuffer[pos + 1] += ConvertSampleFromI16ToF32(workingBuffer[pos + 1]) * it->Volume;
 
 							mixingBuffer[pos + 0] = SDL_clamp(mixingBuffer[pos + 0], -1.0f, 1.0f);
 							mixingBuffer[pos + 1] = SDL_clamp(mixingBuffer[pos + 1], -1.0f, 1.0f);
@@ -287,6 +328,7 @@ namespace Starshine::Audio
 				{
 					source.SampleProvider->Destroy();
 					delete source.SampleProvider;
+					source.SampleProvider = nullptr;
 
 					LogInfo(LogName, "Audio source with handle %u has been unloaded", handle);
 
@@ -406,6 +448,31 @@ namespace Starshine::Audio
 		impl->ReleaseVoice(handle);
 	}
 
+	void AudioEngine::PlaySound(SourceHandle source, f32 volume)
+	{
+		if (source == SourceHandle::Invalid)
+		{
+			return;
+		}
+
+		for (auto& voiceCtx : impl->voiceContexts)
+		{
+			if (voiceCtx.Allocated)
+			{
+				continue;
+			}
+
+			voiceCtx.Allocated = true;
+			voiceCtx.DeallocateOnEnd = true;
+			voiceCtx.Source = source;
+			voiceCtx.Looped = false;
+			voiceCtx.FramePosition = 0;
+			voiceCtx.Volume = volume;
+			voiceCtx.Playing = true;
+			return;
+		}
+	}
+
 	bool Voice::IsValid() const
 	{
 		auto& impl = Instance->impl;
@@ -481,6 +548,24 @@ namespace Starshine::Audio
 		if (auto ctx = impl->GetVoiceContext(Handle); ctx != nullptr)
 		{
 			ctx->FramePosition = position;
+		}
+	}
+
+	f32 Voice::GetVolume() const
+	{
+		auto& impl = Instance->impl;
+		if (auto ctx = impl->GetVoiceContext(Handle); ctx != nullptr)
+		{
+			return ctx->Volume;
+		}
+	}
+
+	void Voice::SetVolume(f32 volume)
+	{
+		auto& impl = Instance->impl;
+		if (auto ctx = impl->GetVoiceContext(Handle); ctx != nullptr)
+		{
+			ctx->Volume = volume;
 		}
 	}
 }
