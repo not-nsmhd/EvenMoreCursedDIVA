@@ -5,13 +5,11 @@
 
 namespace Starshine::Audio
 {
-	static constexpr size_t VorbisfileBufferSize = 4096;
-
 	namespace Vorbisfile
 	{
 		struct DecoderState
 		{
-			const void* EncodedData{};
+			const u8* EncodedData{};
 			size_t EncodedDataSize{};
 			size_t EncodedPosition{};
 		};
@@ -90,7 +88,10 @@ namespace Starshine::Audio
 	{
 		if (encodedData != nullptr && encodedDataSize > 0)
 		{
-			Vorbisfile::DecoderState decoderState{ encodedData, encodedDataSize, 0 };
+			Vorbisfile::DecoderState decoderState{};
+			decoderState.EncodedData = reinterpret_cast<const u8*>(encodedData);
+			decoderState.EncodedDataSize = encodedDataSize;
+
 			OggVorbis_File ovFile{};
 
 			if (ov_open_callbacks(&decoderState, &ovFile, NULL, 0, Vorbisfile::VF_Callbacks) != 0)
@@ -131,13 +132,15 @@ namespace Starshine::Audio
 			output.SampleCount = ov_pcm_total(&ovFile, -1) * info->channels;
 			output.SampleData = new i16[output.SampleCount];
 
-			std::array<char, VorbisfileBufferSize> buffer;
+			constexpr size_t vorbisfileBufferSize = 4096;
+
+			std::array<char, vorbisfileBufferSize > buffer;
 			int currentBitstream = -1;
 			size_t copyOffset = 0;
 
 			while (copyOffset < (output.SampleCount * sizeof(i16)))
 			{
-				long readSize = ov_read(&ovFile, &buffer[0], VorbisfileBufferSize, 0, 2, 1, &currentBitstream);
+				long readSize = ov_read(&ovFile, &buffer[0], vorbisfileBufferSize, 0, 2, 1, &currentBitstream);
 				if (readSize == 0)
 				{
 					break;

@@ -70,6 +70,9 @@ namespace Starshine::Audio
 		SourceHandle RegisterSource(ISampleProvider* sampleProvider);
 		SourceHandle LoadSource(const void* encodedData, size_t encodedDataSize);
 		SourceHandle LoadSource(std::string_view filePath);
+
+		SourceHandle LoadStreamingSource(std::string_view filePath);
+
 		void UnloadSource(SourceHandle handle);
 
 		VoiceHandle AllocateVoice(SourceHandle source);

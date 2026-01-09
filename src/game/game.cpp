@@ -5,8 +5,6 @@
 #include "gfx/Renderer.h"
 #include "audio/AudioEngine.h"
 #include "input/Keyboard.h"
-#include "testing/AudioTest.h"
-#include "testing/RenderingTest.h"
 #include "main_game/MainGame.h"
 
 namespace Starshine
@@ -103,7 +101,7 @@ namespace Starshine
 
 			Keyboard::Initialize();
 
-			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<Testing::AudioTest>();
+			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::MainGame::MainGameState>();
 			SetCurrentGameStateInstance(mainGameState);
 
 			return true;
@@ -148,12 +146,14 @@ namespace Starshine
 				Timing.Ticks_Error = 0;
 			}
 
-			while (Timing.Ticks_Delta < Timing.TargetFrameTime_Ticks - Timing.Ticks_Error)
+			/*while (Timing.Ticks_Delta < Timing.TargetFrameTime_Ticks - Timing.Ticks_Error)
 			{
 				SDL_Delay(1);
 				Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
 				Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
-			}
+			}*/
+			Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
+			Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
 
 			Timing.Ticks_Error = Timing.Ticks_Delta - Timing.TargetFrameTime_Ticks;
 			Timing.DeltaTime_Milliseconds = static_cast<double>(Timing.Ticks_Delta) / 10000.0;

@@ -94,6 +94,9 @@
     <ClCompile Include="game\audio\Decoding\OggVorbisDecoder.cpp">
       <Filter>src\game\audio\Decoding</Filter>
     </ClCompile>
+    <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -228,6 +231,12 @@
     <ClInclude Include="game\audio\Decoding\OggVorbisDecoder.h">
       <Filter>src\game\audio\Decoding</Filter>
     </ClInclude>
+    <ClInclude Include="game\res\resource.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h">
+      <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -302,10 +311,23 @@
     <Filter Include="src\game\audio\Decoding">
       <UniqueIdentifier>{c7e3b211-d44f-4f19-88f0-a84d8b91dc6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{5d6d06da-1f33-429f-a721-67529c365a1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="game\.editorconfig">
       <Filter>src\game</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="game\res\GameIcon.ico">
+      <Filter>res</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game\res\Game.rc">
+      <Filter>res</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

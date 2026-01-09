@@ -2,6 +2,7 @@
 #include <vector>
 #include "AudioEngine.h"
 #include "Decoding/DecoderFactory.h"
+#include "SampleProvider/StreamingSampleProvider.h"
 #include "io/File.h"
 #include "util/logging.h"
 
@@ -20,11 +21,14 @@ namespace Starshine::Audio
 
 		size_t LoopStart{};
 		size_t LoopEnd{};
+
+		// NOTE: Only one voice at a time can play audio from a streaming source
+		VoiceHandle BoundVoice{ VoiceHandle::Invalid };
 	};
 
 	struct VoiceContext
 	{
-		SourceHandle Source{};
+		SourceHandle Source{ SourceHandle::Invalid };
 		f32 Volume{ 1.0f };
 
 		bool Allocated{};
@@ -120,14 +124,29 @@ namespace Starshine::Audio
 		{
 			SDL_memset(&mixingBuffer[0], 0, length * sizeof(f32));
 
+			int currentVoice = -1;
 			for (auto& it = voiceContexts.begin(); it != voiceContexts.end(); it++)
 			{
+				currentVoice++;
 				if (it->Source != SourceHandle::Invalid && it->Allocated && it->Playing)
 				{
 					const SourceData* source = GetSourceData(it->Source);
+
+					if (source == nullptr)
+					{
+						continue;
+					}
+
 					ISampleProvider* sampleProvider = source->SampleProvider;
+					bool streaming = sampleProvider->IsStreamingOnly();
+
+					if (streaming && (static_cast<int>(source->BoundVoice) != currentVoice))
+					{
+						continue;
+					}
+
 					size_t channels = sampleProvider->GetChannelCount();
-					size_t endPosition = (it->Looped && !it->DeallocateOnEnd) ? (source->LoopEnd) : (sampleProvider->GetSampleAmount() / channels);
+					size_t endPosition = sampleProvider->GetSampleAmount() / channels;
 				
 					if (it->FramePosition >= endPosition)
 					{
@@ -142,8 +161,6 @@ namespace Starshine::Audio
 								it->Source = SourceHandle::Invalid;
 								it->FramePosition = 0;
 								it->Volume = 1.0f;
-
-								//LogInfo(LogName, "Voice %d has been deallocated because it has reached its source end", voiceIndex);
 							}
 
 							continue;
@@ -153,15 +170,34 @@ namespace Starshine::Audio
 					}
 
 					size_t samplesToRead = length / (DefaultChannelCount / channels);
-					size_t readSamples = sampleProvider->ReadSamples(&workingBuffer[0], it->FramePosition * channels, length / (DefaultChannelCount / channels));
+					size_t readSamples = 0;
+
+					if (streaming)
+					{
+						readSamples = sampleProvider->GetNextSamples(&workingBuffer[0], samplesToRead);
+					}
+					else
+					{
+						readSamples = sampleProvider->ReadSamples(&workingBuffer[0], it->FramePosition * channels, samplesToRead);
+					}
 
 					if (it->Looped && readSamples < samplesToRead)
 					{
 						size_t bufferRemainder = samplesToRead - readSamples;
-						readSamples = sampleProvider->ReadSamples(
-							&workingBuffer[bufferRemainder], 
-							source->LoopStart * channels, 
-							bufferRemainder / (DefaultChannelCount / channels));
+						if (streaming)
+						{
+							sampleProvider->Seek(source->LoopStart * channels);
+							readSamples = sampleProvider->GetNextSamples(
+								&workingBuffer[bufferRemainder],
+								bufferRemainder / (DefaultChannelCount / channels));
+						}
+						else
+						{
+							readSamples = sampleProvider->ReadSamples(
+								&workingBuffer[bufferRemainder],
+								source->LoopStart * channels,
+								bufferRemainder / (DefaultChannelCount / channels));
+						}
 
 						it->FramePosition = source->LoopStart + readSamples;
 						readSamples = samplesToRead;
@@ -234,6 +270,8 @@ namespace Starshine::Audio
 				return VoiceHandle::Invalid;
 			}
 
+			SourceData* sourceData = GetSourceData(source);
+
 			for (size_t i = 0; i < MaxSimultaneousVoices; i++)
 			{
 				VoiceContext& voiceCtx = voiceContexts.at(i);
@@ -246,6 +284,11 @@ namespace Starshine::Audio
 				voiceCtx.Allocated = true;
 				voiceCtx.Source = source;
 				voiceCtx.FramePosition = 0;
+
+				if (sourceData->SampleProvider->IsStreamingOnly())
+				{
+					sourceData->BoundVoice = static_cast<VoiceHandle>(i);
+				}
 
 				return static_cast<VoiceHandle>(i);
 			}
@@ -297,11 +340,53 @@ namespace Starshine::Audio
 			return static_cast<SourceHandle>(registeredSources.size() - 1);
 		}
 
+		void BindStreamingSourceToANewVoice(SourceHandle source, VoiceHandle newVoice)
+		{
+			if (source != SourceHandle::Invalid && newVoice != VoiceHandle::Invalid)
+			{
+				SourceData* sourceData = GetSourceData(source);
+				if (sourceData != nullptr)
+				{
+					if (sourceData->SampleProvider->IsStreamingOnly() && sourceData->BoundVoice != VoiceHandle::Invalid)
+					{
+						VoiceContext* oldVoice = GetVoiceContext(sourceData->BoundVoice);
+						oldVoice->Playing = false;
+						oldVoice->FramePosition = 0;
+						oldVoice->Source = SourceHandle::Invalid;
+
+						sourceData->BoundVoice = newVoice;
+					}
+				}
+			}
+		}
+
 		SourceHandle LoadSource(const void* encodedData, size_t encodedDataSize)
 		{
 			if (encodedData != nullptr && encodedDataSize > 0)
 			{
 				ISampleProvider* sampleProvider = DecoderFactory::GetInstance()->DecodeFileData("", encodedData, encodedDataSize);
+				if (sampleProvider == nullptr)
+				{
+					return SourceHandle::Invalid;
+				}
+
+				SourceHandle handle = RegisterSource(sampleProvider);
+
+				SourceData* sourceData = GetSourceData(handle);
+				sourceData->LoopStart = sampleProvider->GetLoopStart_Frames();
+				sourceData->LoopEnd = sampleProvider->GetLoopEnd_Frames();
+
+				return handle;
+			}
+
+			return SourceHandle::Invalid;
+		}
+
+		SourceHandle LoadStreamingSource(const void* encodedData, size_t encodedDataSize)
+		{
+			if (encodedData != nullptr && encodedDataSize > 0)
+			{
+				StreamingSampleProvider* sampleProvider = new StreamingSampleProvider(reinterpret_cast<const u8*>(encodedData), encodedDataSize);
 				if (sampleProvider == nullptr)
 				{
 					return SourceHandle::Invalid;
@@ -338,8 +423,10 @@ namespace Starshine::Audio
 						if (voiceCtx->Source == handle)
 						{
 							voiceCtx->Source = SourceHandle::Invalid;
-							LogInfo(LogName, "The audio source of the voice with handle %llu has been invalidated", i);
-							break;
+							if (!voiceCtx->DeallocateOnEnd)
+							{
+								LogInfo(LogName, "The audio source of the voice with handle %llu has been invalidated", i);
+							}
 						}
 					}
 				}
@@ -415,7 +502,7 @@ namespace Starshine::Audio
 
 		if (fileData != nullptr && fileSize > 0)
 		{
-			SourceHandle handle = AudioEngine::GetInstance()->LoadSource(fileData, fileSize);
+			SourceHandle handle = LoadSource(fileData, fileSize);
 			delete[] fileData;
 
 			if (handle != SourceHandle::Invalid)
@@ -426,6 +513,31 @@ namespace Starshine::Audio
 			else
 			{
 				LogInfo(LogName, "Failed to load file \"%s\"", filePath.data());
+				return SourceHandle::Invalid;
+			}
+		}
+
+		return SourceHandle::Invalid;
+	}
+
+	SourceHandle AudioEngine::LoadStreamingSource(std::string_view filePath)
+	{
+		u8* fileData = nullptr;
+		size_t fileSize = IO::File::ReadAllBytes(filePath, &fileData);
+
+		if (fileData != nullptr && fileSize > 0)
+		{
+			SourceHandle handle = impl->LoadStreamingSource(fileData, fileSize);
+			delete[] fileData;
+
+			if (handle != SourceHandle::Invalid)
+			{
+				LogInfo(LogName, "Loaded file \"%s\" for streaming", filePath.data());
+				return handle;
+			}
+			else
+			{
+				LogInfo(LogName, "Failed to load file \"%s\" for streaming", filePath.data());
 				return SourceHandle::Invalid;
 			}
 		}
@@ -530,6 +642,7 @@ namespace Starshine::Audio
 		if (auto ctx = impl->GetVoiceContext(Handle); ctx != nullptr)
 		{
 			ctx->Source = handle;
+			impl->BindStreamingSourceToANewVoice(handle, this->Handle);
 		}
 	}
 
@@ -548,6 +661,11 @@ namespace Starshine::Audio
 		if (auto ctx = impl->GetVoiceContext(Handle); ctx != nullptr)
 		{
 			ctx->FramePosition = position;
+
+			if (impl->GetSourceData(ctx->Source)->SampleProvider->IsStreamingOnly())
+			{
+				impl->GetSourceData(ctx->Source)->SampleProvider->Seek(position);
+			}
 		}
 	}
 

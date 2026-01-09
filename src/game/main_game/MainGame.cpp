@@ -6,6 +6,7 @@
 #include "HUD.h"
 #include "input/Keyboard.h"
 #include "gfx/Render2D/SpriteRenderer.h"
+#include "audio/AudioEngine.h"
 #include <string>
 #include <deque>
 #include <fstream>
@@ -17,6 +18,7 @@ namespace DIVA::MainGame
 	using namespace Starshine;
 	using namespace Starshine::GFX;
 	using namespace Starshine::GFX::Render2D;
+	using namespace Starshine::Audio;
 	using namespace Starshine::Input;
 	using namespace Common;
 	using std::string_view;
@@ -36,9 +38,6 @@ namespace DIVA::MainGame
 		{ 255, 206, 255, 255 },
 		{ 242, 255, 175, 255 }
 	};
-
-	// TODO: Replace this with sprites
-	
 
 	struct GameNote
 	{
@@ -131,6 +130,20 @@ namespace DIVA::MainGame
 
 		HUD hud = HUD(MainGameContext);
 
+		SourceHandle HitSound_Normal{};
+		SourceHandle HitSound_Double{};
+
+		Voice HitSound_Hold_LoopVoice{};
+		SourceHandle HitSound_Hold_Loop{};
+		SourceHandle HitSound_Hold_LoopEnd{};
+
+		Voice MusicVoice{};
+		SourceHandle MusicSource{};
+
+		size_t CurrentMusicPosition{};
+		size_t PreviousMusicPosition{};
+		float ChartDeltaTime{};
+
 		char debugText[512] = {};
 
 		StateInternal(MainGame::Context& context) : MainGameContext{ context }
@@ -206,8 +219,23 @@ namespace DIVA::MainGame
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "HoldTrail_Triangle", spriteCache.HoldNoteTrails);
 
 			// ---------------
+			
+			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
+			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
 
-			fstream chartFile = fstream("diva/songdata/test/test_f_chart.xml", ios_base::binary | ios_base::in);
+			HitSound_Hold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_Loop.ogg");
+			HitSound_Hold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_LoopEnd.ogg");
+
+			HitSound_Hold_LoopVoice = AudioEngine::GetInstance()->AllocateVoice(HitSound_Hold_Loop);
+			HitSound_Hold_LoopVoice.SetLoopState(true);
+			HitSound_Hold_LoopVoice.SetVolume(0.35f);
+
+			MusicSource = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/pv_022.ogg");
+			MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
+
+			// ---------------
+
+			fstream chartFile = fstream("diva/songdata/test/test_dt2_chart.xml", ios_base::binary | ios_base::in);
 			chartFile.seekg(0, ios_base::end);
 			size_t chartFileSize = chartFile.tellg();
 			chartFile.seekg(0, ios_base::beg);
@@ -243,10 +271,24 @@ namespace DIVA::MainGame
 			}
 
 			if (!Paused)
-			{
-				ElapsedTime_Seconds += deltaTime_ms / 1000.0f;
+			{	
+				MusicVoice.SetPlaying(true);
 
-				UpdateChart(deltaTime_ms);
+				if (MusicVoice.IsPlaying())
+				{
+					PreviousMusicPosition = CurrentMusicPosition;
+					CurrentMusicPosition = MusicVoice.GetFramePosition();
+
+					ChartDeltaTime = static_cast<float>(CurrentMusicPosition - PreviousMusicPosition) / 44100.0f;
+					ElapsedTime_Seconds += ChartDeltaTime;
+				}
+				else
+				{
+					ElapsedTime_Seconds += deltaTime_ms / 1000.0f;
+					ChartDeltaTime = deltaTime_ms / 1000.0f;
+				}
+
+				UpdateChart(ChartDeltaTime);
 
 				size_t noteIndex = 0;
 				while (noteIndex < ActiveNotes.size())
@@ -259,7 +301,7 @@ namespace DIVA::MainGame
 						continue;
 					}
 
-					UpdateNote(*note, deltaTime_ms);
+					UpdateNote(*note, ChartDeltaTime);
 					noteIndex++;
 				}
 
@@ -277,6 +319,14 @@ namespace DIVA::MainGame
 			if (Keyboard::IsAnyTapped(PauseKeybind, nullptr, nullptr))
 			{
 				Paused = !Paused;
+				if (Paused)
+				{
+					MusicVoice.SetPlaying(false);
+				}
+				else
+				{
+					MusicVoice.SetPlaying(true);
+				}
 			}
 
 			SDL_memset(debugText, 0, sizeof(debugText));
@@ -303,7 +353,7 @@ namespace DIVA::MainGame
 
 			hud.Draw(deltaTime_ms);
 
-			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText, sizeof(debugText)), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			spriteRenderer->RenderSprites(nullptr);
 			BaseRenderer->SwapBuffers();
@@ -361,7 +411,7 @@ namespace DIVA::MainGame
 
 		void UpdateNote(GameNote& note, float deltaTime_ms)
 		{
-			note.ElapsedTime += deltaTime_ms / 1000.0f;
+			note.ElapsedTime += deltaTime_ms;
 
 			bool isHoldNote = (NoteTypeToNoteTypeFlags(note.Type) & NoteTypeFlags_HoldAll) != 0;
 			float remainingTime = note.GetRemainingTime() * 1000.0f;
@@ -467,6 +517,10 @@ namespace DIVA::MainGame
 				{
 				case NoteType::Normal:
 					note->HasBeenHit = tapped;
+					if (note->HasBeenHit)
+					{
+						AudioEngine::GetInstance()->PlaySound(HitSound_Normal, 0.35f);
+					}
 					break;
 				case NoteType::Double:
 					note->HasBeenHitPrimary = note->HasBeenHitPrimary ? note->HasBeenHitPrimary : primTapped;
@@ -477,17 +531,25 @@ namespace DIVA::MainGame
 					{
 						Keyboard::IsAnyDown(binding, nullptr, &note->HasBeenHitAlternative);
 						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
+						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
 						break;
 					}
 					else if (!note->HasBeenHitPrimary && note->HasBeenHitAlternative)
 					{
 						Keyboard::IsAnyDown(binding, &note->HasBeenHitPrimary, nullptr);
 						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
+						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
 						break;
 					}
 
 					note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
 					doubleGiveBonus = note->HasBeenHit && shapeMatches;
+
+					if (note->HasBeenHit)
+					{
+						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
+					}
+
 					break;
 				case NoteType::HoldStart:
 					note->HasBeenHit = note->HasBeenHit ? note->HasBeenHit : tapped;
@@ -496,6 +558,12 @@ namespace DIVA::MainGame
 					hud.HoldScoreBonus();
 					hud.SetScoreBonusDisplayState(note->CurrentScoreBonus, note->IconPosition);
 
+					if (note->HasBeenHit)
+					{
+						HitSound_Hold_LoopVoice.SetFramePosition(0);
+						HitSound_Hold_LoopVoice.SetPlaying(true);
+					}
+
 					if (note->HasBeenHit && note->NextNote->ElapsedTime < 0.0f && released)
 					{
 						note->NextNote->HasBeenHit = note->HasBeenHit;
@@ -503,6 +571,7 @@ namespace DIVA::MainGame
 						note->HitEvaluation = HitEvaluation::Miss;
 						note->NextNote->HitEvaluation = HitEvaluation::Miss;
 						hud.ReleaseScoreBonus(true);
+						HitSound_Hold_LoopVoice.SetPlaying(false);
 
 						note->NextNote->ShouldBeRemoved = true;
 					}
@@ -516,11 +585,19 @@ namespace DIVA::MainGame
 					{
 						note->HitEvaluation = HitEvaluation::Miss;
 						hud.ReleaseScoreBonus(true);
+						HitSound_Hold_LoopVoice.SetPlaying(false);
 						break;
 					}
 
 					MainGameContext.Score.Score += note->CurrentScoreBonus;
 					hud.ReleaseScoreBonus(false);
+
+					if (note->HasBeenHit)
+					{
+						HitSound_Hold_LoopVoice.SetPlaying(false);
+						AudioEngine::GetInstance()->PlaySound(HitSound_Hold_LoopEnd, 0.35f);
+					}
+
 					break;
 				}
 
@@ -569,6 +646,10 @@ namespace DIVA::MainGame
 						hud.SetScoreBonusDisplayState(200, note->TargetPosition);
 					}
 				}
+			}
+			else if (tapped && !released)
+			{
+				AudioEngine::GetInstance()->PlaySound(HitSound_Normal, 0.5f);
 			}
 		}
 

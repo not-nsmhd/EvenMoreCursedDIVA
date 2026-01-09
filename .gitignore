@@ -18,3 +18,5 @@ lib_vs/FAudio
 lib_vs/libogg
 lib_vs/libvorbis
 lib_vs/SDL2
+
+*.aps

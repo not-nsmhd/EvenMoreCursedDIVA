@@ -32,6 +32,9 @@ namespace Starshine::Testing
 		SourceHandle testLoopingAudio_start{};
 		SourceHandle testLoopingAudio_end{};
 
+		SourceHandle testStreamingAudio{};
+		Voice testStreamingVoice{};
+
 		char debugText[512] {};
 
 		bool Initialize()
@@ -53,6 +56,9 @@ namespace Starshine::Testing
 			testLoopingAudio_end = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
 			testLoopingVoice = AudioEngine::GetInstance()->AllocateVoice(testLoopingAudio_start);
 
+			testStreamingAudio = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/test.ogg");
+			testStreamingVoice = AudioEngine::GetInstance()->AllocateVoice(testStreamingAudio);
+
 			return true;
 		}
 
@@ -61,6 +67,7 @@ namespace Starshine::Testing
 			AudioEngine::GetInstance()->UnloadSource(testAudio);
 			AudioEngine::GetInstance()->UnloadSource(testLoopingAudio_start);
 			AudioEngine::GetInstance()->UnloadSource(testLoopingAudio_end);
+			AudioEngine::GetInstance()->UnloadSource(testStreamingAudio);
 
 			TestFont.Destroy();
 			SpriteRenderer->Destroy();
@@ -88,12 +95,20 @@ namespace Starshine::Testing
 				AudioEngine::GetInstance()->PlaySound(testLoopingAudio_end, 1.0f);
 			}
 
+			if (Keyboard::IsKeyTapped(SDLK_s))
+			{
+				testStreamingVoice.SetLoopState(true);
+				testStreamingVoice.SetPlaying(true);
+			}
+
 			SDL_memset(debugText, 0, sizeof(debugText));
 
 			int pos = SDL_snprintf(debugText, sizeof(debugText) - 1, "\n\n(Press spacebar to play a test sound)");
 			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\n(Hold the H key to test audio looping)");
+			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\n(Press S to test audio streaming)");
 
 			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\nLooping Voice Position: %llu", testLoopingVoice.GetFramePosition());
+			pos += SDL_snprintf(debugText + pos, sizeof(debugText) - 1, "\nStreaming Voice Position: %llu", testStreamingVoice.GetFramePosition());
 		}
 
 		void Draw(f64 deltaTime_milliseconds)

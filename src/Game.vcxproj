@@ -130,6 +130,7 @@
     <ClInclude Include="game\audio\Decoding\WavDecoder.h" />
     <ClInclude Include="game\audio\SampleProvider\ISampleProvider.h" />
     <ClInclude Include="game\audio\SampleProvider\MemorySampleProvider.h" />
+    <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h" />
     <ClInclude Include="game\build\build_info.h" />
     <ClInclude Include="game\build\build_info_dummy.h" />
     <ClInclude Include="game\common\color.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="game\main_game\HUD.h" />
     <ClInclude Include="game\main_game\MainGame.h" />
     <ClInclude Include="game\pcg\pcg_basic.h" />
+    <ClInclude Include="game\res\resource.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
     <ClInclude Include="game\testing\SpriteTest.h" />
@@ -176,6 +178,7 @@
     <ClCompile Include="game\audio\Decoding\OggVorbisDecoder.cpp" />
     <ClCompile Include="game\audio\Decoding\WavDecoder.cpp" />
     <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp" />
+    <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp" />
     <ClCompile Include="game\common\color.cpp" />
     <ClCompile Include="game\common\math_ext.cpp" />
     <ClCompile Include="game\game.cpp" />
@@ -203,6 +206,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="game\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="game\res\GameIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game\res\Game.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

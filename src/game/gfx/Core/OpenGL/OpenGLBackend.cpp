@@ -207,7 +207,7 @@ namespace Starshine::GFX::Core::OpenGL
 				return false;
 			}
 
-			//SDL_GL_SetSwapInterval(1);
+			SDL_GL_SetSwapInterval(1);
 
 			LogInfo(LogName, "OpenGL Version: %s", glGetString(GL_VERSION));
 			LogInfo(LogName, "OpenGL Renderer: %s", glGetString(GL_RENDERER));
