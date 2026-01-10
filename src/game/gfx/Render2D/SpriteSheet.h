@@ -13,7 +13,7 @@ namespace Starshine::GFX::Render2D
 	{
 		std::string Name;
 		u32 TextureIndex;
-		Common::RectangleF SourceRectangle;
+		RectangleF SourceRectangle;
 		vec2 Origin;
 	};
 

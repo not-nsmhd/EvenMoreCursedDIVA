@@ -1,5 +1,4 @@
 #include "Core/OpenGL/OpenGLBackend.h"
-#include "Core/D3D9/D3D9Backend.h"
 #include "Renderer.h"
 #include "io/Xml.h"
 #include "io/File.h"
@@ -14,7 +13,6 @@ namespace Starshine::GFX
 	using namespace Core;
 	using namespace IO;
 	using OpenGLBackend = Core::OpenGL::OpenGLBackend;
-	using D3D9Backend = Core::D3D9::D3D9Backend;
 	using std::string;
 	using std::string_view;
 
@@ -40,9 +38,6 @@ namespace Starshine::GFX
 				default:
 					CurrentBackend = new OpenGLBackend();
 					break;
-				case RendererBackendType::D3D9:
-					CurrentBackend = new D3D9Backend();
-					break;
 				}
 			}
 		}
@@ -62,7 +57,7 @@ namespace Starshine::GFX
 			CurrentBackend = nullptr;
 		}
 
-		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
+		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
 		{
 			CurrentBackend->Clear(flags, color, depth, stencil);
 		}
@@ -262,12 +257,12 @@ namespace Starshine::GFX
 		return impl->CurrentBackend->GetType();
 	}
 
-	Common::RectangleF Renderer::GetViewportSize() const
+	RectangleF Renderer::GetViewportSize() const
 	{
 		return impl->CurrentBackend->GetViewportSize();
 	}
 
-	void Renderer::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
+	void Renderer::Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
 	{
 		impl->Clear(flags, color, depth, stencil);
 	}

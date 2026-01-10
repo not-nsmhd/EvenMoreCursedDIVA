@@ -1,6 +1,6 @@
 #pragma once
-#include "common/types.h"
-#include "common/color.h"
+#include <Common/Types.h>
+#include <Common/Color.h>
 #include "SpriteSheet.h"
 
 namespace Starshine::GFX::Render2D
@@ -18,9 +18,9 @@ namespace Starshine::GFX::Render2D
 		void SetSpriteState(const SpriteSheet& sheet, i32 spriteIndex, const vec2& scale, i32* texIndex);
 		void SetSpriteState(const SpriteSheet& sheet, std::string_view spriteName, const vec2& scale, i32* texIndex);
 
-		void PushSprite(const SpriteSheet& sheet, const Sprite& sprite, vec2& position, vec2& scale, const Common::Color& color);
-		void PushSprite(const SpriteSheet& sheet, i32 spriteIndex, vec2& position, vec2& scale, const Common::Color& color);
-		void PushSprite(const SpriteSheet& sheet, std::string_view spriteName, vec2& position, vec2& scale, const Common::Color& color);
+		void PushSprite(const SpriteSheet& sheet, const Sprite& sprite, vec2& position, vec2& scale, const Color& color);
+		void PushSprite(const SpriteSheet& sheet, i32 spriteIndex, vec2& position, vec2& scale, const Color& color);
+		void PushSprite(const SpriteSheet& sheet, std::string_view spriteName, vec2& position, vec2& scale, const Color& color);
 
 	private:
 		SpriteRenderer& sprRenderer;

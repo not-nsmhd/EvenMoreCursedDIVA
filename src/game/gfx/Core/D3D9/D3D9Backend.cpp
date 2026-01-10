@@ -1,3 +1,4 @@
+#if 0
 #include <d3d9.h>
 #include <SDL2/SDL_syswm.h>
 #include "D3D9Backend.h"
@@ -5,7 +6,6 @@
 #include <vector>
 #include "io/Xml.h"
 #include "io/File.h"
-#include "common/math_ext.h"
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::D3D9
@@ -478,3 +478,4 @@ namespace Starshine::GFX::Core::D3D9
 	{
 	}
 }
+#endif

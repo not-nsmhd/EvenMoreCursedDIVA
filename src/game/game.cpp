@@ -14,8 +14,6 @@ namespace Starshine
 	using namespace Audio;
 	using namespace Input;
 
-	using Common::Color;
-
 	constexpr const char* LogName = "Starshine::Game";
 	constexpr u64 DefaultTargetFrameTime_Ticks = 166667;
 

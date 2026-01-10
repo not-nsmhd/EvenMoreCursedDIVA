@@ -1,14 +1,12 @@
 #include "hud.h"
 #include "common/color.h"
-#include "common/math_ext.h"
+#include <Common/MathExt.h>
 #include "gfx/Render2D/SpriteRenderer.h"
-#include <SDL2/SDL.h>
 
 namespace DIVA::MainGame
 {
 	using namespace Starshine;
 	using namespace Starshine::GFX::Render2D;
-	using namespace Common;
 	using std::string_view;
 
 	constexpr EnumStringMappingTable<HitEvaluation> HitEvaluationNames
@@ -114,7 +112,7 @@ namespace DIVA::MainGame
 			FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
 
 			char scoreText[8] = {};
-			size_t scoreTextLength = SDL_snprintf(scoreText, sizeof(scoreText), "%07u", ScoreDisplay.DisplayValue);
+			size_t scoreTextLength = snprintf(scoreText, sizeof(scoreText), "%07u", ScoreDisplay.DisplayValue);
 
 			fontRenderer.PushString(debugFont, std::string_view(scoreText, scoreTextLength), ScoreDisplay.Position, vec2(1.0f), DefaultColors::White);
 		}
@@ -139,7 +137,7 @@ namespace DIVA::MainGame
 				else
 				{
 					char comboText[8] = {};
-					size_t comboTextLength = SDL_snprintf(comboText, sizeof(comboText) - 1, "%u", ComboDisplayState.Combo);
+					size_t comboTextLength = snprintf(comboText, sizeof(comboText) - 1, "%u", ComboDisplayState.Combo);
 
 					vec2 valuTextSize = fontRenderer.MeasureString(debugFont, valuText);
 					vec2 comboTextPos = { valuTextPos.x + valuTextSize.x + 4.0f, valuTextPos.y };
@@ -158,7 +156,7 @@ namespace DIVA::MainGame
 				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
 
 				char text[8] = {};
-				size_t textLength = SDL_snprintf(text, sizeof(text) - 1, "+%u", ScoreBonusDisplay.Value);
+				size_t textLength = snprintf(text, sizeof(text) - 1, "+%u", ScoreBonusDisplay.Value);
 
 				vec2 textSize = fontRenderer.MeasureString(debugFont, std::string_view(text, textLength));
 

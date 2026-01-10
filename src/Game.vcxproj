@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)\</IntDir>
     <TargetName>game_debug</TargetName>
     <TargetExt>.exe</TargetExt>
     <CustomBuildBeforeTargets>
@@ -52,7 +52,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)_$(PlatformShortName)\$(ProjectName)\</IntDir>
     <TargetName>game</TargetName>
     <TargetExt>.exe</TargetExt>
     <CustomBuildBeforeTargets>
@@ -63,7 +63,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\StarshineLib\src;$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -93,7 +93,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\StarshineLib\src;$(SolutionDir)lib\glad\include;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib\utf8cpp\include;$(SolutionDir)lib_vs\SDL2\include;$(SolutionDir)lib_vs\libogg\include;$(SolutionDir)lib_vs\libvorbis\include;$(SolutionDir)src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -133,10 +133,6 @@
     <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h" />
     <ClInclude Include="game\build\build_info.h" />
     <ClInclude Include="game\build\build_info_dummy.h" />
-    <ClInclude Include="game\common\color.h" />
-    <ClInclude Include="game\common\math_ext.h" />
-    <ClInclude Include="game\common\rect.h" />
-    <ClInclude Include="game\common\types.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\game_state.h" />
     <ClInclude Include="game\gfx\Buffers.h" />
@@ -162,7 +158,6 @@
     <ClInclude Include="game\main_game\HitEvaluation.h" />
     <ClInclude Include="game\main_game\HUD.h" />
     <ClInclude Include="game\main_game\MainGame.h" />
-    <ClInclude Include="game\pcg\pcg_basic.h" />
     <ClInclude Include="game\res\resource.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
@@ -179,8 +174,6 @@
     <ClCompile Include="game\audio\Decoding\WavDecoder.cpp" />
     <ClCompile Include="game\audio\SampleProvider\MemorySampleProvider.cpp" />
     <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp" />
-    <ClCompile Include="game\common\color.cpp" />
-    <ClCompile Include="game\common\math_ext.cpp" />
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\gfx\Core\D3D9\D3D9Backend.cpp" />
     <ClCompile Include="game\gfx\Core\OpenGL\OpenGLBackend.cpp" />
@@ -196,7 +189,6 @@
     <ClCompile Include="game\main_game\Chart.cpp" />
     <ClCompile Include="game\main_game\HUD.cpp" />
     <ClCompile Include="game\main_game\MainGame.cpp" />
-    <ClCompile Include="game\pcg\pcg_basic.c" />
     <ClCompile Include="game\stb\stb_image.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
@@ -212,6 +204,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game\res\Game.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="StarshineLib\StarshineLib.vcxproj">
+      <Project>{71aa7175-a2c5-405b-9946-d79260200bda}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

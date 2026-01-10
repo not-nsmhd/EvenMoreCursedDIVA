@@ -7,19 +7,33 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "src\Game.vcxproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpritePack", "src\SpritePack.vcxproj", "{BBB06759-A768-A9A6-1070-8202FC464497}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StarshineLib", "src\StarshineLib\StarshineLib.vcxproj", "{71AA7175-A2C5-405B-9946-D79260200BDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Debug|x64.ActiveCfg = Debug|x64
 		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Debug|x64.Build.0 = Debug|x64
+		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Debug|x86.ActiveCfg = Debug|x64
 		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Release|x64.ActiveCfg = Release|x64
 		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Release|x64.Build.0 = Release|x64
+		{7FA9857C-6BE0-860D-14CD-6C1000E3020F}.Release|x86.ActiveCfg = Release|x64
 		{BBB06759-A768-A9A6-1070-8202FC464497}.Debug|x64.ActiveCfg = Debug|x64
 		{BBB06759-A768-A9A6-1070-8202FC464497}.Debug|x64.Build.0 = Debug|x64
+		{BBB06759-A768-A9A6-1070-8202FC464497}.Debug|x86.ActiveCfg = Debug|x64
 		{BBB06759-A768-A9A6-1070-8202FC464497}.Release|x64.ActiveCfg = Release|x64
+		{BBB06759-A768-A9A6-1070-8202FC464497}.Release|x86.ActiveCfg = Release|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Debug|x64.ActiveCfg = Debug|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Debug|x64.Build.0 = Debug|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Debug|x86.ActiveCfg = Debug|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Release|x64.ActiveCfg = Release|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Release|x64.Build.0 = Release|x64
+		{71AA7175-A2C5-405B-9946-D79260200BDA}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

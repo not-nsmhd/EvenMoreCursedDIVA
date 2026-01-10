@@ -1,7 +1,7 @@
 #pragma once
-#include "common/types.h"
-#include "common/color.h"
-#include "common/rect.h"
+#include <Common/Types.h>
+#include <Common/Color.h>
+#include <Common/Rect.h>
 #include "Types.h"
 #include "Resource.h"
 #include "Buffers.h"
@@ -32,9 +32,9 @@ namespace Starshine::GFX
 	public:
 		RendererBackendType GetType() const;
 
-		Common::RectangleF GetViewportSize() const;
+		RectangleF GetViewportSize() const;
 	public:
-		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
+		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
 	public:

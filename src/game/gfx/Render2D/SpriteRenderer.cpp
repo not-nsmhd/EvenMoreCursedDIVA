@@ -1,14 +1,13 @@
+#include "SpriteRenderer.h"
 #include <array>
 #include <vector>
-#include "common/math_ext.h"
+#include <Common/MathExt.h>
 #include <glm/ext.hpp>
-#include "SpriteRenderer.h"
 
 namespace Starshine::GFX::Render2D
 {
 	using std::array;
 	using std::vector;
-	using namespace Common;
 
 	constexpr size_t MaxSprites = 1024;
 	constexpr size_t MaxVertices = MaxSprites * 4;
@@ -379,9 +378,9 @@ namespace Starshine::GFX::Render2D
 		impl->CurrentSprite.RotationSin = SDL_sinf(radians);
 	}
 
-	void SpriteRenderer::SetSpriteSource(const RectangleF& source)
+	void SpriteRenderer::SetSpriteSource(const RectangleF& texSpaceSource)
 	{
-		impl->CurrentSprite.SourceRect_TexSpace = source;
+		impl->CurrentSprite.SourceRect_TexSpace = texSpaceSource;
 	}
 
 	void SpriteRenderer::SetSpriteSource(const Texture* texture, const RectangleF& absSource)
@@ -420,7 +419,7 @@ namespace Starshine::GFX::Render2D
 		impl->CurrentSprite.VertexColors.BottomRight = colors[3];
 	}
 
-	void SpriteRenderer::SetSpriteColors(Color& topLeft, Color& topRight, Color& bottomLeft, Color& bottomRight)
+	void SpriteRenderer::SetSpriteColors(const Color& topLeft, const Color& topRight, const Color& bottomLeft, const Color& bottomRight)
 	{
 		impl->CurrentSprite.VertexColors.TopLeft = topLeft;
 		impl->CurrentSprite.VertexColors.TopRight = topRight;

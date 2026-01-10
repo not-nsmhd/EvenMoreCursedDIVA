@@ -1,9 +1,9 @@
-#include "common/types.h"
-#include "common/math_ext.h"
 #include "MainGame.h"
 #include "Chart.h"
 #include "HitEvaluation.h"
 #include "HUD.h"
+#include <Common/Types.h>
+#include <Common/MathExt.h>
 #include "input/Keyboard.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "audio/AudioEngine.h"
@@ -20,7 +20,6 @@ namespace DIVA::MainGame
 	using namespace Starshine::GFX::Render2D;
 	using namespace Starshine::Audio;
 	using namespace Starshine::Input;
-	using namespace Common;
 	using std::string_view;
 	using std::fstream;
 	using std::ios_base;
@@ -76,7 +75,7 @@ namespace DIVA::MainGame
 		// NOTE: Functions
 		// NOTE: Returned value is specified in seconds
 		float GetRemainingTime() const { return NoteTime - ElapsedTime; }
-		float GetNormalizedElapsedTime() const { return Common::MathExtensions::ConvertRange(0.0f, NoteTime, 0.0f, 1.0f, ElapsedTime); }
+		float GetNormalizedElapsedTime() const { return MathExtensions::ConvertRange(0.0f, NoteTime, 0.0f, 1.0f, ElapsedTime); }
 
 		bool HasBeenEvaluated() const { return HitEvaluation != HitEvaluation::None; }
 	};
@@ -343,7 +342,7 @@ namespace DIVA::MainGame
 
 		void Draw(float deltaTime_ms)
 		{
-			BaseRenderer->Clear(ClearFlags::ClearFlags_Color, Common::Color(0, 24, 24, 255), 1.0f, 0);
+			BaseRenderer->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
 			for (auto& note : ActiveNotes)

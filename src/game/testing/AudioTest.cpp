@@ -1,7 +1,7 @@
 #include "AudioTest.h"
 #include "audio/AudioEngine.h"
-#include "common/color.h"
-#include "common/math_ext.h"
+#include <Common/Types.h>
+#include <Common/MathExt.h>
 #include "gfx/Renderer.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "input/Keyboard.h"
@@ -15,7 +15,6 @@ namespace Starshine::Testing
 	using namespace Starshine::GFX::Render2D;
 	using namespace Starshine::Input;
 	using namespace Starshine::IO;
-	using namespace Common;
 	using std::string;
 	using std::string_view;
 

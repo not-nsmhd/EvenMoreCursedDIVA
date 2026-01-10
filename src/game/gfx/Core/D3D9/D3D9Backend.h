@@ -1,5 +1,5 @@
+#if 0
 #pragma once
-#include "common/types.h"
 #include "gfx/Core/IBackend.h"
 
 namespace Starshine::GFX::Core::D3D9
@@ -25,7 +25,7 @@ namespace Starshine::GFX::Core::D3D9
 
 		Common::RectangleF GetViewportSize() const;
 	public:
-		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
+		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
 	public:
@@ -58,3 +58,4 @@ namespace Starshine::GFX::Core::D3D9
 		Impl* impl = nullptr;
 	};
 }
+#endif

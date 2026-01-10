@@ -1,5 +1,5 @@
 #pragma once
-#include "common/types.h"
+#include <Common/Types.h>
 #include "game_state.h"
 
 namespace Starshine

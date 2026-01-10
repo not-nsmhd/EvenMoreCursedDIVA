@@ -1,10 +1,9 @@
 #pragma once
-#include "../common/types.h"
-#include "../common/color.h"
-#include <SDL2/SDL_stdinc.h>
+#include <Common/Types.h>
+#include <Common/Color.h>
 #include <tinyxml2.h>
 
-namespace Xml
+namespace Starshine::Xml
 {
 	constexpr std::string_view Extension = "xml";
 
@@ -35,7 +34,7 @@ namespace Xml
 	inline size_t GetValueLength(Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 	inline size_t GetValueLength(const Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 
-	inline Common::Color TryGetHexColor(const Attribute* attrib)
+	inline Color TryGetHexColor(const Attribute* attrib)
 	{
 		if (attrib != nullptr && GetValueLength(attrib) > 1)
 		{
@@ -46,12 +45,12 @@ namespace Xml
 			}
 
 			u32 r = 0, g = 0, b = 0, a = 0;
-			SDL_sscanf(value, "%02x%02x%02x%02x", &r, &g, &b, &a);
-			return Common::Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
+			sscanf_s(value, "%02x%02x%02x%02x", &r, &g, &b, &a);
+			return Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
 		}
 		else
 		{
-			Common::Color{};
+			Color{};
 		}
 	}
 }

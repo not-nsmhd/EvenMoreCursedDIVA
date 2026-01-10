@@ -1,8 +1,6 @@
 #pragma once
-#include "common/types.h"
 #include "gfx/Core/IBackend.h"
 #include "OpenGLVertexDesc.h"
-#include <vector>
 
 namespace Starshine::GFX::Core::OpenGL
 {
@@ -25,9 +23,9 @@ namespace Starshine::GFX::Core::OpenGL
 	public:
 		ResourceContext* GetResourceContext(ResourceHandle handle);
 
-		Common::RectangleF GetViewportSize() const;
+		RectangleF GetViewportSize() const;
 	public:
-		void Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil);
+		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
 	public:

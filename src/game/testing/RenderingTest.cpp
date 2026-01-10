@@ -1,5 +1,6 @@
 #include "RenderingTest.h"
-#include "common/color.h"
+#include <Common/Types.h>
+#include <Common/MathExt.h>
 #include "gfx/Renderer.h"
 #include "io/File.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,7 +10,6 @@ namespace Starshine::Testing
 {
 	using namespace Starshine::GFX;
 	using namespace Starshine::IO;
-	using namespace Common;
 	using std::string_view;
 
 	struct TestVertex

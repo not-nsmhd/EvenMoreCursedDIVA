@@ -89,11 +89,4 @@ namespace Starshine
 		// TODO: There must be a better way to do this without causing a program crash or returning the first value in the enum
 		return static_cast<Enum>(0);
 	}
-
-	enum class SeekOrigin
-	{
-		Start,
-		Current,
-		End
-	};
 }

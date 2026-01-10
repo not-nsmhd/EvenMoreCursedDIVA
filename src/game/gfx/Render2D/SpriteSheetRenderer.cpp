@@ -32,7 +32,7 @@ namespace Starshine::GFX::Render2D
 		SetSpriteState(sheet, sprite, scale, texIndex);
 	}
 
-	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, const Sprite& sprite, vec2& position, vec2& scale, const Common::Color& color)
+	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, const Sprite& sprite, vec2& position, vec2& scale, const Color& color)
 	{
 		SetSpriteState(sheet, sprite, scale, nullptr);
 		sprRenderer.SetSpritePosition(position);
@@ -40,13 +40,13 @@ namespace Starshine::GFX::Render2D
 		sprRenderer.PushSprite(sheet.GetTexture(sprite.TextureIndex));
 	}
 
-	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, i32 spriteIndex, vec2& position, vec2& scale, const Common::Color& color)
+	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, i32 spriteIndex, vec2& position, vec2& scale, const Color& color)
 	{
 		const Sprite& sprite = sheet.GetSprite(spriteIndex);
 		PushSprite(sheet, sprite, position, scale, color);
 	}
 
-	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, std::string_view spriteName, vec2& position, vec2& scale, const Common::Color& color)
+	void SpriteSheetRenderer::PushSprite(const SpriteSheet& sheet, std::string_view spriteName, vec2& position, vec2& scale, const Color& color)
 	{
 		const Sprite& sprite = sheet.GetSprite(spriteName);
 		PushSprite(sheet, sprite, position, scale, color);

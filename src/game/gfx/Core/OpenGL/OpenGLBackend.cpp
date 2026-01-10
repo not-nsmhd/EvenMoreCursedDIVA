@@ -4,13 +4,12 @@
 #include <vector>
 #include "io/Xml.h"
 #include "io/File.h"
-#include "common/math_ext.h"
+#include <Common/MathExt.h>
 #include "util/logging.h"
 
 namespace Starshine::GFX::Core::OpenGL
 {
 	using namespace Logging;
-	using namespace Common;
 	using std::array;
 	using std::vector;
 	using std::string_view;
@@ -465,14 +464,14 @@ namespace Starshine::GFX::Core::OpenGL
 		return nullptr;
 	}
 
-	Common::RectangleF OpenGLBackend::GetViewportSize() const
+	RectangleF OpenGLBackend::GetViewportSize() const
 	{
 		RectangleF viewport = {};
 		glGetFloatv(GL_VIEWPORT, &viewport.X);
 		return viewport;
 	}
 
-	void OpenGLBackend::Clear(ClearFlags flags, Common::Color& color, f32 depth, u8 stencil)
+	void OpenGLBackend::Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
 	{
 		GLenum clearFlags = 0;
 

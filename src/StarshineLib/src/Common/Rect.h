@@ -1,7 +1,7 @@
 #pragma once
-#include "types.h"
+#include "Types.h"
 
-namespace Common
+namespace Starshine
 {
 	struct Rectangle
 	{

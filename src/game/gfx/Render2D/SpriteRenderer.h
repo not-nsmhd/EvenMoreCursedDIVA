@@ -1,6 +1,6 @@
 #pragma once
-#include "common/rect.h"
-#include "common/color.h"
+#include <Common/Rect.h>
+#include <Common/Color.h>
 #include "gfx/Renderer.h"
 #include "SpriteSheetRenderer.h"
 #include "FontRenderer.h"
@@ -32,15 +32,16 @@ namespace Starshine::GFX::Render2D
 		void SetSpriteRotation(float radians);
 
 		// NOTE: Source must be specified in texture space
-		void SetSpriteSource(const Common::RectangleF& source);
-		void SetSpriteSource(const Texture* texture, const Common::RectangleF& absSource);
+		// (texture's point at its width and height is represented as a (1.0, 1.0) coordinate)
+		void SetSpriteSource(const RectangleF& texSpaceSource);
+		void SetSpriteSource(const Texture* texture, const RectangleF& absSource);
 
 		void SetSpriteFlip(bool flipHorizontal, bool flipVertical);
-		void SetSpriteColor(const Common::Color& color);
+		void SetSpriteColor(const Color& color);
 		
 		// NOTE: Coloring order: top-left, top-right, bottom-left, bottom-right
-		void SetSpriteColors(const Common::Color colors[4]);
-		void SetSpriteColors(Common::Color& topLeft, Common::Color& topRight, Common::Color& bottomLeft, Common::Color& bottomRight);
+		void SetSpriteColors(const Color colors[4]);
+		void SetSpriteColors(const Color& topLeft, const Color& topRight, const Color& bottomLeft, const Color& bottomRight);
 
 		void SetBlendMode(BlendMode mode);
 

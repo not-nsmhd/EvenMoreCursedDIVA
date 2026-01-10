@@ -7,7 +7,7 @@ namespace Starshine::GFX::Render2D
 	{
 	}
 
-	void FontRenderer::PushString(const Font& font, std::string_view text, vec2& position, vec2& scale, const Common::Color& color)
+	void FontRenderer::PushString(const Font& font, std::string_view text, vec2& position, vec2& scale, const Color& color)
 	{
 		vec2 basePos{};
 		vec2 glyphOffset{};
@@ -68,7 +68,7 @@ namespace Starshine::GFX::Render2D
 		return basePos;
 	}
 
-	void FontRenderer::PushGlyph(const Font& font, const FontGlyph* glyph, vec2& position, vec2& scale, const Common::Color& color)
+	void FontRenderer::PushGlyph(const Font& font, const FontGlyph* glyph, vec2& position, vec2& scale, const Color& color)
 	{
 		float srcX = static_cast<float>(glyph->X);
 		float srcY = static_cast<float>(glyph->Y);
@@ -76,14 +76,13 @@ namespace Starshine::GFX::Render2D
 		float srcHeight = static_cast<float>(glyph->Height);
 
 		sprRenderer.SetSpritePosition(position);
-		sprRenderer.SetSpriteScale(vec2(srcWidth, srcHeight) * scale);
+		sprRenderer.SetSpriteScale(vec2{ srcWidth, srcHeight } *scale);
 		sprRenderer.SetSpriteColor(color);
 
-		Common::RectangleF glyphSrcRect = { srcX, srcY, srcWidth, srcHeight };
-		sprRenderer.SetSpriteSource(font.Texture, glyphSrcRect);
+		sprRenderer.SetSpriteSource(font.Texture, RectangleF{ srcX, srcY, srcWidth, srcHeight });
 
 		sprRenderer.SetSpriteRotation(0.0f);
-		sprRenderer.SetSpriteOrigin(vec2(0.0f));
+		sprRenderer.SetSpriteOrigin(vec2{ 0.0f, 0.0f });
 
 		sprRenderer.PushSprite(font.Texture);
 	}
