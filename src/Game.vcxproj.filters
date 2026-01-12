@@ -88,6 +88,9 @@
     <ClCompile Include="game\audio\SampleProvider\StreamingSampleProvider.cpp">
       <Filter>src\game\audio\SampleProvider</Filter>
     </ClCompile>
+    <ClCompile Include="game\testing\DataTest.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -212,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="game\audio\SampleProvider\StreamingSampleProvider.h">
       <Filter>src\game\audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\DataTest.h">
+      <Filter>src\game\testing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

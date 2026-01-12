@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -89,7 +89,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -112,12 +112,22 @@
     <ClInclude Include="src\Common\MathExt.h" />
     <ClInclude Include="src\Common\Rect.h" />
     <ClInclude Include="src\Common\Types.h" />
+    <ClInclude Include="src\IO\BinaryMode.h" />
+    <ClInclude Include="src\IO\FileStream.h" />
+    <ClInclude Include="src\IO\IStream.h" />
+    <ClInclude Include="src\IO\StreamManipulator.h" />
+    <ClInclude Include="src\IO\StreamReader.h" />
+    <ClInclude Include="src\IO\StreamWriter.h" />
+    <ClInclude Include="src\Misc\EndianHelper.h" />
     <ClInclude Include="src\Testing.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\IO\FileStream.cpp" />
+    <ClCompile Include="src\IO\StreamReader.cpp" />
+    <ClCompile Include="src\IO\StreamWriter.cpp" />
     <ClCompile Include="src\Testing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

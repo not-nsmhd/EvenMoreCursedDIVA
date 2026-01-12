@@ -160,6 +160,7 @@
     <ClInclude Include="game\main_game\MainGame.h" />
     <ClInclude Include="game\res\resource.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
+    <ClInclude Include="game\testing\DataTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
     <ClInclude Include="game\testing\SpriteTest.h" />
     <ClInclude Include="game\util\logging.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="game\main_game\MainGame.cpp" />
     <ClCompile Include="game\stb\stb_image.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />
+    <ClCompile Include="game\testing\DataTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
     <ClCompile Include="game\testing\SpriteTest.cpp" />
     <ClCompile Include="game\util\logging.cpp" />

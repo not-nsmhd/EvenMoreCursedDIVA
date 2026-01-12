@@ -17,18 +17,18 @@ namespace Starshine
 
 	namespace DefaultColors
 	{
-		constexpr Color Transparent		= { 0,		0,		0,		0 };
+		constexpr Color Transparent { 0, 0, 0, 0 };
 
-		constexpr Color Black			= { 0,		0,		0,		255 };
-		constexpr Color White			= { 255,	255,	255,	255 };
-		constexpr Color Gray			= { 128,	128,	128,	255 };
+		constexpr Color Black { 0, 0, 0, 255 };
+		constexpr Color White { 255, 255, 255, 255 };
+		constexpr Color Gray { 128, 128, 128, 255 };
 
-		constexpr Color Red				= { 255,	0,		0,		255 };
-		constexpr Color Green			= { 0,		255,	0,		255 };
-		constexpr Color Blue			= { 0,		0,		255,	255 };
+		constexpr Color Red { 255, 0, 0, 255 };
+		constexpr Color Green { 0, 255, 0, 255 };
+		constexpr Color Blue { 0, 0, 255, 255 };
 
-		constexpr Color Yellow			= { 255,	255,	0,		255 };
-		constexpr Color Cyan			= { 0,		255,	255,	255 };
-		constexpr Color Purple			= { 255,	0,		255,	255 };
+		constexpr Color Yellow { 255, 255, 0, 255 };
+		constexpr Color Cyan { 0, 255, 255, 255 };
+		constexpr Color Purple { 255, 0, 255, 255 };
 	};
 };
