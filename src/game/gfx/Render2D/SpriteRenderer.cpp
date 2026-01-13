@@ -442,6 +442,38 @@ namespace Starshine::GFX::Render2D
 		impl->RenderSprites(shader);
 	}
 
+	void SpriteRenderer::PushLine(const vec2& position, float angle, float length, const Color& color, float thickness)
+	{
+		SetSpritePosition(position);
+		SetSpriteScale({ length, thickness });
+		SetSpriteRotation(angle);
+		SetSpriteColor(color);
+		PushSprite(nullptr);
+	}
+
+	void SpriteRenderer::PushOutlineRect(const vec2& position, const vec2& size, const vec2& origin, const Color& color, float thickness)
+	{
+		SetSpritePosition({ position.x, position.y });
+		SetSpriteScale({ size.x, thickness });
+		SetSpriteColor(color);
+		PushSprite(nullptr);
+
+		SetSpritePosition({ position.x, position.y });
+		SetSpriteScale({ thickness, size.y });
+		SetSpriteColor(color);
+		PushSprite(nullptr);
+
+		SetSpritePosition({ position.x + size.x - thickness, position.y });
+		SetSpriteScale({ thickness, size.y });
+		SetSpriteColor(color);
+		PushSprite(nullptr);
+
+		SetSpritePosition({ position.x, position.y + size.y - thickness });
+		SetSpriteScale({ size.x, thickness });
+		SetSpriteColor(color);
+		PushSprite(nullptr);
+	}
+
 	SpriteSheetRenderer& SpriteRenderer::SpriteSheet()
 	{
 		return impl->SpriteSheetRenderer;

@@ -152,8 +152,6 @@
     <ClInclude Include="game\gfx\Types.h" />
     <ClInclude Include="game\gfx\VertexDesc.h" />
     <ClInclude Include="game\input\Keyboard.h" />
-    <ClInclude Include="game\io\File.h" />
-    <ClInclude Include="game\io\Xml.h" />
     <ClInclude Include="game\main_game\Chart.h" />
     <ClInclude Include="game\main_game\HitEvaluation.h" />
     <ClInclude Include="game\main_game\HUD.h" />
@@ -168,7 +166,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lib\glad\src\glad.c" />
-    <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="game\audio\AudioEngine.cpp" />
     <ClCompile Include="game\audio\Decoding\DecoderFactory.cpp" />
     <ClCompile Include="game\audio\Decoding\OggVorbisDecoder.cpp" />
@@ -185,7 +182,6 @@
     <ClCompile Include="game\gfx\Render2D\SpriteSheetRenderer.cpp" />
     <ClCompile Include="game\gfx\Renderer.cpp" />
     <ClCompile Include="game\input\Keyboard.cpp" />
-    <ClCompile Include="game\io\File.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\main_game\Chart.cpp" />
     <ClCompile Include="game\main_game\HUD.cpp" />

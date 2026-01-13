@@ -22,11 +22,17 @@
     <Filter Include="Source Files\Misc">
       <UniqueIdentifier>{72ac6bfb-d4d1-48e4-8c58-a4d6df70ffa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GFX">
+      <UniqueIdentifier>{ad413135-77d1-462b-bbd1-05c587831afd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IO\Path">
+      <UniqueIdentifier>{b252de57-498e-422a-81b8-3c93e8297c12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lib">
+      <UniqueIdentifier>{7b9fad2b-377a-4a18-b17c-c61957413be0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Testing.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Common\Types.h">
       <Filter>Source Files\Common</Filter>
     </ClInclude>
@@ -60,6 +66,21 @@
     <ClInclude Include="src\Misc\EndianHelper.h">
       <Filter>Source Files\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="src\GFX\RectanglePacker.h">
+      <Filter>Source Files\GFX</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IO\Path\Directory.h">
+      <Filter>Source Files\IO\Path</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IO\Path\Path.h">
+      <Filter>Source Files\IO\Path</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IO\File.h">
+      <Filter>Source Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IO\Xml.h">
+      <Filter>Source Files\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -67,9 +88,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Testing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\IO\FileStream.cpp">
       <Filter>Source Files\IO</Filter>
     </ClCompile>
@@ -78,6 +96,18 @@
     </ClCompile>
     <ClCompile Include="src\IO\StreamReader.cpp">
       <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GFX\RectanglePacker.cpp">
+      <Filter>Source Files\GFX</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\Path\Directory.cpp">
+      <Filter>Source Files\IO\Path</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\File.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\tinyxml2\src\tinyxml2.cpp">
+      <Filter>Source Files\Lib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -26,6 +26,8 @@ using u8vec2 = glm::vec<2, u8, glm::defaultp>;
 using u8vec3 = glm::vec<3, u8, glm::defaultp>;
 using u8vec4 = glm::vec<4, u8, glm::defaultp>;
 
+using ivec2 = glm::vec<2, i32, glm::defaultp>;
+
 using mat4 = glm::mat<4, 4, f32, glm::defaultp>;
 
 struct NonCopyable

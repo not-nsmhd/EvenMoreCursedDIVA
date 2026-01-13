@@ -1,7 +1,6 @@
 #include "File.h"
 #include <fstream>
 #include <Windows.h>
-#include "util/logging.h"
 
 namespace Starshine::IO
 {
@@ -10,9 +9,6 @@ namespace Starshine::IO
 		using std::fstream;
 		using std::ios;
 		using std::string_view;
-		using namespace Logging;
-
-		constexpr const char* LogName = "Starshine::IO::File";
 
 		constexpr const char PathSeparator = '/';
 		constexpr const char PathSeparator_Windows = '\\';
@@ -55,7 +51,6 @@ namespace Starshine::IO
 
 			if (!file.good())
 			{
-				LogError(LogName, "Failed to open file \"%s\"", filePath.data());
 				return 0;
 			}
 

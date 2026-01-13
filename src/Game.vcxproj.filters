@@ -4,9 +4,6 @@
     <ClCompile Include="..\lib\glad\src\glad.c">
       <Filter>lib\glad\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\lib\tinyxml2\src\tinyxml2.cpp">
-      <Filter>lib\tinyxml2\src</Filter>
-    </ClCompile>
     <ClCompile Include="game\main.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
@@ -24,9 +21,6 @@
     </ClCompile>
     <ClCompile Include="game\testing\RenderingTest.cpp">
       <Filter>src\game\testing</Filter>
-    </ClCompile>
-    <ClCompile Include="game\io\File.cpp">
-      <Filter>src\game\io</Filter>
     </ClCompile>
     <ClCompile Include="game\gfx\Renderer.cpp">
       <Filter>src\game\gfx</Filter>
@@ -120,14 +114,8 @@
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLBackend.h">
       <Filter>src\game\gfx\Core\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="game\io\File.h">
-      <Filter>src\game\io</Filter>
-    </ClInclude>
     <ClInclude Include="game\gfx\Core\OpenGL\OpenGLVertexDesc.h">
       <Filter>src\game\gfx\Core\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="game\io\Xml.h">
-      <Filter>src\game\io</Filter>
     </ClInclude>
     <ClInclude Include="game\gfx\Buffers.h">
       <Filter>src\game\gfx</Filter>
@@ -230,12 +218,6 @@
     <Filter Include="lib\glad\src">
       <UniqueIdentifier>{bf5e71b7-dcd3-4234-83a8-30655ef399b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\tinyxml2">
-      <UniqueIdentifier>{cad3976b-9f90-4c5b-857c-135f8e65c080}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\tinyxml2\src">
-      <UniqueIdentifier>{d7a9e1fd-cc22-4e9d-ba68-514a53670f75}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{009eb1fd-59c3-47ce-b7d2-27c734134923}</UniqueIdentifier>
     </Filter>
@@ -247,9 +229,6 @@
     </Filter>
     <Filter Include="src\game\input">
       <UniqueIdentifier>{17dd7525-f9fc-4fb9-814b-3d9619d0a836}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\game\io">
-      <UniqueIdentifier>{c581a64b-b9f8-495d-82f3-4d1ce5e92b56}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\main_game">
       <UniqueIdentifier>{a0b9677d-9edb-4cf4-8f12-fb12c28f34a9}</UniqueIdentifier>

@@ -50,6 +50,10 @@ namespace Starshine::GFX::Render2D
 		void RenderSprites(Shader* shader);
 
 	public:
+		void PushLine(const vec2& position, float angle, float length, const Color& color, float thickness = 1.0f);
+		void PushOutlineRect(const vec2& position, const vec2& size, const vec2& origin, const Color& color, float thickness = 1.0f);
+
+	public:
 		SpriteSheetRenderer& SpriteSheet();
 		FontRenderer& Font();
 

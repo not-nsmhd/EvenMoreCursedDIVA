@@ -4,6 +4,8 @@
 
 namespace Starshine::MathExtensions
 {
+	constexpr f32 PiOver2 = 3.1415927f / 2.0f;
+	constexpr f32 PiOver4 = 3.1415927f / 4.0f;
 	constexpr f32 Pi = 3.1415927f;
 	constexpr f32 TwoPi = 6.2831854f;
 
@@ -77,8 +79,8 @@ namespace Starshine::MathExtensions
 
 	constexpr bool ApproxiamtelyEqual(f32 a, f32 b, f32 range = 0.0001f) { return glm::abs(a - b) < range; };
 
-	template <typename T> constexpr T Min(T a, T b) { return (a < b) ? a : b };
-	template <typename T> constexpr T Max(T a, T b) { return (a > b) ? a : b };
+	template <typename T> constexpr T Min(T a, T b) { return (a < b) ? a : b; };
+	template <typename T> constexpr T Max(T a, T b) { return (a > b) ? a : b; };
 	template <typename T> constexpr T Clamp(T value, T min, T max) { return Min<T>(Max<T>(value, min), max); };
 
 	template <typename T>

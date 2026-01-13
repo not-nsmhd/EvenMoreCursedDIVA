@@ -1,6 +1,8 @@
 #pragma once
 #include <Common/Types.h>
+#include <Common/MathExt.h>
 #include <Common/Color.h>
+#include <SDL2/SDL_stdinc.h>
 #include <tinyxml2.h>
 
 namespace Starshine::Xml
@@ -11,22 +13,35 @@ namespace Starshine::Xml
 	using Element = tinyxml2::XMLElement;
 	using Attribute = tinyxml2::XMLAttribute;
 
-	inline void Parse(Document& doc, char* text, size_t textSize) { doc.Parse(text, textSize); }
+	inline bool Parse(Document& doc, const char* text, size_t textSize) { return doc.Parse(text, textSize) == tinyxml2::XMLError::XML_SUCCESS; }
+	inline bool ParseFromFile(Document& doc, std::string_view filePath)
+	{ 
+		return doc.LoadFile(filePath.data()) == tinyxml2::XMLError::XML_SUCCESS; 
+	}
 
 	inline Element* GetRootElement(Document& doc) { return doc.RootElement(); }
 	inline const Element* GetRootElement(const Document& doc) { return doc.RootElement(); }
 
-	inline Element* FindElement(Element* element, std::string_view name) { return element->FirstChildElement(name.data()); }
-	inline const Element* FindElement(const Element* element, std::string_view name) { return element->FirstChildElement(name.data()); }
+	inline Element* FindElement(Element* element, std::string_view name)
+	{
+		if (SDL_strncmp(element->Name(), name.data(), name.size()) == 0) { return element; }
+		return element->FirstChildElement(name.data());
+	}
+
+	inline const Element* FindElement(const Element* element, std::string_view name)
+	{
+		if (SDL_strncmp(element->Name(), name.data(), name.size()) == 0) { return element; }
+		return element->FirstChildElement(name.data());
+	}
 
 	inline const Attribute* FindAttribute(Element* element, std::string_view name) { return element->FindAttribute(name.data()); }
 	inline const Attribute* FindAttribute(const Element* element, std::string_view name) { return element->FindAttribute(name.data()); }
 
-	inline size_t GetNameLength(Element* element) { size_t len = SDL_strlen(element->Name()); return SDL_min(len, 256); }
-	inline size_t GetNameLength(const Element* element) { size_t len = SDL_strlen(element->Name()); return SDL_min(len, 256); }
+	inline size_t GetNameLength(Element* element) { size_t len = SDL_strlen(element->Name()); return MathExtensions::Min(len, 256ULL); }
+	inline size_t GetNameLength(const Element* element) { size_t len = SDL_strlen(element->Name()); return MathExtensions::Min(len, 256ULL); }
 
-	inline size_t GetNameLength(Attribute* attrib) { size_t len = SDL_strlen(attrib->Name()); return SDL_min(len, 256); }
-	inline size_t GetNameLength(const Attribute* attrib) { size_t len = SDL_strlen(attrib->Name()); return SDL_min(len, 256); }
+	inline size_t GetNameLength(Attribute* attrib) { size_t len = SDL_strlen(attrib->Name()); return MathExtensions::Min(len, 256ULL); }
+	inline size_t GetNameLength(const Attribute* attrib) { size_t len = SDL_strlen(attrib->Name()); return MathExtensions::Min(len, 256ULL); }
 
 	inline size_t GetValueLength(Element* element) { return SDL_strlen(element->Value()); }
 	inline size_t GetValueLength(const Element* element) { return SDL_strlen(element->Value()); }
