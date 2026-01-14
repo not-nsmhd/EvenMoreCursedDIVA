@@ -67,6 +67,20 @@ namespace Starshine::MathExtensions
 		return (value & (value - 1)) == 0;
 	};
 
+	template <typename N>
+	constexpr N NearestPowerOf2(N value)
+	{
+		// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+		static_assert(std::is_integral_v<N>);
+		value--;
+		value |= value >> 1;
+		value |= value >> 2;
+		value |= value >> 4;
+		value |= value >> 8;
+		value |= value >> 16;
+		return value++;
+	};
+
 	constexpr f32 CalculateBarDuration_Seconds(f32 bpm, int beatsPerBar)
 	{
 		if (bpm <= 0.0f || beatsPerBar <= 0)

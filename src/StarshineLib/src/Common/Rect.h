@@ -23,12 +23,16 @@ namespace Starshine
 		inline bool Contains(const ivec2& point) const { return Contains(point.x, point.y); };
 		inline bool Contains(const Rectangle& rect) const { return Contains(rect.X, rect.Y, rect.Width, rect.Height); };
 
-		inline bool Intersects(const Rectangle& rect) const
+		inline bool Intersects(i32 x, i32 y, i32 width, i32 height) const
 		{
-			return Width > 0 && Height > 0 && rect.Width > 0 && rect.Height > 0 && 
-				((rect.X + rect.Width) > X && rect.X < (X + Width) && 
-				 (rect.Y + rect.Height) > Y && rect.Y < (Y + Height));
+			return Width > 0 && Height > 0 && width > 0 && height > 0 &&
+				((x + width) > X && x < (X + Width) &&
+					(y + height) > Y && y < (Y + Height));
 		};
+
+		inline bool Intersects(const Rectangle& rect) const { return Intersects(rect.X, rect.Y, rect.Width, rect.Height); };
+
+		constexpr i32 Area() const { return Width * Height; };
 	};
 
 	struct RectangleF

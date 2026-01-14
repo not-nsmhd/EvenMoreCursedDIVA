@@ -20,7 +20,7 @@ namespace Starshine::GFX
 		{
 			ivec2 testAreaSize{ testedArea.Width, testedArea.Height };
 
-			if (testAreaSize.x >= Settings.MaxSize.x && testAreaSize.y >= Settings.MaxSize.y)
+			if (testAreaSize.x >= Settings.MaxSize.x || testAreaSize.y >= Settings.MaxSize.y)
 			{
 				testedArea.Width = originalTestedAreaSize.x;
 				testedArea.Height = originalTestedAreaSize.y;
@@ -30,11 +30,11 @@ namespace Starshine::GFX
 			// First try by increasing the smallest dimension
 			if (testAreaSize.x < Settings.MaxSize.x && (testAreaSize.x <= testAreaSize.y || ((testAreaSize.x == testAreaSize.y) && (size.x >= size.y))))
 			{
-				testedArea.Width = testAreaSize.x * 2;
+				testedArea.Width = testAreaSize.x + size.x + Settings.Padding.x;
 			}
 			else
 			{
-				testedArea.Height = testAreaSize.y * 2;
+				testedArea.Height = testAreaSize.y + size.y + Settings.Padding.x;
 			}
 
 			if (AddAtEmptySpot(size))
@@ -48,7 +48,7 @@ namespace Starshine::GFX
 				testedArea.Width = testAreaSize.x;
 				if (testAreaSize.y < Settings.MaxSize.y)
 				{
-					testedArea.Height = testAreaSize.y * 2;
+					testedArea.Height = testAreaSize.y + size.y + Settings.Padding.y;
 				}
 			}
 			else
@@ -56,7 +56,7 @@ namespace Starshine::GFX
 				testedArea.Height = testAreaSize.y;
 				if (testAreaSize.x < Settings.MaxSize.x)
 				{
-					testedArea.Width = testAreaSize.x * 2;
+					testedArea.Width = testAreaSize.x + size.x + Settings.Padding.x;
 				}
 			}
 
@@ -74,15 +74,15 @@ namespace Starshine::GFX
 
 			if (testAreaSize.x < Settings.MaxSize.x)
 			{
-				testedArea.Width = testAreaSize.x * 2;
+				testedArea.Width = testAreaSize.x + size.x + Settings.Padding.x;
 			}
 			if (testAreaSize.y < Settings.MaxSize.y)
 			{
-				testedArea.Height = testAreaSize.y * 2;
+				testedArea.Height = testAreaSize.y + size.y + Settings.Padding.y;
 			}
 		}
 
-		return static_cast<i32>(packedRects.size()) - 1;;
+		return static_cast<i32>(packedRects.size()) - 1;
 	}
 
 	const Rectangle& RectanglePacker::GetRectangle(i32 index) const
@@ -106,19 +106,20 @@ namespace Starshine::GFX
 
 	void RectanglePacker::Clear()
 	{
+		anchors.clear();
 		packedRects.clear();
 	}
 
-	bool RectanglePacker::IsFree(const Rectangle& rect)
+	bool RectanglePacker::IsFree(i32 x, i32 y, i32 width, i32 height)
 	{
-		if (!testedArea.Contains(rect))
+		if (!testedArea.Contains(x, y, width, height))
 		{
 			return false;
 		}
 
 		for (auto& it : packedRects)
 		{
-			if (it.Intersects(rect))
+			if (it.Intersects(x, y, width, height))
 			{
 				return false;
 			}
@@ -126,6 +127,8 @@ namespace Starshine::GFX
 
 		return true;
 	}
+
+	bool RectanglePacker::IsFree(const Rectangle& rect) { return IsFree(rect.X, rect.Y, rect.Width, rect.Height); }
 
 	void RectanglePacker::AddAnchor(const ivec2& position)
 	{
@@ -168,6 +171,17 @@ namespace Starshine::GFX
 		if (canBePlaced)
 		{
 			anchors.erase(erasePos);
+
+			// Try to further optimize rectangle placement by shifting the rectangle
+			// to the upper left corner until met with another rectangle
+			int x, y {};
+
+			for (x = 1; x <= testRect.X; x++) { if (!IsFree(x, testRect.Y, testRect.Width, testRect.Height)) { break; } }
+			for (y = 1; y <= testRect.Y; y++) { if (!IsFree(testRect.X, y, testRect.Width, testRect.Height)) { break; } }
+
+			if (y > x) { testRect.Y -= y - (Settings.Padding.y + 1); }
+			else if (x > y) { testRect.X -= x - (Settings.Padding.x + 1); }
+
 			AddRect(testRect);
 		}
 

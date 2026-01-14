@@ -7,9 +7,6 @@
     <ClCompile Include="game\main.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
-    <ClCompile Include="game\stb\stb_image.cpp">
-      <Filter>src\game\stb</Filter>
-    </ClCompile>
     <ClCompile Include="game\util\logging.cpp">
       <Filter>src\game\util</Filter>
     </ClCompile>
@@ -232,9 +229,6 @@
     </Filter>
     <Filter Include="src\game\main_game">
       <UniqueIdentifier>{a0b9677d-9edb-4cf4-8f12-fb12c28f34a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\game\stb">
-      <UniqueIdentifier>{c43fb75a-742c-4d18-8402-e504629b89fa}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\testing">
       <UniqueIdentifier>{d5a6558e-b6b2-4dfc-9eff-d38e147a1bd1}</UniqueIdentifier>

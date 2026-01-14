@@ -36,5 +36,8 @@ namespace Starshine::IO
 
 			return includeExtension ? fileName : TrimExtension(fileName);
 		}
+
+		// NOTE: "newExtension" must contain a '.' at the beginning
+		std::string ChangeExtension(std::string_view filePath, std::string_view newExtension);
 	}
 }

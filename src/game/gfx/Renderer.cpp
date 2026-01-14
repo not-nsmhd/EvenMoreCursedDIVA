@@ -4,8 +4,8 @@
 #include "io/File.h"
 #include <string>
 #include <string_view>
-#include <stb_image.h>
 #include "util/logging.h"
+#include <Misc/ImageHelper.h>
 
 namespace Starshine::GFX
 {
@@ -193,24 +193,16 @@ namespace Starshine::GFX
 				return nullptr;
 			}
 
-			int width, height, channels;
-			u8* texData = stbi_load_from_memory(fileData, static_cast<int>(fileSize), &width, &height, &channels, 4);
+			ivec2 size{};
+			i32 channels{};
+			std::unique_ptr<u8[]> rgbaData;
 
-			if (texData == nullptr)
-			{
-				return nullptr;
-			}
+			if (!Misc::ImageHelper::ReadImageFile(fileData, fileSize, size, channels, rgbaData)) { return nullptr; }
 
-			Texture* texture = CurrentBackend->CreateTexture(width, height, TextureFormat::RGBA8, nearestFilter, clamp);
+			Texture* texture = CurrentBackend->CreateTexture(size.x, size.y, TextureFormat::RGBA8, nearestFilter, clamp);
+			if (texture == nullptr) { return nullptr; }
 
-			if (texture == nullptr)
-			{
-				return nullptr;
-			}
-
-			texture->SetData(0, 0, width, height, texData);
-
-			stbi_image_free(texData);
+			texture->SetData(0, 0, size.x, size.y, rgbaData.get());
 			return texture;
 		}
 	};

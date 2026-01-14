@@ -186,7 +186,6 @@
     <ClCompile Include="game\main_game\Chart.cpp" />
     <ClCompile Include="game\main_game\HUD.cpp" />
     <ClCompile Include="game\main_game\MainGame.cpp" />
-    <ClCompile Include="game\stb\stb_image.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\DataTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />

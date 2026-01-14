@@ -36,6 +36,7 @@ namespace Starshine::GFX
 
 		Rectangle testedArea{};
 
+		bool IsFree(i32 x, i32 y, i32 width, i32 height);
 		bool IsFree(const Rectangle& rect);
 		void AddAnchor(const ivec2& position);
 		void AddRect(const Rectangle& rect);
