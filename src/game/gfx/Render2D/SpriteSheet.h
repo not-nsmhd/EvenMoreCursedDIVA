@@ -2,10 +2,10 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include <glm/vec2.hpp>
-#include "common/types.h"
-#include "common/rect.h"
+#include "Common/Types.h"
+#include "Common/Rect.h"
 #include "gfx/Renderer.h"
+#include "GFX/SpritePacker.h"
 
 namespace Starshine::GFX::Render2D
 {
@@ -35,6 +35,10 @@ namespace Starshine::GFX::Render2D
 
 	public:
 		bool ReadFromTextFile(std::string_view dirPath);
+
+		// NOTE: Sprites are intended to be packed ahead of time, hence a separate function
+		// (TODO: Write an external tool for packing sprites)
+		void CreateFromSpritePacker(const GFX::SpritePacker& spritePacker);
 		void Destroy();
 
 	public:

@@ -53,7 +53,6 @@ namespace Starshine::GFX::Render2D
 		{
 			if (line.length() > 1)
 			{
-				// Wanted to split strings anyway? We had a tool for that, it's called "sscanf"
 				SDL_sscanf(line.c_str(), "%s = %d %f %f %f %f %f %f",
 					&spriteName,
 					&sprite.TextureIndex,
@@ -83,6 +82,36 @@ namespace Starshine::GFX::Render2D
 		}
 
 		return true;
+	}
+
+	void SpriteSheet::CreateFromSpritePacker(const GFX::SpritePacker& spritePacker)
+	{
+		sprites.reserve(spritePacker.GetSpriteCount());
+		for (size_t i = 0; i < spritePacker.GetSpriteCount(); i++)
+		{
+			const SpriteInfo* sprite = spritePacker.GetSpriteInfo(i);
+			if (!sprite->WasPacked) { continue; }
+
+			sprites.emplace_back(Sprite
+				{
+					sprite->Name,
+					static_cast<u32>(sprite->DesiredTextureIndex),
+					RectangleF(sprite->PackedPosition.x, sprite->PackedPosition.y, sprite->Size.x, sprite->Size.y),
+					sprite->Origin
+				});
+		}
+
+		textures.reserve(spritePacker.GetTextureCount());
+		for (size_t i = 0; i < spritePacker.GetTextureCount(); i++)
+		{
+			const SheetTextureInfo* texInfo = spritePacker.GetTextureInfo(i);
+			if (texInfo != nullptr)
+			{
+				Texture* gpuTex = Renderer::GetInstance()->CreateTexture(texInfo->Size.x, texInfo->Size.y, TextureFormat::RGBA8, false, true);
+				gpuTex->SetData(0, 0, texInfo->Size.x, texInfo->Size.y, texInfo->Data.get());
+				textures.push_back(gpuTex);
+			}
+		}
 	}
 
 	const Sprite& SpriteSheet::GetSprite(i32 index) const

@@ -6,7 +6,6 @@
 #include "audio/AudioEngine.h"
 #include "input/Keyboard.h"
 #include "main_game/MainGame.h"
-#include "testing/SpriteTest.h"
 
 namespace Starshine
 {
@@ -100,7 +99,7 @@ namespace Starshine
 
 			Keyboard::Initialize();
 
-			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<Testing::SpriteTest>();
+			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::MainGame::MainGameState>();
 			SetCurrentGameStateInstance(mainGameState);
 
 			return true;

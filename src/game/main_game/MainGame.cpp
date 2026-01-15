@@ -6,6 +6,8 @@
 #include <Common/MathExt.h>
 #include "input/Keyboard.h"
 #include "gfx/Render2D/SpriteRenderer.h"
+#include "GFX/SpritePacker.h"
+#include "IO/Path/Directory.h"
 #include "audio/AudioEngine.h"
 #include <string>
 #include <deque>
@@ -155,18 +157,23 @@ namespace DIVA::MainGame
 			hud.Initialize();
 		}
 
-		bool LoadContent()
+		bool CreateIconSetSpriteSheet()
 		{
-			spriteRenderer = new SpriteRenderer();
-			MainGameContext.SpriteRenderer = spriteRenderer;
+			SpritePacker sprPacker;
+			sprPacker.Initialize();
 
-			debugFont.ReadBMFont("diva/fonts/debug.fnt");
-			MainGameContext.DebugFont = &debugFont;
+			IO::Directory::IterateFiles("diva/sprites/iconset_dev",
+				[&](std::string_view filePath)
+				{
+					sprPacker.AddImage(filePath);
+				});
 
-			// ---------------
-			iconSet.ReadFromTextFile("diva/sprites/iconset_ps3");
+			sprPacker.Pack();
 
-			spriteCache.NoteTargetHand = &iconSet.GetSprite("TargetHand");
+			iconSet.CreateFromSpritePacker(sprPacker);
+			sprPacker.Clear();
+
+			spriteCache.NoteTargetHand = &iconSet.GetSprite("TargetHand_Normal");
 			spriteCache.Trail_Normal = &iconSet.GetSprite("Trail_Normal");
 			spriteCache.Trail_CT = &iconSet.GetSprite("Trail_CT");
 
@@ -216,8 +223,18 @@ namespace DIVA::MainGame
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "HoldTrail_Cross", spriteCache.HoldNoteTrails);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "HoldTrail_Square", spriteCache.HoldNoteTrails);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "HoldTrail_Triangle", spriteCache.HoldNoteTrails);
+			return true;
+		}
 
-			// ---------------
+		bool LoadContent()
+		{
+			spriteRenderer = new SpriteRenderer();
+			MainGameContext.SpriteRenderer = spriteRenderer;
+
+			debugFont.ReadBMFont("diva/fonts/debug.fnt");
+			MainGameContext.DebugFont = &debugFont;
+
+			CreateIconSetSpriteSheet();
 			
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
@@ -310,7 +327,7 @@ namespace DIVA::MainGame
 				}
 
 				TrailScrollOffset += TrailScrollSpeed * (16.6667f / deltaTime_ms);
-				TrailScrollOffset = SDL_fmodf(TrailScrollOffset, 128.0f);
+				TrailScrollOffset = SDL_fmodf(TrailScrollOffset, spriteCache.Trail_Normal->SourceRectangle.Width);
 
 				hud.Update(deltaTime_ms);
 			}
@@ -815,9 +832,8 @@ namespace DIVA::MainGame
 			}
 
 			float targetHandRotation = MathExtensions::ConvertRange(0.0f, note.NoteTime, 0.0f, MathExtensions::TwoPi, note.ElapsedTime);
-			//spriteRenderer->SetSpritePosition(note.TargetPosition);
 			spriteRenderer->SetSpriteRotation(holdStartHit ? 0.0f : targetHandRotation);
-			//spriteRenderer->SetSpriteColor(DefaultColors::White);
+
 			switch (note.Type)
 			{
 			default:

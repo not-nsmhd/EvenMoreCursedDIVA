@@ -65,8 +65,8 @@ namespace Starshine::Testing
 				}
 			}
 
+#if 0
 			Xml::Printer xmlPrinter = Xml::Printer();
-
 			xmlPrinter.OpenElement("SpriteSheet");
 			{
 				for (size_t i = 0; i < sprPacker.GetSpriteCount(); i++)
@@ -95,6 +95,7 @@ namespace Starshine::Testing
 
 			File::WriteAllBytes("sprite_test_writeall.xml", xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
 			xmlPrinter.ClearBuffer();
+#endif
 
 			return true;
 		}
