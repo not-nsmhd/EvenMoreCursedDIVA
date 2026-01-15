@@ -29,61 +29,6 @@ namespace Starshine::GFX::Render2D
 		sprites.clear();	
 	}
 
-	bool SpriteSheet::ReadFromTextFile(std::string_view dirPath)
-	{
-		std::string mapFilePath = std::string(dirPath);
-		mapFilePath.append("/map.txt");
-
-		fstream mapFileStream;
-		mapFileStream.open(mapFilePath, ios::in | ios::binary);
-
-		if (mapFileStream.bad())
-		{
-			LogError(LogName, "Failed to load a text sprite sheet at path %s", mapFilePath.c_str());
-			return false;
-		}
-
-		Sprite sprite = {};
-		u32 spriteIndex = 0;
-
-		u32 texCount = 1;
-		char spriteName[128]{};
-
-		for (string line; std::getline(mapFileStream, line);)
-		{
-			if (line.length() > 1)
-			{
-				SDL_sscanf(line.c_str(), "%s = %d %f %f %f %f %f %f",
-					&spriteName,
-					&sprite.TextureIndex,
-					&sprite.SourceRectangle.X, &sprite.SourceRectangle.Y, &sprite.SourceRectangle.Width, &sprite.SourceRectangle.Height,
-					&sprite.Origin.x, &sprite.Origin.y);
-
-				sprite.Name = spriteName;
-				sprites.push_back(sprite);
-			}
-		}
-
-		mapFileStream.close();
-
-		Renderer* renderer = Renderer::GetInstance();
-
-		std::string texPath;
-		for (int i = 0; i < texCount; i++)
-		{
-			texPath = dirPath;
-			texPath.append("/sheet_" + std::to_string(i) + ".png");
-
-			Texture* tex = renderer->LoadTexture(texPath, false, true);
-			if (tex != nullptr)
-			{
-				textures.push_back(tex);
-			}
-		}
-
-		return true;
-	}
-
 	void SpriteSheet::CreateFromSpritePacker(const GFX::SpritePacker& spritePacker)
 	{
 		sprites.reserve(spritePacker.GetSpriteCount());

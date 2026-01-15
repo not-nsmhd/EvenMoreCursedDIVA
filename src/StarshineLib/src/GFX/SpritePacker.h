@@ -57,6 +57,7 @@ namespace Starshine::GFX
 		void Clear();
 
 		bool AddImage(std::string_view filePath);
+		bool AddFromDirectory(std::string_view dirPath);
 		void Pack();
 
 		const SpriteInfo* GetSpriteInfo(i32 index) const;

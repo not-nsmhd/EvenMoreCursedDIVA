@@ -34,8 +34,6 @@ namespace Starshine::GFX::Render2D
 		Texture* GetTexture(i32 index) const;
 
 	public:
-		bool ReadFromTextFile(std::string_view dirPath);
-
 		// NOTE: Sprites are intended to be packed ahead of time, hence a separate function
 		// (TODO: Write an external tool for packing sprites)
 		void CreateFromSpritePacker(const GFX::SpritePacker& spritePacker);

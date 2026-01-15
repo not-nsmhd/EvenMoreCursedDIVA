@@ -134,6 +134,15 @@ namespace Starshine::GFX
 		return false;
 	}
 
+	bool SpritePacker::AddFromDirectory(std::string_view dirPath)
+	{
+		if (!Directory::Exists(dirPath)) { return false; }
+
+		Directory::IterateFiles(dirPath, [&](std::string_view filePath) { AddImage(filePath); });
+
+		return true;
+	}
+
 	void SpritePacker::Pack()
 	{
 		SortSpritesByArea();

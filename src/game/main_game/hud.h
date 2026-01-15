@@ -2,6 +2,7 @@
 #include "common/types.h"
 #include "MainGame.h"
 #include "HitEvaluation.h"
+#include "GFX/SpritePacker.h"
 
 namespace DIVA::MainGame
 {
@@ -11,6 +12,8 @@ namespace DIVA::MainGame
 		HUD(Context& context) : mainGameContext{ context } {}
 
 		void Initialize();
+		bool LoadSprites(Starshine::GFX::SpritePacker& sprPacker);
+
 		void Destroy();
 		void Update(float deltaTime_ms);
 		void Draw(float deltaTime_ms);

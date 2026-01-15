@@ -1,6 +1,7 @@
 #include "hud.h"
 #include "common/color.h"
 #include <Common/MathExt.h>
+#include "gfx/Render2D/SpriteSheet.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 
 namespace DIVA::MainGame
@@ -33,7 +34,17 @@ namespace DIVA::MainGame
 	struct HUD::Implementation
 	{
 		MainGame::Context& mainGameContext;
+
 		Font* debugFont = nullptr;
+
+		struct SpriteCache
+		{
+			SpriteSheet hudSprites;
+
+			const Sprite* HitEvaluations[EnumCount<HitEvaluation>()]{};
+			const Sprite* ScoreNumbers[10]{};
+			const Sprite* ComboNumbers[10]{};
+		} spriteCache;
 
 		struct ComboDisplayData
 		{
@@ -55,7 +66,7 @@ namespace DIVA::MainGame
 
 		struct ScoreDisplayData
 		{
-			vec2 Position{ 1152.0f, 160.0f };
+			vec2 Position{ 1260.0f, 40.0f };
 			u32 DisplayValue{};
 			float IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
@@ -66,6 +77,58 @@ namespace DIVA::MainGame
 
 		void Initialize()
 		{
+		}
+
+		bool LoadSprites(GFX::SpritePacker& sprPacker)
+		{
+			sprPacker.Clear();
+			sprPacker.Initialize();
+
+			sprPacker.AddFromDirectory("diva/sprites/mg_hud");
+			sprPacker.Pack();
+
+			spriteCache.hudSprites.CreateFromSpritePacker(sprPacker);
+			sprPacker.Clear();
+
+			auto fetchHitValueSprite = [&](HitEvaluation valu, std::string_view name, const Sprite* spriteArray[])
+			{
+				spriteArray[static_cast<size_t>(valu)] = &spriteCache.hudSprites.GetSprite(name);
+			};
+
+			auto fetchSprite = [&](std::string_view name)
+			{
+				return &spriteCache.hudSprites.GetSprite(name);
+			};
+
+			fetchHitValueSprite(HitEvaluation::Cool, "HitValu_Cool", spriteCache.HitEvaluations);
+			fetchHitValueSprite(HitEvaluation::Good, "HitValu_Good", spriteCache.HitEvaluations);
+			fetchHitValueSprite(HitEvaluation::Safe, "HitValu_Safe", spriteCache.HitEvaluations);
+			fetchHitValueSprite(HitEvaluation::Bad, "HitValu_Bad", spriteCache.HitEvaluations);
+			fetchHitValueSprite(HitEvaluation::Miss, "HitValu_Miss", spriteCache.HitEvaluations);
+
+			spriteCache.ScoreNumbers[0] = fetchSprite("Score_0");
+			spriteCache.ScoreNumbers[1] = fetchSprite("Score_1");
+			spriteCache.ScoreNumbers[2] = fetchSprite("Score_2");
+			spriteCache.ScoreNumbers[3] = fetchSprite("Score_3");
+			spriteCache.ScoreNumbers[4] = fetchSprite("Score_4");
+			spriteCache.ScoreNumbers[5] = fetchSprite("Score_5");
+			spriteCache.ScoreNumbers[6] = fetchSprite("Score_6");
+			spriteCache.ScoreNumbers[7] = fetchSprite("Score_7");
+			spriteCache.ScoreNumbers[8] = fetchSprite("Score_8");
+			spriteCache.ScoreNumbers[9] = fetchSprite("Score_9");
+
+			spriteCache.ComboNumbers[0] = fetchSprite("Combo_0");
+			spriteCache.ComboNumbers[1] = fetchSprite("Combo_1");
+			spriteCache.ComboNumbers[2] = fetchSprite("Combo_2");
+			spriteCache.ComboNumbers[3] = fetchSprite("Combo_3");
+			spriteCache.ComboNumbers[4] = fetchSprite("Combo_4");
+			spriteCache.ComboNumbers[5] = fetchSprite("Combo_5");
+			spriteCache.ComboNumbers[6] = fetchSprite("Combo_6");
+			spriteCache.ComboNumbers[7] = fetchSprite("Combo_7");
+			spriteCache.ComboNumbers[8] = fetchSprite("Combo_8");
+			spriteCache.ComboNumbers[9] = fetchSprite("Combo_9");
+
+			return true;
 		}
 
 		void UpdateScoreDisplay(float deltaTime_ms)
@@ -108,13 +171,22 @@ namespace DIVA::MainGame
 
 		void DrawScoreDisplay()
 		{
-			const Font& debugFont = *mainGameContext.DebugFont;
-			FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+			SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
+			vec2 displayOffset{ 0.0f, 0.0f };
 
-			char scoreText[8] = {};
-			size_t scoreTextLength = snprintf(scoreText, sizeof(scoreText), "%07u", ScoreDisplay.DisplayValue);
+			u32 remainingNumbers = ScoreDisplay.DisplayValue;
+			for (int i = 0; i < 8; i++)
+			{
+				if (remainingNumbers == 0 && i > 0) { break; }
 
-			fontRenderer.PushString(debugFont, std::string_view(scoreText, scoreTextLength), ScoreDisplay.Position, vec2(1.0f), DefaultColors::White);
+				int sprIndex = remainingNumbers % 10;
+				const Sprite* numSprite = spriteCache.ScoreNumbers[sprIndex];
+
+				sprRenderer.PushSprite(spriteCache.hudSprites, *numSprite, ScoreDisplay.Position + displayOffset, vec2(0.667f), DefaultColors::White);
+
+				displayOffset.x -= 25.0f;
+				remainingNumbers /= 10;
+			}
 		}
 
 		void DrawComboDisplay(float deltaTime_ms)
@@ -201,6 +273,11 @@ namespace DIVA::MainGame
 	{
 		implementation = new Implementation(mainGameContext);
 		implementation->Initialize();
+	}
+
+	bool HUD::LoadSprites(Starshine::GFX::SpritePacker& sprPacker)
+	{
+		return implementation->LoadSprites(sprPacker);
 	}
 
 	void HUD::Destroy()

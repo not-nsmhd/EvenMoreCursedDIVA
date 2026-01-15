@@ -145,6 +145,8 @@ namespace DIVA::MainGame
 		size_t PreviousMusicPosition{};
 		float ChartDeltaTime{};
 
+		SpritePacker sprPacker;
+
 		char debugText[512] = {};
 
 		StateInternal(MainGame::Context& context) : MainGameContext{ context }
@@ -159,15 +161,7 @@ namespace DIVA::MainGame
 
 		bool CreateIconSetSpriteSheet()
 		{
-			SpritePacker sprPacker;
-			sprPacker.Initialize();
-
-			IO::Directory::IterateFiles("diva/sprites/iconset_dev",
-				[&](std::string_view filePath)
-				{
-					sprPacker.AddImage(filePath);
-				});
-
+			sprPacker.AddFromDirectory("diva/sprites/iconset_dev");
 			sprPacker.Pack();
 
 			iconSet.CreateFromSpritePacker(sprPacker);
@@ -234,7 +228,9 @@ namespace DIVA::MainGame
 			debugFont.ReadBMFont("diva/fonts/debug.fnt");
 			MainGameContext.DebugFont = &debugFont;
 
+			sprPacker.Initialize();
 			CreateIconSetSpriteSheet();
+			hud.LoadSprites(sprPacker);
 			
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
