@@ -10,13 +10,15 @@ namespace Starshine::Xml
 	constexpr std::string_view Extension = "xml";
 
 	using Document = tinyxml2::XMLDocument;
+	using Printer = tinyxml2::XMLPrinter;
 	using Element = tinyxml2::XMLElement;
 	using Attribute = tinyxml2::XMLAttribute;
+	using Error = tinyxml2::XMLError;
 
-	inline bool Parse(Document& doc, const char* text, size_t textSize) { return doc.Parse(text, textSize) == tinyxml2::XMLError::XML_SUCCESS; }
+	inline bool Parse(Document& doc, const char* text, size_t textSize) { return doc.Parse(text, textSize) == Error::XML_SUCCESS; }
 	inline bool ParseFromFile(Document& doc, std::string_view filePath)
 	{ 
-		return doc.LoadFile(filePath.data()) == tinyxml2::XMLError::XML_SUCCESS; 
+		return doc.LoadFile(filePath.data()) == Error::XML_SUCCESS;
 	}
 
 	inline Element* GetRootElement(Document& doc) { return doc.RootElement(); }
@@ -63,9 +65,7 @@ namespace Starshine::Xml
 			sscanf_s(value, "%02x%02x%02x%02x", &r, &g, &b, &a);
 			return Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
 		}
-		else
-		{
-			Color{};
-		}
+
+		return Color{};
 	}
 }

@@ -1,7 +1,8 @@
 #pragma once
 #include "Font.h"
-#include "io/Xml.h"
-#include "io/File.h"
+#include "IO/Xml.h"
+#include "IO/Path/File.h"
+#include "IO/Path/Path.h"
 #include "gfx/Renderer.h"
 #include "util/logging.h"
 
@@ -119,7 +120,7 @@ namespace Starshine::GFX::Render2D
 
 	bool Font::ReadBMFont(const std::string_view filePath)
 	{
-		std::string_view basePath = File::GetParentDirectory(filePath);
+		std::string_view basePath = Path::GetDirectoryPath(filePath);
 
 		u8* xmlData = nullptr;
 		size_t xmlSize = File::ReadAllBytes(filePath, &xmlData);

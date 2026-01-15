@@ -30,8 +30,10 @@ namespace Starshine::Misc
 
 		bool ReadImageFile(std::string_view filePath, ivec2& size, i32& channels, std::unique_ptr<u8[]>& outRGBAdata)
 		{
+			constexpr int rgbaPixelSize = 4;
+
 			int x, y, comp{};
-			u8* decodedPixels = stbi_load(filePath.data(), &x, &y, &comp, 4);
+			u8* decodedPixels = stbi_load(filePath.data(), &x, &y, &comp, rgbaPixelSize);
 
 			if (decodedPixels == nullptr)
 			{
@@ -57,8 +59,10 @@ namespace Starshine::Misc
 				return false;
 			}
 
+			constexpr int rgbaPixelSize = 4;
+
 			int x, y, comp{};
-			u8* decodedPixels = stbi_load_from_memory(reinterpret_cast<const u8*>(fileData), static_cast<int>(fileSize), &x, &y, &comp, 4);
+			u8* decodedPixels = stbi_load_from_memory(reinterpret_cast<const u8*>(fileData), static_cast<int>(fileSize), &x, &y, &comp, rgbaPixelSize);
 
 			if (decodedPixels == nullptr)
 			{

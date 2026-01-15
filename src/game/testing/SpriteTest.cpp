@@ -8,6 +8,8 @@
 
 #include <GFX/SpritePacker.h>
 #include <IO/Path/Directory.h>
+#include <IO/Path/File.h>
+#include <IO/Xml.h>
 #include <vector>
 
 #include "util/logging.h"
@@ -62,6 +64,37 @@ namespace Starshine::Testing
 					sprTextures.push_back(gpuTex);
 				}
 			}
+
+			Xml::Printer xmlPrinter = Xml::Printer();
+
+			xmlPrinter.OpenElement("SpriteSheet");
+			{
+				for (size_t i = 0; i < sprPacker.GetSpriteCount(); i++)
+				{
+					const SpriteInfo* sprite = sprPacker.GetSpriteInfo(i);
+					if (!sprite->WasPacked) { continue; }
+
+					xmlPrinter.OpenElement("Sprite");
+					{
+						xmlPrinter.PushAttribute("Name", sprite->Name.c_str());
+
+						xmlPrinter.PushAttribute("TextureIndex", sprite->DesiredTextureIndex);
+
+						xmlPrinter.PushAttribute("X", sprite->PackedPosition.x);
+						xmlPrinter.PushAttribute("Y", sprite->PackedPosition.y);
+						xmlPrinter.PushAttribute("Width", sprite->Size.x);
+						xmlPrinter.PushAttribute("Height", sprite->Size.y);
+
+						xmlPrinter.PushAttribute("OriginX", sprite->Origin.x);
+						xmlPrinter.PushAttribute("OriginY", sprite->Origin.y);
+					}
+					xmlPrinter.CloseElement();
+				}
+			}
+			xmlPrinter.CloseElement();
+
+			File::WriteAllBytes("sprite_test_writeall.xml", xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
+			xmlPrinter.ClearBuffer();
 
 			return true;
 		}

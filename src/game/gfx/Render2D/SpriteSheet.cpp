@@ -1,7 +1,7 @@
 #include <fstream>
 #include <SDL2/SDL.h>
 #include "SpriteSheet.h"
-#include "io/File.h"
+#include "IO/Path/File.h"
 #include "util/string_utils.h"
 #include "util/logging.h"
 

@@ -6,7 +6,7 @@ namespace Starshine::IO
 	void StreamWriter::WriteString(std::string_view value)
 	{
 		// Length-prefixed strings >>>>>>>>>>>>>>> Null-terminated strings
-		WriteU32(value.size());
+		WriteU32(static_cast<u32>(value.size()));
 		if (value.size() > 0)
 		{
 			WriteBuffer(value.data(), value.size());

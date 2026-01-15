@@ -78,7 +78,7 @@ namespace Starshine::MathExtensions
 		value |= value >> 4;
 		value |= value >> 8;
 		value |= value >> 16;
-		return value++;
+		return ++value;
 	};
 
 	constexpr f32 CalculateBarDuration_Seconds(f32 bpm, int beatsPerBar)

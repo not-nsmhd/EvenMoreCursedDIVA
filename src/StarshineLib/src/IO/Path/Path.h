@@ -37,6 +37,12 @@ namespace Starshine::IO
 			return includeExtension ? fileName : TrimExtension(fileName);
 		}
 
+		constexpr std::string_view GetDirectoryPath(std::string_view filePath)
+		{
+			const std::string_view fileName = GetFileName(filePath, true);
+			return fileName.empty() ? "" : filePath.substr(0, filePath.size() - fileName.size() - 1); // also trim the trailing slash at the end
+		}
+
 		// NOTE: "newExtension" must contain a '.' at the beginning
 		std::string ChangeExtension(std::string_view filePath, std::string_view newExtension);
 	}

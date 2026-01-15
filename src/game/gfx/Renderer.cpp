@@ -1,7 +1,8 @@
 #include "Core/OpenGL/OpenGLBackend.h"
 #include "Renderer.h"
-#include "io/Xml.h"
-#include "io/File.h"
+#include "IO/Xml.h"
+#include "IO/Path/File.h"
+#include "IO/Path/Path.h"
 #include <string>
 #include <string_view>
 #include "util/logging.h"
@@ -311,7 +312,7 @@ namespace Starshine::GFX
 
 	Shader* Renderer::LoadShaderFromXml(const std::string_view filePath)
 	{
-		string_view basePath = File::GetParentDirectory(filePath);
+		string_view basePath = Path::GetDirectoryPath(filePath);
 
 		u8* xmlShaderData = nullptr;
 		size_t xmlShaderSize = File::ReadAllBytes(filePath, &xmlShaderData);

@@ -1,6 +1,6 @@
 #include "SpritePacker.h"
 #include "IO/Path/Directory.h"
-#include "IO/File.h"
+#include "IO/Path/File.h"
 #include "IO/Xml.h"
 #include "Misc/ImageHelper.h"
 #include "Common/MathExt.h"
@@ -21,22 +21,46 @@ namespace Starshine::GFX
 				const Xml::Element* optionsElement = Xml::FindElement(rootElement, "SpritePackOptions");
 				if (optionsElement != nullptr)
 				{
-					// TODO: Source shifting
+					const Xml::Attribute* realSourceX_Attrib = Xml::FindAttribute(optionsElement, "RealSourceX");
+					const Xml::Attribute* realSourceY_Attrib = Xml::FindAttribute(optionsElement, "RealSourceY");
+					const Xml::Attribute* realWidth_Attrib = Xml::FindAttribute(optionsElement, "RealWidth");
+					const Xml::Attribute* realHeight_Attrib = Xml::FindAttribute(optionsElement, "RealHeight");
+
 					const Xml::Attribute* originX_Attrib = Xml::FindAttribute(optionsElement, "OriginX");
 					const Xml::Attribute* originY_Attrib = Xml::FindAttribute(optionsElement, "OriginY");
+
 					const Xml::Attribute* texAttrib = Xml::FindAttribute(optionsElement, "DesiredTextureIndex");
 
+					vec2 newSource = spriteInfo.RealSource;
+					vec2 newSize = spriteInfo.Size;
 					vec2 newOrigin = spriteInfo.Origin;
 					i32 newTexIndex = spriteInfo.DesiredTextureIndex;
 
 					bool applyNewValues = false;
 
+					if (realSourceX_Attrib != nullptr) { applyNewValues = (realSourceX_Attrib->QueryFloatValue(&newSource.x) == tinyxml2::XMLError::XML_SUCCESS); }
+					if (realSourceY_Attrib != nullptr) { applyNewValues = (realSourceY_Attrib->QueryFloatValue(&newSource.y) == tinyxml2::XMLError::XML_SUCCESS); }
+					if (realWidth_Attrib != nullptr)
+					{ 
+						applyNewValues = (realWidth_Attrib->QueryFloatValue(&newSize.x) == tinyxml2::XMLError::XML_SUCCESS);
+						if (applyNewValues) { newOrigin.x = static_cast<float>(newSize.x) / 2.0f; }
+					}
+
+					if (realHeight_Attrib != nullptr)
+					{
+						applyNewValues = (realHeight_Attrib->QueryFloatValue(&newSize.y) == tinyxml2::XMLError::XML_SUCCESS);
+						if (applyNewValues) { newOrigin.y = static_cast<float>(newSize.y) / 2.0f; }
+					}
+
 					if (originX_Attrib != nullptr) { applyNewValues = (originX_Attrib->QueryFloatValue(&newOrigin.x) == tinyxml2::XMLError::XML_SUCCESS); }
 					if (originY_Attrib != nullptr) { applyNewValues = (originY_Attrib->QueryFloatValue(&newOrigin.y) == tinyxml2::XMLError::XML_SUCCESS); }
+
 					if (texAttrib != nullptr) { applyNewValues = (texAttrib->QueryIntValue(&newTexIndex) == tinyxml2::XMLError::XML_SUCCESS); }
 
 					if (applyNewValues)
 					{
+						spriteInfo.RealSource = newSource;
+						spriteInfo.Size = newSize;
 						spriteInfo.Origin = newOrigin;
 						spriteInfo.DesiredTextureIndex = newTexIndex;
 					}
@@ -73,11 +97,13 @@ namespace Starshine::GFX
 
 		SpriteInfo spriteInfo{};
 
-		if (ImageHelper::GetImageInfo(filePath, spriteInfo.Size, nullptr))
+		if (ImageHelper::GetImageInfo(filePath, spriteInfo.ImageSize, nullptr))
 		{
 			spriteInfo.Origin = vec2(
-				static_cast<float>(spriteInfo.Size.x) / 2.0f,
-				static_cast<float>(spriteInfo.Size.y) / 2.0f);
+				static_cast<float>(spriteInfo.ImageSize.x) / 2.0f,
+				static_cast<float>(spriteInfo.ImageSize.y) / 2.0f);
+
+			spriteInfo.Size = spriteInfo.ImageSize;
 
 			spriteInfo.ImagePath = filePath;
 			spriteInfo.Name = fileName;
@@ -121,20 +147,22 @@ namespace Starshine::GFX
 			{
 				if (it.DesiredTextureIndex != i) { continue; }
 
-				i32 index = rectPacker.TryPack(it.Size);
+				i32 index = rectPacker.TryPack(it.ImageSize);
 				if (index != -1)
 				{
 					const Rectangle& packedRect = rectPacker.GetRectangle(index);
 					it.WasPacked = true;
-					it.PackedPosition.x = packedRect.X;
-					it.PackedPosition.y = packedRect.Y;
+					it.SheetPosition.x = packedRect.X;
+					it.SheetPosition.y = packedRect.Y;
+					it.PackedPosition.x = packedRect.X + it.RealSource.x;
+					it.PackedPosition.y = packedRect.Y + it.RealSource.y;
 				}
 
 				continue;
 			}
 
 			ivec2 areaSize = rectPacker.GetRealAreaSize();
-			ivec2 texSize_pow2 { MathExtensions::NearestPowerOf2(areaSize.x) + 1, MathExtensions::NearestPowerOf2(areaSize.y) + 1 };
+			ivec2 texSize_pow2 { MathExtensions::NearestPowerOf2(areaSize.x), MathExtensions::NearestPowerOf2(areaSize.y) };
 
 			textures.emplace_back(SheetTextureInfo
 				{
@@ -188,7 +216,9 @@ namespace Starshine::GFX
 
 		for (auto& texInfo : textures)
 		{
-			texInfo.DataSize = (texInfo.Size.x * texInfo.Size.y * 4ull);
+			constexpr size_t rgbaPixelSize = 4ull;
+
+			texInfo.DataSize = (static_cast<size_t>(texInfo.Size.x) * static_cast<size_t>(texInfo.Size.y) * rgbaPixelSize);
 			texInfo.Data = std::make_unique<u8[]>(texInfo.DataSize);
 
 			for (auto& sprInfo : sprites)
@@ -197,15 +227,15 @@ namespace Starshine::GFX
 
 				ImageHelper::ReadImageFile(sprInfo.ImagePath, size, channels, tempSpriteBuffer);
 
-				size_t dstX = sprInfo.PackedPosition.x;
-				size_t dstY = sprInfo.PackedPosition.y;
+				size_t dstX = sprInfo.SheetPosition.x;
+				size_t dstY = sprInfo.SheetPosition.y;
 
-				for (size_t y = 0; y < sprInfo.Size.y; y++)
+				for (size_t y = 0; y < sprInfo.ImageSize.y; y++)
 				{
-					for (size_t x = 0; x < sprInfo.Size.x; x++)
+					for (size_t x = 0; x < sprInfo.ImageSize.x; x++)
 					{
 						Detail::GetPixel(dstX + x, dstY + y, texInfo.Size.x, texInfo.Data.get()) = 
-							Detail::GetPixel(x, y, sprInfo.Size.x, tempSpriteBuffer.get());
+							Detail::GetPixel(x, y, sprInfo.ImageSize.x, tempSpriteBuffer.get());
 					}
 				}
 			}

@@ -13,7 +13,6 @@ namespace Starshine::GFX
 
 		ivec2 Size{};
 		vec2 Origin{};
-
 		i32 DesiredTextureIndex{};
 
 		bool WasPacked{};
@@ -22,6 +21,9 @@ namespace Starshine::GFX
 		i32 OriginalIndex{};
 
 		std::string ImagePath;
+		ivec2 SheetPosition{};
+		ivec2 ImageSize{};
+		ivec2 RealSource{};
 	};
 
 	struct SheetTextureInfo

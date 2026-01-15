@@ -115,10 +115,10 @@
     <ClInclude Include="src\GFX\RectanglePacker.h" />
     <ClInclude Include="src\GFX\SpritePacker.h" />
     <ClInclude Include="src\IO\BinaryMode.h" />
-    <ClInclude Include="src\IO\File.h" />
     <ClInclude Include="src\IO\FileStream.h" />
     <ClInclude Include="src\IO\IStream.h" />
     <ClInclude Include="src\IO\Path\Directory.h" />
+    <ClInclude Include="src\IO\Path\File.h" />
     <ClInclude Include="src\IO\Path\Path.h" />
     <ClInclude Include="src\IO\StreamManipulator.h" />
     <ClInclude Include="src\IO\StreamReader.h" />
@@ -134,9 +134,9 @@
     <ClCompile Include="..\..\lib\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="src\GFX\RectanglePacker.cpp" />
     <ClCompile Include="src\GFX\SpritePacker.cpp" />
-    <ClCompile Include="src\IO\File.cpp" />
     <ClCompile Include="src\IO\FileStream.cpp" />
     <ClCompile Include="src\IO\Path\Directory.cpp" />
+    <ClCompile Include="src\IO\Path\File.cpp" />
     <ClCompile Include="src\IO\Path\Path.cpp" />
     <ClCompile Include="src\IO\StreamReader.cpp" />
     <ClCompile Include="src\IO\StreamWriter.cpp" />

@@ -11,7 +11,7 @@ namespace Starshine::IO
 #ifdef _WIN32
 			WIN32_FILE_ATTRIBUTE_DATA dirAttribs{};
 			BOOL result = GetFileAttributesExA(directoryPath.data(), GetFileExInfoStandard, &dirAttribs);
-			return (result == true) && (dirAttribs.dwFileAttributes != INVALID_FILE_ATTRIBUTES) && (dirAttribs.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+			return (result == TRUE) && (dirAttribs.dwFileAttributes != INVALID_FILE_ATTRIBUTES) && (dirAttribs.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 #else
 			return false;
 #endif
