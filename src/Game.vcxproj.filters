@@ -50,13 +50,13 @@
       <Filter>src\game\gfx\Render2D</Filter>
     </ClCompile>
     <ClCompile Include="game\main_game\HUD.cpp">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClCompile>
     <ClCompile Include="game\main_game\MainGame.cpp">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClCompile>
     <ClCompile Include="game\main_game\Chart.cpp">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClCompile>
     <ClCompile Include="game\audio\AudioEngine.cpp">
       <Filter>src\game\audio</Filter>
@@ -160,16 +160,16 @@
       <Filter>src\game\gfx\Render2D</Filter>
     </ClInclude>
     <ClInclude Include="game\main_game\HitEvaluation.h">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClInclude>
     <ClInclude Include="game\main_game\HUD.h">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClInclude>
     <ClInclude Include="game\main_game\MainGame.h">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClInclude>
     <ClInclude Include="game\main_game\Chart.h">
-      <Filter>src\game\main_game</Filter>
+      <Filter>src\game\MainGame</Filter>
     </ClInclude>
     <ClInclude Include="game\audio\AudioEngine.h">
       <Filter>src\game\audio</Filter>
@@ -227,9 +227,6 @@
     <Filter Include="src\game\input">
       <UniqueIdentifier>{17dd7525-f9fc-4fb9-814b-3d9619d0a836}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\game\main_game">
-      <UniqueIdentifier>{a0b9677d-9edb-4cf4-8f12-fb12c28f34a9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\game\testing">
       <UniqueIdentifier>{d5a6558e-b6b2-4dfc-9eff-d38e147a1bd1}</UniqueIdentifier>
     </Filter>
@@ -262,6 +259,9 @@
     </Filter>
     <Filter Include="res">
       <UniqueIdentifier>{5d6d06da-1f33-429f-a721-67529c365a1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\MainGame">
+      <UniqueIdentifier>{a0b9677d-9edb-4cf4-8f12-fb12c28f34a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

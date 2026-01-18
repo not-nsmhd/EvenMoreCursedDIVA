@@ -5,7 +5,7 @@
 #include "gfx/Renderer.h"
 #include "audio/AudioEngine.h"
 #include "input/Keyboard.h"
-#include "main_game/MainGame.h"
+#include "MainGame/MainGame.h"
 
 namespace Starshine
 {

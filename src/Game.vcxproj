@@ -152,10 +152,10 @@
     <ClInclude Include="game\gfx\Types.h" />
     <ClInclude Include="game\gfx\VertexDesc.h" />
     <ClInclude Include="game\input\Keyboard.h" />
-    <ClInclude Include="game\main_game\Chart.h" />
-    <ClInclude Include="game\main_game\HitEvaluation.h" />
-    <ClInclude Include="game\main_game\HUD.h" />
-    <ClInclude Include="game\main_game\MainGame.h" />
+    <ClInclude Include="game\MainGame\Chart.h" />
+    <ClInclude Include="game\MainGame\HitEvaluation.h" />
+    <ClInclude Include="game\MainGame\HUD.h" />
+    <ClInclude Include="game\MainGame\MainGame.h" />
     <ClInclude Include="game\res\resource.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\DataTest.h" />
@@ -183,9 +183,9 @@
     <ClCompile Include="game\gfx\Renderer.cpp" />
     <ClCompile Include="game\input\Keyboard.cpp" />
     <ClCompile Include="game\main.cpp" />
-    <ClCompile Include="game\main_game\Chart.cpp" />
-    <ClCompile Include="game\main_game\HUD.cpp" />
-    <ClCompile Include="game\main_game\MainGame.cpp" />
+    <ClCompile Include="game\MainGame\Chart.cpp" />
+    <ClCompile Include="game\MainGame\HUD.cpp" />
+    <ClCompile Include="game\MainGame\MainGame.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\DataTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
