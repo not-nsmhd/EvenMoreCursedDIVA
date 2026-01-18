@@ -137,7 +137,7 @@ namespace Starshine::Testing
 
 			SpriteRenderer->ResetSprite();
 			SpriteRenderer->SetSpritePosition(vec2{ 0.0f, yOffset });
-			SpriteRenderer->SetSpriteScale(texStats->Size);
+			SpriteRenderer->SetSpriteSize(texStats->Size);
 			SpriteRenderer->PushSprite(sprTextures[displayedTextureIndex]);
 
 			char textBuffer[128]{};

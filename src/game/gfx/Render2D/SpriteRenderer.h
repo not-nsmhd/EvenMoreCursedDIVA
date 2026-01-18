@@ -27,7 +27,7 @@ namespace Starshine::GFX::Render2D
 
 		void ResetSprite();
 		void SetSpritePosition(const vec2& position);
-		void SetSpriteScale(const vec2& absScale);
+		void SetSpriteSize(const vec2& absScale);
 		void SetSpriteOrigin(const vec2& origin);
 		void SetSpriteRotation(float radians);
 

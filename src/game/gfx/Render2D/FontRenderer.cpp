@@ -76,7 +76,7 @@ namespace Starshine::GFX::Render2D
 		float srcHeight = static_cast<float>(glyph->Height);
 
 		sprRenderer.SetSpritePosition(position);
-		sprRenderer.SetSpriteScale(vec2{ srcWidth, srcHeight } *scale);
+		sprRenderer.SetSpriteSize(vec2{ srcWidth, srcHeight } *scale);
 		sprRenderer.SetSpriteColor(color);
 
 		sprRenderer.SetSpriteSource(font.Texture, RectangleF{ srcX, srcY, srcWidth, srcHeight });

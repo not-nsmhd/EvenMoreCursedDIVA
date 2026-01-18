@@ -10,8 +10,8 @@ namespace Starshine::GFX::Render2D
 	void SpriteSheetRenderer::SetSpriteState(const SpriteSheet& sheet, const Sprite& sprite, const vec2& scale, i32* texIndex)
 	{
 		Texture* tex = sheet.GetTexture(sprite.TextureIndex);
-		sprRenderer.SetSpriteOrigin(sprite.Origin);
-		sprRenderer.SetSpriteScale(vec2{ sprite.SourceRectangle.Width * scale.x, sprite.SourceRectangle.Height * scale.y });
+		sprRenderer.SetSpriteOrigin(sprite.Origin * scale);
+		sprRenderer.SetSpriteSize(vec2{ sprite.SourceRectangle.Width * scale.x, sprite.SourceRectangle.Height * scale.y });
 		sprRenderer.SetSpriteSource(tex, sprite.SourceRectangle);
 
 		if (texIndex != nullptr)

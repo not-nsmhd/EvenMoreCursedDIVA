@@ -1,7 +1,7 @@
 #pragma once
-#include "common/types.h"
+#include "Common/Types.h"
+#include "IO/Xml.h"
 #include <vector>
-#include <string>
 
 namespace DIVA::MainGame
 {
@@ -11,7 +11,7 @@ namespace DIVA::MainGame
 		Cross,
 		Square,
 		Triangle,
-		//Star,
+		Star,
 
 		Count
 	};
@@ -50,7 +50,8 @@ namespace DIVA::MainGame
 		{ NoteShape::Circle, "Circle" },
 		{ NoteShape::Cross, "Cross" },
 		{ NoteShape::Square, "Square" },
-		{ NoteShape::Triangle, "Triangle" }
+		{ NoteShape::Triangle, "Triangle" },
+		{ NoteShape::Star, "Star" }
 	};
 
 	constexpr Starshine::EnumStringMappingTable<NoteType> NoteTypeStringTable
@@ -97,8 +98,8 @@ namespace DIVA::MainGame
 		void ProcessNoteReferences();
 		void Clear();
 
+		bool LoadXml(std::string_view filePath);
+
 		f32 GetNoteTime(f32 timeSeconds);
 	};
-
-	void ReadXmlChart(Chart& outChart, const char* xml, size_t size);
 }

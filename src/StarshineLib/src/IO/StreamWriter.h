@@ -1,6 +1,7 @@
 #pragma once
 #include "StreamManipulator.h"
 #include <vector>
+#include <functional>
 
 namespace Starshine::IO
 {
@@ -25,10 +26,13 @@ namespace Starshine::IO
 		void WriteString(std::string_view value);
 		void WriteStringPointer(std::string_view value, i32 alignment = 0);
 
+		void WriteFunctionPointer(const std::function<void(StreamWriter&)>& func);
+
 		void WritePadding(size_t size, u8 value = DefaultPaddingValue);
 		void WriteAlignedPadding(i32 alignment, bool force = false, u8 value = DefaultPaddingValue);
 
 		void FlushStringArray();
+		void FlushFunctionArray();
 
 	public:
 		inline void WriteU8(u8 value) { WriteType_NativeOrder<u8>(value); }
@@ -96,6 +100,13 @@ namespace Starshine::IO
 			i32 Alignment{};
 		};
 
+		struct FunctionPointerEntry
+		{
+			size_t PointerPosition{};
+			const std::function<void(StreamWriter&)> Function;
+		};
+
 		std::vector<StringPointerEntry> stringArray;
+		std::vector<FunctionPointerEntry> functionArray;
 	};
 }

@@ -1,60 +1,64 @@
-#include "chart.h"
-#include <tinyxml2.h>
+#include "Chart.h"
 
 namespace DIVA::MainGame
 {
 	constexpr f32 DefaultNoteDuration { 60.0f / 120.0f * 4.0f };
 
-	using namespace tinyxml2;
+	using namespace Starshine;
 
-	void ReadXmlChart(Chart& outChart, const char* xml, size_t size)
+	bool Chart::LoadXml(std::string_view filePath)
 	{
-		XMLDocument xmlDoc;
-		xmlDoc.Parse(xml, size);
+		Xml::Document chartDoc;
+		if (!Xml::ParseFromFile(chartDoc, filePath)) { return false; }
 
-		XMLElement* root = xmlDoc.RootElement();
-		root->QueryFloatAttribute("Duration", &outChart.Duration);
+		Xml::Element* rootElement = chartDoc.RootElement();
+		rootElement->QueryFloatAttribute("Duration", &Duration);
 
-		size_t noteCount = static_cast<size_t>(root->ChildElementCount("Note"));
-		size_t noteTimeChangesCount = static_cast<size_t>(root->ChildElementCount("SetNoteTime"));
-		outChart.Notes.reserve(noteCount);
-		outChart.NoteTimeChanges.reserve(noteTimeChangesCount);
+		size_t noteCount = static_cast<size_t>(rootElement->ChildElementCount("Note"));
+		size_t noteTimeChangesCount = static_cast<size_t>(rootElement->ChildElementCount("SetNoteTime"));
+		Notes.reserve(noteCount);
+		NoteTimeChanges.reserve(noteTimeChangesCount);
 
-		XMLElement* xmlElement = root->FirstChildElement("Note");
-		const XMLAttribute* curAttrib = nullptr;
+		Xml::Element* element = rootElement->FirstChildElement("Note");
+		const Xml::Attribute* curAttrib = nullptr;
 		for (size_t i = 0; i < noteCount; i++)
 		{
-			ChartNote& newNote = outChart.Notes.emplace_back();
-			
-			xmlElement->QueryFloatAttribute("Time", &newNote.AppearTime);
+			ChartNote& newNote = Notes.emplace_back();
 
-			curAttrib = xmlElement->FindAttribute("Shape");
+			element->QueryFloatAttribute("Time", &newNote.AppearTime);
+
+			curAttrib = element->FindAttribute("Shape");
 			newNote.Shape = Starshine::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
 
-			curAttrib = xmlElement->FindAttribute("Type");
+			curAttrib = element->FindAttribute("Type");
 			newNote.Type = Starshine::EnumFromString<NoteType>(NoteTypeStringTable, curAttrib->Value());
 
-			xmlElement->QueryFloatAttribute("X", &newNote.X);
-			xmlElement->QueryFloatAttribute("Y", &newNote.Y);
-
-			xmlElement->QueryFloatAttribute("Angle", &newNote.Angle);
-			xmlElement->QueryFloatAttribute("Frequency", &newNote.Frequency);
-			xmlElement->QueryFloatAttribute("Amplitude", &newNote.Amplitude);
-			xmlElement->QueryFloatAttribute("Distance", &newNote.Distance);
-
-			xmlElement = xmlElement->NextSiblingElement("Note");
+			element->QueryFloatAttribute("X", &newNote.X);
+			element->QueryFloatAttribute("Y", &newNote.Y);
+			
+			element->QueryFloatAttribute("Angle", &newNote.Angle);
+			element->QueryFloatAttribute("Frequency", &newNote.Frequency);
+			element->QueryFloatAttribute("Amplitude", &newNote.Amplitude);
+			element->QueryFloatAttribute("Distance", &newNote.Distance);
+			
+			element = element->NextSiblingElement("Note");
 		}
 
-		xmlElement = root->FirstChildElement("SetNoteTime");
+		element = rootElement->FirstChildElement("SetNoteTime");
 		for (size_t i = 0; i < noteTimeChangesCount; i++)
 		{
-			NoteTimeChange& newTimeChange = outChart.NoteTimeChanges.emplace_back();
+			NoteTimeChange& newTimeChange = NoteTimeChanges.emplace_back();
 
-			xmlElement->QueryFloatAttribute("Time", &newTimeChange.Time);
-			xmlElement->QueryFloatAttribute("Value", &newTimeChange.Value);
+			element->QueryFloatAttribute("Time", &newTimeChange.Time);
+			element->QueryFloatAttribute("Value", &newTimeChange.Value);
+
+			element = element->NextSiblingElement("SetNoteTime");
 		}
 
-		outChart.ProcessNoteReferences();
+		ProcessNoteReferences();
+		chartDoc.Clear();
+
+		return true;
 	}
 
 	void Chart::Clear()

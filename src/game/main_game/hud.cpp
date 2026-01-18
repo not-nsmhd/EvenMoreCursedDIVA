@@ -10,27 +10,6 @@ namespace DIVA::MainGame
 	using namespace Starshine::GFX::Render2D;
 	using std::string_view;
 
-	constexpr EnumStringMappingTable<HitEvaluation> HitEvaluationNames
-	{
-		EnumStringMapping<HitEvaluation>
-		{ HitEvaluation::None, "" },
-		{ HitEvaluation::Cool, "Cool" },
-		{ HitEvaluation::Good, "Good" },
-		{ HitEvaluation::Safe, "Safe" },
-		{ HitEvaluation::Bad, "Bad" },
-		{ HitEvaluation::Miss, "Miss" }
-	};
-
-	constexpr Color HitEvaluationColors[EnumCount<HitEvaluation>()]
-	{
-		{   0,   0,   0,   0 },
-		{ 255, 255,   0, 255 },
-		{ 255, 255, 255, 255 },
-		{   0, 255,   0, 255 },
-		{ 128, 128, 255, 255 },
-		{ 255,   0, 255, 255 }
-	};
-
 	struct HUD::Implementation
 	{
 		MainGame::Context& mainGameContext;
@@ -44,12 +23,16 @@ namespace DIVA::MainGame
 			const Sprite* HitEvaluations[EnumCount<HitEvaluation>()]{};
 			const Sprite* ScoreNumbers[10]{};
 			const Sprite* ComboNumbers[10]{};
+
+			const Sprite* ScoreBonusNumbers[10]{};
+			const Sprite* ScoreBonus_Plus{};
 		} spriteCache;
 
 		struct ComboDisplayData
 		{
 			vec2 Position{};
 			HitEvaluation HitEvaluation{};
+			bool IsWrong{};
 			u32 Combo{};
 
 			float ElapsedDisplayTime{};
@@ -66,7 +49,7 @@ namespace DIVA::MainGame
 
 		struct ScoreDisplayData
 		{
-			vec2 Position{ 1260.0f, 40.0f };
+			vec2 Position{ 1250.0f, 30.0f };
 			u32 DisplayValue{};
 			float IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
@@ -77,6 +60,13 @@ namespace DIVA::MainGame
 
 		void Initialize()
 		{
+		}
+
+		void Reset()
+		{
+			ComboDisplayState.HitEvaluation = HitEvaluation::None;
+			ScoreBonusDisplay.Value = 0;
+			ScoreDisplay.DisplayValue = 0;
 		}
 
 		bool LoadSprites(GFX::SpritePacker& sprPacker)
@@ -128,6 +118,18 @@ namespace DIVA::MainGame
 			spriteCache.ComboNumbers[8] = fetchSprite("Combo_8");
 			spriteCache.ComboNumbers[9] = fetchSprite("Combo_9");
 
+			spriteCache.ScoreBonusNumbers[0] = fetchSprite("ScoreBonus_0");
+			spriteCache.ScoreBonusNumbers[1] = fetchSprite("ScoreBonus_1");
+			spriteCache.ScoreBonusNumbers[2] = fetchSprite("ScoreBonus_2");
+			spriteCache.ScoreBonusNumbers[3] = fetchSprite("ScoreBonus_3");
+			spriteCache.ScoreBonusNumbers[4] = fetchSprite("ScoreBonus_4");
+			spriteCache.ScoreBonusNumbers[5] = fetchSprite("ScoreBonus_5");
+			spriteCache.ScoreBonusNumbers[6] = fetchSprite("ScoreBonus_6");
+			spriteCache.ScoreBonusNumbers[7] = fetchSprite("ScoreBonus_7");
+			spriteCache.ScoreBonusNumbers[8] = fetchSprite("ScoreBonus_8");
+			spriteCache.ScoreBonusNumbers[9] = fetchSprite("ScoreBonus_9");
+			spriteCache.ScoreBonus_Plus = fetchSprite("ScoreBonus_Plus");
+
 			return true;
 		}
 
@@ -168,54 +170,84 @@ namespace DIVA::MainGame
 				ScoreBonusDisplay.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
 			}
 		}
-
-		void DrawScoreDisplay()
+		
+		// NOTE: Value text is displayed from right to left
+		float DrawSpriteNumericValue(u32 value, const Sprite* spriteArray[], vec2& position, vec2& scale, float spacing, int length = -1)
 		{
 			SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
 			vec2 displayOffset{ 0.0f, 0.0f };
 
-			u32 remainingNumbers = ScoreDisplay.DisplayValue;
-			for (int i = 0; i < 8; i++)
+			int realLength = (length == -1) ? 10 : length;
+
+			u32 remainingNumbers = value;
+			for (int i = 0; i < realLength; i++)
 			{
-				if (remainingNumbers == 0 && i > 0) { break; }
+				if (remainingNumbers == 0 && i > 0 && length == -1) { break; }
 
 				int sprIndex = remainingNumbers % 10;
-				const Sprite* numSprite = spriteCache.ScoreNumbers[sprIndex];
+				const Sprite* numSprite = spriteArray[sprIndex];
 
-				sprRenderer.PushSprite(spriteCache.hudSprites, *numSprite, ScoreDisplay.Position + displayOffset, vec2(0.667f), DefaultColors::White);
+				sprRenderer.PushSprite(spriteCache.hudSprites, *numSprite, position + displayOffset, scale, DefaultColors::White);
 
-				displayOffset.x -= 25.0f;
+				displayOffset.x -= spacing * scale.x;
 				remainingNumbers /= 10;
 			}
+
+			return displayOffset.x;
+		}
+
+		float MeasureSpriteNumericValue(u32 value, const Sprite* spriteArray[], float spacing, int length = -1)
+		{
+			float displayOffset{ 0.0f };
+
+			int realLength = (length == -1) ? 10 : length;
+
+			u32 remainingNumbers = value;
+			for (int i = 0; i < realLength; i++)
+			{
+				if (remainingNumbers == 0 && i > 0 && length == -1) { return displayOffset; }
+
+				int sprIndex = remainingNumbers % 10;
+				const Sprite* numSprite = spriteArray[sprIndex];
+
+				displayOffset += spacing;
+				remainingNumbers /= 10;
+			}
+
+			return displayOffset;
+		}
+
+		void DrawScoreDisplay()
+		{
+			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(0.667f), 37.0f, -1);
 		}
 
 		void DrawComboDisplay(float deltaTime_ms)
 		{
 			if (ComboDisplayState.HitEvaluation != HitEvaluation::None && ComboDisplayState.ElapsedDisplayTime <= 2.0f)
 			{
-				const Font& debugFont = *mainGameContext.DebugFont;
-				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+				SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
 
-				string_view valuText = EnumToString<HitEvaluation>(HitEvaluationNames, ComboDisplayState.HitEvaluation);
-				Color valuColor = HitEvaluationColors[static_cast<size_t>(ComboDisplayState.HitEvaluation)];
-				Color comboColor = DefaultColors::White;
+				size_t valuIndex = static_cast<size_t>(ComboDisplayState.HitEvaluation);
 
-				vec2 valuTextPos = { ComboDisplayState.Position.x - 30.0f, ComboDisplayState.Position.y - 35.0f };
+				const Sprite* valuSprite = spriteCache.HitEvaluations[valuIndex];
+				vec2 valuTextPos = { ComboDisplayState.Position.x, ComboDisplayState.Position.y - 35.0f };
 
 				if (ComboDisplayState.Combo <= 1)
 				{
-					fontRenderer.PushString(debugFont, valuText, valuTextPos, vec2(1.0f), valuColor);
+					sprRenderer.PushSprite(spriteCache.hudSprites, *valuSprite, valuTextPos, vec2(0.667f), DefaultColors::White);
 				}
 				else
 				{
-					char comboText[8] = {};
-					size_t comboTextLength = snprintf(comboText, sizeof(comboText) - 1, "%u", ComboDisplayState.Combo);
+					constexpr float valuComboSpacing = 27.0f * 0.667f;
 
-					vec2 valuTextSize = fontRenderer.MeasureString(debugFont, valuText);
-					vec2 comboTextPos = { valuTextPos.x + valuTextSize.x + 4.0f, valuTextPos.y };
+					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, 25.0f) * 0.667f;
 
-					fontRenderer.PushString(debugFont, valuText, valuTextPos, vec2(1.0f), valuColor);
-					fontRenderer.PushString(debugFont, std::string_view(comboText, comboTextLength), comboTextPos, vec2(1.0f), comboColor);
+					vec2 comboTextPos = { valuTextPos.x + valuComboSpacing + (comboTextWidth / 2.0f), valuTextPos.y };
+					valuTextPos.x -= (comboTextWidth / 2.0f) + valuComboSpacing;
+
+					sprRenderer.PushSprite(spriteCache.hudSprites, *valuSprite, valuTextPos, vec2(0.667f), DefaultColors::White);
+					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, vec2(0.667f), 25.0f);
 				}
 			}
 		}
@@ -224,18 +256,18 @@ namespace DIVA::MainGame
 		{
 			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f)
 			{
-				const Font& debugFont = *mainGameContext.DebugFont;
-				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+				SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
 
-				char text[8] = {};
-				size_t textLength = snprintf(text, sizeof(text) - 1, "+%u", ScoreBonusDisplay.Value);
-
-				vec2 textSize = fontRenderer.MeasureString(debugFont, std::string_view(text, textLength));
+				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, spriteCache.ScoreBonusNumbers, 22.0f);
+				float plusWidth = spriteCache.ScoreBonus_Plus->SourceRectangle.Width;
 
 				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, -20.0f, ScoreBonusDisplay.ElapsedDisplayTime);
-				vec2 textPos = { ScoreBonusDisplay.Position.x - textSize.x / 2.0f, ScoreBonusDisplay.Position.y + textPosY - 45.0f };
 
-				fontRenderer.PushString(debugFont, std::string_view(text, textLength), textPos, vec2(1.0f), DefaultColors::White);
+				vec2 textPos = { ScoreBonusDisplay.Position.x, ScoreBonusDisplay.Position.y - 70.0f };
+				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, vec2(0.667f), 22.0f);
+
+				//textPos.x -= (textWidth / 2.0f) - (plusWidth / 2.0f);
+				//sprRenderer.PushSprite(spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, vec2(0.667f), DefaultColors::White);
 			}
 		}
 
@@ -273,6 +305,11 @@ namespace DIVA::MainGame
 	{
 		implementation = new Implementation(mainGameContext);
 		implementation->Initialize();
+	}
+
+	void HUD::Reset()
+	{
+		implementation->Reset();
 	}
 
 	bool HUD::LoadSprites(Starshine::GFX::SpritePacker& sprPacker)

@@ -8,6 +8,8 @@
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "GFX/SpritePacker.h"
 #include "IO/Path/Directory.h"
+#include "IO/Path/File.h"
+#include "IO/Xml.h"
 #include "audio/AudioEngine.h"
 #include <string>
 #include <deque>
@@ -37,7 +39,14 @@ namespace DIVA::MainGame
 		{ 237,  68,  78, 255 },
 		{ 181, 255, 255, 255 },
 		{ 255, 206, 255, 255 },
-		{ 242, 255, 175, 255 }
+		{ 242, 255, 175, 255 },
+		{ 255, 202, 0, 255 }
+	};
+
+	enum class SubState : i32
+	{
+		MainGame,
+		Results
 	};
 
 	struct GameNote
@@ -70,6 +79,8 @@ namespace DIVA::MainGame
 		GameNote* NextNote = nullptr;
 		u32 CurrentScoreBonus = 0;
 
+		float TimeSinceHoldStart{};
+
 		// NOTE: Hit Stats
 		HitEvaluation HitEvaluation{ HitEvaluation::None };
 		bool HitWrong = false;
@@ -86,6 +97,16 @@ namespace DIVA::MainGame
 	{
 		GFX::Renderer* BaseRenderer = nullptr;
 		Context& MainGameContext;
+
+		SubState CurrentSubState{ SubState::MainGame };
+		i32 results_optionIndex = 0;
+		bool resultsSaved = false;
+
+		static constexpr std::array<std::string_view, 2> results_OptionNames
+		{
+			"Retry",
+			"Return to Chart Select"
+		};
 
 		SpriteRenderer* spriteRenderer{};
 		SpriteSheet iconSet;
@@ -126,13 +147,16 @@ namespace DIVA::MainGame
 			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Circle, KeyBind{ SDLK_d, SDLK_l } },
 			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Cross, KeyBind{ SDLK_s, SDLK_k } },
 			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Square, KeyBind{ SDLK_a, SDLK_j } },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind{ SDLK_w, SDLK_i } }
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind{ SDLK_w, SDLK_i } },
+			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Star, KeyBind{ SDLK_f, SDLK_h } },
 		};
 
 		HUD hud = HUD(MainGameContext);
 
 		SourceHandle HitSound_Normal{};
 		SourceHandle HitSound_Double{};
+
+		SourceHandle HitSound_Star_Normal{};
 
 		Voice HitSound_Hold_LoopVoice{};
 		SourceHandle HitSound_Hold_Loop{};
@@ -159,6 +183,19 @@ namespace DIVA::MainGame
 			hud.Initialize();
 		}
 
+		void Reset()
+		{
+			chartNoteOffset = 0;
+			ElapsedTime_Seconds = 0.0f;
+			ActiveNotes.clear();
+
+			MainGameContext.Score.Score = 0;
+			MainGameContext.Score.Combo = 0;
+			MainGameContext.Score.MaxCombo = 0;
+
+			hud.Reset();
+		}
+
 		bool CreateIconSetSpriteSheet()
 		{
 			sprPacker.AddFromDirectory("diva/sprites/iconset_dev");
@@ -180,43 +217,49 @@ namespace DIVA::MainGame
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Target_Cross", spriteCache.NoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Target_Square", spriteCache.NoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Target_Triangle", spriteCache.NoteTargets);
-			//fetchNoteShapeSpecificSprite(NoteShape::Star, "Target_Star", spriteCache.NoteTargets);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Target_Star", spriteCache.NoteTargets);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Icon_Circle", spriteCache.NoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Icon_Cross", spriteCache.NoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Icon_Square", spriteCache.NoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Icon_Triangle", spriteCache.NoteIcons);
-			//fetchNoteShapeSpecificSprite(NoteShape::Star, "Icon_Star", spriteCache.NoteIcons);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Icon_Star", spriteCache.NoteIcons);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Target_Circle_Double", spriteCache.DoubleNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Target_Cross_Double", spriteCache.DoubleNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Target_Square_Double", spriteCache.DoubleNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Target_Triangle_Double", spriteCache.DoubleNoteTargets);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Target_Star_Double", spriteCache.DoubleNoteTargets);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Icon_Circle_Double", spriteCache.DoubleNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Icon_Cross_Double", spriteCache.DoubleNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Icon_Square_Double", spriteCache.DoubleNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Icon_Triangle_Double", spriteCache.DoubleNoteIcons);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Icon_Star_Double", spriteCache.DoubleNoteIcons);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "TargetHand_Circle", spriteCache.DoubleNoteTargetHands);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "TargetHand_Cross", spriteCache.DoubleNoteTargetHands);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "TargetHand_Square", spriteCache.DoubleNoteTargetHands);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "TargetHand_Triangle", spriteCache.DoubleNoteTargetHands);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "TargetHand_Star", spriteCache.DoubleNoteTargetHands);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Target_Circle_Hold", spriteCache.HoldNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Target_Cross_Hold", spriteCache.HoldNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Target_Square_Hold", spriteCache.HoldNoteTargets);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Target_Triangle_Hold", spriteCache.HoldNoteTargets);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Target_Star_Hold", spriteCache.HoldNoteTargets);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Icon_Circle_Hold", spriteCache.HoldNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "Icon_Cross_Hold", spriteCache.HoldNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "Icon_Square_Hold", spriteCache.HoldNoteIcons);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "Icon_Triangle_Hold", spriteCache.HoldNoteIcons);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "Icon_Star_Hold", spriteCache.HoldNoteIcons);
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "HoldTrail_Circle", spriteCache.HoldNoteTrails);
 			fetchNoteShapeSpecificSprite(NoteShape::Cross, "HoldTrail_Cross", spriteCache.HoldNoteTrails);
 			fetchNoteShapeSpecificSprite(NoteShape::Square, "HoldTrail_Square", spriteCache.HoldNoteTrails);
 			fetchNoteShapeSpecificSprite(NoteShape::Triangle, "HoldTrail_Triangle", spriteCache.HoldNoteTrails);
+			fetchNoteShapeSpecificSprite(NoteShape::Star, "HoldTrail_Star", spriteCache.HoldNoteTrails);
 			return true;
 		}
 
@@ -235,6 +278,8 @@ namespace DIVA::MainGame
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
 
+			HitSound_Star_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Normal01.ogg");
+
 			HitSound_Hold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_Loop.ogg");
 			HitSound_Hold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_LoopEnd.ogg");
 
@@ -242,23 +287,12 @@ namespace DIVA::MainGame
 			HitSound_Hold_LoopVoice.SetLoopState(true);
 			HitSound_Hold_LoopVoice.SetVolume(0.35f);
 
-			MusicSource = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/pv_022.ogg");
-			MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
+			//MusicSource = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/pv_022.ogg");
+			//MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
 
 			// ---------------
 
-			fstream chartFile = fstream("diva/songdata/test/test_dt2_chart.xml", ios_base::binary | ios_base::in);
-			chartFile.seekg(0, ios_base::end);
-			size_t chartFileSize = chartFile.tellg();
-			chartFile.seekg(0, ios_base::beg);
-
-			char* chartFileText = new char[chartFileSize];
-			chartFile.read(chartFileText, chartFileSize);
-			chartFile.close();
-
-			ReadXmlChart(songChart, chartFileText, chartFileSize);
-
-			delete[] chartFileText;
+			songChart.LoadXml("diva/songdata/test/test.xml");
 
 			return true;
 		}
@@ -277,14 +311,21 @@ namespace DIVA::MainGame
 
 		void Update(float deltaTime_ms)
 		{
+			if (CurrentSubState == SubState::Results)
+			{
+				UpdateResults(deltaTime_ms);
+				return;
+			}
+
 			if (ElapsedTime_Seconds >= songChart.Duration)
 			{
+				CurrentSubState = SubState::Results;
 				return;
 			}
 
 			if (!Paused)
 			{	
-				MusicVoice.SetPlaying(true);
+				//MusicVoice.SetPlaying(true);
 
 				if (MusicVoice.IsPlaying())
 				{
@@ -353,8 +394,63 @@ namespace DIVA::MainGame
 			}
 		}
 
+		void UpdateResults(float deltaTime_ms)
+		{
+			if (!resultsSaved)
+			{
+				Xml::Printer printer;
+
+				printer.OpenElement("Score");
+				{
+					printer.PushAttribute("Score", MainGameContext.Score.Score);
+					printer.PushAttribute("MaxCombo", MainGameContext.Score.MaxCombo);
+
+					printer.CloseElement();
+				}
+
+				IO::File::WriteAllBytes("userdata/score_test.xml", printer.CStr(), printer.CStrSize() - 1);
+				printer.ClearBuffer();
+				
+				resultsSaved = true;
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_DOWN)) { results_optionIndex++; }
+			if (Keyboard::IsKeyTapped(SDLK_UP)) { results_optionIndex--; }
+			results_optionIndex = MathExtensions::Clamp<i32>(results_optionIndex, 0, 1);
+
+			if (Keyboard::IsKeyTapped(SDLK_RETURN))
+			{ 
+				switch (results_optionIndex)
+				{
+				case 0:
+					CurrentSubState = SubState::MainGame;
+					resultsSaved = false;
+					Reset();
+					break;
+				case 1:
+					// TODO: Not implemented yet
+					break;
+				}
+
+				results_optionIndex = 0;
+				return;
+			}
+
+			SDL_memset(debugText, 0, sizeof(debugText));
+
+			size_t lastPos = 0;
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Score: %d\n", MainGameContext.Score.Score);
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Max Combo: %d\n", MainGameContext.Score.MaxCombo);
+		}
+
 		void Draw(float deltaTime_ms)
 		{
+			if (CurrentSubState == SubState::Results)
+			{
+				DrawResults();
+				return;
+			}
+
 			BaseRenderer->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
@@ -366,6 +462,23 @@ namespace DIVA::MainGame
 			hud.Draw(deltaTime_ms);
 
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+
+			spriteRenderer->RenderSprites(nullptr);
+			BaseRenderer->SwapBuffers();
+		}
+
+		void DrawResults()
+		{
+			BaseRenderer->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
+			spriteRenderer->SetBlendMode(BlendMode::Normal);
+
+			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+
+			for (i32 i = 0; i < results_OptionNames.size(); i++)
+			{
+				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont.LineHeight), vec2(1.0f),
+					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
+			}
 
 			spriteRenderer->RenderSprites(nullptr);
 			BaseRenderer->SwapBuffers();
@@ -457,6 +570,7 @@ namespace DIVA::MainGame
 				}
 				else if (note.HasBeenEvaluated())
 				{
+					note.TimeSinceHoldStart += deltaTime_ms;
 					if (!nextNote->Expired && !nextNote->ShouldBeRemoved && !nextNote->HasBeenEvaluated())
 					{
 						if (nextNoteRemainingTime < HitThresholds::ThresholdMiss)
@@ -465,11 +579,8 @@ namespace DIVA::MainGame
 						}
 						else
 						{
-							i32 threshold = static_cast<i32>(note.ElapsedTime * 1000.0f);
-							if (MathExtensions::IsInRange<i32>(0, 16, threshold % 100))
-							{
-								note.CurrentScoreBonus += 10;
-							}
+							float scoreBonusBase = note.TimeSinceHoldStart * 1000.0f;
+							note.CurrentScoreBonus = static_cast<u32>((scoreBonusBase / 100.0f)) * 10;
 
 							hud.SetScoreBonusDisplayState(note.CurrentScoreBonus, note.TargetPosition);
 						}
@@ -521,6 +632,8 @@ namespace DIVA::MainGame
 
 			if (note != nullptr)
 			{
+				if (shape == NoteShape::Star && note->Shape != shape) { AudioEngine::GetInstance()->PlaySound(HitSound_Star_Normal, 0.35f); return; }
+
 				float remainingTimeOnHit = note->GetRemainingTime() * 1000.0f;
 				bool shapeMatches = note->Shape == shape;
 				bool doubleGiveBonus = false;
@@ -531,7 +644,7 @@ namespace DIVA::MainGame
 					note->HasBeenHit = tapped;
 					if (note->HasBeenHit)
 					{
-						AudioEngine::GetInstance()->PlaySound(HitSound_Normal, 0.35f);
+						AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.35f);
 					}
 					break;
 				case NoteType::Double:
@@ -559,7 +672,7 @@ namespace DIVA::MainGame
 
 					if (note->HasBeenHit)
 					{
-						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
+						//AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
 					}
 
 					break;
@@ -568,7 +681,7 @@ namespace DIVA::MainGame
 					note->CurrentScoreBonus = 10;
 
 					hud.HoldScoreBonus();
-					hud.SetScoreBonusDisplayState(note->CurrentScoreBonus, note->IconPosition);
+					hud.SetScoreBonusDisplayState(note->CurrentScoreBonus, note->TargetPosition);
 
 					if (note->HasBeenHit)
 					{
@@ -651,6 +764,8 @@ namespace DIVA::MainGame
 						MainGameContext.Score.Combo = 0;
 					}
 
+					MainGameContext.Score.MaxCombo = MathExtensions::Max<u32>(MainGameContext.Score.MaxCombo, MainGameContext.Score.Combo);
+
 					hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->TargetPosition);
 					if (doubleGiveBonus)
 					{
@@ -661,7 +776,7 @@ namespace DIVA::MainGame
 			}
 			else if (tapped && !released)
 			{
-				AudioEngine::GetInstance()->PlaySound(HitSound_Normal, 0.5f);
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.35f);
 			}
 		}
 
@@ -775,7 +890,7 @@ namespace DIVA::MainGame
 					spriteRenderer->SetSpriteColor(Color {DefaultColors::White});
 
 					float segmentLength = glm::distance(curPoint, prevPoint);
-					spriteRenderer->SetSpriteScale(vec2{ segmentLength, trailSprite->SourceRectangle.Height });
+					spriteRenderer->SetSpriteSize(vec2{ segmentLength, trailSprite->SourceRectangle.Height });
 					spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, trailSprite->Origin.y });
 
 					vec2 diff = { curPoint.y - prevPoint.y, curPoint.x - prevPoint.x };
@@ -939,7 +1054,7 @@ namespace DIVA::MainGame
 					prevColor, curColor);
 
 				float segmentLength = glm::distance(curPoint, prevPoint);
-				spriteRenderer->SetSpriteScale(vec2{ segmentLength, thickness });
+				spriteRenderer->SetSpriteSize(vec2{ segmentLength, thickness });
 				spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, thickness / 2.0f });
 
 				vec2 diff = { curPoint.y - prevPoint.y, curPoint.x - prevPoint.x };

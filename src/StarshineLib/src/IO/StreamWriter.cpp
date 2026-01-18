@@ -26,6 +26,12 @@ namespace Starshine::IO
 		}
 	}
 
+	void StreamWriter::WriteFunctionPointer(const std::function<void(StreamWriter&)>& func)
+	{
+		functionArray.push_back({ GetPosition(), func });
+		WritePointer(0);
+	}
+
 	void StreamWriter::WritePadding(size_t size, u8 value)
 	{
 		constexpr size_t maxPaddingSize = 32;
@@ -74,6 +80,21 @@ namespace Starshine::IO
 			}
 		}
 		stringArray.clear();
+	}
+
+	void StreamWriter::FlushFunctionArray()
+	{
+		for (auto& func : functionArray)
+		{
+			size_t funcPosition = GetPosition();
+
+			Seek(func.PointerPosition);
+			WritePointer(funcPosition);
+
+			Seek(funcPosition);
+			func.Function(*this);
+		}
+		functionArray.clear();
 	}
 
 	void StreamWriter::OnPointerSizeChange()

@@ -162,13 +162,6 @@ namespace Starshine
 			while (Running)
 			{
 				UpdateTimingData();
-
-				if (Timing.FirstFrame)
-				{
-					Timing.FirstFrame = false;
-					continue;
-				}
-
 				Keyboard::NextFrame();
 
 				if (SDL_PollEvent(&SDLEvent) != 0)
@@ -185,15 +178,20 @@ namespace Starshine
 					}
 				}
 
-				if (CurrentGameState != nullptr)
+				if (!Timing.FirstFrame)
 				{
-					CurrentGameState->Update(Timing.DeltaTime_Milliseconds);
+					if (CurrentGameState != nullptr)
+					{
+						CurrentGameState->Update(Timing.DeltaTime_Milliseconds);
+					}
+
+					if (CurrentGameState != nullptr)
+					{
+						CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
+					}
 				}
 
-				if (CurrentGameState != nullptr)
-				{
-					CurrentGameState->Draw(Timing.DeltaTime_Milliseconds);
-				}
+				if (Timing.FirstFrame) { Timing.FirstFrame = false; }
 			}
 
 			Destroy();

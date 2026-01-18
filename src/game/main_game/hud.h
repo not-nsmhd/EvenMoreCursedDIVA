@@ -12,6 +12,7 @@ namespace DIVA::MainGame
 		HUD(Context& context) : mainGameContext{ context } {}
 
 		void Initialize();
+		void Reset();
 		bool LoadSprites(Starshine::GFX::SpritePacker& sprPacker);
 
 		void Destroy();
