@@ -11,4 +11,7 @@ namespace BuildInfo
 	static constexpr const char* BuildDateString = "1970.01.01T00:00:00";
 	static constexpr const char* GitBranchName = "";
 	static constexpr const char* GitCommitHashString = "0000000";
+
+	static constexpr int BuildYear = 1970;
+	static constexpr int BuildMonth = 1;
 }

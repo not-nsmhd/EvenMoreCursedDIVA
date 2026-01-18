@@ -37,7 +37,10 @@ def main():
     # Variables
     buildDefFileWriter.write("\tstatic constexpr const char* BuildDateString = \"{genDate}\";\n".format(genDate=genDateString))
     buildDefFileWriter.write("\tstatic constexpr const char* GitBranchName = \"{branch}\";\n".format(branch=gitBranch[:-1]))
-    buildDefFileWriter.write("\tstatic constexpr const char* GitCommitHashString = \"{hash}\";\n".format(hash=gitCommitHash[:-1]))
+    buildDefFileWriter.write("\tstatic constexpr const char* GitCommitHashString = \"{hash}\";\n\n".format(hash=gitCommitHash[:-1]))
+    
+    buildDefFileWriter.write("\tstatic constexpr int BuildYear = {year};\n".format(year=genDate.year))
+    buildDefFileWriter.write("\tstatic constexpr int BuildMonth = {month};\n".format(month=genDate.month))
     
     buildDefFileWriter.write("}\n")
     buildDefFileWriter.close()

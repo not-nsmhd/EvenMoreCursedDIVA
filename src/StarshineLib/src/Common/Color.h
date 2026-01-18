@@ -30,5 +30,8 @@ namespace Starshine
 		constexpr Color Yellow { 255, 255, 0, 255 };
 		constexpr Color Cyan { 0, 255, 255, 255 };
 		constexpr Color Purple { 255, 0, 255, 255 };
+
+		constexpr Color ClearColor_Menus { 24, 24, 24, 255 };
+		constexpr Color ClearColor_InGame { 0, 24, 24, 255 };
 	};
 };

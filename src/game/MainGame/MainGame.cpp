@@ -1,9 +1,10 @@
-#include "MainGame.h"
-#include "Chart.h"
-#include "HitEvaluation.h"
-#include "HUD.h"
 #include <Common/Types.h>
 #include <Common/MathExt.h>
+#include "MainGame.h"
+#include "Chart.h"
+#include "GameNote.h"
+#include "HitEvaluation.h"
+#include "HUD.h"
 #include "input/Keyboard.h"
 #include "gfx/Render2D/SpriteRenderer.h"
 #include "GFX/SpritePacker.h"
@@ -11,11 +12,9 @@
 #include "IO/Path/File.h"
 #include "IO/Xml.h"
 #include "audio/AudioEngine.h"
-#include <string>
+#include "Menu/ChartSelect.h"
+#include "game.h"
 #include <deque>
-#include <fstream>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/compatibility.hpp>
 
 namespace DIVA::MainGame
 {
@@ -24,24 +23,6 @@ namespace DIVA::MainGame
 	using namespace Starshine::GFX::Render2D;
 	using namespace Starshine::Audio;
 	using namespace Starshine::Input;
-	using std::string_view;
-	using std::fstream;
-	using std::ios_base;
-
-	constexpr vec2 DefaultIconPosition { std::numeric_limits<float>().infinity(), std::numeric_limits<float>().infinity() };
-	constexpr float MaxNoteLifetime { 1000.0f };
-	constexpr float TrailResolution { 1.0f / 48.0f };
-	constexpr float TrailLengthFactor { 64.0f / 1.25f };
-	constexpr float TrailScrollSpeed { 64.0f * TrailResolution };
-
-	constexpr Color NoteTrailColors[EnumCount<NoteShape>()]
-	{
-		{ 237,  68,  78, 255 },
-		{ 181, 255, 255, 255 },
-		{ 255, 206, 255, 255 },
-		{ 242, 255, 175, 255 },
-		{ 255, 202, 0, 255 }
-	};
 
 	enum class SubState : i32
 	{
@@ -49,54 +30,10 @@ namespace DIVA::MainGame
 		Results
 	};
 
-	struct GameNote
-	{
-		float NoteTime{};
-		float ElapsedTime{};
-
-		float RemainingTimeOnHit{};
-
-		NoteShape Shape{};
-		NoteType Type{};
-		vec2 TargetPosition{};
-		vec2 IconPosition{ DefaultIconPosition };
-
-		float EntryAngle{};
-		float Frequency{};
-		float Amplitude{};
-		float Distance{};
-
-		// NOTE: Generic state flags
-		bool Expired = false;
-		bool HasBeenHit = false;
-		bool ShouldBeRemoved = false;
-
-		// NOTE: Double-specific state flags
-		bool HasBeenHitPrimary = false;
-		bool HasBeenHitAlternative = false;
-
-		// NOTE: Used by hold notes (and possibly linked star notes if they get added)
-		GameNote* NextNote = nullptr;
-		u32 CurrentScoreBonus = 0;
-
-		float TimeSinceHoldStart{};
-
-		// NOTE: Hit Stats
-		HitEvaluation HitEvaluation{ HitEvaluation::None };
-		bool HitWrong = false;
-
-		// NOTE: Functions
-		// NOTE: Returned value is specified in seconds
-		float GetRemainingTime() const { return NoteTime - ElapsedTime; }
-		float GetNormalizedElapsedTime() const { return MathExtensions::ConvertRange(0.0f, NoteTime, 0.0f, 1.0f, ElapsedTime); }
-
-		bool HasBeenEvaluated() const { return HitEvaluation != HitEvaluation::None; }
-	};
-
-	struct MainGameState::StateInternal
+	struct MainGameState::Impl
 	{
 		GFX::Renderer* BaseRenderer = nullptr;
-		Context& MainGameContext;
+		MainGameContext& MainGameContext;
 
 		SubState CurrentSubState{ SubState::MainGame };
 		i32 results_optionIndex = 0;
@@ -109,35 +46,15 @@ namespace DIVA::MainGame
 		};
 
 		SpriteRenderer* spriteRenderer{};
-		SpriteSheet iconSet;
 		Font debugFont;
 
 		float TrailScrollOffset = 0.0f;
 		bool Paused = false;
 
-		struct SpriteCache
-		{
-			const Sprite* NoteTargets[EnumCount<NoteShape>()]{};
-			const Sprite* NoteIcons[EnumCount<NoteShape>()]{};
-			const Sprite* NoteTargetHand{};
-
-			const Sprite* DoubleNoteTargets[EnumCount<NoteShape>()]{};
-			const Sprite* DoubleNoteIcons[EnumCount<NoteShape>()]{};
-			const Sprite* DoubleNoteTargetHands[EnumCount<NoteShape>()]{};
-
-			const Sprite* HoldNoteTargets[EnumCount<NoteShape>()]{};
-			const Sprite* HoldNoteIcons[EnumCount<NoteShape>()]{};
-
-			const Sprite* HoldNoteTrails[EnumCount<NoteShape>()]{};
-
-			const Sprite* Trail_Normal{};
-			const Sprite* Trail_CT{};
-		} spriteCache;
-
 		Chart songChart;
 		size_t chartNoteOffset = 0;
 
-		float ElapsedTime_Seconds = 0.0f;
+		f64 ElapsedTime_Seconds = 0.0f;
 		std::deque<GameNote> ActiveNotes;
 
 		KeyBind AdvanceKeybind = KeyBind{ SDLK_PERIOD, Input::UnboundKey };
@@ -167,13 +84,13 @@ namespace DIVA::MainGame
 
 		size_t CurrentMusicPosition{};
 		size_t PreviousMusicPosition{};
-		float ChartDeltaTime{};
+		f64 ChartDeltaTime{};
 
 		SpritePacker sprPacker;
 
 		char debugText[512] = {};
 
-		StateInternal(MainGame::Context& context) : MainGameContext{ context }
+		Impl(MainGame::MainGameContext& context) : MainGameContext{ context }
 		{
 		}
 
@@ -186,7 +103,7 @@ namespace DIVA::MainGame
 		void Reset()
 		{
 			chartNoteOffset = 0;
-			ElapsedTime_Seconds = 0.0f;
+			ElapsedTime_Seconds = 0.0;
 			ActiveNotes.clear();
 
 			MainGameContext.Score.Score = 0;
@@ -201,8 +118,11 @@ namespace DIVA::MainGame
 			sprPacker.AddFromDirectory("diva/sprites/iconset_dev");
 			sprPacker.Pack();
 
-			iconSet.CreateFromSpritePacker(sprPacker);
+			MainGameContext.IconSetSprites.SpriteSheet.CreateFromSpritePacker(sprPacker);
 			sprPacker.Clear();
+
+			auto& spriteCache = MainGameContext.IconSetSprites;
+			auto& iconSet = MainGameContext.IconSetSprites.SpriteSheet;
 
 			spriteCache.NoteTargetHand = &iconSet.GetSprite("TargetHand_Normal");
 			spriteCache.Trail_Normal = &iconSet.GetSprite("Trail_Normal");
@@ -275,6 +195,7 @@ namespace DIVA::MainGame
 			CreateIconSetSpriteSheet();
 			hud.LoadSprites(sprPacker);
 			
+#if 0
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
 
@@ -286,22 +207,25 @@ namespace DIVA::MainGame
 			HitSound_Hold_LoopVoice = AudioEngine::GetInstance()->AllocateVoice(HitSound_Hold_Loop);
 			HitSound_Hold_LoopVoice.SetLoopState(true);
 			HitSound_Hold_LoopVoice.SetVolume(0.35f);
-
+			
 			//MusicSource = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/pv_022.ogg");
 			//MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
-
-			// ---------------
-
-			songChart.LoadXml("diva/songdata/test/test.xml");
+#endif
 
 			return true;
 		}
 
+		bool LoadChart(std::string_view chartPath)
+		{
+			return songChart.LoadXml(chartPath);
+		}
+
 		void UnloadContent()
 		{
+			MainGameContext.IconSetSprites.SpriteSheet.Destroy();
+
 			ActiveNotes.clear();
 			songChart.Clear();
-			iconSet.Destroy();
 		}
 
 		void Destroy()
@@ -309,7 +233,56 @@ namespace DIVA::MainGame
 			hud.Destroy();
 		}
 
-		void Update(float deltaTime_ms)
+		GameNote* FindNoteToEvaluate()
+		{
+			for (auto& note : ActiveNotes)
+			{
+				if (!note.HasBeenHit && !note.Expired && !note.Expiring && !note.ShouldBeRemoved) { return &note; }
+			}
+
+			return nullptr;
+		}
+
+		void UpdateInputBinding(NoteShape shape, const KeyBind& binding)
+		{
+			bool primTapped = false;
+			bool altTapped = false;
+			bool tapped = Keyboard::IsAnyTapped(binding, &primTapped, &altTapped);
+			bool released = Keyboard::IsAnyReleased(binding, nullptr, nullptr);
+
+			if (!tapped && !released) { return; }
+
+			GameNote* note = FindNoteToEvaluate();
+			if (note == nullptr) { return; }
+
+			bool evaluated = note->Evaluate(shape, false);
+			if (!evaluated) { return; }
+
+			switch (note->HitEvaluation)
+			{
+			case HitEvaluation::Cool:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
+				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				break;
+			case HitEvaluation::Good:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
+				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				break;
+			case HitEvaluation::Safe:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
+				MainGameContext.Score.Combo = 0;
+				break;
+			case HitEvaluation::Bad:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
+				MainGameContext.Score.Combo = 0;
+				break;
+			}
+
+			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
+			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
+		}
+
+		void Update(f64 deltaTime_ms)
 		{
 			if (CurrentSubState == SubState::Results)
 			{
@@ -325,21 +298,8 @@ namespace DIVA::MainGame
 
 			if (!Paused)
 			{	
-				//MusicVoice.SetPlaying(true);
-
-				if (MusicVoice.IsPlaying())
-				{
-					PreviousMusicPosition = CurrentMusicPosition;
-					CurrentMusicPosition = MusicVoice.GetFramePosition();
-
-					ChartDeltaTime = static_cast<float>(CurrentMusicPosition - PreviousMusicPosition) / 44100.0f;
-					ElapsedTime_Seconds += ChartDeltaTime;
-				}
-				else
-				{
-					ElapsedTime_Seconds += deltaTime_ms / 1000.0f;
-					ChartDeltaTime = deltaTime_ms / 1000.0f;
-				}
+				ElapsedTime_Seconds += deltaTime_ms / 1000.0;
+				ChartDeltaTime = deltaTime_ms / 1000.0;
 
 				UpdateChart(ChartDeltaTime);
 
@@ -348,13 +308,20 @@ namespace DIVA::MainGame
 				{
 					GameNote* note = &ActiveNotes[noteIndex];
 
+					if (note->Expiring && !note->Expired && !note->HasBeenHit)
+					{
+						note->Expired = true;
+						MainGameContext.Score.Combo = 0;
+						hud.SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
+					}
+
 					if (note->ShouldBeRemoved)
 					{
 						ActiveNotes.erase(ActiveNotes.cbegin() + noteIndex);
 						continue;
 					}
 
-					UpdateNote(*note, ChartDeltaTime);
+					note->Update(deltaTime_ms);
 					noteIndex++;
 				}
 
@@ -362,9 +329,6 @@ namespace DIVA::MainGame
 				{
 					UpdateInputBinding(NoteKeybinds[i].EnumValue, NoteKeybinds[i].MappedValue);
 				}
-
-				TrailScrollOffset += TrailScrollSpeed * (16.6667f / deltaTime_ms);
-				TrailScrollOffset = SDL_fmodf(TrailScrollOffset, spriteCache.Trail_Normal->SourceRectangle.Width);
 
 				hud.Update(deltaTime_ms);
 			}
@@ -394,7 +358,7 @@ namespace DIVA::MainGame
 			}
 		}
 
-		void UpdateResults(float deltaTime_ms)
+		void UpdateResults(f64 deltaTime_ms)
 		{
 			if (!resultsSaved)
 			{
@@ -428,8 +392,8 @@ namespace DIVA::MainGame
 					Reset();
 					break;
 				case 1:
-					// TODO: Not implemented yet
-					break;
+					Game::GetInstance().SetCurrentGameState(GameStateHelpers::CreateGameStateInstance<Menu::ChartSelect>());
+					return;
 				}
 
 				results_optionIndex = 0;
@@ -443,7 +407,7 @@ namespace DIVA::MainGame
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Max Combo: %d\n", MainGameContext.Score.MaxCombo);
 		}
 
-		void Draw(float deltaTime_ms)
+		void Draw(f64 deltaTime_ms)
 		{
 			if (CurrentSubState == SubState::Results)
 			{
@@ -456,7 +420,7 @@ namespace DIVA::MainGame
 
 			for (auto& note : ActiveNotes)
 			{
-				DrawNote(note);
+				note.Draw(deltaTime_ms);
 			}
 
 			hud.Draw(deltaTime_ms);
@@ -484,634 +448,58 @@ namespace DIVA::MainGame
 			BaseRenderer->SwapBuffers();
 		}
 
-		void UpdateChart(float deltaTime_ms)
+		void UpdateChart(f64 deltaTime_ms)
 		{
 			for (auto chartNote = songChart.Notes.cbegin() + chartNoteOffset; chartNote != songChart.Notes.cend(); chartNote++)
 			{
 				if (chartNote->AppearTime <= ElapsedTime_Seconds)
 				{
-					if (chartNote->Type == NoteType::HoldEnd)
-					{
-						chartNoteOffset++;
-						break;
-					}
+					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
+					newNote.FlyTime = songChart.GetNoteTime(chartNote->AppearTime);
 
-					GameNote& newNote = ActiveNotes.emplace_back();
-					newNote.NoteTime = songChart.GetNoteTime(chartNote->AppearTime);
-					newNote.ElapsedTime = 0.0f;
-					newNote.Shape = chartNote->Shape;
-					newNote.Type = chartNote->Type;
-					newNote.TargetPosition = { chartNote->X, chartNote->Y };
-					newNote.IconPosition = DefaultIconPosition;
-					newNote.EntryAngle = chartNote->Angle;
-					newNote.Frequency = chartNote->Frequency;
-					newNote.Amplitude = chartNote->Amplitude;
-					newNote.Distance = chartNote->Distance;
 					chartNoteOffset++;
-
-					if (chartNote->Type == NoteType::HoldStart)
-					{
-						float originalAppearTime = chartNote->AppearTime;
-
-						chartNote = songChart.Notes.cbegin() + chartNote->NextNoteIndex;
-
-						GameNote& holdEndNote = ActiveNotes.emplace_back();
-						holdEndNote.NoteTime = songChart.GetNoteTime(chartNote->AppearTime);
-						holdEndNote.ElapsedTime = -(chartNote->AppearTime - originalAppearTime);
-						holdEndNote.Shape = chartNote->Shape;
-						holdEndNote.Type = NoteType::HoldEnd;
-						holdEndNote.TargetPosition = { chartNote->X, chartNote->Y };
-						holdEndNote.IconPosition = DefaultIconPosition;
-						holdEndNote.EntryAngle = chartNote->Angle;
-						holdEndNote.Frequency = chartNote->Frequency;
-						holdEndNote.Amplitude = chartNote->Amplitude;
-						holdEndNote.Distance = chartNote->Distance;
-						newNote.NextNote = &holdEndNote;
-					}
-
 					break;
 				}
-			}
-		}
-
-		void UpdateNote(GameNote& note, float deltaTime_ms)
-		{
-			note.ElapsedTime += deltaTime_ms;
-
-			bool isHoldNote = (NoteTypeToNoteTypeFlags(note.Type) & NoteTypeFlags_HoldAll) != 0;
-			float remainingTime = note.GetRemainingTime() * 1000.0f;
-			if (!isHoldNote)
-			{
-				if (!note.HasBeenEvaluated() && !note.Expired && !note.ShouldBeRemoved && note.ElapsedTime > 0.0f)
-				{
-					if (remainingTime < HitThresholds::ThresholdMiss)
-					{
-						note.Expired = true;
-					}
-				}
-
-				if (remainingTime <= -MaxNoteLifetime)
-				{
-					note.ShouldBeRemoved = true;
-				}
-			}
-			else if (note.Type == NoteType::HoldStart)
-			{
-				GameNote* nextNote = note.NextNote;
-				float nextNoteRemainingTime = nextNote->GetRemainingTime() * 1000.0f;
-				if (!note.Expired && !note.ShouldBeRemoved && !note.HasBeenEvaluated())
-				{
-					if (remainingTime < HitThresholds::ThresholdMiss)
-					{
-						note.Expired = true;
-						nextNote->Expired = true;
-						nextNote->ShouldBeRemoved = true;
-					}
-				}
-				else if (note.HasBeenEvaluated())
-				{
-					note.TimeSinceHoldStart += deltaTime_ms;
-					if (!nextNote->Expired && !nextNote->ShouldBeRemoved && !nextNote->HasBeenEvaluated())
-					{
-						if (nextNoteRemainingTime < HitThresholds::ThresholdMiss)
-						{
-							nextNote->Expired = true;
-						}
-						else
-						{
-							float scoreBonusBase = note.TimeSinceHoldStart * 1000.0f;
-							note.CurrentScoreBonus = static_cast<u32>((scoreBonusBase / 100.0f)) * 10;
-
-							hud.SetScoreBonusDisplayState(note.CurrentScoreBonus, note.TargetPosition);
-						}
-					}
-				}
-
-				if (remainingTime <= -MaxNoteLifetime && !note.HasBeenEvaluated())
-				{
-					note.ShouldBeRemoved = true;
-					nextNote->ShouldBeRemoved = true;
-				}
-				else if (note.HasBeenEvaluated())
-				{
-					if (nextNoteRemainingTime < HitThresholds::ThresholdMiss && !nextNote->HasBeenEvaluated())
-					{
-						nextNote->Expired = true;
-					}
-
-					if (nextNoteRemainingTime <= -MaxNoteLifetime)
-					{
-						note.ShouldBeRemoved = true;
-						nextNote->ShouldBeRemoved = true;
-					}
-				}
-			}
-
-			float iconProgress = 1.0f - note.GetNormalizedElapsedTime();
-			note.IconPosition = MathExtensions::GetSinePoint(iconProgress, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
-		}
-
-		void UpdateInputBinding(NoteShape shape, const KeyBind& binding)
-		{
-			bool primTapped = false;
-			bool altTapped = false;
-			bool tapped = Keyboard::IsAnyTapped(binding, &primTapped, &altTapped);
-			bool released = Keyboard::IsAnyReleased(binding, nullptr, nullptr);
-
-			if (!tapped && !released)
-			{
-				return;
-			}
-
-			GameNote* note = FindNextNoteToEvaluate();
-
-			if (note == nullptr)
-			{
-				note = FindNextHoldNoteToEvaluate();
-			}
-
-			if (note != nullptr)
-			{
-				if (shape == NoteShape::Star && note->Shape != shape) { AudioEngine::GetInstance()->PlaySound(HitSound_Star_Normal, 0.35f); return; }
-
-				float remainingTimeOnHit = note->GetRemainingTime() * 1000.0f;
-				bool shapeMatches = note->Shape == shape;
-				bool doubleGiveBonus = false;
-
-				switch (note->Type)
-				{
-				case NoteType::Normal:
-					note->HasBeenHit = tapped;
-					if (note->HasBeenHit)
-					{
-						AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.35f);
-					}
-					break;
-				case NoteType::Double:
-					note->HasBeenHitPrimary = note->HasBeenHitPrimary ? note->HasBeenHitPrimary : primTapped;
-					note->HasBeenHitAlternative = note->HasBeenHitAlternative ? note->HasBeenHitAlternative : altTapped;
-
-					// NOTE: Hold transfer implementation
-					if (note->HasBeenHitPrimary && !note->HasBeenHitAlternative)
-					{
-						Keyboard::IsAnyDown(binding, nullptr, &note->HasBeenHitAlternative);
-						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
-						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
-						break;
-					}
-					else if (!note->HasBeenHitPrimary && note->HasBeenHitAlternative)
-					{
-						Keyboard::IsAnyDown(binding, &note->HasBeenHitPrimary, nullptr);
-						note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
-						AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
-						break;
-					}
-
-					note->HasBeenHit = note->HasBeenHitPrimary && note->HasBeenHitAlternative;
-					doubleGiveBonus = note->HasBeenHit && shapeMatches;
-
-					if (note->HasBeenHit)
-					{
-						//AudioEngine::GetInstance()->PlaySound(HitSound_Double, 0.35f);
-					}
-
-					break;
-				case NoteType::HoldStart:
-					note->HasBeenHit = note->HasBeenHit ? note->HasBeenHit : tapped;
-					note->CurrentScoreBonus = 10;
-
-					hud.HoldScoreBonus();
-					hud.SetScoreBonusDisplayState(note->CurrentScoreBonus, note->TargetPosition);
-
-					if (note->HasBeenHit)
-					{
-						HitSound_Hold_LoopVoice.SetFramePosition(0);
-						HitSound_Hold_LoopVoice.SetPlaying(true);
-					}
-
-					if (note->HasBeenHit && note->NextNote->ElapsedTime < 0.0f && released)
-					{
-						note->NextNote->HasBeenHit = note->HasBeenHit;
-
-						note->HitEvaluation = HitEvaluation::Miss;
-						note->NextNote->HitEvaluation = HitEvaluation::Miss;
-						hud.ReleaseScoreBonus(true);
-						HitSound_Hold_LoopVoice.SetPlaying(false);
-
-						note->NextNote->ShouldBeRemoved = true;
-					}
-
-					break;
-				case NoteType::HoldEnd:
-					note->HasBeenHit = released;
-
-					// NOTE: Note was released early
-					if (released && remainingTimeOnHit > HitThresholds::ThresholdStart)
-					{
-						note->HitEvaluation = HitEvaluation::Miss;
-						hud.ReleaseScoreBonus(true);
-						HitSound_Hold_LoopVoice.SetPlaying(false);
-						break;
-					}
-
-					MainGameContext.Score.Score += note->CurrentScoreBonus;
-					hud.ReleaseScoreBonus(false);
-
-					if (note->HasBeenHit)
-					{
-						HitSound_Hold_LoopVoice.SetPlaying(false);
-						AudioEngine::GetInstance()->PlaySound(HitSound_Hold_LoopEnd, 0.35f);
-					}
-
-					break;
-				}
-
-				if (note->HasBeenHit)
-				{
-					note->RemainingTimeOnHit = remainingTimeOnHit;
-
-					if (remainingTimeOnHit <= HitThresholds::CoolThreshold && remainingTimeOnHit >= -HitThresholds::CoolThreshold)
-					{
-						note->HitEvaluation = HitEvaluation::Cool;
-						note->HitWrong = !shapeMatches;
-						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Cool : ScoreValues::CoolWrong;
-						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
-					}
-					else if (remainingTimeOnHit <= HitThresholds::GoodThreshold && remainingTimeOnHit >= -HitThresholds::GoodThreshold)
-					{
-						note->HitEvaluation = HitEvaluation::Good;
-						note->HitWrong = !shapeMatches;
-						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Good : ScoreValues::GoodWrong;
-						MainGameContext.Score.Combo = shapeMatches ? (MainGameContext.Score.Combo + 1) : 0;
-					}
-					else if (remainingTimeOnHit <= HitThresholds::SafeThreshold && remainingTimeOnHit >= -HitThresholds::SafeThreshold)
-					{
-						note->HitEvaluation = HitEvaluation::Safe;
-						note->HitWrong = !shapeMatches;
-						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Safe : ScoreValues::SafeWrong;
-						MainGameContext.Score.Combo = 0;
-					}
-					else if(remainingTimeOnHit <= HitThresholds::BadThreshold && remainingTimeOnHit >= -HitThresholds::BadThreshold)
-					{
-						note->HitEvaluation = HitEvaluation::Bad;
-						note->HitWrong = !shapeMatches;
-						MainGameContext.Score.Score += shapeMatches ? ScoreValues::Bad : ScoreValues::BadWrong;
-						MainGameContext.Score.Combo = 0;
-					}
-					else
-					{
-						note->HitEvaluation = HitEvaluation::Miss;
-						MainGameContext.Score.Combo = 0;
-					}
-
-					MainGameContext.Score.MaxCombo = MathExtensions::Max<u32>(MainGameContext.Score.MaxCombo, MainGameContext.Score.Combo);
-
-					hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->TargetPosition);
-					if (doubleGiveBonus)
-					{
-						MainGameContext.Score.Score += ScoreValues::DoubleBonus;
-						hud.SetScoreBonusDisplayState(200, note->TargetPosition);
-					}
-				}
-			}
-			else if (tapped && !released)
-			{
-				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.35f);
-			}
-		}
-
-		GameNote* FindNextNoteToEvaluate()
-		{
-			for (auto& note : ActiveNotes)
-			{
-				if (note.HasBeenHit || note.HasBeenEvaluated() || note.Expired || note.ShouldBeRemoved || note.ElapsedTime < 0.0f)
-				{
-					continue;
-				}
-
-				if (note.Type == NoteType::HoldStart || note.Type == NoteType::HoldEnd)
-				{
-					continue;
-				}
-
-				float remainingTime = note.GetRemainingTime() * 1000.0f;
-				if (remainingTime <= HitThresholds::ThresholdStart && remainingTime >= HitThresholds::ThresholdMiss)
-				{
-					return &note;
-				}
-			}
-
-			return nullptr;
-		}
-
-		GameNote* FindNextHoldNoteToEvaluate()
-		{
-			for (auto& note : ActiveNotes)
-			{
-				if (note.Type != NoteType::HoldStart && note.Type != NoteType::HoldEnd)
-				{
-					continue;
-				}
-
-				if (note.Expired || note.ShouldBeRemoved || note.ElapsedTime < 0.0f)
-				{
-					continue;
-				}
-
-				float remainingTime = note.GetRemainingTime() * 1000.0f;
-				if (note.Type == NoteType::HoldStart)
-				{
-					if (note.HasBeenEvaluated() && note.NextNote->HasBeenEvaluated())
-					{
-						continue;
-					}
-					else if (note.HasBeenEvaluated() && note.NextNote->ElapsedTime >= 0.0f && !note.NextNote->HasBeenEvaluated())
-					{
-						return note.NextNote;
-					}
-					else if (remainingTime <= HitThresholds::ThresholdStart && remainingTime >= HitThresholds::ThresholdMiss)
-					{
-						return &note;
-					}
-				}
-
-				if (note.Type == NoteType::HoldEnd && note.HasBeenEvaluated())
-				{
-					continue;
-				}
-			}
-
-			return nullptr;
-		}
-
-		void DrawNote(GameNote& note)
-		{
-			if (note.Expired || (note.HasBeenHit && note.Type != NoteType::HoldStart) || note.ShouldBeRemoved || note.ElapsedTime < 0.0f)
-			{
-				return;
-			}
-
-			bool holdStartHit = note.HasBeenHit && note.Type == NoteType::HoldStart;
-			if (holdStartHit && note.NextNote->HasBeenHit == true)
-			{
-				return;
-			}
-
-			if (note.Type == NoteType::HoldStart)
-			{
-				float trailOffset = 1.0f - note.GetNormalizedElapsedTime();
-				float trailLength = 0.0f;
-
-				trailOffset = SDL_max(trailOffset, 0.0f);
-
-				if (note.NextNote->ElapsedTime >= 0.0f)
-				{
-					trailLength = 1.0f - note.NextNote->GetNormalizedElapsedTime() - trailOffset;
-				}
-				else
-				{
-					trailLength = 1.0f - trailOffset;
-				}
-
-				vec2 curPoint = MathExtensions::GetSinePoint(trailOffset, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
-				vec2 prevPoint{ curPoint };
-
-				const Sprite* trailSprite = spriteCache.HoldNoteTrails[static_cast<size_t>(note.Shape)];
-				Texture* trailTexture = iconSet.GetTexture(trailSprite->TextureIndex);
-
-				size_t colorIndex = 0;
-				for (float f = 0.0f; f <= trailLength; f += TrailResolution)
-				{
-					float percentage = trailOffset + f;
-					curPoint = MathExtensions::GetSinePoint(percentage, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
-
-					spriteRenderer->SetSpritePosition(curPoint);
-
-					spriteRenderer->SetSpriteColor(Color {DefaultColors::White});
-
-					float segmentLength = glm::distance(curPoint, prevPoint);
-					spriteRenderer->SetSpriteSize(vec2{ segmentLength, trailSprite->SourceRectangle.Height });
-					spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, trailSprite->Origin.y });
-
-					vec2 diff = { curPoint.y - prevPoint.y, curPoint.x - prevPoint.x };
-					float angle = glm::atan(diff.x, diff.y);
-
-					spriteRenderer->SetSpriteRotation(angle);
-					spriteRenderer->SetSpriteSource(trailTexture, trailSprite->SourceRectangle);
-					spriteRenderer->PushSprite(trailTexture);
-
-					prevPoint = curPoint;
-				}
-			}
-
-			switch (note.Type)
-			{
-			case NoteType::Normal:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet, 
-					*spriteCache.NoteTargets[static_cast<size_t>(note.Shape)], 
-					note.TargetPosition, 
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			case NoteType::Double:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.DoubleNoteTargets[static_cast<size_t>(note.Shape)],
-					note.TargetPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			case NoteType::HoldEnd:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)],
-					note.TargetPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			}
-
-			if (note.Type == NoteType::HoldStart && note.NextNote->ElapsedTime < 0.0f)
-			{
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.HoldNoteTargets[static_cast<size_t>(note.Shape)],
-					note.TargetPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-			}
-
-			float targetHandRotation = MathExtensions::ConvertRange(0.0f, note.NoteTime, 0.0f, MathExtensions::TwoPi, note.ElapsedTime);
-			spriteRenderer->SetSpriteRotation(holdStartHit ? 0.0f : targetHandRotation);
-
-			switch (note.Type)
-			{
-			default:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.NoteTargetHand,
-					note.TargetPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			case NoteType::Double:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.DoubleNoteTargetHands[static_cast<size_t>(note.Shape)],
-					note.TargetPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			}
-
-			if (note.Type != NoteType::HoldStart && note.Type != NoteType::HoldEnd)
-			{
-				float trailOffset = 1.0f - note.GetNormalizedElapsedTime();
-				float trailPixelLength = (note.Distance / 1000.0f) * (120.0f / note.NoteTime * 2.55f);
-				float trailLength = trailPixelLength / note.Distance;
-
-				const Sprite* trailSprite = spriteCache.Trail_Normal;
-				Color trailColor = NoteTrailColors[static_cast<size_t>(note.Shape)];
-				DrawNoteTrail(note, trailSprite, trailColor, false, trailOffset, trailLength, 20.0f);
-			}
-
-			//spriteRenderer->SetSpritePosition(note.IconPosition);
-			//spriteRenderer->SetSpriteColor(DefaultColors::White);
-			switch (note.Type)
-			{
-			case NoteType::Normal:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.NoteIcons[static_cast<size_t>(note.Shape)],
-					note.IconPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			case NoteType::Double:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.DoubleNoteIcons[static_cast<size_t>(note.Shape)],
-					note.IconPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			case NoteType::HoldStart:
-				if (!holdStartHit)
-				{
-					spriteRenderer->SpriteSheet().PushSprite(
-						iconSet,
-						*spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)],
-						note.IconPosition,
-						vec2(1.0f),
-						DefaultColors::White);
-				}
-				break;
-			case NoteType::HoldEnd:
-				spriteRenderer->SpriteSheet().PushSprite(
-					iconSet,
-					*spriteCache.HoldNoteIcons[static_cast<size_t>(note.Shape)],
-					note.IconPosition,
-					vec2(1.0f),
-					DefaultColors::White);
-				break;
-			}
-		}
-
-		void DrawNoteTrail(const GameNote& note, const Sprite* sprite, Color& color, bool hold, float offset, float length, float thickness)
-		{
-			vec2 curPoint = MathExtensions::GetSinePoint(offset, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
-			vec2 prevPoint{ curPoint };
-
-			Color curColor = color;
-			Color prevColor = color;
-
-			float trailSpriteWidth = 2.0f / length;
-			float trailSpriteOffset = TrailScrollOffset;
-
-			float trailAlpha = 0.5f;
-			float trailFadeThreshold = length / 2.0f;
-
-			Texture* trailTexture = iconSet.GetTexture(sprite->TextureIndex);
-
-			for (float f = 0.0f; f <= length; f += TrailResolution)
-			{
-				float percentage = offset + f;
-				curPoint = MathExtensions::GetSinePoint(percentage, note.TargetPosition, note.EntryAngle, note.Frequency, note.Amplitude, note.Distance);
-
-				spriteRenderer->SetSpritePosition(curPoint);
-
-				if (f >= trailFadeThreshold)
-				{
-					trailAlpha = MathExtensions::ConvertRange(trailFadeThreshold, length, 0.5f, 0.0f, f + TrailResolution);
-					trailAlpha = SDL_max(trailAlpha, 0.0f);
-				}
-
-				prevColor = curColor;
-				curColor.A = static_cast<u8>(trailAlpha * 255.0f);
-				spriteRenderer->SetSpriteColors(
-					prevColor, curColor,
-					prevColor, curColor);
-
-				float segmentLength = glm::distance(curPoint, prevPoint);
-				spriteRenderer->SetSpriteSize(vec2{ segmentLength, thickness });
-				spriteRenderer->SetSpriteOrigin(vec2{ segmentLength / 2.0f, thickness / 2.0f });
-
-				vec2 diff = { curPoint.y - prevPoint.y, curPoint.x - prevPoint.x };
-				float angle = glm::atan(diff.x, diff.y);
-
-				spriteRenderer->SetSpriteRotation(angle);
-
-				spriteRenderer->SetSpriteSource(trailTexture, RectangleF 
-					{ trailSpriteOffset + sprite->SourceRectangle.X, 
-					sprite->SourceRectangle.Y, 
-					trailSpriteWidth, 
-					sprite->SourceRectangle.Height });
-
-				spriteRenderer->PushSprite(trailTexture);
-
-				prevPoint = curPoint;
-				trailSpriteOffset += trailSpriteWidth;
 			}
 		}
 	};
 
 	MainGameState::MainGameState()
 	{
-		stateInternal = new MainGameState::StateInternal(context);
-		//stateInternal->MainGameContext = context;
+		impl = new MainGameState::Impl(context);
 	}
 	
 	bool MainGameState::Initialize()
 	{
-		stateInternal->Initialize();
+		impl->Initialize();
 		return true;
 	}
 	
 	bool MainGameState::LoadContent()
 	{
-		return stateInternal->LoadContent();
+		impl->LoadChart(LoadSettings.ChartPath);
+		return impl->LoadContent();
 	}
 	
 	void MainGameState::UnloadContent()
 	{
-		stateInternal->UnloadContent();
+		impl->UnloadContent();
 	}
 	
 	void MainGameState::Destroy()
 	{
-		stateInternal->Destroy();
-		delete stateInternal;
+		impl->Destroy();
+		delete impl;
 	}
 	
 	void MainGameState::Update(f64 deltaTime_milliseconds)
 	{
-		stateInternal->Update(static_cast<float>(deltaTime_milliseconds));
+		impl->Update(deltaTime_milliseconds);
 	}
 	
 	void MainGameState::Draw(f64 deltaTime_milliseconds)
 	{
-		stateInternal->Draw(static_cast<float>(deltaTime_milliseconds));
+		impl->Draw(deltaTime_milliseconds);
 	}
 
 	std::string_view MainGameState::GetStateName() const

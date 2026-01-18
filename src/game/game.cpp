@@ -5,7 +5,7 @@
 #include "gfx/Renderer.h"
 #include "audio/AudioEngine.h"
 #include "input/Keyboard.h"
-#include "MainGame/MainGame.h"
+#include "Menu/ChartSelect.h"
 
 namespace Starshine
 {
@@ -99,7 +99,7 @@ namespace Starshine
 
 			Keyboard::Initialize();
 
-			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::MainGame::MainGameState>();
+			GameState* mainGameState = GameStateHelpers::CreateGameStateInstance<DIVA::Menu::ChartSelect>();
 			SetCurrentGameStateInstance(mainGameState);
 
 			return true;

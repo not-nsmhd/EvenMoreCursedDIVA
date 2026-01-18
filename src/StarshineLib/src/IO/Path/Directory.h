@@ -9,12 +9,12 @@ namespace Starshine::IO
 	{
 		namespace Detail
 		{
-			template<bool IterateFiles, bool IterateDirectories, typename Func>
+			template<bool IterateFiles, bool IterateDirectories, bool IterateRecursive, typename Func>
 			void Iterate(std::string_view directoryPath, Func func)
 			{
 				if (Path::GetExtension(directoryPath).empty() != true) { return; }
 
-				auto iterate = [&](const std::filesystem::directory_iterator dirIterator)
+				auto iterate = [&](const auto dirIterator)
 				{
 					for (const auto& it : dirIterator)
 					{
@@ -27,13 +27,17 @@ namespace Starshine::IO
 					}
 				};
 
-				iterate(std::filesystem::directory_iterator(directoryPath));
+				if constexpr (IterateRecursive) { iterate(std::filesystem::recursive_directory_iterator(directoryPath)); }
+				else { iterate(std::filesystem::directory_iterator(directoryPath)); }
 			}
 		}
 
 		bool Exists(std::string_view directoryPath);
 
 		template<typename Func>
-		void IterateFiles(std::string_view directoryPath, Func func) { Detail::Iterate<true, false>(directoryPath, func); }
+		void IterateFiles(std::string_view directoryPath, Func func) { Detail::Iterate<true, false, false>(directoryPath, func); }
+
+		template<typename Func>
+		void IterateFilesRecursive(std::string_view directoryPath, Func func) { Detail::Iterate<true, false, true>(directoryPath, func); }
 	}
 }

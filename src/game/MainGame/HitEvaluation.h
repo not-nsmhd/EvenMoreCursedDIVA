@@ -1,5 +1,5 @@
 #pragma once
-#include "common/types.h"
+#include "Common/Types.h"
 
 namespace DIVA::MainGame
 {
@@ -19,13 +19,13 @@ namespace DIVA::MainGame
 	// NOTE: All values are specified in milliseconds
 	namespace HitThresholds
 	{
-		constexpr f32 CoolThreshold = 30.0f;
-		constexpr f32 GoodThreshold = 70.0f;
-		constexpr f32 SafeThreshold = 100.0f;
-		constexpr f32 BadThreshold = 130.0f;
-
-		constexpr f32 ThresholdStart = 130.0f;
-		constexpr f32 ThresholdMiss = -130.0f;
+		constexpr f64 CoolThreshold = 30.0;
+		constexpr f64 GoodThreshold = 70.0;
+		constexpr f64 SafeThreshold = 100.0;
+		constexpr f64 BadThreshold = 130.0;
+				  
+		constexpr f64 ThresholdStart = 130.0;
+		constexpr f64 ThresholdMiss = -130.0;
 	}
 
 	namespace ScoreValues

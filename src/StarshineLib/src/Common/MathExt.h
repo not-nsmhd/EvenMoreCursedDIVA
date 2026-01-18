@@ -39,7 +39,7 @@ namespace Starshine::MathExtensions
 		return vec2(glm::abs(point.x), glm::abs(point.y));
 	}
 
-	constexpr vec2 GetSinePoint(f32 percentage, vec2 target, f32 deg, f32 freq, f32 ampl, f32 dist)
+	constexpr vec2 GetSinePoint(f64 percentage, vec2 target, f32 deg, f32 freq, f32 ampl, f32 dist)
 	{
 		if (dist == 0.0f)
 		{
@@ -105,7 +105,7 @@ namespace Starshine::MathExtensions
 	}
 
 	template <typename T>
-	constexpr f32 ConvertRange(T originalStart, T originalEnd, T newStart, T newEnd, T value)
+	constexpr T ConvertRange(T originalStart, T originalEnd, T newStart, T newEnd, T value)
 	{
 		static_assert(std::is_floating_point_v<T>);
 		return newStart + (value - originalStart) * (newEnd - newStart) / (originalEnd - originalStart);

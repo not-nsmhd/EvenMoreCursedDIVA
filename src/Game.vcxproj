@@ -153,9 +153,11 @@
     <ClInclude Include="game\gfx\VertexDesc.h" />
     <ClInclude Include="game\input\Keyboard.h" />
     <ClInclude Include="game\MainGame\Chart.h" />
+    <ClInclude Include="game\MainGame\GameNote.h" />
     <ClInclude Include="game\MainGame\HitEvaluation.h" />
     <ClInclude Include="game\MainGame\HUD.h" />
     <ClInclude Include="game\MainGame\MainGame.h" />
+    <ClInclude Include="game\Menu\ChartSelect.h" />
     <ClInclude Include="game\res\resource.h" />
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\DataTest.h" />
@@ -184,8 +186,10 @@
     <ClCompile Include="game\input\Keyboard.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\MainGame\Chart.cpp" />
+    <ClCompile Include="game\MainGame\GameNote.cpp" />
     <ClCompile Include="game\MainGame\HUD.cpp" />
     <ClCompile Include="game\MainGame\MainGame.cpp" />
+    <ClCompile Include="game\Menu\ChartSelect.cpp" />
     <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\DataTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
