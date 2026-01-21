@@ -204,7 +204,7 @@ namespace DIVA::MainGame
 			return displayOffset.x;
 		}
 
-		float MeasureSpriteNumericValue(u32 value, const Sprite* spriteArray[], float spacing, int length = -1)
+		float MeasureSpriteNumericValue(u32 value, float spacing, int length = -1)
 		{
 			float displayOffset{ 0.0f };
 
@@ -215,9 +215,6 @@ namespace DIVA::MainGame
 			{
 				if (remainingNumbers == 0 && i > 0 && length == -1) { return displayOffset; }
 
-				int sprIndex = remainingNumbers % 10;
-				const Sprite* numSprite = spriteArray[sprIndex];
-
 				displayOffset += spacing;
 				remainingNumbers /= 10;
 			}
@@ -227,7 +224,7 @@ namespace DIVA::MainGame
 
 		void DrawScoreDisplay()
 		{
-			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(1.0f), 27.0f, -1);
+			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(1.0f), 25.0f, -1);
 		}
 
 		void DrawComboDisplay(float deltaTime_ms)
@@ -249,15 +246,15 @@ namespace DIVA::MainGame
 				}
 				else
 				{
-					constexpr float valuComboSpacing = 27.0f;
+					constexpr float valuComboSpacing = 17.0f;
 
-					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, 25.0f);
+					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, 17.0f);
 
 					vec2 comboTextPos = { valuTextPos.x + valuComboSpacing + (comboTextWidth / 2.0f), valuTextPos.y };
 					valuTextPos.x -= (comboTextWidth / 2.0f) + valuComboSpacing;
 
 					sprRenderer.PushSprite(spriteCache.hudSprites, *valuSprite, valuTextPos, vec2(1.0f), DefaultColors::White);
-					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, vec2(1.0f), 25.0f);
+					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, vec2(1.0f), 17.0f);
 				}
 			}
 		}
@@ -268,16 +265,16 @@ namespace DIVA::MainGame
 			{
 				SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
 
-				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, spriteCache.ScoreBonusNumbers, 22.0f);
+				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, 15.0f);
 				float plusWidth = spriteCache.ScoreBonus_Plus->SourceRectangle.Width;
 
-				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, -20.0f, ScoreBonusDisplay.ElapsedDisplayTime);
+				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, 30.0f, ScoreBonusDisplay.ElapsedDisplayTime);
 
-				vec2 textPos = { ScoreBonusDisplay.Position.x, ScoreBonusDisplay.Position.y - 70.0f };
-				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, vec2(1.0f), 22.0f);
+				vec2 textPos = { ScoreBonusDisplay.Position.x, ScoreBonusDisplay.Position.y - textPosY - 70.0f };
+				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, vec2(1.0f), 15.0f);
 
-				//textPos.x -= (textWidth / 2.0f) - (plusWidth / 2.0f);
-				//sprRenderer.PushSprite(spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, vec2(1.0f), DefaultColors::White);
+				textPos.x -= textWidth - plusWidth - 5.0f;
+				sprRenderer.PushSprite(spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, vec2(1.0f), DefaultColors::White);
 			}
 		}
 
