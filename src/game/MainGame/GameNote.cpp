@@ -50,25 +50,49 @@ namespace DIVA::MainGame
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
 
-		const Sprite* targetSprite = iconSet.NoteTargets[static_cast<size_t>(Shape)];
-		const Sprite* iconSprite = iconSet.NoteIcons[static_cast<size_t>(Shape)];
+		const Sprite* targetSprite = nullptr;
+		const Sprite* targetHandSprite = nullptr;
+		const Sprite* iconSprite = nullptr;
+
+		switch (Type)
+		{
+		case NoteType::Normal:
+		default:
+			targetSprite = iconSet.NoteTargets[static_cast<size_t>(Shape)];
+			iconSprite = iconSet.NoteIcons[static_cast<size_t>(Shape)];
+			targetHandSprite = iconSet.NoteTargetHand;
+			break;
+		case NoteType::Double:
+			targetSprite = iconSet.DoubleNoteTargets[static_cast<size_t>(Shape)];
+			iconSprite = iconSet.DoubleNoteIcons[static_cast<size_t>(Shape)];
+			targetHandSprite = iconSet.DoubleNoteTargetHands[static_cast<size_t>(Shape)];
+			break;
+		}
 
 		sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 
 		sprRenderer->SetSpriteRotation(GetNormalizedElapsedTime() * MathExtensions::TwoPi);
-		sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *iconSet.NoteTargetHand, TargetPosition, vec2(1.0f), DefaultColors::White);
+		sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetHandSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 
 		sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *iconSprite, IconPosition, vec2(1.0f), DefaultColors::White);
 	}
 
-	bool GameNote::Evaluate(NoteShape shape, bool ignoreWrong)
+	bool GameNote::Evaluate(NoteShape shape)
 	{
 		f64 remainingTime_ms = GetRemainingTime() * 1000.0;
 
 		if (remainingTime_ms > HitThresholds::ThresholdStart) { return false; }
 		bool shapeMatches = Shape == shape;
 
-		if (!shapeMatches && ignoreWrong) { return false; }
+		if (Type == NoteType::Double && (!DoubleHit.HitPrimary || !DoubleHit.HitAlternative))
+		{
+			bool holdTrans = false;
+			if (DoubleHit.HitPrimary && Hold.AlternativeHeld) { holdTrans = true; }
+			else if (DoubleHit.HitAlternative && Hold.PrimaryHeld) { holdTrans = true; }
+
+			if (!holdTrans) { return false; }
+			else { DoubleHit.GiveBonus = false; }
+		}
 
 		if (MathExtensions::IsInRange(-HitThresholds::CoolThreshold, HitThresholds::CoolThreshold, remainingTime_ms))
 		{

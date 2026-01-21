@@ -11,6 +11,19 @@ namespace DIVA::MainGame
 	struct GameNote
 	{
 	public:
+		GameNote() {};
+		GameNote(const ChartNote& chartNote, MainGame::MainGameContext& context) :
+			Shape(chartNote.Shape),
+			Type(chartNote.Type),
+			TargetPosition(chartNote.X, chartNote.Y),
+			EntryAngle(chartNote.Angle),
+			Frequency(chartNote.Frequency),
+			Amplitude(chartNote.Amplitude),
+			Distance(chartNote.Distance),
+			MainGameContext(&context)
+		{};
+
+	public:
 		MainGameContext* MainGameContext{};
 
 	public:
@@ -41,6 +54,20 @@ namespace DIVA::MainGame
 		bool HasBeenHit = false;
 		bool HitWrong = false;
 
+		struct DoubleHitData
+		{
+			bool HitPrimary = false;
+			bool HitAlternative = false;
+
+			bool GiveBonus = true;
+		} DoubleHit;
+
+		struct HoldData
+		{
+			bool PrimaryHeld = false;
+			bool AlternativeHeld = false;
+		} Hold;
+
 	public:
 		// NOTE: Functions
 		// NOTE: Returned value is specified in seconds
@@ -53,19 +80,6 @@ namespace DIVA::MainGame
 		void Update(f64 deltaTime_ms);
 		void Draw(f64 deltaTime_ms);
 
-		bool Evaluate(NoteShape shape, bool ignoreWrong);
-
-	public:
-		GameNote() {};
-		GameNote(const ChartNote& chartNote, MainGame::MainGameContext& context) :
-			Shape(chartNote.Shape),
-			Type(chartNote.Type),
-			TargetPosition(chartNote.X, chartNote.Y),
-			EntryAngle(chartNote.Angle),
-			Frequency(chartNote.Frequency),
-			Amplitude(chartNote.Amplitude),
-			Distance(chartNote.Distance),
-			MainGameContext(&context)
-		{};
+		bool Evaluate(NoteShape shape);
 	};
 }

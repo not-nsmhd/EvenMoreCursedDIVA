@@ -247,7 +247,13 @@ namespace DIVA::MainGame
 		{
 			bool primTapped = false;
 			bool altTapped = false;
+
+			bool primDown = false;
+			bool altDown = false;
+
 			bool tapped = Keyboard::IsAnyTapped(binding, &primTapped, &altTapped);
+			Keyboard::IsAnyDown(binding, &primDown, &altDown);
+
 			bool released = Keyboard::IsAnyReleased(binding, nullptr, nullptr);
 
 			if (!tapped && !released) { return; }
@@ -255,8 +261,33 @@ namespace DIVA::MainGame
 			GameNote* note = FindNoteToEvaluate();
 			if (note == nullptr) { return; }
 
-			bool evaluated = note->Evaluate(shape, false);
+			if (note->Type != NoteType::Normal)
+			{
+				switch (note->Type)
+				{
+				case NoteType::Double:
+				{
+					if (primTapped) { note->DoubleHit.HitPrimary = true; }
+					if (altTapped) { note->DoubleHit.HitAlternative = true; }
+
+					note->Hold.PrimaryHeld = primDown;
+					note->Hold.AlternativeHeld = altDown;
+					break;
+				}
+				}
+			}
+
+			bool evaluated = note->Evaluate(shape);
 			if (!evaluated) { return; }
+
+			if (note->Type == NoteType::Double &&
+				note->DoubleHit.GiveBonus &&
+				!note->HitWrong &&
+				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
+			{
+				MainGameContext.Score.Score += 200;
+				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+			}
 
 			switch (note->HitEvaluation)
 			{
