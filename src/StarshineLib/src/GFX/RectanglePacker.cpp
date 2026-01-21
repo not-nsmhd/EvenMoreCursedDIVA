@@ -4,7 +4,7 @@
 
 namespace Starshine::GFX
 {
-	static constexpr ivec2 InitialTestedAreaSize{ 128, 128 };
+	static constexpr ivec2 InitialTestedAreaSize{ 64, 64 };
 
 	void RectanglePacker::Initialize()
 	{
@@ -27,7 +27,7 @@ namespace Starshine::GFX
 				return false;
 			}
 
-			// First try by increasing the smallest dimension
+			// First try increasing the smallest dimension
 			if (testAreaSize.x < Settings.MaxSize.x && (testAreaSize.x <= testAreaSize.y || ((testAreaSize.x == testAreaSize.y) && (size.x >= size.y))))
 			{
 				testedArea.Width = testAreaSize.x + size.x + Settings.Padding.x;
