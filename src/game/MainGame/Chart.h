@@ -65,25 +65,25 @@ namespace DIVA::MainGame
 
 	struct ChartNote
 	{
-		f32 AppearTime;
-		NoteShape Shape;
-		NoteType Type;
+		f32 AppearTime{};
+		NoteShape Shape{};
+		NoteType Type{};
 
-		float X;
-		float Y;
+		float X{};
+		float Y{};
 
-		float Angle;
-		float Frequency;
-		float Amplitude;
-		float Distance;
+		float Angle{};
+		float Frequency{};
+		float Amplitude{};
+		float Distance{};
 
-		u32 NextNoteIndex = 0;
+		ChartNote* NextNote{};
 	};
 
 	struct NoteTimeChange
 	{
-		f32 Time;
-		f32 Value;
+		f32 Time{};
+		f32 Value{};
 	};
 
 	class Chart

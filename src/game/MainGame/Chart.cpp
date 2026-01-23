@@ -68,21 +68,21 @@ namespace DIVA::MainGame
 
 	void Chart::ProcessNoteReferences()
 	{
-		for (size_t i = 0; i < Notes.size(); i++)
+		size_t i = 0;
+		for (auto& note = Notes.begin(); note != Notes.end(); note++)
 		{
-			ChartNote& note = Notes[i];
-			if (note.Type == NoteType::HoldStart)
+			if (note->Type == NoteType::HoldStart)
 			{
-				for (size_t j = i; j < Notes.size(); j++)
+				for (auto& nextNote = Notes.begin() + i; nextNote != Notes.end(); nextNote++)
 				{
-					ChartNote& nextNote = Notes[j];
-					if (nextNote.Type == NoteType::HoldEnd && nextNote.Shape == note.Shape)
-					{
-						note.NextNoteIndex = static_cast<u32>(j);
+					if (nextNote->Type == NoteType::HoldEnd && nextNote->Shape == note->Shape)
+					{ 
+						note->NextNote = &(*nextNote);
 						break;
 					}
 				}
 			}
+			i++;
 		}
 	}
 

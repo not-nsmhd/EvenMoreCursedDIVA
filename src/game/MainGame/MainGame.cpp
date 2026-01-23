@@ -57,7 +57,6 @@ namespace DIVA::MainGame
 		f64 ElapsedTime_Seconds = 0.0f;
 		std::deque<GameNote> ActiveNotes;
 
-		KeyBind AdvanceKeybind = KeyBind{ SDLK_PERIOD, Input::UnboundKey };
 		KeyBind PauseKeybind = KeyBind{ SDLK_ESCAPE, Input::UnboundKey };
 		EnumValueMappingTable<NoteShape, KeyBind> NoteKeybinds
 		{
@@ -243,6 +242,56 @@ namespace DIVA::MainGame
 			return nullptr;
 		}
 
+		void UpdateChart(f64 deltaTime_ms)
+		{
+			for (auto chartNote = songChart.Notes.cbegin() + chartNoteOffset; chartNote != songChart.Notes.cend(); chartNote++)
+			{
+				if (chartNote->AppearTime <= ElapsedTime_Seconds)
+				{
+					if (chartNote->Type == NoteType::HoldEnd) { chartNoteOffset++; break; }
+
+					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
+					newNote.FlyTime = songChart.GetNoteTime(chartNote->AppearTime);
+
+					if (chartNote->Type == NoteType::HoldStart && chartNote->NextNote != nullptr)
+					{
+						GameNote& holdEndNote = ActiveNotes.emplace_back(*chartNote->NextNote, MainGameContext);
+						holdEndNote.FlyTime = songChart.GetNoteTime(chartNote->NextNote->AppearTime);
+						holdEndNote.ElapsedTime = ElapsedTime_Seconds - chartNote->NextNote->AppearTime;
+						newNote.NextNote = &holdEndNote;
+					}
+
+					chartNoteOffset++;
+					break;
+				}
+			}
+		}
+
+		void UpdateActiveNotes(f64 deltaTime_ms)
+		{
+			size_t noteIndex = 0;
+			while (noteIndex < ActiveNotes.size())
+			{
+				GameNote* note = &ActiveNotes[noteIndex];
+
+				if (note->Expiring && !note->Expired && !note->HasBeenHit)
+				{
+					note->Expired = true;
+					MainGameContext.Score.Combo = 0;
+					hud.SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
+				}
+
+				if (note->ShouldBeRemoved)
+				{
+					ActiveNotes.erase(ActiveNotes.cbegin() + noteIndex);
+					continue;
+				}
+
+				note->Update(deltaTime_ms);
+				noteIndex++;
+			}
+		}
+
 		void UpdateInputBinding(NoteShape shape, const KeyBind& binding)
 		{
 			bool primTapped = false;
@@ -267,8 +316,24 @@ namespace DIVA::MainGame
 				{
 				case NoteType::Double:
 				{
-					if (primTapped) { note->DoubleHit.HitPrimary = true; }
-					if (altTapped) { note->DoubleHit.HitAlternative = true; }
+					if (primTapped) { note->DoubleTap.Primary = true; }
+					if (altTapped) { note->DoubleTap.Alternative = true; }
+
+					note->Hold.PrimaryHeld = primDown;
+					note->Hold.AlternativeHeld = altDown;
+					break;
+				}
+				case NoteType::HoldStart:
+				{
+					if (!tapped && released) { return; }
+
+					note->Hold.PrimaryHeld = primDown;
+					note->Hold.AlternativeHeld = altDown;
+					break;
+				}
+				case NoteType::HoldEnd:
+				{
+					if (tapped && !released) { return; }
 
 					note->Hold.PrimaryHeld = primDown;
 					note->Hold.AlternativeHeld = altDown;
@@ -281,7 +346,7 @@ namespace DIVA::MainGame
 			if (!evaluated) { return; }
 
 			if (note->Type == NoteType::Double &&
-				note->DoubleHit.GiveBonus &&
+				note->DoubleTap.GiveBonus &&
 				!note->HitWrong &&
 				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
 			{
@@ -305,6 +370,9 @@ namespace DIVA::MainGame
 				break;
 			case HitEvaluation::Bad:
 				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
+				MainGameContext.Score.Combo = 0;
+				break;
+			case HitEvaluation::Miss:
 				MainGameContext.Score.Combo = 0;
 				break;
 			}
@@ -333,28 +401,7 @@ namespace DIVA::MainGame
 				ChartDeltaTime = deltaTime_ms / 1000.0;
 
 				UpdateChart(ChartDeltaTime);
-
-				size_t noteIndex = 0;
-				while (noteIndex < ActiveNotes.size())
-				{
-					GameNote* note = &ActiveNotes[noteIndex];
-
-					if (note->Expiring && !note->Expired && !note->HasBeenHit)
-					{
-						note->Expired = true;
-						MainGameContext.Score.Combo = 0;
-						hud.SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
-					}
-
-					if (note->ShouldBeRemoved)
-					{
-						ActiveNotes.erase(ActiveNotes.cbegin() + noteIndex);
-						continue;
-					}
-
-					note->Update(deltaTime_ms);
-					noteIndex++;
-				}
+				UpdateActiveNotes(deltaTime_ms);
 
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
@@ -477,21 +524,6 @@ namespace DIVA::MainGame
 
 			spriteRenderer->RenderSprites(nullptr);
 			BaseRenderer->SwapBuffers();
-		}
-
-		void UpdateChart(f64 deltaTime_ms)
-		{
-			for (auto chartNote = songChart.Notes.cbegin() + chartNoteOffset; chartNote != songChart.Notes.cend(); chartNote++)
-			{
-				if (chartNote->AppearTime <= ElapsedTime_Seconds)
-				{
-					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
-					newNote.FlyTime = songChart.GetNoteTime(chartNote->AppearTime);
-
-					chartNoteOffset++;
-					break;
-				}
-			}
 		}
 	};
 

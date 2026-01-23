@@ -54,19 +54,22 @@ namespace DIVA::MainGame
 		bool HasBeenHit = false;
 		bool HitWrong = false;
 
-		struct DoubleHitData
+		struct DoubleTapData
 		{
-			bool HitPrimary = false;
-			bool HitAlternative = false;
+			bool Primary = false;
+			bool Alternative = false;
 
 			bool GiveBonus = true;
-		} DoubleHit;
+		} DoubleTap;
 
 		struct HoldData
 		{
 			bool PrimaryHeld = false;
 			bool AlternativeHeld = false;
 		} Hold;
+
+	public:
+		GameNote* NextNote{ nullptr };
 
 	public:
 		// NOTE: Functions
