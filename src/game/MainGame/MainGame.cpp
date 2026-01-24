@@ -292,6 +292,19 @@ namespace DIVA::MainGame
 					continue;
 				}
 
+				if (note->Type == NoteType::HoldStart)
+				{
+					if (!note->NextNote->HasBeenHit)
+					{
+						hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+					}
+					else
+					{
+						MainGameContext.Score.Score += note->Hold.CurrentBonus;
+						note->Hold.CurrentBonus = 0;
+					}
+				}
+
 				note->Update(deltaTime_ms);
 				noteIndex++;
 			}
@@ -350,15 +363,6 @@ namespace DIVA::MainGame
 			bool evaluated = note->Evaluate(shape);
 			if (!evaluated) { return; }
 
-			if (note->Type == NoteType::Double &&
-				note->DoubleTap.GiveBonus &&
-				!note->HitWrong &&
-				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
-			{
-				MainGameContext.Score.Score += 200;
-				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
-			}
-
 			switch (note->HitEvaluation)
 			{
 			case HitEvaluation::Cool:
@@ -380,6 +384,25 @@ namespace DIVA::MainGame
 			case HitEvaluation::Miss:
 				MainGameContext.Score.Combo = 0;
 				break;
+			}
+
+			if (note->Type == NoteType::Double &&
+				note->DoubleTap.GiveBonus &&
+				!note->HitWrong &&
+				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
+			{
+				MainGameContext.Score.Score += 200;
+				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+			}
+			else if (note->Type == NoteType::HoldStart)
+			{
+				hud.HoldScoreBonus();
+				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+			}
+			else if (note->Type == NoteType::HoldEnd)
+			{
+				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
+				hud.ReleaseScoreBonus(drop);
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);

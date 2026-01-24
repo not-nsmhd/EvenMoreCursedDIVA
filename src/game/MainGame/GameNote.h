@@ -66,6 +66,10 @@ namespace DIVA::MainGame
 		{
 			bool PrimaryHeld = false;
 			bool AlternativeHeld = false;
+
+			f64 TimeSinceHoldStart{};
+
+			i32 CurrentBonus{};
 		} Hold;
 
 	public:

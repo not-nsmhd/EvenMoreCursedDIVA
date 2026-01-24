@@ -64,6 +64,17 @@ namespace DIVA::MainGame
 			52, 47, 43, 39, 34, 30, 25, 21, 17, 12, 0
 		};
 
+		static constexpr Color trailColors[EnumCount<NoteShape>()]
+		{
+			{ 237,  68,  78, 255 },
+			{ 181, 255, 255, 255 },
+			{ 255, 206, 255, 255 },
+			{ 242, 255, 175, 255 },
+			{ 255, 202, 0, 255 }
+		};
+
+		const Color trailColor = trailColors[static_cast<size_t>(Shape)];
+
 		const f32 segmentDistance = glm::distance(trailSegments[0], trailSegments[1]) / (spriteRect.Width * 0.05f);
 
 		const auto getNormal = [](vec2 v) { return vec2(v.y, -v.x); };
@@ -76,8 +87,8 @@ namespace DIVA::MainGame
 			trailVertices[v + 0].Position = trailSegments[i] + normal * spriteRect.Height * 0.5f;
 			trailVertices[v + 1].Position = trailSegments[i] - normal * spriteRect.Height * 0.5f;
 
-			trailVertices[v + 0].Color = Trail.Hold ? DefaultColors::White : Color(255, 255, 255, trailAlphaValues[i]);
-			trailVertices[v + 1].Color = Trail.Hold ? DefaultColors::White : Color(255, 255, 255, trailAlphaValues[i]);
+			trailVertices[v + 0].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, trailAlphaValues[i]);
+			trailVertices[v + 1].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, trailAlphaValues[i]);
 
 			if (!Trail.Hold)
 			{
@@ -109,18 +120,20 @@ namespace DIVA::MainGame
 	{
 		ElapsedTime += deltaTime_ms / 1000.0;
 
-		if (Expired || ShouldBeRemoved) { return; }
+		if (ShouldBeRemoved) { return; }
 
 		if ((GetRemainingTime() * 1000.0) <= HitThresholds::ThresholdMiss && !HasBeenHit)
 		{
 			Expiring = true;
+			if (NextNote != nullptr) { NextNote->Expiring = true; }
 		}
 
 		if (GetRemainingTime() <= NoteRemoveTimeThreshold)
 		{
 			if (NextNote != nullptr)
 			{
-				ShouldBeRemoved = NextNote->ShouldBeRemoved;
+				if (Expiring) { ShouldBeRemoved = true; NextNote->ShouldBeRemoved = true; }
+				else { ShouldBeRemoved = NextNote->ShouldBeRemoved; }
 			}
 			else
 			{
@@ -128,10 +141,21 @@ namespace DIVA::MainGame
 			}
 		}
 
-		if (ShouldBeRemoved) { return; }
+		if (Expired || Expiring || ShouldBeRemoved) { return; }
 
 		IconPosition = MathExtensions::GetSinePoint(GetNormalizedRemainingTime(), TargetPosition, EntryAngle, Frequency, Amplitude, Distance);
 		Trail.Scroll = std::fmodf(Trail.Scroll + 0.32f * (16.6667 / deltaTime_ms), Trail.ScrollResetThreshold);
+
+		if (Type == NoteType::HoldStart && HasBeenHit && (Hold.PrimaryHeld || Hold.AlternativeHeld))
+		{
+			if (!NextNote->HasBeenHit && !NextNote->Expiring)
+			{
+				i32 bonusMultiplier = HitWrong ? 0 : (HitEvaluation == HitEvaluation::Cool ? 20 : (HitEvaluation == HitEvaluation::Good ? 10 : 0));
+
+				Hold.TimeSinceHoldStart += deltaTime_ms / 100.0;
+				Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier;
+			}
+		}
 	}
 
 	void GameNote::Draw(f64 deltaTime_ms)
