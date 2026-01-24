@@ -253,11 +253,16 @@ namespace DIVA::MainGame
 					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
 					newNote.FlyTime = songChart.GetNoteTime(chartNote->AppearTime);
 
+					newNote.Trail.ScrollResetThreshold = MainGameContext.IconSetSprites.Trail_Normal->SourceRectangle.Width;
+
 					if (chartNote->Type == NoteType::HoldStart && chartNote->NextNote != nullptr)
 					{
 						GameNote& holdEndNote = ActiveNotes.emplace_back(*chartNote->NextNote, MainGameContext);
 						holdEndNote.FlyTime = songChart.GetNoteTime(chartNote->NextNote->AppearTime);
 						holdEndNote.ElapsedTime = ElapsedTime_Seconds - chartNote->NextNote->AppearTime;
+
+						holdEndNote.Trail.ScrollResetThreshold = newNote.Trail.ScrollResetThreshold;
+
 						newNote.NextNote = &holdEndNote;
 					}
 
@@ -310,36 +315,36 @@ namespace DIVA::MainGame
 			GameNote* note = FindNoteToEvaluate();
 			if (note == nullptr) { return; }
 
-			if (note->Type != NoteType::Normal)
+			switch (note->Type)
 			{
-				switch (note->Type)
-				{
-				case NoteType::Double:
-				{
-					if (primTapped) { note->DoubleTap.Primary = true; }
-					if (altTapped) { note->DoubleTap.Alternative = true; }
+			case NoteType::Normal:
+				if (!tapped) { return; }
+				break;
+			case NoteType::Double:
+			{
+				if (primTapped) { note->DoubleTap.Primary = true; }
+				if (altTapped) { note->DoubleTap.Alternative = true; }
 
-					note->Hold.PrimaryHeld = primDown;
-					note->Hold.AlternativeHeld = altDown;
-					break;
-				}
-				case NoteType::HoldStart:
-				{
-					if (!tapped && released) { return; }
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
+			case NoteType::HoldStart:
+			{
+				if (!tapped && released) { return; }
 
-					note->Hold.PrimaryHeld = primDown;
-					note->Hold.AlternativeHeld = altDown;
-					break;
-				}
-				case NoteType::HoldEnd:
-				{
-					if (tapped && !released) { return; }
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
+			case NoteType::HoldEnd:
+			{
+				if (tapped && !released) { return; }
 
-					note->Hold.PrimaryHeld = primDown;
-					note->Hold.AlternativeHeld = altDown;
-					break;
-				}
-				}
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
 			}
 
 			bool evaluated = note->Evaluate(shape);

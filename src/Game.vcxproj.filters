@@ -88,6 +88,9 @@
     <ClCompile Include="game\Menu\ChartSelect.cpp">
       <Filter>src\game\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="game\testing\SpriteShapeTest.cpp">
+      <Filter>src\game\testing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\build\build_info.h">
@@ -215,6 +218,9 @@
     </ClInclude>
     <ClInclude Include="game\Menu\ChartSelect.h">
       <Filter>src\game\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="game\testing\SpriteShapeTest.h">
+      <Filter>src\game\testing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

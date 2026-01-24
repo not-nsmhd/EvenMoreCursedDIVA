@@ -76,8 +76,25 @@ namespace DIVA::MainGame
 		// NOTE: Returned value is specified in seconds
 		f64 GetRemainingTime() const;
 		f64 GetNormalizedElapsedTime() const;
+		f64 GetNormalizedRemainingTime() const;
 
 		bool HasBeenEvaluated() const;
+
+	public:
+		struct TrailData
+		{
+			f32 Start{};
+			f32 End{};
+
+			f32 Max{ 1.0f };
+
+			f32 Scroll{};
+			f32 ScrollResetThreshold{};
+
+			bool Hold{ false };
+		} Trail;
+
+		void DrawTrail();
 
 	public:
 		void Update(f64 deltaTime_ms);

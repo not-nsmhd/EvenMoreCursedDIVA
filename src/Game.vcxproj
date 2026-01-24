@@ -162,6 +162,7 @@
     <ClInclude Include="game\testing\AudioTest.h" />
     <ClInclude Include="game\testing\DataTest.h" />
     <ClInclude Include="game\testing\RenderingTest.h" />
+    <ClInclude Include="game\testing\SpriteShapeTest.h" />
     <ClInclude Include="game\testing\SpriteTest.h" />
     <ClInclude Include="game\util\logging.h" />
     <ClInclude Include="game\util\string_utils.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="game\testing\AudioTest.cpp" />
     <ClCompile Include="game\testing\DataTest.cpp" />
     <ClCompile Include="game\testing\RenderingTest.cpp" />
+    <ClCompile Include="game\testing\SpriteShapeTest.cpp" />
     <ClCompile Include="game\testing\SpriteTest.cpp" />
     <ClCompile Include="game\util\logging.cpp" />
     <ClCompile Include="game\util\string_utils.cpp" />

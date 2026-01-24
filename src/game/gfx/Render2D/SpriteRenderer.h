@@ -17,6 +17,13 @@ namespace Starshine::GFX::Render2D
 		Count
 	};
 
+	struct SpriteVertex
+	{
+		vec2 Position{};
+		vec2 TexCoord{};
+		Color Color{};
+	};
+
 	class SpriteRenderer
 	{
 	public:
@@ -48,6 +55,9 @@ namespace Starshine::GFX::Render2D
 		void PushSprite(Texture* texture);
 
 		void RenderSprites(Shader* shader);
+
+	public:
+		void PushShape(const SpriteVertex* vertices, size_t vertexCount, GFX::PrimitiveType primType, Texture* texture);
 
 	public:
 		void PushLine(const vec2& position, float angle, float length, const Color& color, float thickness = 1.0f);

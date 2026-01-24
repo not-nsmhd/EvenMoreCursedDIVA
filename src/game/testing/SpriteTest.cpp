@@ -44,7 +44,7 @@ namespace Starshine::Testing
 			SpriteRenderer = new Render2D::SpriteRenderer();
 			TestFont.ReadBMFont("diva/fonts/debug.fnt");
 
-			Directory::IterateFiles("diva/sprites/devtest2", 
+			Directory::IterateFiles("diva/sprites/devtest", 
 				[&](std::string_view filePath)
 				{
 					sprPacker.AddImage(filePath);

@@ -51,9 +51,9 @@ namespace Starshine::MathExtensions
 			freq *= -1.0f;
 		}
 
-		f32 x = percentage * dist;
-		f32 y = glm::sin(percentage * Pi * freq) / 12.0f * ampl;
-		f32 radians = glm::radians<f32>(deg - 90.0f);
+		f64 x = percentage * dist;
+		f64 y = glm::sin(percentage * Pi * freq) / 12.0f * ampl;
+		f64 radians = glm::radians<f64>(deg - 90.0);
 
 		vec2 point = RotateVector(vec2(x, y), vec2(0.0f), radians);
 		return point + target;
