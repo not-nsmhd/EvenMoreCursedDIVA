@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F0431DF3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpritePack", "src\Tools\SpritePack\SpritePack.vcxproj", "{785FB5EC-20AB-48D8-99BB-F25A55B76B26}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StarshineFramework", "src\StarshineFramework\StarshineFramework.vcxproj", "{F964F200-541C-4312-AE56-9485A0AB6848}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "src\Sandbox\Sandbox.vcxproj", "{4508002B-5545-4CC1-B214-63586895E641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -29,6 +33,14 @@ Global
 		{785FB5EC-20AB-48D8-99BB-F25A55B76B26}.Debug|x64.Build.0 = Debug|x64
 		{785FB5EC-20AB-48D8-99BB-F25A55B76B26}.Release|x64.ActiveCfg = Release|x64
 		{785FB5EC-20AB-48D8-99BB-F25A55B76B26}.Release|x64.Build.0 = Release|x64
+		{F964F200-541C-4312-AE56-9485A0AB6848}.Debug|x64.ActiveCfg = Debug|x64
+		{F964F200-541C-4312-AE56-9485A0AB6848}.Debug|x64.Build.0 = Debug|x64
+		{F964F200-541C-4312-AE56-9485A0AB6848}.Release|x64.ActiveCfg = Release|x64
+		{F964F200-541C-4312-AE56-9485A0AB6848}.Release|x64.Build.0 = Release|x64
+		{4508002B-5545-4CC1-B214-63586895E641}.Debug|x64.ActiveCfg = Debug|x64
+		{4508002B-5545-4CC1-B214-63586895E641}.Debug|x64.Build.0 = Debug|x64
+		{4508002B-5545-4CC1-B214-63586895E641}.Release|x64.ActiveCfg = Release|x64
+		{4508002B-5545-4CC1-B214-63586895E641}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
