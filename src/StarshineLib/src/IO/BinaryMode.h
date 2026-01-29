@@ -7,7 +7,13 @@ namespace Starshine::IO
 	enum class PointerSize : u8
 	{
 		Size32Bit,
-		Size64Bit
+		Size64Bit,
+
+#if defined (_WIN64)
+		Native = Size64Bit
+#else
+		Native = Size32Bit
+#endif
 	};
 
 	enum class Endianess : u8

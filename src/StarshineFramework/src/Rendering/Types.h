@@ -1,20 +1,14 @@
 #pragma once
-#include "common/types.h"
+#include "GFX/Types.h"
 
-namespace Starshine::GFX
+namespace Starshine::Rendering
 {
-	enum class RendererBackendType : u32
+	enum class DeviceType : i32
 	{
 		OpenGL,
-		D3D9,
+		D3D9, // TODO: Implement
 
 		Count
-	};
-
-	constexpr std::array<std::string_view, EnumCount<RendererBackendType>()> RendererBackendTypeNames =
-	{
-		"OpenGL",
-		"D3D9"
 	};
 
 	enum ClearFlags : u8
@@ -39,6 +33,26 @@ namespace Starshine::GFX
 	{
 		Index16bit,
 		Index32bit,
+
+		Count
+	};
+
+	enum class VertexAttribType : u8
+	{
+		Position,
+		Color,
+		TexCoord
+	};
+
+	enum class VertexAttribFormat : u8
+	{
+		Byte,
+		UnsignedByte,
+		Short,
+		UnsignedShort,
+		Int,
+		UnsignedInt,
+		Float,
 
 		Count
 	};
@@ -68,5 +82,28 @@ namespace Starshine::GFX
 		Max,
 
 		Count
+	};
+
+	enum class PolygonOrientation : u8
+	{
+		Clockwise,
+		CounterClockwise,
+
+		Count
+	};
+
+	enum class Face : u8
+	{
+		Front,
+		Back,
+		FrontAndBack,
+
+		Count
+	};
+
+	constexpr std::array<const char*, EnumCount<DeviceType>()> DeviceTypeNames =
+	{
+		"OpenGL",
+		"D3D9"
 	};
 }

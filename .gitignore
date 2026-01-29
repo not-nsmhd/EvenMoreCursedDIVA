@@ -12,6 +12,7 @@ bin/
 obj/
 
 src/game/build/build_info.h
+src/StarshineLib/src/BuildInfo.h
 
 .vs/
 lib_vs/*

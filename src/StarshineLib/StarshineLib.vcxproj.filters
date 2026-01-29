@@ -23,6 +23,9 @@
     <Filter Include="Source Files\Lib">
       <UniqueIdentifier>{7b9fad2b-377a-4a18-b17c-c61957413be0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Common\Logging">
+      <UniqueIdentifier>{2323e95e-cee7-46b6-bb3d-86f1a62b4a4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Common\Types.h">
@@ -79,6 +82,18 @@
     <ClInclude Include="src\IO\Path\File.h">
       <Filter>Source Files\IO\Path</Filter>
     </ClInclude>
+    <ClInclude Include="src\GFX\GPUResource.h">
+      <Filter>Source Files\GFX</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Common\Logging\Logging.h">
+      <Filter>Source Files\Common\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BuildInfo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GFX\Types.h">
+      <Filter>Source Files\GFX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -115,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="src\IO\Path\File.cpp">
       <Filter>Source Files\IO\Path</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Common\Logging\Logging.cpp">
+      <Filter>Source Files\Common\Logging</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

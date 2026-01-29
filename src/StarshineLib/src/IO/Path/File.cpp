@@ -66,7 +66,7 @@ namespace Starshine::IO
 				return 0; 
 			}
 
-			size_t fileSize = 0;
+			size_t fileSize = fileStream.GetSize();
 			destData = std::make_unique<u8[]>(fileStream.GetSize());
 
 			fileStream.ReadBuffer(destData.get(), fileSize);

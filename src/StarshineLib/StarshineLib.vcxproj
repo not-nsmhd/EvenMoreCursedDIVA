@@ -78,6 +78,12 @@
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <PreBuildEvent>
+      <Command>python $(SolutionDir)python\gen_build_info.py $(ProjectDir)src\BuildInfo.h</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating build information header...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -106,14 +112,24 @@
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <PreBuildEvent>
+      <Command>python $(SolutionDir)python\gen_build_info.py $(ProjectDir)src\BuildInfo.h</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating build information header...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\BuildInfo.h" />
     <ClInclude Include="src\Common\Color.h" />
+    <ClInclude Include="src\Common\Logging\Logging.h" />
     <ClInclude Include="src\Common\MathExt.h" />
     <ClInclude Include="src\Common\Rect.h" />
     <ClInclude Include="src\Common\Types.h" />
+    <ClInclude Include="src\GFX\GPUResource.h" />
     <ClInclude Include="src\GFX\RectanglePacker.h" />
     <ClInclude Include="src\GFX\SpritePacker.h" />
+    <ClInclude Include="src\GFX\Types.h" />
     <ClInclude Include="src\IO\BinaryMode.h" />
     <ClInclude Include="src\IO\FileStream.h" />
     <ClInclude Include="src\IO\IStream.h" />
@@ -132,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\tinyxml2\src\tinyxml2.cpp" />
+    <ClCompile Include="src\Common\Logging\Logging.cpp" />
     <ClCompile Include="src\GFX\RectanglePacker.cpp" />
     <ClCompile Include="src\GFX\SpritePacker.cpp" />
     <ClCompile Include="src\IO\FileStream.cpp" />

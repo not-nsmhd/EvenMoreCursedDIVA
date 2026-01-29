@@ -5,10 +5,52 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{8dfb469a-05f0-4a46-8c4f-9ea70a748641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\OpenGL">
+      <UniqueIdentifier>{7b08b7d8-ba31-4b41-9537-f32e1c0a3d4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameInstance.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Types.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLDevice.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLVertexDesc.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\VertexDesc.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Buffers.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLBuffers.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Shader.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLShader.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Texture.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLTexture.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLCommon.h">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Device.h">
+      <Filter>Source Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -19,6 +61,27 @@
   <ItemGroup>
     <ClCompile Include="src\GameInstance.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\glad.c">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLDevice.cpp">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLBuffers.cpp">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLVertexDesc.cpp">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLShader.cpp">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLTexture.cpp">
+      <Filter>Source Files\Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Device.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

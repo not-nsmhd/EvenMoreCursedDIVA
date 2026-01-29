@@ -61,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,7 +84,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -101,12 +101,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\GameInstance.h" />
+    <ClInclude Include="src\Rendering\Buffers.h" />
+    <ClInclude Include="src\Rendering\Device.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLBuffers.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLCommon.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLDevice.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLShader.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLTexture.h" />
+    <ClInclude Include="src\Rendering\OpenGL\OpenGLVertexDesc.h" />
+    <ClInclude Include="src\Rendering\Shader.h" />
+    <ClInclude Include="src\Rendering\Texture.h" />
+    <ClInclude Include="src\Rendering\Types.h" />
+    <ClInclude Include="src\Rendering\VertexDesc.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameInstance.cpp" />
+    <ClCompile Include="src\Rendering\Device.cpp" />
+    <ClCompile Include="src\Rendering\OpenGL\glad.c" />
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLBuffers.cpp" />
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLDevice.cpp" />
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLShader.cpp" />
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLTexture.cpp" />
+    <ClCompile Include="src\Rendering\OpenGL\OpenGLVertexDesc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StarshineLib\StarshineLib.vcxproj">

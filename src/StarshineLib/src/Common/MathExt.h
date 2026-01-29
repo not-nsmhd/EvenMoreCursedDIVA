@@ -53,7 +53,7 @@ namespace Starshine::MathExtensions
 
 		f64 x = percentage * dist;
 		f64 y = glm::sin(percentage * Pi * freq) / 12.0f * ampl;
-		f64 radians = glm::radians<f64>(deg - 90.0);
+		f32 radians = glm::radians<f32>(deg - 90.0f);
 
 		vec2 point = RotateVector(vec2(x, y), vec2(0.0f), radians);
 		return point + target;
