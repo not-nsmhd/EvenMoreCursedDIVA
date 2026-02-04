@@ -5,6 +5,8 @@
 #include "Rendering/Render2D/SpriteSheet.h"
 #include "Rendering/Render2D/SpriteRenderer.h"
 #include "Input/Keyboard.h"
+#include "Input/Gamepad.h"
+#include "Common/MathExt.h"
 
 using namespace Starshine;
 using namespace Starshine::GFX;
@@ -63,11 +65,55 @@ public:
 	{
 		GFXDevice->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
 
-		sprRenderer.SpriteSheet().PushSprite(spriteSheet, 0, sprPos, vec2(1.0f), DefaultColors::White);
-		sprRenderer.SpriteSheet().PushSprite(spriteSheet, 7, vec2(780.0f, 360.0f), vec2(1.0f), DefaultColors::White);
+		static constexpr vec2 axisBoxPosition = vec2(640.0f, 360.0f);
+		static constexpr vec2 axisBoxOrigin = vec2(64.0f);
 
-		char text[64] = {};
-		sprintf_s(text, sizeof(text) - 1, "Elapsed Time: %.3f\nDelta Time: %.3f", elapsedTime, deltaTime_milliseconds);
+		sprRenderer.PushOutlineRect(axisBoxPosition - axisBoxOrigin, vec2(128.0f), vec2(0.0f), DefaultColors::White);
+		sprRenderer.PushLine(vec2(axisBoxPosition.x - axisBoxOrigin.x, axisBoxPosition.y), 0.0f, 128.0f, DefaultColors::White);
+		sprRenderer.PushLine(vec2(axisBoxPosition.x, axisBoxPosition.y - axisBoxOrigin.y), MathExtensions::PiOver2, 128.0f, DefaultColors::White);
+
+		vec2 leftStick = { Gamepad::GetAxis(GamepadAxis::LeftStick_X), Gamepad::GetAxis(GamepadAxis::LeftStick_Y) };
+		sprRenderer.SetSpritePosition((leftStick * 64.0f) + axisBoxPosition);
+		sprRenderer.SetSpriteSize(vec2(8.0f));
+		sprRenderer.SetSpriteOrigin(vec2(4.0f));
+		sprRenderer.SetSpriteColor(DefaultColors::Red);
+		sprRenderer.PushSprite(nullptr);
+
+		char text[512] = {};
+		int offset = SDL_snprintf(text, sizeof(text) - 1, "Elapsed Time: %.3f\nDelta Time: %.3f\n", elapsedTime, deltaTime_milliseconds);
+
+		if (Gamepad::IsConnected())
+		{
+			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Gamepad Buttons: ");
+			for (size_t i = 0; i < EnumCount<GamepadButton>(); i++)
+			{
+				if (Gamepad::IsButtonDown(static_cast<GamepadButton>(i)))
+				{
+					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
+						GamepadButtonNames_PlayStation[i]);
+				}
+			}
+
+			/*offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nGamepad Sticks (Held): ");
+			for (size_t i = 0; i < EnumCount<GamepadStick>(); i++)
+			{
+				if (Gamepad::IsStickHeld(static_cast<GamepadStick>(i)))
+				{
+					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
+						GamepadStickNames[i]);
+				}
+			}*/
+
+			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nGamepad Sticks (Pulled): ");
+			for (size_t i = 0; i < EnumCount<GamepadStick>(); i++)
+			{
+				if (Gamepad::IsStickPulled(static_cast<GamepadStick>(i)))
+				{
+					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
+						GamepadStickNames[i]);
+				}
+			}
+		}
 
 		sprRenderer.Font().PushString(testFont, text, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f), DefaultColors::White);
 

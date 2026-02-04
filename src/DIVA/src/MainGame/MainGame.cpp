@@ -5,7 +5,8 @@
 #include "GameNote.h"
 #include "HitEvaluation.h"
 #include "HUD.h"
-#include "input/Keyboard.h"
+#include <Input/Keyboard.h>
+#include <Input/Gamepad.h>
 #include "GFX/SpritePacker.h"
 #include "IO/Path/Directory.h"
 #include "IO/Path/File.h"
@@ -58,15 +59,33 @@ namespace DIVA::MainGame
 		f64 ElapsedTime_Seconds = 0.0f;
 		std::deque<GameNote> ActiveNotes;
 
-		KeyBind PauseKeybind = KeyBind{ SDLK_ESCAPE, Input::UnboundKey };
-		EnumValueMappingTable<NoteShape, KeyBind> NoteKeybinds
+		struct KeyboardBindsData
 		{
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Circle, KeyBind{ SDLK_d, SDLK_l } },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Cross, KeyBind{ SDLK_s, SDLK_k } },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Square, KeyBind{ SDLK_a, SDLK_j } },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind{ SDLK_w, SDLK_i } },
-			EnumValueMapping<NoteShape, KeyBind> { NoteShape::Star, KeyBind{ SDLK_f, SDLK_h } },
-		};
+			KeyBind Pause = KeyBind{ SDLK_ESCAPE, Input::UnboundKey };
+			EnumValueMappingTable<NoteShape, KeyBind> Notes
+			{
+				EnumValueMapping<NoteShape, KeyBind> { NoteShape::Circle, KeyBind{ SDLK_d, SDLK_l } },
+				EnumValueMapping<NoteShape, KeyBind> { NoteShape::Cross, KeyBind{ SDLK_s, SDLK_k } },
+				EnumValueMapping<NoteShape, KeyBind> { NoteShape::Square, KeyBind{ SDLK_a, SDLK_j } },
+				EnumValueMapping<NoteShape, KeyBind> { NoteShape::Triangle, KeyBind{ SDLK_w, SDLK_i } },
+				EnumValueMapping<NoteShape, KeyBind> { NoteShape::Star, KeyBind{ SDLK_f, SDLK_h } }
+			};
+		} KeyboardBinds;
+
+		struct GamepadBindsData
+		{
+			GamepadBind Pause = GamepadBind{ GamepadButton::Options, GamepadButton::Unbound };
+			EnumValueMappingTable<NoteShape, GamepadBind> Notes
+			{
+				EnumValueMapping<NoteShape, GamepadBind> { NoteShape::Circle, GamepadBind{ GamepadButton::Circle, GamepadButton::DPad_Right } },
+				EnumValueMapping<NoteShape, GamepadBind> { NoteShape::Cross, GamepadBind{ GamepadButton::Cross, GamepadButton::DPad_Down } },
+				EnumValueMapping<NoteShape, GamepadBind> { NoteShape::Square, GamepadBind{ GamepadButton::Square, GamepadButton::DPad_Left } },
+				EnumValueMapping<NoteShape, GamepadBind> { NoteShape::Triangle, GamepadBind{ GamepadButton::Triangle, GamepadButton::DPad_Up } },
+
+				// NOTE: Stars can be hit by pulling a stick on a gamepad or flicking on the screen (Vita)/touch panel (PS4)
+				EnumValueMapping<NoteShape, GamepadBind> { NoteShape::Star, GamepadBind{ GamepadButton::Unbound, GamepadButton::Unbound } }
+			};
+		} GamepadBinds;
 
 		HUD hud = HUD(MainGameContext);
 
@@ -414,6 +433,105 @@ namespace DIVA::MainGame
 			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
 		}
 
+		void UpdateInputGamepadBinding(NoteShape shape, const GamepadBind& binding)
+		{
+			bool primTapped = false;
+			bool altTapped = false;
+
+			bool primDown = false;
+			bool altDown = false;
+
+			bool tapped = Gamepad::IsAnyButtonTapped(binding, &primTapped, &altTapped);
+			Gamepad::IsAnyButtonDown(binding, &primDown, &altDown);
+
+			bool released = Gamepad::IsAnyButtonReleased(binding, nullptr, nullptr);
+
+			if (!tapped && !released) { return; }
+
+			GameNote* note = FindNoteToEvaluate();
+			if (note == nullptr) { return; }
+
+			switch (note->Type)
+			{
+			case NoteType::Normal:
+				if (!tapped) { return; }
+				break;
+			case NoteType::Double:
+			{
+				if (primTapped) { note->DoubleTap.Primary = true; }
+				if (altTapped) { note->DoubleTap.Alternative = true; }
+
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
+			case NoteType::HoldStart:
+			{
+				if (!tapped && released) { return; }
+
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
+			case NoteType::HoldEnd:
+			{
+				if (tapped && !released) { return; }
+
+				note->Hold.PrimaryHeld = primDown;
+				note->Hold.AlternativeHeld = altDown;
+				break;
+			}
+			}
+
+			bool evaluated = note->Evaluate(shape);
+			if (!evaluated) { return; }
+
+			switch (note->HitEvaluation)
+			{
+			case HitEvaluation::Cool:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
+				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				break;
+			case HitEvaluation::Good:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
+				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				break;
+			case HitEvaluation::Safe:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
+				MainGameContext.Score.Combo = 0;
+				break;
+			case HitEvaluation::Bad:
+				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
+				MainGameContext.Score.Combo = 0;
+				break;
+			case HitEvaluation::Miss:
+				MainGameContext.Score.Combo = 0;
+				break;
+			}
+
+			if (note->Type == NoteType::Double &&
+				note->DoubleTap.GiveBonus &&
+				!note->HitWrong &&
+				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
+			{
+				MainGameContext.Score.Score += 200;
+				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+			}
+			else if (note->Type == NoteType::HoldStart)
+			{
+				hud.HoldScoreBonus();
+				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+			}
+			else if (note->Type == NoteType::HoldEnd)
+			{
+				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
+				hud.ReleaseScoreBonus(drop);
+			}
+
+			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
+			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
+		}
+
 		void Update(f64 deltaTime_ms)
 		{
 			if (CurrentSubState == SubState::Results)
@@ -436,15 +554,24 @@ namespace DIVA::MainGame
 				UpdateChart(ChartDeltaTime);
 				UpdateActiveNotes(deltaTime_ms);
 
+#if 0
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
-					UpdateInputBinding(NoteKeybinds[i].EnumValue, NoteKeybinds[i].MappedValue);
+					UpdateInputBinding(KeyboardBinds.Notes[i].EnumValue, KeyboardBinds.Notes[i].MappedValue);
+				}
+#endif
+				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
+				{
+					UpdateInputGamepadBinding(GamepadBinds.Notes[i].EnumValue, GamepadBinds.Notes[i].MappedValue);
 				}
 
 				hud.Update(deltaTime_ms);
 			}
 
-			if (Keyboard::IsAnyTapped(PauseKeybind, nullptr, nullptr))
+#if 0
+			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
+#endif
+			if (Gamepad::IsAnyButtonTapped(GamepadBinds.Pause, nullptr, nullptr))
 			{
 				Paused = !Paused;
 				if (Paused)

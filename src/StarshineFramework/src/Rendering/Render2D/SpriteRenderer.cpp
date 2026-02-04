@@ -542,22 +542,22 @@ namespace Starshine::Rendering::Render2D
 
 	void SpriteRenderer::PushOutlineRect(const vec2& position, const vec2& size, const vec2& origin, const Color& color, float thickness)
 	{
-		SetSpritePosition({ position.x, position.y });
+		SetSpritePosition({ position.x - origin.x, position.y - origin.y });
 		SetSpriteSize({ size.x, thickness });
 		SetSpriteColor(color);
 		PushSprite(nullptr);
 
-		SetSpritePosition({ position.x, position.y });
+		SetSpritePosition({ position.x - origin.x, position.y - origin.y });
 		SetSpriteSize({ thickness, size.y });
 		SetSpriteColor(color);
 		PushSprite(nullptr);
 
-		SetSpritePosition({ position.x + size.x - thickness, position.y });
+		SetSpritePosition({ position.x + size.x - thickness - origin.x, position.y - origin.y });
 		SetSpriteSize({ thickness, size.y });
 		SetSpriteColor(color);
 		PushSprite(nullptr);
 
-		SetSpritePosition({ position.x, position.y + size.y - thickness });
+		SetSpritePosition({ position.x - origin.x, position.y + size.y - thickness - origin.y });
 		SetSpriteSize({ size.x, thickness });
 		SetSpriteColor(color);
 		PushSprite(nullptr);

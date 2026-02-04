@@ -109,6 +109,8 @@
     <ClInclude Include="src\Audio\SampleProvider\MemorySampleProvider.h" />
     <ClInclude Include="src\Audio\SampleProvider\StreamingSampleProvider.h" />
     <ClInclude Include="src\GameInstance.h" />
+    <ClInclude Include="src\Input\Gamepad.h" />
+    <ClInclude Include="src\Input\GamepadTypes.h" />
     <ClInclude Include="src\Input\Keyboard.h" />
     <ClInclude Include="src\Input\Mouse.h" />
     <ClInclude Include="src\Rendering\Buffers.h" />
@@ -141,6 +143,7 @@
     <ClCompile Include="src\Audio\SampleProvider\MemorySampleProvider.cpp" />
     <ClCompile Include="src\Audio\SampleProvider\StreamingSampleProvider.cpp" />
     <ClCompile Include="src\GameInstance.cpp" />
+    <ClCompile Include="src\Input\Gamepad.cpp" />
     <ClCompile Include="src\Input\Keyboard.cpp" />
     <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Rendering\Device.cpp" />

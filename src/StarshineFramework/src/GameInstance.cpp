@@ -4,6 +4,7 @@
 #include "GameInstance.h"
 #include "Rendering/Device.h"
 #include "Input/Keyboard.h"
+#include "Input/Gamepad.h"
 
 namespace Starshine
 {
@@ -64,6 +65,7 @@ namespace Starshine
 			GFXDevice = Rendering::GetDevice();
 
 			Keyboard::Initialize();
+			Gamepad::Initialize();
 
 			return true;
 		}
@@ -77,6 +79,7 @@ namespace Starshine
 				CurrentState = nullptr;
 			}
 
+			Gamepad::Destroy();
 			Keyboard::Destroy();
 			Rendering::DestroyDevice();
 
@@ -121,6 +124,7 @@ namespace Starshine
 			{
 				UpdateTimingData();
 				Keyboard::NextFrame();
+				Gamepad::NextFrame();
 
 				if (SDL_PollEvent(&SDLEvent))
 				{
@@ -132,6 +136,17 @@ namespace Starshine
 					case SDL_KEYDOWN:
 					case SDL_KEYUP:
 						Keyboard::Poll(SDLEvent.key);
+						break;
+					case SDL_CONTROLLERDEVICEADDED:
+						Gamepad::Connect(SDLEvent.cdevice.which);
+						break;
+					case SDL_CONTROLLERDEVICEREMOVED:
+						Gamepad::Disconnect();
+						break;
+					case SDL_CONTROLLERBUTTONDOWN:
+					case SDL_CONTROLLERBUTTONUP:
+					case SDL_CONTROLLERAXISMOTION:
+						Gamepad::Poll();
 						break;
 					}
 				}
