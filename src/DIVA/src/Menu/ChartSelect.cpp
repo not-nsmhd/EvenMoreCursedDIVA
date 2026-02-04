@@ -1,5 +1,6 @@
 #include "ChartSelect.h"
 #include <Rendering/Render2D/SpriteRenderer.h>
+#include <BuildInfo.h>
 #include "IO/Path/Directory.h"
 #include "input/Keyboard.h"
 #include "MainGame/MainGame.h"
@@ -83,17 +84,18 @@ namespace DIVA::Menu
 
 			char text[256] = {};
 			int offset = SDL_snprintf(text, sizeof(text) - 1, "Even More Cursed DIVA\n");
+			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Starshine %02d.%02d\n", BuildInfo::BuildYear - 2000, BuildInfo::BuildMonth);
 
 #if defined (_WIN32)
 			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Windows ");
 #endif
 
-#if defined (_M_AMD64)
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "64-bit\n");
+#if defined (__X86_64__) || defined (_M_X64)
+			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "64-bit");
 #endif
 
 #if defined (_DEBUG)
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "DEBUG BUILD\n");
+			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nDEBUG BUILD");
 #endif
 
 			spriteRenderer->Font().PushString(debugFont, text, vec2(baseX, 16.0f), vec2(1.0f), DefaultColors::White);
