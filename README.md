@@ -20,11 +20,11 @@ Oh yeah, while we're at it, if you think that most of this code looks awfully si
 Initially, I didn't plan on making this repository public in such early state, but I didn't want to spend even more time constantly rewriting this project from scratch again instead of simply refactoring it. Letting it just sit here also doesn't seem really good, especially if *somebody* ~~(bro though he was cooking with this one😂😂)~~ would want to hack around with this code, but whatever.
 
 ## Project Structure
-This section doesn't have much purpose other than add even more things to the "Stolen from ComfyStudio" list. In any case, as of January 2026 the project structure is as follows:
+This section doesn't have much purpose other than add even more things to the "Stolen from ComfyStudio" list. In any case, as of the last update of the README the project structure is as follows:
 
 * `StarshineLib` - Base code used across the entire project
-* `StarshineFramework` - Functionality for ~~audio, input,~~ graphics, window management and so on (read "I've ran out of things to list"), built on top of StarshineLib and is named "Framework" instead of "Engine" because it sounds cooler<sup>[citation needed]</sup>
-* `game` - **Even More Cursed DIVA** itself + some old engine code written before I figured out how to build static libraries in Visual Studio
+* `StarshineFramework` - Functionality for audio, input, graphics, window management and so on (read "I've ran out of things to list"), built on top of StarshineLib and is named "Framework" instead of "Engine" because it sounds cooler<sup>[citation needed]</sup>
+* `DIVA` - **Even More Cursed DIVA** itself
 * `Tools/SpritePack` - An unfinished sprite packing tool used for... packing sprites
 * `Sandbox` - One of the many war crimes I have commited- I mean, a sandbox for testing various ideas I get before integrating them into StarshineLib/Framework.
 

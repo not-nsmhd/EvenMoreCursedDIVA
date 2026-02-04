@@ -61,17 +61,17 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -84,7 +84,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,14 +93,24 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Audio\AudioEngine.h" />
+    <ClInclude Include="src\Audio\Decoding\DecoderFactory.h" />
+    <ClInclude Include="src\Audio\Decoding\IDecoder.h" />
+    <ClInclude Include="src\Audio\Decoding\OggVorbisDecoder.h" />
+    <ClInclude Include="src\Audio\Decoding\WavDecoder.h" />
+    <ClInclude Include="src\Audio\SampleProvider\ISampleProvider.h" />
+    <ClInclude Include="src\Audio\SampleProvider\MemorySampleProvider.h" />
+    <ClInclude Include="src\Audio\SampleProvider\StreamingSampleProvider.h" />
     <ClInclude Include="src\GameInstance.h" />
+    <ClInclude Include="src\Input\Keyboard.h" />
+    <ClInclude Include="src\Input\Mouse.h" />
     <ClInclude Include="src\Rendering\Buffers.h" />
     <ClInclude Include="src\Rendering\Device.h" />
     <ClInclude Include="src\Rendering\OpenGL\OpenGLBuffers.h" />
@@ -109,16 +119,30 @@
     <ClInclude Include="src\Rendering\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Rendering\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Rendering\OpenGL\OpenGLVertexDesc.h" />
+    <ClInclude Include="src\Rendering\Render2D\Font.h" />
+    <ClInclude Include="src\Rendering\Render2D\FontRenderer.h" />
+    <ClInclude Include="src\Rendering\Render2D\SpriteRenderer.h" />
+    <ClInclude Include="src\Rendering\Render2D\SpriteSheet.h" />
+    <ClInclude Include="src\Rendering\Render2D\SpriteSheetRenderer.h" />
     <ClInclude Include="src\Rendering\Shader.h" />
     <ClInclude Include="src\Rendering\Texture.h" />
     <ClInclude Include="src\Rendering\Types.h" />
+    <ClInclude Include="src\Rendering\Utilities.h" />
     <ClInclude Include="src\Rendering\VertexDesc.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Audio\AudioEngine.cpp" />
+    <ClCompile Include="src\Audio\Decoding\DecoderFactory.cpp" />
+    <ClCompile Include="src\Audio\Decoding\OggVorbisDecoder.cpp" />
+    <ClCompile Include="src\Audio\Decoding\WavDecoder.cpp" />
+    <ClCompile Include="src\Audio\SampleProvider\MemorySampleProvider.cpp" />
+    <ClCompile Include="src\Audio\SampleProvider\StreamingSampleProvider.cpp" />
     <ClCompile Include="src\GameInstance.cpp" />
+    <ClCompile Include="src\Input\Keyboard.cpp" />
+    <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Rendering\Device.cpp" />
     <ClCompile Include="src\Rendering\OpenGL\glad.c" />
     <ClCompile Include="src\Rendering\OpenGL\OpenGLBuffers.cpp" />
@@ -126,6 +150,12 @@
     <ClCompile Include="src\Rendering\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Rendering\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Rendering\OpenGL\OpenGLVertexDesc.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\Font.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\SpriteRenderer.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\SpriteSheet.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp" />
+    <ClCompile Include="src\Rendering\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StarshineLib\StarshineLib.vcxproj">

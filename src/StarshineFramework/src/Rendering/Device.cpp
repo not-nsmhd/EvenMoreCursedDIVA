@@ -5,6 +5,7 @@
 namespace Starshine::Rendering
 {
 	std::unique_ptr<Device> GlobalDevice{};
+	DeviceType GlobalDeviceType{};
 
 	constexpr const char* LogName = "Starshine::Rendering";
 
@@ -23,6 +24,7 @@ namespace Starshine::Rendering
 		}
 
 		LogInfo(LogName, "Device Type: %s", DeviceTypeNames[static_cast<size_t>(type)]);
+		GlobalDeviceType = type;
 
 		return GlobalDevice->Initialize(sdlWindow);
 	}
@@ -39,5 +41,10 @@ namespace Starshine::Rendering
 	Device* GetDevice()
 	{
 		return GlobalDevice.get();
+	}
+
+	DeviceType GetDeviceType()
+	{
+		return GlobalDeviceType;
 	}
 }

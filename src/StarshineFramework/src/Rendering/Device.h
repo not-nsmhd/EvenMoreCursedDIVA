@@ -58,4 +58,5 @@ namespace Starshine::Rendering
 	bool InitializeDevice(SDL_Window* sdlWindow, DeviceType type);
 	void DestroyDevice();
 	Device* GetDevice();
+	DeviceType GetDeviceType();
 }

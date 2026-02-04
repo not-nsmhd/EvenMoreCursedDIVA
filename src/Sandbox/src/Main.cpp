@@ -1,40 +1,16 @@
 #include <SDL2/SDL_main.h>
 #include "GameInstance.h"
+#include "GFX/SpritePacker.h"
 #include "Rendering/Device.h"
-#include "IO/Path/File.h"
-#include "Misc/ImageHelper.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include "Rendering/Render2D/SpriteSheet.h"
+#include "Rendering/Render2D/SpriteRenderer.h"
+#include "Input/Keyboard.h"
 
 using namespace Starshine;
+using namespace Starshine::GFX;
 using namespace Starshine::Rendering;
-
-struct TestVertex
-{
-	vec2 Position;
-	vec2 TexCoord;
-	Color Color;
-};
-
-static constexpr std::array<TestVertex, 4> testVertexData
-{
-	TestVertex { vec2 { 0.0f, 0.0f }, vec2{ 0.0f, 0.0f }, Color { 255, 0, 0 } },
-	TestVertex { vec2 { 256.0f, 256.0f }, vec2{ 1.0f, 1.0f }, Color { 0, 255, 0 } },
-	TestVertex { vec2 { 256.0f, 0.0f }, vec2{ 1.0f, 0.0f }, Color { 0, 0, 255 } },
-	TestVertex { vec2 { 0.0f, 256.0f }, vec2{ 0.0f, 1.0f }, Color { 255, 255, 255 } }
-};
-
-static constexpr std::array<VertexAttrib, 3> testVertexAttribs
-{
-	VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float, 2, false, sizeof(TestVertex), offsetof(TestVertex, Position) },
-	VertexAttrib { VertexAttribType::TexCoord, 0, VertexAttribFormat::Float, 2, false, sizeof(TestVertex), offsetof(TestVertex, TexCoord) },
-	VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte, 4, true, sizeof(TestVertex), offsetof(TestVertex, Color) }
-};
-
-static constexpr std::array<u16, 6> testIndexData
-{
-	0, 1, 2,
-	0, 3, 1
-};
+using namespace Starshine::Rendering::Render2D;
+using namespace Starshine::Input;
 
 class TestState : public GameState
 {
@@ -50,43 +26,23 @@ public:
 
 	bool LoadContent()
 	{
-		testVertexBuffer = GFXDevice->CreateVertexBuffer(testVertexData.size() * sizeof(TestVertex), testVertexData.data(), false);
-		testIndexBuffer = GFXDevice->CreateIndexBuffer(testIndexData.size() * sizeof(u16), IndexFormat::Index16bit, testIndexData.data(), false);
-		testVertexDesc = GFXDevice->CreateVertexDesc(testVertexAttribs.data(), testVertexAttribs.size());
+		SpritePacker sprPacker;
+		sprPacker.AddFromDirectory("diva/sprites/devtest");
+		sprPacker.Pack();
 
-		std::unique_ptr<u8[]> vpSource{};
-		size_t vpSourceSize = IO::File::ReadAllBytes("diva/shaders/opengl/VS_SpriteDefault.vp", vpSource);
+		spriteSheet.CreateFromSpritePacker(sprPacker);
+		sprPacker.Clear();
 
-		std::unique_ptr<u8[]> fpSource{};
-		size_t fpSourceSize = IO::File::ReadAllBytes("diva/shaders/opengl/FS_SpriteDefault.fp", fpSource);
-
-		testShader = GFXDevice->LoadShader(vpSource.get(), vpSourceSize, fpSource.get(), fpSourceSize);
-
-		vpSource = nullptr;
-		fpSource = nullptr;
-
-		std::unique_ptr<u8[]> testTexData{};
-		ivec2 size{};
-		i32 channels{};
-
-		Misc::ImageHelper::ReadImageFile("testfiles/test.png", size, channels, testTexData);
-		testTexture = GFXDevice->CreateTexture(size.x, size.y, GFX::TextureFormat::RGBA8, false, false);
-		testTexture->SetData(testTexData.get(), 0, 0, size.x, size.y);
-
-		testTexData = nullptr;
-
-		GFXDevice->SetFaceCullingState(true, PolygonOrientation::CounterClockwise, Face::Back);
-		GFXDevice->SetBlendState(true, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One);
+		testFont.ReadBMFont("diva/fonts/debug.fnt");
 
 		return true;
 	}
 
 	void UnloadContent()
 	{
-		testTexture = nullptr;
-		testIndexBuffer = nullptr;
-		testVertexBuffer = nullptr;
-		testVertexDesc = nullptr;
+		spriteSheet.Destroy();
+		testFont.Destroy();
+		sprRenderer.Destroy();
 	}
 
 	void Destroy()
@@ -95,22 +51,27 @@ public:
 
 	void Update(f64 deltaTime_milliseconds)
 	{
+		elapsedTime += deltaTime_milliseconds;
+		
+		if (Keyboard::IsKeyDown(SDLK_RIGHT)) { sprPos.x += 1.0f; }
+		if (Keyboard::IsKeyDown(SDLK_LEFT)) { sprPos.x -= 1.0f; }
+		if (Keyboard::IsKeyDown(SDLK_DOWN)) { sprPos.y += 1.0f; }
+		if (Keyboard::IsKeyDown(SDLK_UP)) { sprPos.y -= 1.0f; }
 	}
 
 	void Draw(f64 deltaTime_milliseconds)
 	{
 		GFXDevice->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
 
-		GFXDevice->SetVertexBuffer(testVertexBuffer.get());
-		GFXDevice->SetIndexBuffer(testIndexBuffer.get());
-		GFXDevice->SetVertexDesc(testVertexDesc.get());
-		GFXDevice->SetShader(testShader.get());
-		GFXDevice->SetTexture(testTexture.get(), 0);
+		sprRenderer.SpriteSheet().PushSprite(spriteSheet, 0, sprPos, vec2(1.0f), DefaultColors::White);
+		sprRenderer.SpriteSheet().PushSprite(spriteSheet, 7, vec2(780.0f, 360.0f), vec2(1.0f), DefaultColors::White);
 
-		mat4 projMatrix = glm::orthoNO(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f);
-		testShader->SetVertexShaderMatrix(0, projMatrix);
+		char text[64] = {};
+		sprintf_s(text, sizeof(text) - 1, "Elapsed Time: %.3f\nDelta Time: %.3f", elapsedTime, deltaTime_milliseconds);
 
-		GFXDevice->DrawIndexed(PrimitiveType::Triangles, 0, 6);
+		sprRenderer.Font().PushString(testFont, text, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f), DefaultColors::White);
+
+		sprRenderer.RenderSprites(nullptr);
 
 		GFXDevice->SwapBuffers();
 	}
@@ -118,13 +79,15 @@ public:
 	std::string_view GetStateName() const { return "Test State"; }
 
 private:
-	Rendering::Device* GFXDevice{};
+	f64 elapsedTime{};
 
-	std::unique_ptr<VertexBuffer> testVertexBuffer{};
-	std::unique_ptr<IndexBuffer> testIndexBuffer{};
-	std::unique_ptr<VertexDesc> testVertexDesc{};
-	std::unique_ptr<Shader> testShader{};
-	std::unique_ptr<Texture> testTexture{};
+	Rendering::Device* GFXDevice{};
+	SpriteRenderer sprRenderer;
+
+	SpriteSheet spriteSheet;
+	Font testFont;
+
+	vec2 sprPos{ 640.0f, 360.0f };
 };
 
 int SDL_main(int argc, char* argv[])

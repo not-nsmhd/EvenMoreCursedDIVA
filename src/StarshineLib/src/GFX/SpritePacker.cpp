@@ -74,6 +74,16 @@ namespace Starshine::GFX
 		}
 	}
 
+	SpritePacker::SpritePacker()
+	{
+		Initialize();
+	}
+
+	SpritePacker::~SpritePacker()
+	{
+		Clear();
+	}
+
 	void SpritePacker::Initialize()
 	{
 		rectPacker.Initialize();

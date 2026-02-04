@@ -91,24 +91,5 @@ namespace Starshine::IO
 			fileStream.Close();
 			return true;
 		}
-
-		size_t ReadAllBytes(std::string_view filePath, u8** dest)
-		{
-			size_t fileSize = GetSize(filePath);
-
-			fstream file = fstream(filePath.data(), ios::in | ios::binary);
-
-			if (!file.good())
-			{
-				return 0;
-			}
-
-			u8* fileData = new u8[fileSize];
-			file.read(reinterpret_cast<char*>(fileData), fileSize);
-			file.close();
-
-			*dest = fileData;
-			return fileSize;
-		}
 	}
 }

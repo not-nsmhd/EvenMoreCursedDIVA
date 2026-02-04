@@ -11,6 +11,21 @@
     <Filter Include="Source Files\Rendering\OpenGL">
       <UniqueIdentifier>{7b08b7d8-ba31-4b41-9537-f32e1c0a3d4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Rendering\Render2D">
+      <UniqueIdentifier>{4d30b4a9-7c6a-46f6-9bc5-a373f930bc3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input">
+      <UniqueIdentifier>{c0cd3ac6-f04a-4351-b6ed-ab7c60cbf94d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Audio">
+      <UniqueIdentifier>{11f7e3dd-77ba-4a25-87c7-834f47fcfd24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Audio\Decoding">
+      <UniqueIdentifier>{d3f00698-b82f-44cd-9ea1-1830c4c61e74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Audio\SampleProvider">
+      <UniqueIdentifier>{8cb9ec05-f97c-49aa-9417-a8235f877c85}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameInstance.h">
@@ -52,6 +67,54 @@
     <ClInclude Include="src\Rendering\Device.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\SpriteSheet.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\SpriteSheetRenderer.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\Font.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\FontRenderer.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\SpriteRenderer.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Utilities.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input\Keyboard.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input\Mouse.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\AudioEngine.h">
+      <Filter>Source Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Decoding\OggVorbisDecoder.h">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Decoding\WavDecoder.h">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Decoding\DecoderFactory.h">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Decoding\IDecoder.h">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\SampleProvider\StreamingSampleProvider.h">
+      <Filter>Source Files\Audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\SampleProvider\ISampleProvider.h">
+      <Filter>Source Files\Audio\SampleProvider</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\SampleProvider\MemorySampleProvider.h">
+      <Filter>Source Files\Audio\SampleProvider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -82,6 +145,48 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\Device.cpp">
       <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\SpriteSheet.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\Font.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\SpriteRenderer.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Utilities.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input\Keyboard.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input\Mouse.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\AudioEngine.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Decoding\OggVorbisDecoder.cpp">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Decoding\WavDecoder.cpp">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Decoding\DecoderFactory.cpp">
+      <Filter>Source Files\Audio\Decoding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\SampleProvider\StreamingSampleProvider.cpp">
+      <Filter>Source Files\Audio\SampleProvider</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\SampleProvider\MemorySampleProvider.cpp">
+      <Filter>Source Files\Audio\SampleProvider</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

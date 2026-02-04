@@ -40,8 +40,8 @@ namespace Starshine::GFX
 	class SpritePacker : NonCopyable
 	{
 	public:
-		SpritePacker() = default;
-		~SpritePacker() = default;
+		SpritePacker();
+		~SpritePacker();
 
 	public:
 		struct SettingsData
