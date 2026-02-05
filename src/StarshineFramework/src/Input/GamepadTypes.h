@@ -70,6 +70,29 @@ namespace Starshine::Input
 		Count
 	};
 
+	enum class GamepadStickDirection : u32
+	{
+		None,
+		
+		Left,
+		Right,
+		Up,
+		Down,
+
+		Count
+	};
+
+	enum GamepadStickDirectionFlags : u32
+	{
+		GamepadStickDirection_None = 0,
+		GamepadStickDirection_Left = (1 << 0),
+		GamepadStickDirection_Right = (1 << 1),
+		GamepadStickDirection_Up = (1 << 2),
+		GamepadStickDirection_Down = (1 << 3),
+
+		GamepadStickDirection_Any = (GamepadStickDirection_Left | GamepadStickDirection_Right | GamepadStickDirection_Up | GamepadStickDirection_Down)
+	};
+
 	constexpr std::array<const char*, EnumCount<GamepadButton>()> GamepadButtonNames_PlayStation
 	{
 		"Circle",

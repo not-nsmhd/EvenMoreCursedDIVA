@@ -45,11 +45,8 @@ namespace Starshine::Input
 
 	struct Gamepad::Impl
 	{
-		static constexpr i16 TriggerPressThreshold = 16384;
-		static constexpr i16 StickHoldThreshold = 4096;
-
-		static constexpr i16 StickPullThreshold = 4096;
-		static constexpr i16 StickPullThreshold_Delta = 6144;
+		static constexpr i16 TriggerPressThreshold = 8192;
+		static constexpr i16 StickPullThreshold = 6144;
 
 		SDL_GameController* SDLController{};
 		bool IsConnected{};
@@ -59,8 +56,11 @@ namespace Starshine::Input
 			std::array<bool, SDL_CONTROLLER_BUTTON_MAX> CurrentButtonState;
 			std::array<bool, SDL_CONTROLLER_BUTTON_MAX> PreviousButtonState;
 
-			std::array<i16, SDL_CONTROLLER_AXIS_MAX> CurrentAxisState;
-			std::array<i16, SDL_CONTROLLER_AXIS_MAX> PreviousAxisState;
+			std::array<i16, SDL_CONTROLLER_AXIS_MAX> CurrentAxisValue;
+			std::array<i16, SDL_CONTROLLER_AXIS_MAX> PreviousAxisValue;
+
+			std::array<u32, EnumCount<GamepadStick>()> CurrentSticksDirection;
+			std::array<u32, EnumCount<GamepadStick>()> PreviousSticksDirection;
 		} State{};
 
 		Impl()
@@ -71,14 +71,26 @@ namespace Starshine::Input
 		{
 			if (!IsConnected) { return; }
 
-			for (size_t i = 0; i < State.CurrentAxisState.size(); i++)
+			for (size_t i = 0; i < State.CurrentAxisValue.size(); i++)
 			{
-				State.CurrentAxisState[i] = (SDL_GameControllerGetAxis(SDLController, static_cast<SDL_GameControllerAxis>(i)));
+				State.CurrentAxisValue[i] = (SDL_GameControllerGetAxis(SDLController, static_cast<SDL_GameControllerAxis>(i)));
 			}
 
 			for (size_t i = 0; i < State.CurrentButtonState.size(); i++)
 			{
 				State.CurrentButtonState[i] = (SDL_GameControllerGetButton(SDLController, static_cast<SDL_GameControllerButton>(i)) == 1);
+			}
+
+			for (size_t i = 0; i < State.CurrentSticksDirection.size(); i++)
+			{
+				i16 x = GetAxis((i == 0) ? GamepadAxis::LeftStick_X : GamepadAxis::RightStick_X, false);
+				i16 y = GetAxis((i == 0) ? GamepadAxis::LeftStick_Y : GamepadAxis::RightStick_Y, false);
+
+				u32 dirFlags = GamepadStickDirection_None;
+				if (std::abs(x) > StickPullThreshold) { dirFlags |= ((x > 0) ? GamepadStickDirection_Right : GamepadStickDirection_Left); }
+				if (std::abs(y) > StickPullThreshold) { dirFlags |= ((y > 0) ? GamepadStickDirection_Down : GamepadStickDirection_Up); }
+
+				State.CurrentSticksDirection[i] = dirFlags;
 			}
 		}
 
@@ -86,7 +98,8 @@ namespace Starshine::Input
 		{
 			if (!IsConnected) { return; }
 			State.PreviousButtonState = State.CurrentButtonState;
-			State.PreviousAxisState = State.CurrentAxisState;
+			State.PreviousAxisValue = State.CurrentAxisValue;
+			State.PreviousSticksDirection = State.CurrentSticksDirection;
 		}
 
 		void Connect(int sdlGamepadIndex)
@@ -129,10 +142,7 @@ namespace Starshine::Input
 			if (!IsConnected || button == GamepadButton::Unknown) { return false; }
 			if (button == GamepadButton::L2 || button == GamepadButton::R2)
 			{
-				if (button == GamepadButton::L2 || button == GamepadButton::R2)
-				{
-					return GetAxis((button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2, false) < TriggerPressThreshold;
-				}
+				return GetAxis((button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2, false) < TriggerPressThreshold;
 			}
 
 			SDL_GameControllerButton sdlButton = ConversionTables::SDLGameControllerButtons[static_cast<size_t>(button)];
@@ -144,11 +154,8 @@ namespace Starshine::Input
 			if (!IsConnected || button == GamepadButton::Unknown) { return false; }
 			if (button == GamepadButton::L2 || button == GamepadButton::R2)
 			{
-				if (button == GamepadButton::L2 || button == GamepadButton::R2)
-				{
-					GamepadAxis axis = (button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2;
-					return (GetAxis(axis, false) >= TriggerPressThreshold) && (GetAxis(axis, true) < TriggerPressThreshold);
-				}
+				GamepadAxis axis = (button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2;
+				return (GetAxis(axis, false) >= TriggerPressThreshold) && (GetAxis(axis, true) < TriggerPressThreshold);
 			}
 
 			SDL_GameControllerButton sdlButton = ConversionTables::SDLGameControllerButtons[static_cast<size_t>(button)];
@@ -160,11 +167,8 @@ namespace Starshine::Input
 			if (!IsConnected || button == GamepadButton::Unknown) { return false; }
 			if (button == GamepadButton::L2 || button == GamepadButton::R2)
 			{
-				if (button == GamepadButton::L2 || button == GamepadButton::R2)
-				{
-					GamepadAxis axis = (button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2;
-					return (GetAxis(axis, false) >= TriggerPressThreshold) && (GetAxis(axis, true) < TriggerPressThreshold);
-				}
+				GamepadAxis axis = (button == GamepadButton::L2) ? GamepadAxis::L2 : GamepadAxis::R2;
+				return (GetAxis(axis, false) >= TriggerPressThreshold) && (GetAxis(axis, true) < TriggerPressThreshold);
 			}
 
 			SDL_GameControllerButton sdlButton = ConversionTables::SDLGameControllerButtons[static_cast<size_t>(button)];
@@ -176,7 +180,7 @@ namespace Starshine::Input
 			if (!IsConnected) { return 0; }
 
 			SDL_GameControllerAxis sdlAxis = ConversionTables::SDLGameControllerAxis[static_cast<size_t>(axis)];
-			return previousFrame ? State.PreviousAxisState[sdlAxis] : State.CurrentAxisState[sdlAxis];
+			return previousFrame ? State.PreviousAxisValue[sdlAxis] : State.CurrentAxisValue[sdlAxis];
 		}
 
 		f32 GetAxisNormalized(const GamepadAxis& axis, bool previousFrame)
@@ -187,7 +191,7 @@ namespace Starshine::Input
 
 		void GetStickAxisValues(const GamepadStick& stick, i16& x, i16& y, bool previousFrame)
 		{
-			auto& state = previousFrame ? State.PreviousAxisState : State.CurrentAxisState;
+			auto& state = previousFrame ? State.PreviousAxisValue : State.CurrentAxisValue;
 
 			switch (stick)
 			{
@@ -205,55 +209,32 @@ namespace Starshine::Input
 		bool IsStickHeld(const GamepadStick& stick)
 		{
 			if (!IsConnected) { return false; }
-
-			i16 stickX = 0;
-			i16 stickY = 0;
-
-			GetStickAxisValues(stick, stickX, stickY, false);
-			return (std::abs(stickX) >= StickHoldThreshold) || (std::abs(stickY) >= StickHoldThreshold);
+			return State.CurrentSticksDirection[static_cast<size_t>(stick)] != 0;
 		}
 
 		bool IsStickCentered(const GamepadStick& stick)
 		{
 			if (!IsConnected) { return false; }
-
-			i16 stickX = 0;
-			i16 stickY = 0;
-
-			GetStickAxisValues(stick, stickX, stickY, false);
-			return (std::abs(stickX) < StickHoldThreshold) || (std::abs(stickY) < StickHoldThreshold);
+			return State.CurrentSticksDirection[static_cast<size_t>(stick)] == 0;
 		}
 
 		bool IsStickPulled(const GamepadStick& stick)
 		{
 			if (!IsConnected) { return false; }
+			u32 curDir = State.CurrentSticksDirection[static_cast<size_t>(stick)];
+			u32 prevDir = State.PreviousSticksDirection[static_cast<size_t>(stick)];
 
-			i16 stickX_cur = 0;
-			i16 stickY_cur = 0;
-
-			i16 stickX_prev = 0;
-			i16 stickY_prev = 0;
-
-			GetStickAxisValues(stick, stickX_cur, stickY_cur, false);
-			GetStickAxisValues(stick, stickX_prev, stickY_prev, true);
-			return ((std::abs(stickY_cur - stickY_prev) >= StickPullThreshold_Delta) && (std::abs(stickY_prev) < StickPullThreshold)) ||
-				((std::abs(stickX_cur - stickX_prev) >= StickPullThreshold_Delta) && (std::abs(stickX_prev) < StickPullThreshold));
+			return (curDir != 0) && 
+				((prevDir == 0) || (prevDir != curDir));
 		}
 
 		bool IsStickReleased(const GamepadStick& stick)
 		{
 			if (!IsConnected) { return false; }
+			u32 curDir = State.CurrentSticksDirection[static_cast<size_t>(stick)];
+			u32 prevDir = State.PreviousSticksDirection[static_cast<size_t>(stick)];
 
-			i16 stickX_cur = 0;
-			i16 stickY_cur = 0;
-
-			i16 stickX_prev = 0;
-			i16 stickY_prev = 0;
-
-			GetStickAxisValues(stick, stickX_cur, stickY_cur, false);
-			GetStickAxisValues(stick, stickX_prev, stickY_prev, true);
-			return ((std::abs(stickY_cur - stickY_prev) < StickPullThreshold_Delta) && (std::abs(stickY_prev) >= StickPullThreshold)) ||
-				((std::abs(stickX_cur - stickX_prev) < StickPullThreshold_Delta) && (std::abs(stickX_prev) >= StickPullThreshold));
+			return (curDir == 0) && (prevDir != 0);
 		}
 	};
 
