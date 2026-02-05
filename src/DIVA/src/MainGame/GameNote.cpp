@@ -8,6 +8,7 @@ namespace DIVA::MainGame
 	using namespace Starshine::Rendering::Render2D;
 
 	constexpr f64 NoteRemoveTimeThreshold{ -1.0 };
+	constexpr f32 TrailMaxProgress{ 1.15f };
 
 	f64 GameNote::GetRemainingTime() const
 	{
@@ -34,9 +35,8 @@ namespace DIVA::MainGame
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
 
-		static constexpr size_t trailSegmentCount = 48;
-		static constexpr f32 trailMaxProgress = 1.0f;
-		static constexpr f32 trailSegmentStep = trailMaxProgress / static_cast<f32>(trailSegmentCount);
+		static constexpr size_t trailSegmentCount = 56;
+		static constexpr f32 trailSegmentStep = TrailMaxProgress / static_cast<f32>(trailSegmentCount);
 		
 		std::array<vec2, trailSegmentCount> trailSegments{};
 		f32 segmentStep = (Trail.End - Trail.Start) / static_cast<f32>(trailSegmentCount);
@@ -142,10 +142,10 @@ namespace DIVA::MainGame
 			}
 		}
 
-		if (Expired || Expiring || ShouldBeRemoved) { return; }
-
 		IconPosition = MathExtensions::GetSinePoint(GetNormalizedRemainingTime(), TargetPosition, EntryAngle, Frequency, Amplitude, Distance);
 		Trail.Scroll = std::fmodf(Trail.Scroll + 0.32f * (16.6667 / deltaTime_ms), Trail.ScrollResetThreshold);
+
+		if (Expired || Expiring || ShouldBeRemoved) { return; }
 
 		if (Type == NoteType::HoldStart && HasBeenHit && (Hold.PrimaryHeld || Hold.AlternativeHeld))
 		{
@@ -207,8 +207,8 @@ namespace DIVA::MainGame
 
 		if (Type == NoteType::HoldStart && NextNote != nullptr)
 		{
-			Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, 1.0f);
-			Trail.End = MathExtensions::Min<f32>(1.0f, NextNote->GetNormalizedRemainingTime());
+			Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
+			Trail.End = MathExtensions::Min<f32>(TrailMaxProgress, NextNote->GetNormalizedRemainingTime());
 			Trail.Hold = true;
 
 			DrawTrail();
@@ -230,7 +230,7 @@ namespace DIVA::MainGame
 				f32 trailPixelLength = (Distance / 1000.0f) * (120.0f / static_cast<f32>(FlyTime) * lengthFactor);
 				f32 normalizedLength = trailPixelLength / Distance;
 
-				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, 1.0f);
+				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
 				Trail.End = Trail.Start + normalizedLength;
 
 				DrawTrail();

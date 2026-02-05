@@ -1,0 +1,37 @@
+// https://discord.com/channels/531630856767406105/613450757227937792/856369189161140265
+
+TARGET(0 - Triangle Note
+TARGET(1 - Circle Note
+TARGET(2 - Cross Note
+TARGET(3 - Square Note
+
+TARGET(4 - Triangle Hold    (FT) /  Up Arrow Note    (F)
+TARGET(5 - Circle Hold      (FT) /  Left Arrow Note  (F)
+TARGET(6 - Cross Hold       (FT) /  Down Arrow Note  (F)
+TARGET(7 - Square Hold      (FT) /  Right Arrow Note (F)
+
+TARGET(8 -  Random          (FT) /  Triangle Hold    (F)
+TARGET(9 -  Random Hold     (FT) /  Circle Hold      (F)
+TARGET(10 - Previous Note   (FT) /  Cross Hold       (F)
+TARGET(11 - Crash           (FT) /  Square Hold      (F)
+
+TARGET(12 - Slide L         (FT) /  Star Note        (F)
+TARGET(13 - Slide R         (FT) /  Star Hold        (F)
+TARGET(14 -                      /  Double Star     (F2)
+TARGET(15 - Chain L         (FT) /  Chance Star      (F)
+TARGET(16 - Chain R         (FT) /  Edit Chance Star (F)
+TARGET(17 - Green Square    (FT) /  Star Rush        (X)
+
+TARGET(18 - Triangle Chance (FT) /  Star Up          (F)
+TARGET(19 - Circle Chance   (FT) /  Star Right       (F)
+TARGET(20 - Cross Chance    (FT) /  Star Down        (F)
+TARGET(21 - Square Chance   (FT) /  Star Left        (F)
+
+TARGET(22 -                      /  Link Star       (F2) 
+TARGET(23 - Slide L Chance  (FT) /  Link Star End   (F2)   
+TARGET(24 - Slide R Chance  (FT) /  Circle Rush Test (X)
+
+TARGET(25 -                      /  Triangle Rush    (X)
+TARGET(26 -                      /  Circle Rush      (X)
+TARGET(27 -                      /  Cross Rush       (X)
+TARGET(28 -                      /  Square Rush      (X)

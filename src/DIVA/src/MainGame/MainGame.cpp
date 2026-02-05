@@ -441,10 +441,27 @@ namespace DIVA::MainGame
 			bool primDown = false;
 			bool altDown = false;
 
-			bool tapped = Gamepad::IsAnyButtonTapped(binding, &primTapped, &altTapped);
-			Gamepad::IsAnyButtonDown(binding, &primDown, &altDown);
+			bool tapped = false;
+			bool released = false;
 
-			bool released = Gamepad::IsAnyButtonReleased(binding, nullptr, nullptr);
+			if (shape != NoteShape::Star)
+			{
+				tapped = Gamepad::IsAnyButtonTapped(binding, &primTapped, &altTapped);
+				Gamepad::IsAnyButtonDown(binding, &primDown, &altDown);
+
+				released = Gamepad::IsAnyButtonReleased(binding, nullptr, nullptr);
+			}
+			else
+			{
+				primTapped = Gamepad::IsStickPulled(GamepadStick::Left);
+				altTapped = Gamepad::IsStickPulled(GamepadStick::Right);
+
+				primDown = Gamepad::IsStickHeld(GamepadStick::Left);
+				altDown = Gamepad::IsStickHeld(GamepadStick::Right);
+
+				tapped = primTapped || altTapped;
+				released = Gamepad::IsStickReleased(GamepadStick::Left) || Gamepad::IsStickReleased(GamepadStick::Right);
+			}
 
 			if (!tapped && !released) { return; }
 

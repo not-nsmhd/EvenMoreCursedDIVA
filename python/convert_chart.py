@@ -15,12 +15,14 @@ def GetNoteShapeString(value):
             return "Cross"
         case 3 | 7 | 11:
             return "Square"
+        case 12 | 15:
+            return "Star"
        
     print("Unknown shape value: {0}".format(value));
     return "Circle"
   
 def GetNoteTypeString(value):
-    if (value <= 3):
+    if (value <= 3 or value == 12 or value == 15):
         return "Normal"
     elif (value <= 7):
         return "Double"
@@ -79,7 +81,7 @@ while True:
     
     match opcode:
         case 0: # END
-            xmlChart.attrib["Duration"] = "{0:.3f}".format(nextCommandTime_divaTime / 100000.0)
+            xmlChart.attrib["Duration"] = "{0}".format(nextCommandTime_divaTime / 100000.0)
         case 1: # TIME
             nextCommandTime_divaTime = dscData[opcodeIdx + 1]
         case 6: # TARGET
@@ -106,7 +108,7 @@ while True:
             if (prevNoteTime != noteTime):
                 xmlChartNote = XmlET.SubElement(xmlChart, "SetNoteTime", 
                 {
-                    "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
+                    "Time": "{0}".format(nextCommandTime_divaTime / 100000.0),
                     "Value": "{0}".format(noteTime / 1000.0)
                 })
                 XmlET.indent(xmlChart, space="\t")
@@ -115,22 +117,22 @@ while True:
             
             xmlChartNote = XmlET.SubElement(xmlChart, "Note", 
             {
-                "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
+                "Time": "{0}".format(nextCommandTime_divaTime / 100000.0),
                 
                 "Shape": shapeString,
                 "Type": typeString,
-                "X": "{0:.3f}".format((tgtX * 960.0 / 480000.0) + 160.0),
-                "Y": "{0:.3f}".format((tgtY * 540.0 / 272000.0) + 90.0),
+                "X": "{0}".format((tgtX * 960.0 / 480000.0) + 160.0),
+                "Y": "{0}".format((tgtY * 540.0 / 272000.0) + 90.0),
                 
-                "Angle": "{0:.3f}".format(angle / 1000.0),
+                "Angle": "{0}".format(angle / 1000.0),
                 "Frequency": "{0}".format(frequency),
                 "Amplitude": "{0}".format(amplitude),
-                "Distance": "{0:.3f}".format(distance / 1000.0 * 4)
+                "Distance": "{0}".format(distance / 1000.0 * 4)
             })
             
             XmlET.indent(xmlChart, space="\t")
         case 25: # MUSIC_PLAY
-            xmlChart.attrib["MusicStart"] = "{0:.3f}".format(nextCommandTime_divaTime / 100000.0)
+            xmlChart.attrib["MusicStart"] = "{0}".format(nextCommandTime_divaTime / 100000.0)
         case 26: # MODE_SELECT
             difficulty = dscData[opcodeIdx + 1]
             mode = dscData[opcodeIdx + 2]
@@ -152,7 +154,7 @@ while True:
                 if len(eventName) > 0:
                      xmlEvent = XmlET.SubElement(xmlChart, eventName, 
                     {
-                        "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
+                        "Time": "{0}".format(nextCommandTime_divaTime / 100000.0),
                     })
             
             XmlET.indent(xmlChart, space="\t")
@@ -162,8 +164,8 @@ while True:
         
             xmlChartNote = XmlET.SubElement(xmlChart, "SetNoteTime", 
             {
-                "Time": "{0:.3f}".format(nextCommandTime_divaTime / 100000.0),
-                "Value": "{0:.3f}".format(60 / bpm * 4)
+                "Time": "{0}".format(nextCommandTime_divaTime / 100000.0),
+                "Value": "{0}".format(60 / bpm * 4)
             })
             
             XmlET.indent(xmlChart, space="\t")
