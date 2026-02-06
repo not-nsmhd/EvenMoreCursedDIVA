@@ -1,5 +1,6 @@
 #include "Keyboard.h"
 #include <array>
+#include "Common/Logging/Logging.h"
 
 namespace Starshine::Input
 {

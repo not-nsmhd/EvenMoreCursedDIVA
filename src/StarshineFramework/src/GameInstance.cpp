@@ -126,7 +126,7 @@ namespace Starshine
 				Keyboard::NextFrame();
 				Gamepad::NextFrame();
 
-				if (SDL_PollEvent(&SDLEvent))
+				while (SDL_PollEvent(&SDLEvent))
 				{
 					switch (SDLEvent.type)
 					{
@@ -143,9 +143,10 @@ namespace Starshine
 					case SDL_CONTROLLERDEVICEREMOVED:
 						Gamepad::Disconnect();
 						break;
+					case SDL_CONTROLLERAXISMOTION:
 					case SDL_CONTROLLERBUTTONDOWN:
 					case SDL_CONTROLLERBUTTONUP:
-					case SDL_CONTROLLERAXISMOTION:
+					case SDL_CONTROLLERSENSORUPDATE:
 						Gamepad::Poll();
 						break;
 					}

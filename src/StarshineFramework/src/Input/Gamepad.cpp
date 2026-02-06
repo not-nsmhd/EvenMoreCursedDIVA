@@ -112,6 +112,8 @@ namespace Starshine::Input
 					LogError(LogName, "Failed to open game controller at index %d. Error: %s", sdlGamepadIndex, SDL_GetError());
 					return;
 				}
+
+				LogInfo(LogName, "Successfully connected a game controller %d. Product ID: 0x%04X", sdlGamepadIndex, SDL_GameControllerGetProduct(SDLController));
 				IsConnected = true;
 			}
 		}
@@ -121,6 +123,7 @@ namespace Starshine::Input
 			if (IsConnected)
 			{
 				SDL_GameControllerClose(SDLController);
+				LogInfo(LogName, "Game controller has been disconnected");
 				IsConnected = false;
 			}
 		}
