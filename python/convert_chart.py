@@ -126,8 +126,8 @@ while True:
                 
                 "Angle": "{0}".format(angle / 1000.0),
                 "Frequency": "{0}".format(frequency),
-                "Amplitude": "{0}".format(amplitude),
-                "Distance": "{0}".format(distance / 1000.0 * 4)
+                "Amplitude": "{0:.0f}".format((amplitude * 272) / 540),
+                "Distance": "{0:.0f}".format((distance * 720) / 272000)
             })
             
             XmlET.indent(xmlChart, space="\t")

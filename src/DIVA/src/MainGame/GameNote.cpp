@@ -8,7 +8,7 @@ namespace DIVA::MainGame
 	using namespace Starshine::Rendering::Render2D;
 
 	constexpr f64 NoteRemoveTimeThreshold{ -1.0 };
-	constexpr f32 TrailMaxProgress{ 1.15f };
+	constexpr f32 TrailMaxProgress{ 1.0f };
 
 	f64 GameNote::GetRemainingTime() const
 	{
@@ -17,7 +17,7 @@ namespace DIVA::MainGame
 
 	f64 GameNote::GetNormalizedElapsedTime() const
 	{
-		return MathExtensions::ConvertRange<f64>(0.0f, FlyTime, 0.0f, 1.0f, ElapsedTime);
+		return ElapsedTime / FlyTime;
 	}
 
 	f64 GameNote::GetNormalizedRemainingTime() const
@@ -35,7 +35,7 @@ namespace DIVA::MainGame
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
 
-		static constexpr size_t trailSegmentCount = 56;
+		static constexpr size_t trailSegmentCount = 48;
 		static constexpr f32 trailSegmentStep = TrailMaxProgress / static_cast<f32>(trailSegmentCount);
 		
 		std::array<vec2, trailSegmentCount> trailSegments{};

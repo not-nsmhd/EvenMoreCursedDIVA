@@ -581,7 +581,6 @@ namespace DIVA::MainGame
 				{
 					UpdateInputGamepadBinding(GamepadBinds.Notes[i].EnumValue, GamepadBinds.Notes[i].MappedValue);
 				}
-
 				hud.Update(deltaTime_ms);
 			}
 
