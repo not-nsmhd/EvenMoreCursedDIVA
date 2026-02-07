@@ -514,7 +514,7 @@ namespace Starshine::Rendering::OpenGL
 		GLenum dataFormat = ConversionTables::GLTextureDataFormats[static_cast<size_t>(format)];
 		glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, NULL);
 
-		std::unique_ptr<Texture_OpenGL> texture = std::make_unique<Texture_OpenGL>(*this, width, height, format, false);
+		std::unique_ptr<Texture_D3D9> texture = std::make_unique<Texture_D3D9>(*this, width, height, format, false);
 		texture->Handle = texHandle;
 		texture->Filter = filter;
 		texture->WrapMode = wrapMode;
@@ -577,7 +577,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 		else
 		{
-			const Texture_OpenGL* glTexture = static_cast<const Texture_OpenGL*>(texture);
+			const Texture_D3D9* glTexture = static_cast<const Texture_D3D9*>(texture);
 			glBindTexture(GL_TEXTURE_2D, glTexture->Handle);
 		}
 	}

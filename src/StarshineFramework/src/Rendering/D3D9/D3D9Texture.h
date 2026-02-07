@@ -1,13 +1,13 @@
 #pragma once
 #include "Rendering/Texture.h"
-#include "OpenGLDevice.h"
-#include <glad/glad.h>
+#include "D3D9Device.h"
+#include <d3d9.h>
 
-namespace Starshine::Rendering::OpenGL
+namespace Starshine::Rendering::D3D9
 {
 	struct Texture_D3D9 : public Texture
 	{
-		Texture_D3D9(OpenGLDevice& device, u32 width, u32 height, GFX::TextureFormat format, bool dynamic);
+		Texture_D3D9(IDirect3DDevice9* device, u32 width, u32 height, GFX::TextureFormat format, bool dynamic);
 		~Texture_D3D9();
 
 		u32 GetWidth() const;
@@ -16,11 +16,13 @@ namespace Starshine::Rendering::OpenGL
 
 		void SetData(const void* source, u32 x, u32 y, u32 width, u32 height);
 
-		OpenGLDevice& DeviceRef;
-		GLuint Handle{};
+		IDirect3DDevice9* Device{};
 
-		GLenum Filter{ GL_LINEAR };
-		GLenum WrapMode{ GL_CLAMP_TO_EDGE };
+		IDirect3DTexture9* GPUTexture{};
+		IDirect3DTexture9* StagingTexture{};
+
+		DWORD Filter{ D3DTEXF_LINEAR };
+		DWORD WrapMode{ D3DTADDRESS_CLAMP };
 
 		u32 Width{};
 		u32 Height{};

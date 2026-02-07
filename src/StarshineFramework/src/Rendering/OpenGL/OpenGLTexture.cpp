@@ -3,33 +3,33 @@
 
 namespace Starshine::Rendering::OpenGL
 {
-	Texture_OpenGL::Texture_OpenGL(OpenGLDevice& device, u32 width, u32 height, GFX::TextureFormat format, bool dynamic) :
+	Texture_D3D9::Texture_D3D9(OpenGLDevice& device, u32 width, u32 height, GFX::TextureFormat format, bool dynamic) :
 		DeviceRef(device), Width(width), Height(height), Format(format), Dynamic(dynamic)
 	{
 	}
 
-	Texture_OpenGL::~Texture_OpenGL()
+	Texture_D3D9::~Texture_D3D9()
 	{
 		glDeleteTextures(1, &Handle);
 		Handle = 0;
 	}
 
-	u32 Texture_OpenGL::GetWidth() const
+	u32 Texture_D3D9::GetWidth() const
 	{
 		return Width;
 	}
 
-	u32 Texture_OpenGL::GetHeight() const
+	u32 Texture_D3D9::GetHeight() const
 	{
 		return Height;
 	}
 
-	GFX::TextureFormat Texture_OpenGL::GetFormat() const
+	GFX::TextureFormat Texture_D3D9::GetFormat() const
 	{
 		return Format;
 	}
 
-	void Texture_OpenGL::SetData(const void* source, u32 x, u32 y, u32 width, u32 height)
+	void Texture_D3D9::SetData(const void* source, u32 x, u32 y, u32 width, u32 height)
 	{
 		if (Handle != 0 && source != nullptr)
 		{

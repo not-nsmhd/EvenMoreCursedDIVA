@@ -40,7 +40,8 @@ namespace Starshine::Rendering::D3D9
 		{
 			Device->SetVertexShader(VertexShader);
 
-			auto valuePtr = glm::value_ptr(matrix);
+			glm::mat4 transposed = glm::transpose(matrix);
+			auto valuePtr = glm::value_ptr(transposed);
 			Device->SetVertexShaderConstantF(index, valuePtr, 4);
 		}
 	}
@@ -51,7 +52,8 @@ namespace Starshine::Rendering::D3D9
 		{
 			Device->SetPixelShader(FragmentShader);
 
-			auto valuePtr = glm::value_ptr(matrix);
+			glm::mat4 transposed = glm::transpose(matrix);
+			auto valuePtr = glm::value_ptr(transposed);
 			Device->SetPixelShaderConstantF(index, valuePtr, 4);
 		}
 	}

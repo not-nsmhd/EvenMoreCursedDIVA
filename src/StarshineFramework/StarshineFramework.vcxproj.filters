@@ -11,9 +11,6 @@
     <Filter Include="Source Files\Rendering\OpenGL">
       <UniqueIdentifier>{7b08b7d8-ba31-4b41-9537-f32e1c0a3d4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\Render2D">
-      <UniqueIdentifier>{4d30b4a9-7c6a-46f6-9bc5-a373f930bc3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Input">
       <UniqueIdentifier>{c0cd3ac6-f04a-4351-b6ed-ab7c60cbf94d}</UniqueIdentifier>
     </Filter>
@@ -31,6 +28,9 @@
     </Filter>
     <Filter Include="Direct3D 9 Shaders">
       <UniqueIdentifier>{2e0a10f2-ea8e-4178-b9f4-9481ca7b60b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\Render2D">
+      <UniqueIdentifier>{4d30b4a9-7c6a-46f6-9bc5-a373f930bc3c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +145,9 @@
     <ClInclude Include="src\Rendering\D3D9\D3D9Shader.h">
       <Filter>Source Files\Rendering\D3D9</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\D3D9\D3D9Texture.h">
+      <Filter>Source Files\Rendering\D3D9</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -236,12 +239,24 @@
     <ClCompile Include="src\Rendering\D3D9\D3D9Shader.cpp">
       <Filter>Source Files\Rendering\D3D9</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\D3D9\D3D9Texture.cpp">
+      <Filter>Source Files\Rendering\D3D9</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="d3d9shaders\src\FS_Test.hlsl">
       <Filter>Direct3D 9 Shaders</Filter>
     </FxCompile>
     <FxCompile Include="d3d9shaders\src\VS_Test.hlsl">
+      <Filter>Direct3D 9 Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="d3d9shaders\src\VS_MatrixTransform.hlsl">
+      <Filter>Direct3D 9 Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="d3d9shaders\src\VS_SpriteDefault.hlsl">
+      <Filter>Direct3D 9 Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="d3d9shaders\src\FS_SpriteDefault.hlsl">
       <Filter>Direct3D 9 Shaders</Filter>
     </FxCompile>
   </ItemGroup>

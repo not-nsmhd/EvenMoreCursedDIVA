@@ -8,7 +8,7 @@
 #include "D3D9Buffers.h"
 #include "D3D9VertexDesc.h"
 #include "D3D9Shader.h"
-//#include "OpenGLTexture.h"
+#include "D3D9Texture.h"
 #include <array>
 #include "IO/Xml.h"
 #include "IO/Path/File.h"
@@ -66,6 +66,21 @@ namespace Starshine::Rendering::D3D9
 				return false;
 			}
 
+			BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+			int windowWidth{};
+			int windowHeight{};
+			SDL_GetWindowSizeInPixels(GameWindow, &windowWidth, &windowHeight);
+
+			D3DVIEWPORT9 viewport{};
+			viewport.X = 0;
+			viewport.Y = 0;
+			viewport.Width = windowWidth;
+			viewport.Height = windowHeight;
+			viewport.MinZ = -1.0f;
+			viewport.MaxZ = 1.0f;
+			BaseDevice->SetViewport(&viewport);
+
 			return true;
 		}
 
@@ -96,8 +111,20 @@ namespace Starshine::Rendering::D3D9
 				}
 
 				D3DPRIMITIVETYPE primType = ConversionTables::D3DPrimitiveTypes[static_cast<size_t>(type)];
-				u32 vtxPerPrim = ConversionTables::D3DVerticesPerPrimitive[static_cast<size_t>(type)];
-				BaseDevice->DrawPrimitive(primType, firstVertex, vertexCount / vtxPerPrim);
+				
+				u32 primCount = 0;
+				if (type != PrimitiveType::TriangleStrip)
+				{
+					u32 vtxPerPrim = ConversionTables::D3DVerticesPerPrimitive[static_cast<size_t>(type)];
+					primCount = vertexCount / vtxPerPrim;
+				}
+				else
+				{
+					if (vertexCount >= 3) { primCount = 1; }
+					if (vertexCount > 3) { primCount += (vertexCount - 3) / 1; }
+				}
+
+				BaseDevice->DrawPrimitive(primType, firstVertex, primCount);
 			}
 		}
 
@@ -181,9 +208,10 @@ namespace Starshine::Rendering::D3D9
 
 	RectangleF D3D9Device::GetViewportSize() const
 	{
-		RectangleF viewport = {};
-		//glGetFloatv(GL_VIEWPORT, &viewport.X);
-		return viewport;
+		D3DVIEWPORT9 viewport{};
+		impl->BaseDevice->GetViewport(&viewport);
+		return RectangleF{ static_cast<float>(viewport.X), static_cast<float>(viewport.Y),
+			static_cast<float>(viewport.Width), static_cast<float>(viewport.Height) };
 	}
 
 	void D3D9Device::Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
@@ -217,49 +245,45 @@ namespace Starshine::Rendering::D3D9
 
 	void D3D9Device::SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
 	{
-		/*GLboolean blendEnabled = glIsEnabled(GL_BLEND);
-		if (enable)
+		if (!enable)
 		{
-			if (!blendEnabled) { glEnable(GL_BLEND); }
+			impl->BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		}
 		else
 		{
-			if (blendEnabled) { glDisable(GL_BLEND); }
-			return;
+			D3DBLEND d3dSrcColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcColor)];
+			D3DBLEND d3dDstColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(destColor)];
+			D3DBLEND d3dSrcAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcAlpha)];
+			D3DBLEND d3dDstAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(destAlpha)];
+
+			impl->BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			impl->BaseDevice->SetRenderState(D3DRS_SRCBLEND, d3dSrcColor);
+			impl->BaseDevice->SetRenderState(D3DRS_SRCBLENDALPHA, d3dSrcAlpha);
+			impl->BaseDevice->SetRenderState(D3DRS_DESTBLEND, d3dDstColor);
+			impl->BaseDevice->SetRenderState(D3DRS_DESTBLENDALPHA, d3dDstAlpha);
 		}
-
-		GLenum glSrcColor = ConversionTables::GLBlendFactors[static_cast<size_t>(srcColor)];
-		GLenum glDstColor = ConversionTables::GLBlendFactors[static_cast<size_t>(destColor)];
-		GLenum glSrcAlpha = ConversionTables::GLBlendFactors[static_cast<size_t>(srcAlpha)];
-		GLenum glDstAlpha = ConversionTables::GLBlendFactors[static_cast<size_t>(destAlpha)];
-
-		glBlendFuncSeparate(glSrcColor, glDstColor, glSrcAlpha, glDstAlpha);*/
 	}
 
 	void D3D9Device::SetBlendOperation(BlendOperation op)
 	{
-		//GLenum glOperation = ConversionTables::GLBlendOperations[static_cast<size_t>(op)];
-		//glBlendEquation(glOperation);
+		D3DBLENDOP d3dBlendColor = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
+		D3DBLENDOP d3dBlendAlpha = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
+		impl->BaseDevice->SetRenderState(D3DRS_BLENDOP, d3dBlendColor);
+		impl->BaseDevice->SetRenderState(D3DRS_BLENDOPALPHA, d3dBlendAlpha);
 	}
 
 	void D3D9Device::SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull)
 	{
-		/*GLboolean cullingEnabled = glIsEnabled(GL_CULL_FACE);
 		if (enable)
 		{
-			if (!cullingEnabled) { glEnable(GL_CULL_FACE); }
+			DWORD orientation = ConversionTables::D3DPolygonOrientation[static_cast<size_t>(frontFaceOrientation)];
+
+			impl->BaseDevice->SetRenderState(D3DRS_CULLMODE, orientation);
 		}
 		else
 		{
-			if (cullingEnabled) { glDisable(GL_CULL_FACE); }
-			return;
+			impl->BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		}
-
-		GLenum glOrientation = ConversionTables::GLPolygonOrientation[static_cast<size_t>(frontFaceOrientation)];
-		GLenum glFacesToCull = ConversionTables::GLFace[static_cast<size_t>(facesToCull)];
-
-		glFrontFace(glOrientation);
-		glCullFace(glFacesToCull);*/
 	}
 
 	void D3D9Device::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
@@ -320,31 +344,14 @@ namespace Starshine::Rendering::D3D9
 
 	std::unique_ptr<Texture> D3D9Device::CreateTexture(u32 width, u32 height, GFX::TextureFormat format, bool nearestFilter, bool repeat)
 	{
-		/*if (width == 0 || height == 0) { return nullptr; }
+		if (width == 0 || height == 0) { return nullptr; }
 		if (!MathExtensions::IsPowerOf2(width) || !MathExtensions::IsPowerOf2(height)) { return nullptr; }
 
-		GLuint texHandle = 0;
-		GLenum filter = nearestFilter ? GL_NEAREST : GL_LINEAR;
-		GLenum wrapMode = repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+		std::unique_ptr<Texture_D3D9> texture = std::make_unique<Texture_D3D9>(impl->BaseDevice, width, height, format, false);
+		texture->Filter = nearestFilter ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+		texture->WrapMode = repeat ? D3DTADDRESS_WRAP : D3DTADDRESS_CLAMP;
 
-		glGenTextures(1, &texHandle);
-		glBindTexture(GL_TEXTURE_2D, texHandle);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-
-		GLenum pixelFormat = ConversionTables::GLTextureDisplayFormats[static_cast<size_t>(format)];
-		GLenum dataFormat = ConversionTables::GLTextureDataFormats[static_cast<size_t>(format)];
-		glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, NULL);
-
-		std::unique_ptr<Texture_OpenGL> texture = std::make_unique<Texture_OpenGL>(*this, width, height, format, false);
-		texture->Handle = texHandle;
-		texture->Filter = filter;
-		texture->WrapMode = wrapMode;
-
-		return texture;*/
-		return nullptr;
+		return texture;
 	}
 
 	void D3D9Device::SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc)
@@ -396,15 +403,18 @@ namespace Starshine::Rendering::D3D9
 
 	void D3D9Device::SetTexture(const Texture* texture, u32 slot)
 	{
-		/*glActiveTextureARB(GL_TEXTURE0_ARB + slot);
 		if (texture == nullptr)
 		{
-			glBindTexture(GL_TEXTURE_2D, 0);
+			impl->BaseDevice->SetTexture(slot, NULL);
 		}
 		else
 		{
-			const Texture_OpenGL* glTexture = static_cast<const Texture_OpenGL*>(texture);
-			glBindTexture(GL_TEXTURE_2D, glTexture->Handle);
-		}*/
+			const Texture_D3D9* d3dTexture = static_cast<const Texture_D3D9*>(texture);
+			impl->BaseDevice->SetTexture(slot, d3dTexture->GPUTexture);
+			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSU, d3dTexture->WrapMode);
+			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSV, d3dTexture->WrapMode);
+			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_MINFILTER, d3dTexture->Filter);
+			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_MAGFILTER, d3dTexture->Filter);
+		}
 	}
 }

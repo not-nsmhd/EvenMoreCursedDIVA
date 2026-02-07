@@ -21,7 +21,7 @@ namespace Starshine::Rendering::D3D9
 			2,
 			2,
 			3,
-			3
+			1
 		};
 
 		constexpr std::array<D3DFORMAT, EnumCount<IndexFormat>()> D3DIndexFormats =
@@ -68,6 +68,17 @@ namespace Starshine::Rendering::D3D9
 			D3DFMT_DXT1,
 			D3DFMT_DXT3,
 			D3DFMT_DXT5
+		};
+
+		constexpr std::array<u32, EnumCount<GFX::TextureFormat>()> D3DBytesPerPixel =
+		{
+			4,
+			2,
+			1,
+
+			0,
+			0,
+			0
 		};
 	}
 }

@@ -571,23 +571,23 @@ namespace DIVA::MainGame
 				UpdateChart(ChartDeltaTime);
 				UpdateActiveNotes(deltaTime_ms);
 
-#if 0
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
 					UpdateInputBinding(KeyboardBinds.Notes[i].EnumValue, KeyboardBinds.Notes[i].MappedValue);
 				}
-#endif
+#if 0
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
 					UpdateInputGamepadBinding(GamepadBinds.Notes[i].EnumValue, GamepadBinds.Notes[i].MappedValue);
 				}
+#endif
 				hud.Update(deltaTime_ms);
 			}
 
-#if 0
 			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
-#endif
+#if 0
 			if (Gamepad::IsAnyButtonTapped(GamepadBinds.Pause, nullptr, nullptr))
+#endif
 			{
 				Paused = !Paused;
 				if (Paused)

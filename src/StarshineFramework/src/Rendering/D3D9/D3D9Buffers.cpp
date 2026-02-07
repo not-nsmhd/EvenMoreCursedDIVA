@@ -8,7 +8,7 @@ namespace Starshine::Rendering::D3D9
 	{
 		Device->CreateVertexBuffer(static_cast<UINT>(size),
 			dynamic ? D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY,
-			0, D3DPOOL_MANAGED, &BaseBuffer, NULL);
+			0, dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED, &BaseBuffer, NULL);
 
 		if (!dynamic || initialData != nullptr)
 		{
@@ -42,7 +42,7 @@ namespace Starshine::Rendering::D3D9
 
 		Device->CreateIndexBuffer(static_cast<UINT>(size),
 			dynamic ? D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY,
-			indexFormat, D3DPOOL_MANAGED, &BaseBuffer, NULL);
+			indexFormat, dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED, &BaseBuffer, NULL);
 
 		if (!dynamic || initialData != nullptr)
 		{

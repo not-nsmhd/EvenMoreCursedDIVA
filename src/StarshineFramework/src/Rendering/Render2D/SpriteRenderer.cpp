@@ -188,8 +188,8 @@ namespace Starshine::Rendering::Render2D
 	
 		void Internal_CreateDefaultSpriteResources()
 		{
-			DefaultSpriteResources.DefaultShader = Rendering::Utilities::LoadShader("diva/shaders/opengl/VS_SpriteDefault.vp", "diva/shaders/opengl/FS_SpriteDefault.fp");
-			DefaultSpriteResources.DefaultTexture = GFXDevice->CreateTexture(1, 1, TextureFormat::RGBA8, false, true);
+			DefaultSpriteResources.DefaultShader = Rendering::Utilities::LoadShader("diva/shaders/d3d9/VS_SpriteDefault.cso", "diva/shaders/d3d9/FS_SpriteDefault.cso");
+			DefaultSpriteResources.DefaultTexture = GFXDevice->CreateTexture(1, 1, TextureFormat::RGBA8, false, false);
 
 			array<u8, 4> defaultTexData = { 0xFF, 0xFF, 0xFF, 0xFF };
 			DefaultSpriteResources.DefaultTexture->SetData(defaultTexData.data(), 0, 0, 1, 1);
@@ -326,7 +326,7 @@ namespace Starshine::Rendering::Render2D
 			Shader* spriteShader = (shader != nullptr) ? shader : DefaultSpriteResources.DefaultShader.get();
 
 			RectangleF viewportSize = GFXDevice->GetViewportSize();
-			ShaderVariables.TransformMatrix = glm::ortho(viewportSize.X, viewportSize.Width, viewportSize.Height, viewportSize.Y, 0.0f, 1.0f);
+			ShaderVariables.TransformMatrix = glm::orthoRH_ZO(viewportSize.X, viewportSize.Width, viewportSize.Height, viewportSize.Y, 0.0f, 1.0f);
 			spriteShader->SetVertexShaderMatrix(0, ShaderVariables.TransformMatrix);
 
 			GFXDevice->SetIndexBuffer(GraphicsResources.SpriteIndexBuffer.get());
@@ -344,7 +344,7 @@ namespace Starshine::Rendering::Render2D
 						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 						switchBackToSpriteBuffer = false;
 					}
-					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, list->SpriteCount * 4, list->SpriteCount * 6);
+					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, PushedSprites * 4, list->SpriteCount * 6);
 				}
 				else
 				{
