@@ -48,9 +48,8 @@ namespace Starshine::Rendering
 		virtual std::unique_ptr<Texture> CreateTexture(u32 width, u32 height, GFX::TextureFormat format, bool nearestFilter, bool repeat) = 0;
 
 	public:
-		virtual void SetVertexBuffer(const VertexBuffer* buffer) = 0;
+		virtual void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc) = 0;
 		virtual void SetIndexBuffer(const IndexBuffer* buffer) = 0;
-		virtual void SetVertexDesc(const VertexDesc* desc) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
 		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
 	};

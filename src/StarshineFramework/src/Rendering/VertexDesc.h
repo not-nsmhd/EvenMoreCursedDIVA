@@ -10,8 +10,6 @@ namespace Starshine::Rendering
 		u32 Index{};
 
 		VertexAttribFormat Format{};
-		u32 Components{};
-		bool Normalized{};
 
 		u32 VertexSize{};
 		u32 Offset{};

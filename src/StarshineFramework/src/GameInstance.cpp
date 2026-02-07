@@ -58,7 +58,7 @@ namespace Starshine
 			LogMessage("Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 
 			SDL_Init(SDL_INIT_EVERYTHING);
-			Parent->GameWindow = std::make_unique<Window>("Even More Cursed DIVA", 1280, 720, SDL_WINDOW_OPENGL);
+			Parent->GameWindow = std::make_unique<Window>("Starshine", 1280, 720, SDL_WINDOW_SHOWN);
 
 			if (!Parent->GameWindow->Exists())
 			{
@@ -69,7 +69,7 @@ namespace Starshine
 
 			BaseWindow = Parent->GameWindow->GetBaseWindow();
 
-			Rendering::InitializeDevice(BaseWindow, DeviceType::OpenGL);
+			Rendering::InitializeDevice(BaseWindow, DeviceType::D3D9);
 			GFXDevice = Rendering::GetDevice();
 
 			Keyboard::Initialize();

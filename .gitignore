@@ -18,3 +18,4 @@ src/StarshineLib/src/BuildInfo.h
 lib_vs/*
 
 *.aps
+*.cso

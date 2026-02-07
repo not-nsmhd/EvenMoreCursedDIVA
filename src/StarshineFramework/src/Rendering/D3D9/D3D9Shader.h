@@ -1,13 +1,12 @@
 #pragma once
-#include "Rendering/Shader.h"
-#include "OpenGLDevice.h"
-#include <glad/glad.h>
+#include "D3D9Device.h"
+#include <d3d9.h>
 
-namespace Starshine::Rendering::OpenGL
+namespace Starshine::Rendering::D3D9
 {
 	struct Shader_D3D9 : public Shader
 	{
-		Shader_D3D9(OpenGLDevice& device, GLuint vsHandle, GLuint fsHandle);
+		Shader_D3D9(IDirect3DDevice9* device, const DWORD* vsBytecode, const DWORD* fsBytecode);
 		~Shader_D3D9();
 
 		void SetVertexShaderVariables(u32 index, size_t count, const f32* values);
@@ -16,9 +15,9 @@ namespace Starshine::Rendering::OpenGL
 		void SetVertexShaderMatrix(u32 index, const mat4& matrix);
 		void SetFragmentShaderMatrix(u32 index, const mat4& matrix);
 
-		OpenGLDevice& DeviceRef;
+		IDirect3DDevice9* Device{};
 
-		GLuint VertexProgramHandle{};
-		GLuint FragmentProgramHandle{};
+		IDirect3DVertexShader9* VertexShader{};
+		IDirect3DPixelShader9* FragmentShader{};
 	};
 }

@@ -1,5 +1,6 @@
 #include "Device.h"
 #include "OpenGL/OpenGLDevice.h"
+#include "D3D9/D3D9Device.h"
 #include "Common/Logging/Logging.h"
 
 namespace Starshine::Rendering
@@ -19,8 +20,8 @@ namespace Starshine::Rendering
 			GlobalDevice = std::make_unique<OpenGL::OpenGLDevice>();
 			break;
 		case DeviceType::D3D9:
-			assert(("Direct3D 9 rendering device is not implemented yet", false));
-			return false;
+			GlobalDevice = std::make_unique<D3D9::D3D9Device>();
+			break;
 		}
 
 		LogInfo(LogName, "Device Type: %s", DeviceTypeNames[static_cast<size_t>(type)]);

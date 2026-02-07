@@ -3,17 +3,17 @@
 
 namespace Starshine::Rendering::OpenGL
 {
-	Shader_OpenGL::Shader_OpenGL(OpenGLDevice& device, GLuint vsHandle, GLuint fsHandle)
+	Shader_D3D9::Shader_D3D9(OpenGLDevice& device, GLuint vsHandle, GLuint fsHandle)
 		: DeviceRef(device), VertexProgramHandle(vsHandle), FragmentProgramHandle(fsHandle)
 	{}
 
-	Shader_OpenGL::~Shader_OpenGL()
+	Shader_D3D9::~Shader_D3D9()
 	{
 		glDeleteProgramsARB(1, &VertexProgramHandle);
 		glDeleteProgramsARB(1, &FragmentProgramHandle);
 	}
 
-	void Shader_OpenGL::SetVertexShaderVariables(u32 index, size_t count, const f32* values)
+	void Shader_D3D9::SetVertexShaderVariables(u32 index, size_t count, const f32* values)
 	{
 		if (VertexProgramHandle != 0 && FragmentProgramHandle != 0 && values != nullptr && count > 0)
 		{
@@ -25,7 +25,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 	}
 
-	void Shader_OpenGL::SetFragmentShaderVariables(u32 index, size_t count, const f32* values)
+	void Shader_D3D9::SetFragmentShaderVariables(u32 index, size_t count, const f32* values)
 	{
 		if (VertexProgramHandle != 0 && FragmentProgramHandle != 0 && values != nullptr && count > 0)
 		{
@@ -37,7 +37,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 	}
 
-	void Shader_OpenGL::SetVertexShaderMatrix(u32 index, const mat4& matrix)
+	void Shader_D3D9::SetVertexShaderMatrix(u32 index, const mat4& matrix)
 	{
 		if (VertexProgramHandle != 0 && FragmentProgramHandle != 0)
 		{
@@ -53,7 +53,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 	}
 
-	void Shader_OpenGL::SetFragmentShaderMatrix(u32 index, const mat4& matrix)
+	void Shader_D3D9::SetFragmentShaderMatrix(u32 index, const mat4& matrix)
 	{
 		if (VertexProgramHandle != 0 && FragmentProgramHandle != 0)
 		{

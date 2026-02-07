@@ -55,9 +55,9 @@ namespace Starshine::Rendering::Render2D
 
 	constexpr array<VertexAttrib, 3> SpriteVertexAttribs
 	{
-		VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float, 2, false, sizeof(SpriteVertex), offsetof(SpriteVertex, Position) },
-		VertexAttrib { VertexAttribType::TexCoord, 0, VertexAttribFormat::Float, 2, false, sizeof(SpriteVertex), offsetof(SpriteVertex, TexCoord) },
-		VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte, 4, true, sizeof(SpriteVertex), offsetof(SpriteVertex, Color) }
+		VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, Position) },
+		VertexAttrib { VertexAttribType::TexCoord, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, TexCoord) },
+		VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte4Norm, sizeof(SpriteVertex), offsetof(SpriteVertex, Color) }
 	};
 
 	struct BlendModeDescriptor
@@ -341,16 +341,14 @@ namespace Starshine::Rendering::Render2D
 				{
 					if (switchBackToSpriteBuffer)
 					{
-						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get());
-						GFXDevice->SetVertexDesc(GraphicsResources.VertexDesc.get());
+						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 						switchBackToSpriteBuffer = false;
 					}
 					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, list->SpriteCount * 6);
 				}
 				else
 				{
-					GFXDevice->SetVertexBuffer(GraphicsResources.ShapeVertexBuffer.get());
-					GFXDevice->SetVertexDesc(GraphicsResources.VertexDesc.get());
+					GFXDevice->SetVertexBuffer(GraphicsResources.ShapeVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 					GFXDevice->DrawArrays(list->PrimitiveType, list->ShapeFirstVertex, list->ShapeVertexCount);
 					switchBackToSpriteBuffer = true;
 				}

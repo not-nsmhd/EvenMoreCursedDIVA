@@ -41,18 +41,20 @@ namespace Starshine::Rendering
 	{
 		Position,
 		Color,
-		TexCoord
+		TexCoord,
+
+		Count
 	};
 
 	enum class VertexAttribFormat : u8
 	{
-		Byte,
-		UnsignedByte,
-		Short,
-		UnsignedShort,
-		Int,
-		UnsignedInt,
-		Float,
+		Float1,
+		Float2,
+		Float3,
+		Float4,
+
+		UnsignedByte4,
+		UnsignedByte4Norm,
 
 		Count
 	};

@@ -2,6 +2,7 @@
 #include "GameInstance.h"
 #include "GFX/SpritePacker.h"
 #include "Rendering/Device.h"
+#include "Rendering/Utilities.h"
 #include "Rendering/Render2D/SpriteSheet.h"
 #include "Rendering/Render2D/SpriteRenderer.h"
 #include "Input/Keyboard.h"
@@ -13,6 +14,25 @@ using namespace Starshine::GFX;
 using namespace Starshine::Rendering;
 using namespace Starshine::Rendering::Render2D;
 using namespace Starshine::Input;
+
+struct TestVertex
+{
+	vec2 Position{};
+	Color VtxColor{};
+};
+
+static constexpr std::array<TestVertex, 3> testVertexData
+{
+	TestVertex { vec2{ 0.0f, 0.0f }, Color{ 255, 0, 0, 255 } },
+	TestVertex { vec2{ 1.0f, 1.0f }, Color{ 0, 255, 0, 255 } },
+	TestVertex { vec2{ 1.0f, 0.0f }, Color{ 0, 0, 255, 255 } }
+};
+
+static constexpr std::array<VertexAttrib, 2> testVertexDesc
+{
+	VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float2, sizeof(TestVertex), offsetof(TestVertex, Position) },
+	VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte4Norm, sizeof(TestVertex), offsetof(TestVertex, VtxColor) }
+};
 
 class TestState : public GameState
 {
@@ -28,23 +48,17 @@ public:
 
 	bool LoadContent()
 	{
-		SpritePacker sprPacker;
-		sprPacker.AddFromDirectory("diva/sprites/devtest");
-		sprPacker.Pack();
-
-		spriteSheet.CreateFromSpritePacker(sprPacker);
-		sprPacker.Clear();
-
-		testFont.ReadBMFont("diva/fonts/debug.fnt");
-
+		vertexBuffer = GFXDevice->CreateVertexBuffer(testVertexData.size() * sizeof(TestVertex), testVertexData.data(), false);
+		vertexDesc = GFXDevice->CreateVertexDesc(testVertexDesc.data(), testVertexDesc.size());
+		testShader = Rendering::Utilities::LoadShader("diva/shaders/d3d9/VS_Test.cso", "diva/shaders/d3d9/FS_Test.cso");
 		return true;
 	}
 
 	void UnloadContent()
 	{
-		spriteSheet.Destroy();
-		testFont.Destroy();
-		sprRenderer.Destroy();
+		vertexBuffer = nullptr;
+		vertexDesc = nullptr;
+		testShader = nullptr;
 	}
 
 	void Destroy()
@@ -54,70 +68,15 @@ public:
 	void Update(f64 deltaTime_milliseconds)
 	{
 		elapsedTime += deltaTime_milliseconds;
-		
-		if (Keyboard::IsKeyDown(SDLK_RIGHT)) { sprPos.x += 1.0f; }
-		if (Keyboard::IsKeyDown(SDLK_LEFT)) { sprPos.x -= 1.0f; }
-		if (Keyboard::IsKeyDown(SDLK_DOWN)) { sprPos.y += 1.0f; }
-		if (Keyboard::IsKeyDown(SDLK_UP)) { sprPos.y -= 1.0f; }
 	}
 
 	void Draw(f64 deltaTime_milliseconds)
 	{
 		GFXDevice->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
 
-		static constexpr vec2 axisBoxPosition = vec2(640.0f, 360.0f);
-		static constexpr vec2 axisBoxOrigin = vec2(64.0f);
-
-		sprRenderer.PushOutlineRect(axisBoxPosition - axisBoxOrigin, vec2(128.0f), vec2(0.0f), DefaultColors::White);
-		sprRenderer.PushLine(vec2(axisBoxPosition.x - axisBoxOrigin.x, axisBoxPosition.y), 0.0f, 128.0f, DefaultColors::White);
-		sprRenderer.PushLine(vec2(axisBoxPosition.x, axisBoxPosition.y - axisBoxOrigin.y), MathExtensions::PiOver2, 128.0f, DefaultColors::White);
-
-		vec2 leftStick = { Gamepad::GetAxis(GamepadAxis::LeftStick_X), Gamepad::GetAxis(GamepadAxis::LeftStick_Y) };
-		sprRenderer.SetSpritePosition((leftStick * 64.0f) + axisBoxPosition);
-		sprRenderer.SetSpriteSize(vec2(8.0f));
-		sprRenderer.SetSpriteOrigin(vec2(4.0f));
-		sprRenderer.SetSpriteColor(DefaultColors::Red);
-		sprRenderer.PushSprite(nullptr);
-
-		char text[512] = {};
-		int offset = SDL_snprintf(text, sizeof(text) - 1, "Elapsed Time: %.3f\nDelta Time: %.3f\n", elapsedTime, deltaTime_milliseconds);
-
-		if (Gamepad::IsConnected())
-		{
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Gamepad Buttons: ");
-			for (size_t i = 0; i < EnumCount<GamepadButton>(); i++)
-			{
-				if (Gamepad::IsButtonDown(static_cast<GamepadButton>(i)))
-				{
-					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
-						GamepadButtonNames_PlayStation[i]);
-				}
-			}
-
-			/*offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nGamepad Sticks (Held): ");
-			for (size_t i = 0; i < EnumCount<GamepadStick>(); i++)
-			{
-				if (Gamepad::IsStickHeld(static_cast<GamepadStick>(i)))
-				{
-					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
-						GamepadStickNames[i]);
-				}
-			}*/
-
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nGamepad Sticks (Released): ");
-			for (size_t i = 0; i < EnumCount<GamepadStick>(); i++)
-			{
-				if (Gamepad::IsStickReleased(static_cast<GamepadStick>(i)))
-				{
-					offset += SDL_snprintf(text + offset, sizeof(text) - 1, "%s ",
-						GamepadStickNames[i]);
-				}
-			}
-		}
-
-		sprRenderer.Font().PushString(testFont, text, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f), DefaultColors::White);
-
-		sprRenderer.RenderSprites(nullptr);
+		GFXDevice->SetVertexBuffer(vertexBuffer.get(), vertexDesc.get());
+		GFXDevice->SetShader(testShader.get());
+		GFXDevice->DrawArrays(PrimitiveType::Triangles, 0, 3);
 
 		GFXDevice->SwapBuffers();
 	}
@@ -128,12 +87,9 @@ private:
 	f64 elapsedTime{};
 
 	Rendering::Device* GFXDevice{};
-	SpriteRenderer sprRenderer;
-
-	SpriteSheet spriteSheet;
-	Font testFont;
-
-	vec2 sprPos{ 640.0f, 360.0f };
+	std::unique_ptr<Rendering::VertexBuffer> vertexBuffer{};
+	std::unique_ptr<Rendering::VertexDesc> vertexDesc{};
+	std::unique_ptr<Rendering::Shader> testShader{};
 };
 
 int SDL_main(int argc, char* argv[])
@@ -142,6 +98,7 @@ int SDL_main(int argc, char* argv[])
 	
 	if (game.Initialize())
 	{
+		game.GetWindow()->SetTitle("Sandbox");
 		game.SetState(std::make_unique<TestState>());
 		game.EnterLoop();
 		return 0;

@@ -1,13 +1,13 @@
 #pragma once
 #include "Rendering/Device.h"
 
-namespace Starshine::Rendering::OpenGL
+namespace Starshine::Rendering::D3D9
 {
-	class OpenGLDevice : public Device
+	class D3D9Device : public Device
 	{
 	public:
-		OpenGLDevice();
-		~OpenGLDevice();
+		D3D9Device();
+		~D3D9Device();
 
 	public:
 		bool Initialize(SDL_Window* gameWindow);

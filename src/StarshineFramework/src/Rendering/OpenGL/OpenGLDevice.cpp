@@ -125,6 +125,34 @@ namespace Starshine::Rendering::OpenGL
 			}
 		}
 
+		void SetVertexDesc(const VertexDesc_OpenGL* desc)
+		{
+			if (desc != nullptr)
+			{
+				for (auto& attrib : desc->Attribs)
+				{
+					switch (attrib.Type)
+					{
+					case VertexAttribType::Position:
+						glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::Color:
+						glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					case VertexAttribType::TexCoord:
+						glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						break;
+					}
+				}
+
+				VertexDescSet = true;
+			}
+			else
+			{
+				VertexDescSet = false;
+			}
+		}
+
 		void SetIndexBuffer(const IndexBuffer_OpenGL* buffer)
 		{
 			if (buffer == nullptr)
@@ -462,7 +490,7 @@ namespace Starshine::Rendering::OpenGL
 			return nullptr;
 		}
 
-		std::unique_ptr<Shader_OpenGL> shader = std::make_unique<Shader_OpenGL>(*this, vpHandle, fpHandle);
+		std::unique_ptr<Shader_D3D9> shader = std::make_unique<Shader_D3D9>(*this, vpHandle, fpHandle);
 		return shader;
 	}
 
@@ -494,15 +522,18 @@ namespace Starshine::Rendering::OpenGL
 		return texture;
 	}
 
-	void OpenGLDevice::SetVertexBuffer(const VertexBuffer* buffer)
+	void OpenGLDevice::SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc)
 	{
-		if (buffer == nullptr)
+		if (buffer == nullptr || desc == nullptr)
 		{
+			impl->SetVertexDesc(nullptr);
 			impl->SetVertexBuffer(nullptr);
 		}
 		else
 		{
 			const VertexBuffer_OpenGL* glBuffer = static_cast<const VertexBuffer_OpenGL*>(buffer);
+			const VertexDesc_OpenGL* glDesc = static_cast<const VertexDesc_OpenGL*>(desc);
+			impl->SetVertexDesc(glDesc);
 			impl->SetVertexBuffer(glBuffer);
 		}
 	}
@@ -520,34 +551,6 @@ namespace Starshine::Rendering::OpenGL
 		}
 	}
 
-	void OpenGLDevice::SetVertexDesc(const VertexDesc* desc)
-	{
-		if (desc != nullptr)
-		{
-			const VertexDesc_OpenGL* glDesc = static_cast<const VertexDesc_OpenGL*>(desc);
-			if (glDesc != nullptr)
-			{
-				for (auto& attrib : glDesc->Attribs)
-				{
-					switch (attrib.Type)
-					{
-					case VertexAttribType::Position:
-						glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
-						break;
-					case VertexAttribType::Color:
-						glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
-						break;
-					case VertexAttribType::TexCoord:
-						glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
-						break;
-					}
-				}
-
-				impl->VertexDescSet = true;
-			}
-		}
-	}
-
 	void OpenGLDevice::SetShader(const Shader* shader)
 	{
 		if (shader == nullptr)
@@ -558,7 +561,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 		else
 		{
-			const Shader_OpenGL* glShader = static_cast<const Shader_OpenGL*>(shader);
+			const Shader_D3D9* glShader = static_cast<const Shader_D3D9*>(shader);
 			glBindProgramARB(GL_VERTEX_PROGRAM_ARB, glShader->VertexProgramHandle);
 			glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, glShader->FragmentProgramHandle);
 			impl->ShaderSet = true;
