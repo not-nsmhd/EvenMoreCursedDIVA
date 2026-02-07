@@ -21,11 +21,18 @@ struct TestVertex
 	Color VtxColor{};
 };
 
-static constexpr std::array<TestVertex, 3> testVertexData
+static constexpr std::array<TestVertex, 4> testVertexData
 {
 	TestVertex { vec2{ 0.0f, 0.0f }, Color{ 255, 0, 0, 255 } },
 	TestVertex { vec2{ 1.0f, 1.0f }, Color{ 0, 255, 0, 255 } },
-	TestVertex { vec2{ 1.0f, 0.0f }, Color{ 0, 0, 255, 255 } }
+	TestVertex { vec2{ 1.0f, 0.0f }, Color{ 0, 0, 255, 255 } },
+	TestVertex { vec2{ 0.0f, 1.0f }, Color{ 255, 255, 255, 255 } },
+};
+
+static constexpr std::array<u16, 6> testIndexData
+{
+	0, 3, 1,
+	1, 2, 0
 };
 
 static constexpr std::array<VertexAttrib, 2> testVertexDesc
@@ -49,6 +56,7 @@ public:
 	bool LoadContent()
 	{
 		vertexBuffer = GFXDevice->CreateVertexBuffer(testVertexData.size() * sizeof(TestVertex), testVertexData.data(), false);
+		indexBuffer = GFXDevice->CreateIndexBuffer(testIndexData.size() * sizeof(u16), IndexFormat::Index16bit, testIndexData.data(), false);
 		vertexDesc = GFXDevice->CreateVertexDesc(testVertexDesc.data(), testVertexDesc.size());
 		testShader = Rendering::Utilities::LoadShader("diva/shaders/d3d9/VS_Test.cso", "diva/shaders/d3d9/FS_Test.cso");
 		return true;
@@ -57,6 +65,7 @@ public:
 	void UnloadContent()
 	{
 		vertexBuffer = nullptr;
+		indexBuffer = nullptr;
 		vertexDesc = nullptr;
 		testShader = nullptr;
 	}
@@ -75,8 +84,9 @@ public:
 		GFXDevice->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
 
 		GFXDevice->SetVertexBuffer(vertexBuffer.get(), vertexDesc.get());
+		GFXDevice->SetIndexBuffer(indexBuffer.get());
 		GFXDevice->SetShader(testShader.get());
-		GFXDevice->DrawArrays(PrimitiveType::Triangles, 0, 3);
+		GFXDevice->DrawIndexed(PrimitiveType::Triangles, 0, 4, 6);
 
 		GFXDevice->SwapBuffers();
 	}
@@ -88,6 +98,7 @@ private:
 
 	Rendering::Device* GFXDevice{};
 	std::unique_ptr<Rendering::VertexBuffer> vertexBuffer{};
+	std::unique_ptr<Rendering::IndexBuffer> indexBuffer{};
 	std::unique_ptr<Rendering::VertexDesc> vertexDesc{};
 	std::unique_ptr<Rendering::Shader> testShader{};
 };

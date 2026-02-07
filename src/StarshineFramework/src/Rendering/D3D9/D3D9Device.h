@@ -26,7 +26,7 @@ namespace Starshine::Rendering::D3D9
 		void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull);
 
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
-		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount);
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount);
 
 	public:
 		std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic);

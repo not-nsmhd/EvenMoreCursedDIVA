@@ -373,7 +373,7 @@ namespace Starshine::Rendering::OpenGL
 		impl->DrawArrays(type, firstVertex, vertexCount);
 	}
 
-	void OpenGLDevice::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+	void OpenGLDevice::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount)
 	{
 		impl->DrawIndexed(type, firstIndex, indexCount);
 	}

@@ -36,7 +36,7 @@ namespace Starshine::Rendering
 		virtual void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull) = 0;
 
 		virtual void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount) = 0;
-		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount) = 0;
+		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount) = 0;
 
 	public:
 		virtual std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic) = 0;

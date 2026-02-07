@@ -101,7 +101,7 @@ namespace Starshine::Rendering::D3D9
 			}
 		}
 
-		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount)
 		{
 			if (VertexBufferSet && IndexBufferSet && VertexDescSet && ShaderSet)
 			{
@@ -113,7 +113,7 @@ namespace Starshine::Rendering::D3D9
 
 				D3DPRIMITIVETYPE primType = ConversionTables::D3DPrimitiveTypes[static_cast<size_t>(type)];
 				u32 vtxPerPrim = ConversionTables::D3DVerticesPerPrimitive[static_cast<size_t>(type)];
-				//BaseDevice->DrawIndexedPrimitive(primType, 0, 0, );
+				BaseDevice->DrawIndexedPrimitive(primType, 0, 0, vertexCount, firstIndex, indexCount / vtxPerPrim);
 			}
 		}
 
@@ -267,9 +267,9 @@ namespace Starshine::Rendering::D3D9
 		impl->DrawArrays(type, firstVertex, vertexCount);
 	}
 
-	void D3D9Device::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 indexCount)
+	void D3D9Device::DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount)
 	{
-		impl->DrawIndexed(type, firstIndex, indexCount);
+		impl->DrawIndexed(type, firstIndex, vertexCount, indexCount);
 	}
 
 	std::unique_ptr<VertexBuffer> D3D9Device::CreateVertexBuffer(size_t size, const void* initialData, bool dynamic)

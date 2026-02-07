@@ -344,7 +344,7 @@ namespace Starshine::Rendering::Render2D
 						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 						switchBackToSpriteBuffer = false;
 					}
-					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, list->SpriteCount * 6);
+					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, list->SpriteCount * 4, list->SpriteCount * 6);
 				}
 				else
 				{
