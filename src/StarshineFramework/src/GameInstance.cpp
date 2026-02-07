@@ -14,9 +14,8 @@ namespace Starshine
 	struct GameInstance::Impl
 	{
 		GameInstance* Parent;
+		SDL_Window* BaseWindow{};
 
-		SDL_Window* gameWindow{ nullptr };
-		
 		bool Running{ true };
 		SDL_Event SDLEvent{};
 
@@ -59,9 +58,18 @@ namespace Starshine
 			LogMessage("Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 
 			SDL_Init(SDL_INIT_EVERYTHING);
-			gameWindow = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
+			Parent->GameWindow = std::make_unique<Window>("Even More Cursed DIVA", 1280, 720, SDL_WINDOW_OPENGL);
 
-			Rendering::InitializeDevice(gameWindow, DeviceType::OpenGL);
+			if (!Parent->GameWindow->Exists())
+			{
+				LogMessage("Failed to create game window. Error: %s", SDL_GetError());
+				SDL_Quit();
+				return false;
+			}
+
+			BaseWindow = Parent->GameWindow->GetBaseWindow();
+
+			Rendering::InitializeDevice(BaseWindow, DeviceType::OpenGL);
 			GFXDevice = Rendering::GetDevice();
 
 			Keyboard::Initialize();
@@ -83,7 +91,7 @@ namespace Starshine
 			Keyboard::Destroy();
 			Rendering::DestroyDevice();
 
-			SDL_DestroyWindow(gameWindow);
+			Parent->GameWindow = nullptr;
 			SDL_Quit();
 		}
 
@@ -201,6 +209,12 @@ namespace Starshine
 
 	GameInstance::~GameInstance()
 	{
+	}
+
+	Window* const GameInstance::GetWindow()
+	{
+		if (GameWindow != nullptr) { return GameWindow.get(); }
+		return nullptr;
 	}
 
 	bool GameInstance::Initialize()

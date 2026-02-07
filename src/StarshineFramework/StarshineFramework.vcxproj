@@ -131,6 +131,7 @@
     <ClInclude Include="src\Rendering\Types.h" />
     <ClInclude Include="src\Rendering\Utilities.h" />
     <ClInclude Include="src\Rendering\VertexDesc.h" />
+    <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
@@ -159,6 +160,7 @@
     <ClCompile Include="src\Rendering\Render2D\SpriteSheet.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp" />
     <ClCompile Include="src\Rendering\Utilities.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StarshineLib\StarshineLib.vcxproj">

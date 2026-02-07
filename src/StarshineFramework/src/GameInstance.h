@@ -1,5 +1,6 @@
 #pragma once
 #include "Common/Types.h"
+#include "Window.h"
 #include <memory>
 
 namespace Starshine
@@ -35,6 +36,9 @@ namespace Starshine
 		~GameInstance();
 
 	public:
+		Window* const GetWindow();
+
+	public:
 		bool Initialize();
 		void EnterLoop();
 
@@ -42,6 +46,8 @@ namespace Starshine
 		bool SetState(std::unique_ptr<GameState> state);
 
 	private:
+		std::unique_ptr<Window> GameWindow{ nullptr };
+
 		struct Impl;
 		std::unique_ptr<Impl> impl{ nullptr };
 	};

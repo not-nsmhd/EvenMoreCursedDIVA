@@ -72,7 +72,7 @@ public:
 		sprRenderer.PushLine(vec2(axisBoxPosition.x - axisBoxOrigin.x, axisBoxPosition.y), 0.0f, 128.0f, DefaultColors::White);
 		sprRenderer.PushLine(vec2(axisBoxPosition.x, axisBoxPosition.y - axisBoxOrigin.y), MathExtensions::PiOver2, 128.0f, DefaultColors::White);
 
-		vec2 leftStick = { Gamepad::GetAxis(GamepadAxis::RightStick_X), Gamepad::GetAxis(GamepadAxis::RightStick_Y) };
+		vec2 leftStick = { Gamepad::GetAxis(GamepadAxis::LeftStick_X), Gamepad::GetAxis(GamepadAxis::LeftStick_Y) };
 		sprRenderer.SetSpritePosition((leftStick * 64.0f) + axisBoxPosition);
 		sprRenderer.SetSpriteSize(vec2(8.0f));
 		sprRenderer.SetSpriteOrigin(vec2(4.0f));

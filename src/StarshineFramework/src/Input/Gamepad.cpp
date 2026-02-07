@@ -46,7 +46,7 @@ namespace Starshine::Input
 	struct Gamepad::Impl
 	{
 		static constexpr i16 TriggerPressThreshold = 8192;
-		static constexpr i16 StickPullThreshold = 6144;
+		static constexpr i16 StickPullThreshold = 8192;
 
 		SDL_GameController* SDLController{};
 		bool IsConnected{};
