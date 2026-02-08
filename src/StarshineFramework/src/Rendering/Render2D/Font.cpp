@@ -9,6 +9,12 @@ namespace Starshine::Rendering::Render2D
 {
 	using namespace IO;
 
+	Font::~Font()
+	{
+		Glyphs.clear();
+		//Texture = nullptr;
+	}
+
 	const FontGlyph* Font::GetGlyph(i32 code) const
 	{
 		for (auto& glyph : Glyphs)

@@ -1,8 +1,10 @@
 #include <SDL2/SDL_main.h>
 #include "GameInstance.h"
+#include "GameContext.h"
 #include "Menu/ChartSelect.h"
 
 using namespace Starshine;
+using namespace DIVA;
 
 int SDL_main(int argc, char* argv[])
 {
@@ -10,7 +12,11 @@ int SDL_main(int argc, char* argv[])
 	
 	if (game.Initialize())
 	{
-		game.SetState(std::make_unique<DIVA::Menu::ChartSelect>());
+		game.GetWindow()->SetTitle("Even More Cursed DIVA");
+
+		if (!GameContext::CreateInstance()) { return 1; }
+		if (!game.SetState(std::make_unique<Menu::ChartSelect>())) { return 1; }
+
 		game.EnterLoop();
 		return 0;
 	}

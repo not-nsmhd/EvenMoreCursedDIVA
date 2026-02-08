@@ -8,6 +8,7 @@
 #include <Input/Keyboard.h>
 #include <Input/Gamepad.h>
 #include "GFX/SpritePacker.h"
+#include "GameContext.h"
 #include "IO/Path/Directory.h"
 #include "IO/Path/File.h"
 #include "IO/Xml.h"
@@ -48,7 +49,7 @@ namespace DIVA::MainGame
 		};
 
 		SpriteRenderer* spriteRenderer{};
-		Font debugFont;
+		Font* debugFont;
 
 		float TrailScrollOffset = 0.0f;
 		bool Paused = false;
@@ -213,11 +214,11 @@ namespace DIVA::MainGame
 
 		bool LoadContent()
 		{
-			spriteRenderer = new SpriteRenderer();
+			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			MainGameContext.SpriteRenderer = spriteRenderer;
 
-			debugFont.ReadBMFont("diva/fonts/debug.fnt");
-			MainGameContext.DebugFont = &debugFont;
+			debugFont = GameContext::GetInstance()->DebugFont.get();
+			MainGameContext.DebugFont = debugFont;
 
 			sprPacker.Initialize();
 			CreateIconSetSpriteSheet();
@@ -767,7 +768,7 @@ namespace DIVA::MainGame
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont.LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 

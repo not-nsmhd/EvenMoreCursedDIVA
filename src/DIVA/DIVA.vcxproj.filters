@@ -41,6 +41,9 @@
     <ClCompile Include="src\Formats\SongInfo.cpp">
       <Filter>Source Files\Formats</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">

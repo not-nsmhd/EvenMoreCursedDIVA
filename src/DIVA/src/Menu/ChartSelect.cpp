@@ -1,6 +1,6 @@
 #include "ChartSelect.h"
 #include <Rendering/Render2D/SpriteRenderer.h>
-#include <BuildInfo.h>
+#include "GameContext.h"
 #include "IO/Path/Directory.h"
 #include "input/Keyboard.h"
 #include "MainGame/MainGame.h"
@@ -21,9 +21,7 @@ namespace DIVA::Menu
 		Starshine::GameInstance* GameInstance{};
 
 		SpriteRenderer* spriteRenderer{};
-		Font debugFont;
-
-		std::vector<SongInfo> songList;
+		Font* debugFont;
 
 		i32 selectionIndex = 0;
 		i32 currentDifficultyIndex{};
@@ -38,38 +36,18 @@ namespace DIVA::Menu
 
 		void LoadContent()
 		{
-			spriteRenderer = new SpriteRenderer();
-			debugFont.ReadBMFont("diva/fonts/debug.fnt");
-		}
-
-		void ConstructChartList()
-		{
-#if 0
-			Directory::IterateFilesRecursive("diva/songdata", [&](std::string_view filePath)
-				{
-					chartPaths.emplace_back(filePath);
-				});
-#endif
-			Directory::IterateFiles("diva/songdata", [&](std::string_view filePath)
-				{
-					SongInfo info{};
-					if (info.ParseFromFile(filePath))
-					{
-						songList.push_back(info);
-					}
-				});
+			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
+			debugFont = GameContext::GetInstance()->DebugFont.get();
 		}
 
 		void Destroy()
 		{
-			songList.clear();
-			debugFont.Destroy();
-			spriteRenderer->Destroy();
-			delete spriteRenderer;
 		}
 
 		void Update()
 		{
+			auto songList = GameContext::GetInstance()->SongList;
+
 			if (Keyboard::IsKeyTapped(SDLK_DOWN))
 			{
 				selectionIndex++;
@@ -111,6 +89,7 @@ namespace DIVA::Menu
 		void Draw()
 		{
 			auto gfxDevice = spriteRenderer->GetRenderingDevice();
+			auto songList = GameContext::GetInstance()->SongList;
 
 			gfxDevice->Clear(Rendering::ClearFlags_Color, DefaultColors::ClearColor_Menus, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
@@ -138,7 +117,7 @@ namespace DIVA::Menu
 				spriteRenderer->Font().PushString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
 					curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
 
-				yOffset += debugFont.LineHeight;
+				yOffset += debugFont->LineHeight;
 				curIndex++;
 			}
 
@@ -158,7 +137,6 @@ namespace DIVA::Menu
 	bool ChartSelect::Initialize()
 	{
 		impl->GameInstance = GameInstance;
-		impl->ConstructChartList();
 		return true;
 	}
 

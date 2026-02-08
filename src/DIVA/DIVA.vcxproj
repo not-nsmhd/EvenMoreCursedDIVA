@@ -94,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Formats\SongInfo.cpp" />
+    <ClCompile Include="src\GameContext.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MainGame\Chart.cpp" />
     <ClCompile Include="src\MainGame\GameNote.cpp" />

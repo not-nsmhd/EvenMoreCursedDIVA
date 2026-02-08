@@ -7,7 +7,7 @@ namespace Starshine::Rendering::Render2D
 	{
 	}
 
-	void FontRenderer::PushString(const Font& font, std::string_view text, const vec2& position, const vec2& scale, const Color& color)
+	void FontRenderer::PushString(const Font* font, std::string_view text, const vec2& position, const vec2& scale, const Color& color)
 	{
 		vec2 basePos{};
 		vec2 glyphOffset{};
@@ -19,11 +19,11 @@ namespace Starshine::Rendering::Render2D
 			if (c == '\n')
 			{
 				basePos.x = 0.0f;
-				basePos.y += font.LineHeight;
+				basePos.y += font->LineHeight;
 				continue;
 			}
 
-			const FontGlyph* glyph = font.GetGlyph(c);
+			const FontGlyph* glyph = font->GetGlyph(c);
 
 			if (c == ' ')
 			{
@@ -39,7 +39,7 @@ namespace Starshine::Rendering::Render2D
 		}
 	}
 
-	vec2 FontRenderer::MeasureString(const Font& font, std::string_view text)
+	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)
 	{
 		vec2 basePos{};
 
@@ -50,11 +50,11 @@ namespace Starshine::Rendering::Render2D
 			if (c == '\n')
 			{
 				basePos.x = 0.0f;
-				basePos.y += font.LineHeight;
+				basePos.y += font->LineHeight;
 				continue;
 			}
 
-			const FontGlyph* glyph = font.GetGlyph(c);
+			const FontGlyph* glyph = font->GetGlyph(c);
 
 			if (c == ' ')
 			{
@@ -68,7 +68,7 @@ namespace Starshine::Rendering::Render2D
 		return basePos;
 	}
 
-	void FontRenderer::PushGlyph(const Font& font, const FontGlyph* glyph, const vec2& position, const vec2& scale, const Color& color)
+	void FontRenderer::PushGlyph(const Font* font, const FontGlyph* glyph, const vec2& position, const vec2& scale, const Color& color)
 	{
 		float srcX = static_cast<float>(glyph->X);
 		float srcY = static_cast<float>(glyph->Y);
@@ -79,11 +79,11 @@ namespace Starshine::Rendering::Render2D
 		sprRenderer.SetSpriteSize(vec2{ srcWidth, srcHeight } *scale);
 		sprRenderer.SetSpriteColor(color);
 
-		sprRenderer.SetSpriteSource(font.Texture.get(), RectangleF{ srcX, srcY, srcWidth, srcHeight });
+		sprRenderer.SetSpriteSource(font->Texture.get(), RectangleF{ srcX, srcY, srcWidth, srcHeight });
 
 		sprRenderer.SetSpriteRotation(0.0f);
 		sprRenderer.SetSpriteOrigin(vec2{ 0.0f, 0.0f });
 
-		sprRenderer.PushSprite(font.Texture.get());
+		sprRenderer.PushSprite(font->Texture.get());
 	}
 }

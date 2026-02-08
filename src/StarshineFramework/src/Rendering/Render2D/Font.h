@@ -18,15 +18,14 @@ namespace Starshine::Rendering::Render2D
 		u16 XAdvance;
 	};
 
-	class Font
+	class Font : public NonCopyable
 	{
 	public:
 		Font() = default;
-		Font(const Font& other) = delete;
-		~Font() = default;
+		~Font();
 
 	public:
-		std::unique_ptr<Texture> Texture = nullptr;
+		std::unique_ptr<Texture> Texture{};
 		std::vector<FontGlyph> Glyphs;
 		i32 LineHeight = 0;
 
