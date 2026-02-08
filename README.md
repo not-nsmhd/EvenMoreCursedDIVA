@@ -1,7 +1,7 @@
 # Even More Cursed DIVA/Starshine
 ![Main Game Screenshot](readme_img/Screenshot_MainGame.png)
 
-A Project DIVA ⭐⭐⭐rip-off⭐⭐⭐ written in C++ and using OpenGL 1.4 with ARB extensions ✅✅❌✅❌❌❌✅❌❌❌
+A Project DIVA ⭐⭐⭐rip-off⭐⭐⭐ written in C++ and using OpenGL 1.4 with ARB extensions (and Direct3D 9, I guess) ✅✅❌✅❌❌❌✅❌❌❌
 
 ### Preamble
 Among sus has ruined my life
