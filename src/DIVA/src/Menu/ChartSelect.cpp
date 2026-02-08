@@ -114,8 +114,11 @@ namespace DIVA::Menu
 			i32 curIndex = 0;
 			for (auto& info : songList)
 			{
+				const Color selectionBaseColor = curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
+				const u8 selectionAlpha = info.ChartFilePaths[currentDifficultyIndex].empty() ? 128 : 255;
+
 				spriteRenderer->Font().PushString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
-					curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
+					Color{ selectionBaseColor.R, selectionBaseColor.G, selectionBaseColor.B, selectionAlpha });
 
 				yOffset += debugFont->LineHeight;
 				curIndex++;
