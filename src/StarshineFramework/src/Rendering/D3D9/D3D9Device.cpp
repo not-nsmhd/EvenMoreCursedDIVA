@@ -32,12 +32,17 @@ namespace Starshine::Rendering::D3D9
 		UINT CurrentVertexStride{};
 
 		bool IndexBufferSet{ false };
-		//GLenum CurrentIndexFormat = 0;
 
 		bool ShaderSet = false;
 		bool BeginCalled = false;
 
 		vec4 ViewportSize_Normalized{};
+
+		struct CurrentSamplingStateData
+		{
+			DWORD Filter{ 0xFFFFFFFF };
+			DWORD WrapMode{ 0xFFFFFFFF };
+		} CurrentSamplingState;
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
@@ -200,6 +205,32 @@ namespace Starshine::Rendering::D3D9
 			{
 				BaseDevice->SetIndices(buffer->BaseBuffer);
 				IndexBufferSet = true;
+			}
+		}
+
+		void SetTexture(const Texture_D3D9* texture, u32 slot)
+		{
+			if (texture == nullptr)
+			{
+				BaseDevice->SetTexture(slot, NULL);
+			}
+			else
+			{
+				if (CurrentSamplingState.WrapMode != texture->WrapMode)
+				{
+					CurrentSamplingState.WrapMode = texture->WrapMode;
+					BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSU, texture->WrapMode);
+					BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSV, texture->WrapMode);
+				}
+				
+				if (CurrentSamplingState.Filter != texture->Filter)
+				{
+					CurrentSamplingState.Filter = texture->Filter;
+					BaseDevice->SetSamplerState(slot, D3DSAMP_MINFILTER, texture->Filter);
+					BaseDevice->SetSamplerState(slot, D3DSAMP_MAGFILTER, texture->Filter);
+				}
+
+				BaseDevice->SetTexture(slot, texture->GPUTexture);
 			}
 		}
 	};
@@ -427,16 +458,12 @@ namespace Starshine::Rendering::D3D9
 	{
 		if (texture == nullptr)
 		{
-			impl->BaseDevice->SetTexture(slot, NULL);
+			impl->SetTexture(nullptr, slot);
 		}
 		else
 		{
 			const Texture_D3D9* d3dTexture = static_cast<const Texture_D3D9*>(texture);
-			impl->BaseDevice->SetTexture(slot, d3dTexture->GPUTexture);
-			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSU, d3dTexture->WrapMode);
-			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_ADDRESSV, d3dTexture->WrapMode);
-			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_MINFILTER, d3dTexture->Filter);
-			impl->BaseDevice->SetSamplerState(slot, D3DSAMP_MAGFILTER, d3dTexture->Filter);
+			impl->SetTexture(d3dTexture, slot);
 		}
 	}
 }
