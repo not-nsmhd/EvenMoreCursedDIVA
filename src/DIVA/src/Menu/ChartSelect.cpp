@@ -5,6 +5,7 @@
 #include "input/Keyboard.h"
 #include "MainGame/MainGame.h"
 #include <vector>
+#include "Formats/SongInfo.h"
 
 namespace DIVA::Menu
 {
@@ -13,6 +14,7 @@ namespace DIVA::Menu
 	using namespace Starshine::GFX;
 	using namespace Starshine::Rendering::Render2D;
 	using namespace Starshine::Input;
+	using namespace DIVA::Formats;
 
 	struct ChartSelect::Impl
 	{
@@ -21,9 +23,10 @@ namespace DIVA::Menu
 		SpriteRenderer* spriteRenderer{};
 		Font debugFont;
 
-		std::vector<std::string> chartPaths;
+		std::vector<SongInfo> songList;
 
 		i32 selectionIndex = 0;
+		i32 currentDifficultyIndex{};
 
 		Impl()
 		{
@@ -41,15 +44,25 @@ namespace DIVA::Menu
 
 		void ConstructChartList()
 		{
+#if 0
 			Directory::IterateFilesRecursive("diva/songdata", [&](std::string_view filePath)
 				{
 					chartPaths.emplace_back(filePath);
+				});
+#endif
+			Directory::IterateFiles("diva/songdata", [&](std::string_view filePath)
+				{
+					SongInfo info{};
+					if (info.ParseFromFile(filePath))
+					{
+						songList.push_back(info);
+					}
 				});
 		}
 
 		void Destroy()
 		{
-			chartPaths.clear();
+			songList.clear();
 			debugFont.Destroy();
 			spriteRenderer->Destroy();
 			delete spriteRenderer;
@@ -60,45 +73,39 @@ namespace DIVA::Menu
 			if (Keyboard::IsKeyTapped(SDLK_DOWN))
 			{
 				selectionIndex++;
-				if (selectionIndex >= chartPaths.size()) { selectionIndex = 0; }
+				if (selectionIndex >= songList.size()) { selectionIndex = 0; }
 			}
 
 			if (Keyboard::IsKeyTapped(SDLK_UP))
 			{
 				selectionIndex--;
-				if (selectionIndex < 0) { selectionIndex = chartPaths.size() - 1; }
+				if (selectionIndex < 0) { selectionIndex = songList.size() - 1; }
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_RIGHT))
+			{
+				currentDifficultyIndex++;
+				if (currentDifficultyIndex >= EnumCount<ChartDifficulty>()) { currentDifficultyIndex = 0; }
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_LEFT))
+			{
+				currentDifficultyIndex--;
+				if (currentDifficultyIndex < 0) { currentDifficultyIndex = EnumCount<ChartDifficulty>() - 1; }
 			}
 
 			if (Keyboard::IsKeyTapped(SDLK_RETURN))
 			{
-				auto mgState = std::make_unique<MainGame::MainGameState>();
-				mgState->LoadSettings.ChartPath = chartPaths[selectionIndex];
-				GameInstance->SetState(std::move(mgState));
+				const SongInfo& info = songList[selectionIndex];
+
+				if (!info.ChartFilePaths[currentDifficultyIndex].empty())
+				{
+					auto mgState = std::make_unique<MainGame::MainGameState>();
+					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
+					mgState->LoadSettings.MusicPath = info.MusicFilePath;
+					GameInstance->SetState(std::move(mgState));
+				}
 			}
-		}
-
-		void DrawBuildInfo()
-		{
-			auto gfxDevice = spriteRenderer->GetRenderingDevice();
-			float baseX = gfxDevice->GetViewportSize().Width - 256.0f;
-
-			char text[256] = {};
-			int offset = SDL_snprintf(text, sizeof(text) - 1, "Even More Cursed DIVA\n");
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Starshine %02d.%02d\n", BuildInfo::BuildYear - 2000, BuildInfo::BuildMonth);
-
-#if defined (_WIN32)
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "Windows ");
-#endif
-
-#if defined (__X86_64__) || defined (_M_X64)
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "64-bit");
-#endif
-
-#if defined (_DEBUG)
-			offset += SDL_snprintf(text + offset, sizeof(text) - 1, "\nDEBUG BUILD");
-#endif
-
-			spriteRenderer->Font().PushString(debugFont, text, vec2(baseX, 16.0f), vec2(1.0f), DefaultColors::White);
 		}
 
 		void Draw()
@@ -108,20 +115,32 @@ namespace DIVA::Menu
 			gfxDevice->Clear(Rendering::ClearFlags_Color, DefaultColors::ClearColor_Menus, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
-			spriteRenderer->Font().PushString(debugFont, "Chart Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(debugFont, "Song Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+
+			static constexpr std::array<Color, EnumCount<ChartDifficulty>()> difficultyColors
+			{
+				Color { 0, 128, 255, 255 },
+				Color { 64, 255, 64, 255 },
+				Color { 255, 128, 0, 255 },
+				Color { 255, 64, 64, 255 }
+			};
+
+			for (size_t i = 0; i < EnumCount<ChartDifficulty>(); i++)
+			{
+				spriteRenderer->Font().PushString(debugFont, ChartDifficultyNames[i],
+					vec2(16.0f + (92.0f * i), 36.0f), vec2(1.0f), i == currentDifficultyIndex ? difficultyColors[i] : DefaultColors::White);
+			}
 
 			float yOffset = 0.0f;
 			i32 curIndex = 0;
-			for (auto& path : chartPaths)
+			for (auto& info : songList)
 			{
-				spriteRenderer->Font().PushString(debugFont, path, vec2(16.0f, 48.0f + yOffset), vec2(1.0f),
+				spriteRenderer->Font().PushString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
 					curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
 
 				yOffset += debugFont.LineHeight;
 				curIndex++;
 			}
-
-			DrawBuildInfo();
 
 			spriteRenderer->RenderSprites(nullptr);
 			gfxDevice->SwapBuffers();

@@ -93,10 +93,15 @@ namespace DIVA::MainGame
 		SourceHandle HitSound_Double{};
 
 		SourceHandle HitSound_Star_Normal{};
+		SourceHandle HitSound_Star_Double{};
 
 		Voice HitSound_Hold_LoopVoice{};
+
 		SourceHandle HitSound_Hold_Loop{};
 		SourceHandle HitSound_Hold_LoopEnd{};
+
+		SourceHandle HitSound_StarHold_Loop{};
+		SourceHandle HitSound_StarHold_LoopEnd{};
 
 		Voice MusicVoice{};
 		SourceHandle MusicSource{};
@@ -218,22 +223,27 @@ namespace DIVA::MainGame
 			CreateIconSetSpriteSheet();
 			hud.LoadSprites(sprPacker);
 			
-#if 0
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
 
 			HitSound_Star_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Normal01.ogg");
+			HitSound_Star_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Double01.ogg");
 
 			HitSound_Hold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_Loop.ogg");
 			HitSound_Hold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_LoopEnd.ogg");
+
+			HitSound_StarHold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_Loop.ogg");
+			HitSound_StarHold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
 
 			HitSound_Hold_LoopVoice = AudioEngine::GetInstance()->AllocateVoice(HitSound_Hold_Loop);
 			HitSound_Hold_LoopVoice.SetLoopState(true);
 			HitSound_Hold_LoopVoice.SetVolume(0.35f);
 			
-			//MusicSource = AudioEngine::GetInstance()->LoadStreamingSource("diva/music/pv_022.ogg");
-			//MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
-#endif
+			if (MusicSource != SourceHandle::Invalid)
+			{
+				MusicVoice.SetVolume(0.5f);
+				MusicVoice.SetPlaying(true);
+			}
 
 			return true;
 		}
@@ -242,9 +252,37 @@ namespace DIVA::MainGame
 		{
 			return songChart.LoadXml(chartPath);
 		}
+		
+		bool LoadMusic(std::string_view musicPath)
+		{
+			MusicSource = AudioEngine::GetInstance()->LoadStreamingSource(musicPath);
+			if (MusicSource != SourceHandle::Invalid)
+			{
+				MusicVoice = AudioEngine::GetInstance()->AllocateVoice(MusicSource);
+				return true;
+			}
+			return false;
+		}
 
 		void UnloadContent()
 		{
+			AudioEngine::GetInstance()->FreeVoice(MusicVoice);
+			AudioEngine::GetInstance()->FreeVoice(HitSound_Hold_LoopVoice);
+
+			AudioEngine::GetInstance()->UnloadSource(MusicSource);
+
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Normal);
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Double);
+
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Star_Normal);
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Star_Double);
+
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Hold_Loop);
+			AudioEngine::GetInstance()->UnloadSource(HitSound_Hold_LoopEnd);
+
+			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_Loop);
+			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_LoopEnd);
+
 			MainGameContext.IconSetSprites.SpriteSheet.Destroy();
 
 			ActiveNotes.clear();
@@ -350,7 +388,14 @@ namespace DIVA::MainGame
 			if (!tapped && !released) { return; }
 
 			GameNote* note = FindNoteToEvaluate();
-			if (note == nullptr) { return; }
+			if (note == nullptr)
+			{
+				if (tapped)
+				{
+					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+				}
+				return;
+			}
 
 			switch (note->Type)
 			{
@@ -385,7 +430,14 @@ namespace DIVA::MainGame
 			}
 
 			bool evaluated = note->Evaluate(shape);
-			if (!evaluated) { return; }
+			if (!evaluated)
+			{
+				if (tapped)
+				{
+					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+				}
+				return;
+			}
 
 			switch (note->HitEvaluation)
 			{
@@ -411,22 +463,38 @@ namespace DIVA::MainGame
 			}
 
 			if (note->Type == NoteType::Double &&
-				note->DoubleTap.GiveBonus &&
-				!note->HitWrong &&
-				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
+				!note->HitWrong)
 			{
-				MainGameContext.Score.Score += 200;
-				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+				if ((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good) && note->DoubleTap.GiveBonus)
+				{
+					MainGameContext.Score.Score += 200;
+					hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+				}
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.25f);
 			}
 			else if (note->Type == NoteType::HoldStart)
 			{
 				hud.HoldScoreBonus();
 				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+
+				HitSound_Hold_LoopVoice.SetSource(shape == NoteShape::Star ? HitSound_StarHold_Loop : HitSound_Hold_Loop);
+				HitSound_Hold_LoopVoice.SetFramePosition(0);
+				HitSound_Hold_LoopVoice.SetLoopState(true);
+				HitSound_Hold_LoopVoice.SetPlaying(true);
 			}
 			else if (note->Type == NoteType::HoldEnd)
 			{
 				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
 				hud.ReleaseScoreBonus(drop);
+
+				HitSound_Hold_LoopVoice.SetSource(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd);
+				HitSound_Hold_LoopVoice.SetFramePosition(0);
+				HitSound_Hold_LoopVoice.SetLoopState(false);
+				HitSound_Hold_LoopVoice.SetPlaying(true);
+			}
+			else
+			{
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
@@ -565,8 +633,16 @@ namespace DIVA::MainGame
 
 			if (!Paused)
 			{	
-				ElapsedTime_Seconds += deltaTime_ms / 1000.0;
-				ChartDeltaTime = deltaTime_ms / 1000.0;
+				if (MusicSource != SourceHandle::Invalid && MusicVoice.IsPlaying())
+				{
+					ElapsedTime_Seconds = static_cast<f64>(MusicVoice.GetFramePosition()) / 44100.0;
+					ChartDeltaTime = deltaTime_ms / 1000.0;
+				}
+				else
+				{
+					ElapsedTime_Seconds += deltaTime_ms / 1000.0;
+					ChartDeltaTime = deltaTime_ms / 1000.0;
+				}
 
 				UpdateChart(ChartDeltaTime);
 				UpdateActiveNotes(deltaTime_ms);
@@ -590,13 +666,9 @@ namespace DIVA::MainGame
 #endif
 			{
 				Paused = !Paused;
-				if (Paused)
+				if (MusicSource != SourceHandle::Invalid)
 				{
-					//MusicVoice.SetPlaying(false);
-				}
-				else
-				{
-					//MusicVoice.SetPlaying(true);
+					MusicVoice.SetPlaying(!Paused);
 				}
 			}
 
@@ -722,6 +794,7 @@ namespace DIVA::MainGame
 	bool MainGameState::LoadContent()
 	{
 		impl->LoadChart(LoadSettings.ChartPath);
+		impl->LoadMusic(LoadSettings.MusicPath);
 		return impl->LoadContent();
 	}
 	

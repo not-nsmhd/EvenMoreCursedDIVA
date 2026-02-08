@@ -13,6 +13,8 @@ namespace Starshine::Xml
 	using Printer = tinyxml2::XMLPrinter;
 	using Element = tinyxml2::XMLElement;
 	using Attribute = tinyxml2::XMLAttribute;
+	using Node = tinyxml2::XMLNode;
+	using Text = tinyxml2::XMLText;
 	using Error = tinyxml2::XMLError;
 
 	inline bool Parse(Document& doc, const char* text, size_t textSize) { return doc.Parse(text, textSize) == Error::XML_SUCCESS; }

@@ -10,8 +10,7 @@
 #include "D3D9Shader.h"
 #include "D3D9Texture.h"
 #include <array>
-#include "IO/Xml.h"
-#include "IO/Path/File.h"
+#include "Detail/HalfPixelFixup.h"
 
 namespace Starshine::Rendering::D3D9
 {
@@ -37,6 +36,8 @@ namespace Starshine::Rendering::D3D9
 
 		bool ShaderSet = false;
 		bool BeginCalled = false;
+
+		vec4 ViewportSize_Normalized{};
 
 		bool Initialize(SDL_Window* gameWindow)
 		{
@@ -66,6 +67,7 @@ namespace Starshine::Rendering::D3D9
 				return false;
 			}
 
+
 			BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 			int windowWidth{};
@@ -77,9 +79,11 @@ namespace Starshine::Rendering::D3D9
 			viewport.Y = 0;
 			viewport.Width = windowWidth;
 			viewport.Height = windowHeight;
-			viewport.MinZ = -1.0f;
+			viewport.MinZ = 0.0f;
 			viewport.MaxZ = 1.0f;
 			BaseDevice->SetViewport(&viewport);
+
+			ViewportSize_Normalized = { 1.0f / static_cast<f32>(windowWidth), 1.0f / static_cast<f32>(windowHeight), 0.0f, 0.0f };
 
 			return true;
 		}
@@ -121,7 +125,7 @@ namespace Starshine::Rendering::D3D9
 				else
 				{
 					if (vertexCount >= 3) { primCount = 1; }
-					if (vertexCount > 3) { primCount += (vertexCount - 3) / 1; }
+					if (vertexCount > 3) { primCount += (vertexCount - 3); }
 				}
 
 				BaseDevice->DrawPrimitive(primType, firstVertex, primCount);
@@ -139,8 +143,20 @@ namespace Starshine::Rendering::D3D9
 				}
 
 				D3DPRIMITIVETYPE primType = ConversionTables::D3DPrimitiveTypes[static_cast<size_t>(type)];
-				u32 vtxPerPrim = ConversionTables::D3DVerticesPerPrimitive[static_cast<size_t>(type)];
-				BaseDevice->DrawIndexedPrimitive(primType, 0, 0, vertexCount, firstIndex, indexCount / vtxPerPrim);
+
+				u32 primCount = 0;
+				if (type != PrimitiveType::TriangleStrip)
+				{
+					u32 vtxPerPrim = ConversionTables::D3DVerticesPerPrimitive[static_cast<size_t>(type)];
+					primCount = indexCount / vtxPerPrim;
+				}
+				else
+				{
+					if (indexCount >= 3) { primCount = 1; }
+					if (indexCount > 3) { primCount += (indexCount - 3); }
+				}
+
+				BaseDevice->DrawIndexedPrimitive(primType, 0, 0, vertexCount, firstIndex, primCount);
 			}
 		}
 
@@ -336,9 +352,12 @@ namespace Starshine::Rendering::D3D9
 			return nullptr;
 		}
 
-		std::unique_ptr<Shader_D3D9> shader = std::make_unique<Shader_D3D9>(impl->BaseDevice,
-			reinterpret_cast<const DWORD*>(vsData), reinterpret_cast<const DWORD*>(fsData));
+		std::unique_ptr<u32[]> patchedVSBytecode = Detail::HalfPixelFixup::GetPatchedVertexShaderBytecode(reinterpret_cast<const u8*>(vsData), vsSize);
 
+		std::unique_ptr<Shader_D3D9> shader = std::make_unique<Shader_D3D9>(impl->BaseDevice,
+			reinterpret_cast<const DWORD*>(patchedVSBytecode.get()), reinterpret_cast<const DWORD*>(fsData));
+
+		patchedVSBytecode = nullptr;
 		return shader;
 	}
 
@@ -397,6 +416,9 @@ namespace Starshine::Rendering::D3D9
 			const Shader_D3D9* d3dShader = static_cast<const Shader_D3D9*>(shader);
 			impl->BaseDevice->SetVertexShader(d3dShader->VertexShader);
 			impl->BaseDevice->SetPixelShader(d3dShader->FragmentShader);
+
+			impl->BaseDevice->SetVertexShaderConstantF(255, &impl->ViewportSize_Normalized[0], 1);
+
 			impl->ShaderSet = true;
 		}
 	}

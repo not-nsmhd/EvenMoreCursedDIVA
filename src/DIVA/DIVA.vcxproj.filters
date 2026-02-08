@@ -15,6 +15,9 @@
     <Filter Include="Source Files\MainGame">
       <UniqueIdentifier>{6f5f7a5e-b6af-4278-a550-885fbcb49fd3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Formats">
+      <UniqueIdentifier>{3c879335-8314-40a4-93a0-d386b46dd594}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -34,6 +37,9 @@
     </ClCompile>
     <ClCompile Include="src\MainGame\HUD.cpp">
       <Filter>Source Files\MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Formats\SongInfo.cpp">
+      <Filter>Source Files\Formats</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +68,12 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Formats\SongInfo.h">
+      <Filter>Source Files\Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameContext.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

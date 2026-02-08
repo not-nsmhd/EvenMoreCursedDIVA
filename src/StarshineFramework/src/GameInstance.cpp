@@ -5,11 +5,13 @@
 #include "Rendering/Device.h"
 #include "Input/Keyboard.h"
 #include "Input/Gamepad.h"
+#include "Audio/AudioEngine.h"
 
 namespace Starshine
 {
 	using namespace Rendering;
 	using namespace Input;
+	using namespace Audio;
 
 	struct GameInstance::Impl
 	{
@@ -75,6 +77,8 @@ namespace Starshine
 			Keyboard::Initialize();
 			Gamepad::Initialize();
 
+			AudioEngine::CreateInstance();
+
 			return true;
 		}
 
@@ -86,6 +90,8 @@ namespace Starshine
 				CurrentState->Destroy();
 				CurrentState = nullptr;
 			}
+
+			AudioEngine::DestroyInstance();
 
 			Gamepad::Destroy();
 			Keyboard::Destroy();

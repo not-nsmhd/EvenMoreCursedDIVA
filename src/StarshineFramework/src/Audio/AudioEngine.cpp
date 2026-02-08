@@ -10,7 +10,7 @@ namespace Starshine::Audio
 {
 	constexpr const char* LogName = "Starshine::Audio::AudioEngine";
 
-	AudioEngine* Instance = nullptr;
+	std::unique_ptr<AudioEngine> Instance{};
 	void AudioEngine_SDLCallback(void* userdata, Uint8* stream, int size);
 
 	struct SourceData
@@ -437,20 +437,20 @@ namespace Starshine::Audio
 		AudioEngine::GetInstance()->QueueAudioCallback(reinterpret_cast<f32*>(stream), static_cast<size_t>(size / sizeof(f32)));
 	}
 
-	AudioEngine::AudioEngine() : impl(new Impl())
+	AudioEngine::AudioEngine() : impl(std::make_unique<Impl>())
 	{
 	}
 
 	AudioEngine::~AudioEngine()
 	{
-		delete impl;
 	}
 
 	void AudioEngine::CreateInstance()
 	{
 		if (Instance == nullptr)
 		{
-			Instance = new AudioEngine();
+			Instance = std::make_unique<AudioEngine>();
+			Instance->Initialize();
 		}
 	}
 
@@ -458,14 +458,14 @@ namespace Starshine::Audio
 	{
 		if (Instance != nullptr)
 		{
-			delete Instance;
+			Instance->Destroy();
 			Instance = nullptr;
 		}
 	}
 
 	AudioEngine* AudioEngine::GetInstance()
 	{
-		return Instance;
+		return Instance.get();
 	}
 
 	bool AudioEngine::Initialize()

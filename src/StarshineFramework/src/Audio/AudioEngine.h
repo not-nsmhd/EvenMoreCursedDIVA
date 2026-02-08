@@ -1,6 +1,7 @@
 #pragma once
 #include "Common/Types.h"
 #include "SampleProvider/ISampleProvider.h"
+#include <memory>
 
 namespace Starshine::Audio
 {
@@ -89,6 +90,6 @@ namespace Starshine::Audio
 
 	private:
 		struct Impl;
-		Impl* impl = nullptr;
+		std::unique_ptr<Impl> impl{};
 	};
 }

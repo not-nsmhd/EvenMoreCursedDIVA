@@ -93,6 +93,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Formats\SongInfo.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MainGame\Chart.cpp" />
     <ClCompile Include="src\MainGame\GameNote.cpp" />
@@ -105,6 +106,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="src\Formats\SongInfo.h" />
+    <ClInclude Include="src\GameContext.h" />
     <ClInclude Include="src\MainGame\Chart.h" />
     <ClInclude Include="src\MainGame\GameNote.h" />
     <ClInclude Include="src\MainGame\HitEvaluation.h" />
