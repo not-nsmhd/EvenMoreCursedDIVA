@@ -33,7 +33,7 @@ namespace Starshine::Rendering
 		virtual void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha) = 0;
 		virtual void SetBlendOperation(BlendOperation op) = 0;
 
-		virtual void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull) = 0;
+		virtual void SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation) = 0;
 
 		virtual void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount) = 0;
 		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount) = 0;

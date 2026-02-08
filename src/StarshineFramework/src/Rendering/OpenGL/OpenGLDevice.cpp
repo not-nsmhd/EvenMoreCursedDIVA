@@ -168,97 +168,6 @@ namespace Starshine::Rendering::OpenGL
 				IndexBufferSet = true;
 			}
 		}
-
-		/*inline void SetShaderVariableValue(ShaderType shaderType, u32 index, float x, float y, float z, float w)
-		{
-			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
-			glProgramLocalParameter4fARB(glShaderType, index, x, y, z, w);
-		}
-
-		inline void SetShaderVariableValuePtr(ShaderType shaderType, u32 index, const float* value)
-		{
-			GLenum glShaderType = ConversionTables::GLShaderTypes[static_cast<size_t>(shaderType)];
-			glProgramLocalParameter4fvARB(glShaderType, index, value);
-		}
-
-		void SetShader(Shader_OpenGL* shader)
-		{
-			if (shader == nullptr)
-			{
-				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, 0);
-				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-				ShaderSet = false;
-			}
-			else
-			{
-				GLuint vertHandle = ResourceContexts[static_cast<size_t>(shader->VertexHandle)].BaseResourceHandle;
-				GLuint fragHandle = ResourceContexts[static_cast<size_t>(shader->FragmentHandle)].BaseResourceHandle;
-
-				glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vertHandle);
-				glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragHandle);
-
-				if (shader->UpdateVariables)
-				{
-					for (size_t i = 0; i < shader->Variables.size(); i++)
-					{
-						const ShaderVariable& variable = shader->Variables.at(i);
-
-						if (variable.Value == nullptr)
-						{
-							continue;
-						}
-
-						switch (variable.Type)
-						{
-						case ShaderVariableType::Float:
-						{
-							float* value = reinterpret_cast<float*>(variable.Value);
-
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, *value, 0.0f, 0.0f, 0.0f);
-							break;
-						}
-						case ShaderVariableType::Vector2:
-						{
-							vec2* value = reinterpret_cast<vec2*>(variable.Value);
-
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, 0.0f, 0.0f);
-							break;
-						}
-						case ShaderVariableType::Vector3:
-						{
-							vec3* value = reinterpret_cast<vec3*>(variable.Value);
-
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, 0.0f);
-							break;
-						}
-						case ShaderVariableType::Vector4:
-						{
-							vec4* value = reinterpret_cast<vec4*>(variable.Value);
-
-							SetShaderVariableValue(variable.LocationShader, variable.LocationIndex, value->x, value->y, value->z, value->w);
-							break;
-						}
-						case ShaderVariableType::Matrix4:
-						{
-							// HACK: this is dumb
-							mat4* originalMatrix = reinterpret_cast<mat4*>(variable.Value);
-							mat4 transposedMatrix = glm::transpose(*originalMatrix);
-
-							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex, reinterpret_cast<const float*>(&transposedMatrix[0]));
-							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 1, reinterpret_cast<const float*>(&transposedMatrix[1]));
-							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 2, reinterpret_cast<const float*>(&transposedMatrix[2]));
-							SetShaderVariableValuePtr(variable.LocationShader, variable.LocationIndex + 3, reinterpret_cast<const float*>(&transposedMatrix[3]));
-							break;
-						}
-						}
-					}
-
-					shader->UpdateVariables = false;
-				}
-
-				ShaderSet = true;
-			}
-		}*/
 	};
 
 	OpenGLDevice::OpenGLDevice() : impl(std::make_unique<Impl>())
@@ -348,7 +257,7 @@ namespace Starshine::Rendering::OpenGL
 		glBlendEquation(glOperation);
 	}
 
-	void OpenGLDevice::SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull)
+	void OpenGLDevice::SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation)
 	{
 		GLboolean cullingEnabled = glIsEnabled(GL_CULL_FACE);
 		if (enable)
@@ -361,11 +270,10 @@ namespace Starshine::Rendering::OpenGL
 			return;
 		}
 
-		GLenum glOrientation = ConversionTables::GLPolygonOrientation[static_cast<size_t>(frontFaceOrientation)];
-		GLenum glFacesToCull = ConversionTables::GLFace[static_cast<size_t>(facesToCull)];
+		GLenum glOrientation = ConversionTables::GLPolygonOrientation[static_cast<size_t>(backFaceOrientation)];
 
 		glFrontFace(glOrientation);
-		glCullFace(glFacesToCull);
+		glCullFace(GL_FRONT); // Oh well...
 	}
 
 	void OpenGLDevice::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)

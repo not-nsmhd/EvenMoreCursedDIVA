@@ -743,7 +743,7 @@ namespace DIVA::MainGame
 			}
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
-			GFXDevice->SetFaceCullingState(false, PolygonOrientation::Clockwise, Face::Back);
+			GFXDevice->SetFaceCullingState(false, PolygonOrientation::Clockwise);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
 			for (auto& note : ActiveNotes)

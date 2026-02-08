@@ -23,7 +23,7 @@ namespace Starshine::Rendering::D3D9
 		void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha);
 		void SetBlendOperation(BlendOperation op);
 
-		void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull);
+		void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation);
 
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
 		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount);

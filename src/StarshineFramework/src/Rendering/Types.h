@@ -59,8 +59,10 @@ namespace Starshine::Rendering
 		Count
 	};
 
-	enum class BlendFactor : u8
+	enum class BlendFactor : i8
 	{
+		None = -1,
+
 		Zero,
 		One,
 		SrcColor,
@@ -75,8 +77,10 @@ namespace Starshine::Rendering
 		Count
 	};
 
-	enum class BlendOperation : u8
+	enum class BlendOperation : i8
 	{
+		None = -1,
+
 		Add,
 		Subtract,
 		SubtractInverse,

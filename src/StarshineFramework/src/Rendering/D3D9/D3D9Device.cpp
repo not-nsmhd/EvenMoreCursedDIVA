@@ -38,7 +38,17 @@ namespace Starshine::Rendering::D3D9
 
 		vec4 ViewportSize_Normalized{};
 
-		struct CurrentSamplingStateData
+		struct AlphaBlendStateData
+		{
+			BlendFactor SrcColor{ BlendFactor::None };
+			BlendFactor DestColor{ BlendFactor::None };
+			BlendFactor SrcAlpha{ BlendFactor::None };
+			BlendFactor DestAlpha{ BlendFactor::None };
+		} CurrentAlphaBlendState;
+
+		BlendOperation CurrentBlendOp{ BlendOperation::None };
+
+		struct SamplingStateData
 		{
 			DWORD Filter{ 0xFFFFFFFF };
 			DWORD WrapMode{ 0xFFFFFFFF };
@@ -71,7 +81,6 @@ namespace Starshine::Rendering::D3D9
 				LogError(LogName, "Failed to create a Direct3D 9 device. Error: 0x%08X", result);
 				return false;
 			}
-
 
 			BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
@@ -107,6 +116,72 @@ namespace Starshine::Rendering::D3D9
 				BeginCalled = false;
 			}
 			BaseDevice->Present(NULL, NULL, NULL, NULL);
+		}
+
+		void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
+		{
+			if (!enable)
+			{
+				BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			}
+			else
+			{
+				BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				
+				if (CurrentAlphaBlendState.SrcColor != srcColor)
+				{
+					D3DBLEND d3dSrcColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcColor)];
+					BaseDevice->SetRenderState(D3DRS_SRCBLEND, d3dSrcColor);
+					CurrentAlphaBlendState.SrcColor = srcColor;
+				}
+
+				if (CurrentAlphaBlendState.SrcAlpha != srcAlpha)
+				{
+					D3DBLEND d3dSrcAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcAlpha)];
+					BaseDevice->SetRenderState(D3DRS_SRCBLENDALPHA, d3dSrcAlpha);
+					CurrentAlphaBlendState.SrcAlpha = srcAlpha;
+				}
+
+				if (CurrentAlphaBlendState.DestColor != destColor)
+				{
+					D3DBLEND d3dDstColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(destColor)];
+					BaseDevice->SetRenderState(D3DRS_DESTBLEND, d3dDstColor);
+					CurrentAlphaBlendState.DestColor = destColor;
+				}
+
+				if (CurrentAlphaBlendState.DestAlpha != destAlpha)
+				{
+					D3DBLEND d3dDstAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(destAlpha)];
+					BaseDevice->SetRenderState(D3DRS_DESTBLENDALPHA, d3dDstAlpha);
+					CurrentAlphaBlendState.DestAlpha = destAlpha;
+				}
+			}
+		}
+
+		void SetBlendOp(BlendOperation op)
+		{
+			if (CurrentBlendOp != op)
+			{
+				D3DBLENDOP d3dBlendColor = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
+				D3DBLENDOP d3dBlendAlpha = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
+				BaseDevice->SetRenderState(D3DRS_BLENDOP, d3dBlendColor);
+				BaseDevice->SetRenderState(D3DRS_BLENDOPALPHA, d3dBlendAlpha);
+
+				CurrentBlendOp = op;
+			}
+		}
+
+		void SetCullState(bool enable, PolygonOrientation backFaceOrientation)
+		{
+			if (!enable)
+			{
+				BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);				
+			}
+			else
+			{
+				DWORD orientation = ConversionTables::D3DPolygonOrientation[static_cast<size_t>(backFaceOrientation)];
+				BaseDevice->SetRenderState(D3DRS_CULLMODE, orientation);
+			}
 		}
 
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
@@ -292,45 +367,17 @@ namespace Starshine::Rendering::D3D9
 
 	void D3D9Device::SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha)
 	{
-		if (!enable)
-		{
-			impl->BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		}
-		else
-		{
-			D3DBLEND d3dSrcColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcColor)];
-			D3DBLEND d3dDstColor = ConversionTables::D3DBlendFactors[static_cast<size_t>(destColor)];
-			D3DBLEND d3dSrcAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(srcAlpha)];
-			D3DBLEND d3dDstAlpha = ConversionTables::D3DBlendFactors[static_cast<size_t>(destAlpha)];
-
-			impl->BaseDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-			impl->BaseDevice->SetRenderState(D3DRS_SRCBLEND, d3dSrcColor);
-			impl->BaseDevice->SetRenderState(D3DRS_SRCBLENDALPHA, d3dSrcAlpha);
-			impl->BaseDevice->SetRenderState(D3DRS_DESTBLEND, d3dDstColor);
-			impl->BaseDevice->SetRenderState(D3DRS_DESTBLENDALPHA, d3dDstAlpha);
-		}
+		impl->SetBlendState(enable, srcColor, destColor, srcAlpha, destAlpha);
 	}
 
 	void D3D9Device::SetBlendOperation(BlendOperation op)
 	{
-		D3DBLENDOP d3dBlendColor = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
-		D3DBLENDOP d3dBlendAlpha = ConversionTables::D3DBlendOperations[static_cast<size_t>(op)];
-		impl->BaseDevice->SetRenderState(D3DRS_BLENDOP, d3dBlendColor);
-		impl->BaseDevice->SetRenderState(D3DRS_BLENDOPALPHA, d3dBlendAlpha);
+		impl->SetBlendOp(op);
 	}
 
-	void D3D9Device::SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation, Face facesToCull)
+	void D3D9Device::SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation)
 	{
-		if (enable)
-		{
-			DWORD orientation = ConversionTables::D3DPolygonOrientation[static_cast<size_t>(frontFaceOrientation)];
-
-			impl->BaseDevice->SetRenderState(D3DRS_CULLMODE, orientation);
-		}
-		else
-		{
-			impl->BaseDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-		}
+		impl->SetCullState(enable, backFaceOrientation);
 	}
 
 	void D3D9Device::DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount)
