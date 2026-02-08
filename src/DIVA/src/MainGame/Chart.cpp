@@ -16,8 +16,10 @@ namespace DIVA::MainGame
 
 		size_t noteCount = static_cast<size_t>(rootElement->ChildElementCount("Note"));
 		size_t noteTimeChangesCount = static_cast<size_t>(rootElement->ChildElementCount("SetNoteTime"));
+		size_t chanceTimeCount = static_cast<size_t>(rootElement->ChildElementCount("ChanceTimeStart"));
 		Notes.reserve(noteCount);
 		NoteTimeChanges.reserve(noteTimeChangesCount);
+		ChanceTimes.reserve(chanceTimeCount);
 
 		Xml::Element* element = rootElement->FirstChildElement("Note");
 		const Xml::Attribute* curAttrib = nullptr;
@@ -53,6 +55,20 @@ namespace DIVA::MainGame
 			element->QueryFloatAttribute("Value", &newTimeChange.Value);
 
 			element = element->NextSiblingElement("SetNoteTime");
+		}
+
+		element = rootElement->FirstChildElement("ChanceTimeStart");
+		for (size_t i = 0; i < chanceTimeCount; i++)
+		{
+			ChanceTime chanceTime{};
+			element->QueryFloatAttribute("Time", &chanceTime.StartTime);
+
+			element = rootElement->FirstChildElement("ChanceTimeEnd");
+			if (element != nullptr)
+			{
+				element->QueryFloatAttribute("Time", &chanceTime.EndTime);
+				ChanceTimes.push_back(chanceTime);
+			}
 		}
 
 		ProcessNoteReferences();
@@ -102,5 +118,17 @@ namespace DIVA::MainGame
 		}
 
 		return DefaultNoteDuration;
+	}
+
+	const ChanceTime* Chart::GetNextChanceTime(f32 timeSeconds)
+	{
+		if (ChanceTimes.empty()) { return nullptr; }
+
+		for (auto& chanceTime : ChanceTimes)
+		{
+			if (chanceTime.StartTime <= timeSeconds) { return &chanceTime; }
+		}
+
+		return nullptr;
 	}
 };

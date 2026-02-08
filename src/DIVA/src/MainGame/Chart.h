@@ -86,6 +86,12 @@ namespace DIVA::MainGame
 		f32 Value{};
 	};
 
+	struct ChanceTime
+	{
+		f32 StartTime{};
+		f32 EndTime{};
+	};
+
 	class Chart
 	{
 	public:
@@ -93,6 +99,7 @@ namespace DIVA::MainGame
 	public:
 		std::vector<ChartNote> Notes;
 		std::vector<NoteTimeChange> NoteTimeChanges;
+		std::vector<ChanceTime> ChanceTimes;
 
 	public:
 		void ProcessNoteReferences();
@@ -101,5 +108,6 @@ namespace DIVA::MainGame
 		bool LoadXml(std::string_view filePath);
 
 		f32 GetNoteTime(f32 timeSeconds);
+		const ChanceTime* GetNextChanceTime(f32 timeSeconds);
 	};
 }

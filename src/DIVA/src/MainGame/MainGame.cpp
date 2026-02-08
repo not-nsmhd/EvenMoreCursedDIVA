@@ -311,10 +311,18 @@ namespace DIVA::MainGame
 			{
 				if (chartNote->AppearTime <= ElapsedTime_Seconds)
 				{
+					f32 flyTime = songChart.GetNoteTime(chartNote->AppearTime);
+					const ChanceTime* nextCT = songChart.GetNextChanceTime(chartNote->AppearTime + flyTime);
+
 					if (chartNote->Type == NoteType::HoldEnd) { chartNoteOffset++; break; }
 
 					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
-					newNote.FlyTime = songChart.GetNoteTime(chartNote->AppearTime);
+					newNote.FlyTime = flyTime;
+
+					if (nextCT != nullptr && chartNote->AppearTime + flyTime >= nextCT->StartTime && chartNote->AppearTime + flyTime <= nextCT->EndTime)
+					{
+						newNote.ActiveDuringChanceTime = true;
+					}
 
 					newNote.Trail.ScrollResetThreshold = MainGameContext.IconSetSprites.Trail_Normal->SourceRectangle.Width;
 

@@ -50,7 +50,9 @@ namespace DIVA::MainGame
 		static constexpr size_t verticesPerSegment = 2;
 		std::array<SpriteVertex, trailSegmentCount * verticesPerSegment> trailVertices{};
 
-		const Sprite* trailSprite = Trail.Hold ? iconSet.HoldNoteTrails[static_cast<size_t>(Shape)] : iconSet.Trail_Normal;
+		const Sprite* trailSprite = Trail.Hold ? iconSet.HoldNoteTrails[static_cast<size_t>(Shape)] :
+			(ActiveDuringChanceTime ? iconSet.Trail_CT : iconSet.Trail_Normal);
+
 		const RectangleF& spriteRect = trailSprite->SourceRectangle;
 
 		Texture* trailTexture = iconSet.SpriteSheet.GetTexture(trailSprite->TextureIndex);
@@ -74,7 +76,7 @@ namespace DIVA::MainGame
 			{ 255, 202, 0, 255 }
 		};
 
-		const Color trailColor = trailColors[static_cast<size_t>(Shape)];
+		const Color trailColor = (Trail.Hold || ActiveDuringChanceTime) ? DefaultColors::White : trailColors[static_cast<size_t>(Shape)];
 
 		const f32 segmentDistance = glm::distance(trailSegments[0], trailSegments[1]) / (spriteRect.Width * 0.05f);
 
@@ -143,7 +145,7 @@ namespace DIVA::MainGame
 		}
 
 		IconPosition = MathExtensions::GetSinePoint(GetNormalizedRemainingTime(), TargetPosition, EntryAngle, Frequency, Amplitude, Distance);
-		Trail.Scroll = std::fmodf(Trail.Scroll + 0.32f * (16.6667 / deltaTime_ms), Trail.ScrollResetThreshold);
+		Trail.Scroll = std::fmodf(Trail.Scroll + 0.64f * (16.6667 / deltaTime_ms), Trail.ScrollResetThreshold);
 
 		if (Expired || Expiring || ShouldBeRemoved) { return; }
 

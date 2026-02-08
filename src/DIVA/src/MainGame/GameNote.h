@@ -42,6 +42,8 @@ namespace DIVA::MainGame
 		float Amplitude{};
 		float Distance{};
 
+		bool ActiveDuringChanceTime{};
+
 	public:
 		// NOTE: Generic state flags
 		bool Expiring = false;
