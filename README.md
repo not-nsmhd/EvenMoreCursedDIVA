@@ -1,3 +1,5 @@
+(todo)
+
 # Even More Cursed DIVA/Starshine
 ![Main Game Screenshot](readme_img/Screenshot_MainGame.png)
 
