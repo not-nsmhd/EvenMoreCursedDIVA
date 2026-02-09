@@ -126,7 +126,7 @@ namespace DIVA::MainGame
 
 		for (auto& chanceTime : ChanceTimes)
 		{
-			if (chanceTime.StartTime <= timeSeconds) { return &chanceTime; }
+			if (chanceTime.StartTime <= timeSeconds && chanceTime.EndTime >= timeSeconds) { return &chanceTime; }
 		}
 
 		return nullptr;

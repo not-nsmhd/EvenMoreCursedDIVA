@@ -67,6 +67,14 @@ namespace DIVA::MainGame
 			52, 47, 43, 39, 34, 30, 25, 21, 17, 12, 0
 		};
 
+		static constexpr std::array<u8, trailSegmentCount> trailAlphaValues_ChanceTime
+		{
+			0, 25, 140, 180, 200, 216, 228, 237, 244, 249, 252, 254, 254,
+			254, 252, 250, 247, 243, 239, 234, 228, 222, 216, 209, 202, 195,
+			188, 180, 172, 164, 155, 147, 138, 130, 121, 112, 104, 95, 86,
+			77, 68, 60, 51, 42, 34, 20, 0
+		};
+
 		static constexpr Color trailColors[EnumCount<NoteShape>()]
 		{
 			{ 237,  68,  78, 255 },
@@ -87,11 +95,15 @@ namespace DIVA::MainGame
 				(i >= trailSegmentCount - 1) ? glm::normalize(getNormal(trailSegments[i] - trailSegments[i - 1])) :
 				glm::normalize(getNormal(trailSegments[i] - trailSegments[i - 1]) + getNormal(trailSegments[i + 1] - trailSegments[i]));
 
-			trailVertices[v + 0].Position = trailSegments[i] + normal * spriteRect.Height * 0.5f;
-			trailVertices[v + 1].Position = trailSegments[i] - normal * spriteRect.Height * 0.5f;
+			const f32 thickness = (ActiveDuringChanceTime && !Trail.Hold) ? 0.7f : 0.5f;
 
-			trailVertices[v + 0].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, trailAlphaValues[i]);
-			trailVertices[v + 1].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, trailAlphaValues[i]);
+			trailVertices[v + 0].Position = trailSegments[i] + normal * spriteRect.Height * thickness;
+			trailVertices[v + 1].Position = trailSegments[i] - normal * spriteRect.Height * thickness;
+
+			const u8 alpha = ActiveDuringChanceTime ? trailAlphaValues_ChanceTime[i] : trailAlphaValues[i];
+
+			trailVertices[v + 0].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, alpha);
+			trailVertices[v + 1].Color = Trail.Hold ? DefaultColors::White : Color(trailColor.R, trailColor.G, trailColor.B, alpha);
 
 			if (!Trail.Hold)
 			{
@@ -156,7 +168,7 @@ namespace DIVA::MainGame
 				i32 bonusMultiplier = HitWrong ? 0 : (HitEvaluation == HitEvaluation::Cool ? 20 : (HitEvaluation == HitEvaluation::Good ? 10 : 0));
 
 				Hold.TimeSinceHoldStart += deltaTime_ms / 100.0;
-				Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier;
+				Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier + Hold.BonusBaseValue;
 			}
 		}
 	}

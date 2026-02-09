@@ -51,14 +51,17 @@ namespace DIVA::MainGame
 		SpriteRenderer* spriteRenderer{};
 		Font* debugFont;
 
-		float TrailScrollOffset = 0.0f;
 		bool Paused = false;
 
 		Chart songChart;
 		size_t chartNoteOffset = 0;
 
-		f64 ElapsedTime_Seconds = 0.0f;
+		f64 ElapsedTime_Seconds = 0.0;
 		std::deque<GameNote> ActiveNotes;
+
+		bool IsChanceTime{ false };
+		const ChanceTime* NextChanceTime{ nullptr };
+		size_t PassedChanceTimes{};
 
 		struct KeyboardBindsData
 		{
@@ -341,6 +344,25 @@ namespace DIVA::MainGame
 					break;
 				}
 			}
+
+			if (NextChanceTime == nullptr && songChart.ChanceTimes.size() > PassedChanceTimes)
+			{
+				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime_Seconds);
+			}
+
+			if (NextChanceTime != nullptr)
+			{
+				if (NextChanceTime->StartTime <= ElapsedTime_Seconds)
+				{
+					if (NextChanceTime->EndTime <= ElapsedTime_Seconds)
+					{
+						IsChanceTime = false;
+						NextChanceTime = nullptr;
+						PassedChanceTimes++;
+					}
+					else { IsChanceTime = true; }
+				}
+			}
 		}
 
 		void UpdateActiveNotes(f64 deltaTime_ms)
@@ -448,22 +470,24 @@ namespace DIVA::MainGame
 				return;
 			}
 
+			u32 noteScore = 0;
+
 			switch (note->HitEvaluation)
 			{
 			case HitEvaluation::Cool:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
+				noteScore = note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
 				break;
 			case HitEvaluation::Good:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
+				noteScore = note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
 				break;
 			case HitEvaluation::Safe:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
+				noteScore = note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
 				MainGameContext.Score.Combo = 0;
 				break;
 			case HitEvaluation::Bad:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
+				noteScore = note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
 				MainGameContext.Score.Combo = 0;
 				break;
 			case HitEvaluation::Miss:
@@ -471,18 +495,27 @@ namespace DIVA::MainGame
 				break;
 			}
 
+			if (IsChanceTime && !note->HitWrong)
+			{
+				noteScore *= 2;
+			}
+
+			MainGameContext.Score.Score += noteScore;
+
 			if (note->Type == NoteType::Double &&
 				!note->HitWrong)
 			{
 				if ((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good) && note->DoubleTap.GiveBonus)
 				{
 					MainGameContext.Score.Score += 200;
-					hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+					hud.SetScoreBonusDisplayState(200 + (IsChanceTime ? noteScore : 0), note->TargetPosition);
 				}
 				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.25f);
 			}
 			else if (note->Type == NoteType::HoldStart)
 			{
+				if (IsChanceTime) { note->Hold.BonusBaseValue = noteScore; }
+
 				hud.HoldScoreBonus();
 				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
 
@@ -504,6 +537,10 @@ namespace DIVA::MainGame
 			else
 			{
 				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+				if (IsChanceTime)
+				{
+					hud.SetScoreBonusDisplayState(noteScore, note->TargetPosition);
+				}
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);

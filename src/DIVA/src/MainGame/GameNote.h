@@ -71,6 +71,7 @@ namespace DIVA::MainGame
 
 			f64 TimeSinceHoldStart{};
 
+			i32 BonusBaseValue{};
 			i32 CurrentBonus{};
 		} Hold;
 
