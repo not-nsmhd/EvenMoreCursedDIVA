@@ -24,11 +24,22 @@ namespace Starshine
 		SDL_SetWindowSize(baseWindow, newSize.x, newSize.y);
 	}
 
-	ivec2& Window::GetSize() const
+	ivec2 Window::GetSize() const
 	{
 		ivec2 result{};
 		SDL_GetWindowSizeInPixels(baseWindow, &result.x, &result.y);
 		return result;
+	}
+
+	void Window::SetResizing(bool allow)
+	{
+		SDL_SetWindowResizable(baseWindow, allow ? SDL_TRUE : SDL_FALSE);
+	}
+
+	bool Window::CanBeResized() const
+	{
+		Uint32 windowFlags = SDL_GetWindowFlags(baseWindow);
+		return (windowFlags & SDL_WINDOW_RESIZABLE) != 0;
 	}
 
 	void Window::SetTitle(std::string_view title)

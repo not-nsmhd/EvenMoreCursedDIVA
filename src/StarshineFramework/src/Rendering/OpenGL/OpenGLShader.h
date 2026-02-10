@@ -5,10 +5,10 @@
 
 namespace Starshine::Rendering::OpenGL
 {
-	struct Shader_D3D9 : public Shader
+	struct Shader_OpenGL : public Shader
 	{
-		Shader_D3D9(OpenGLDevice& device, GLuint vsHandle, GLuint fsHandle);
-		~Shader_D3D9();
+		Shader_OpenGL(OpenGLDevice& device, GLuint programHandle);
+		~Shader_OpenGL();
 
 		void SetVertexShaderVariables(u32 index, size_t count, const f32* values);
 		void SetFragmentShaderVariables(u32 index, size_t count, const f32* values);
@@ -18,7 +18,6 @@ namespace Starshine::Rendering::OpenGL
 
 		OpenGLDevice& DeviceRef;
 
-		GLuint VertexProgramHandle{};
-		GLuint FragmentProgramHandle{};
+		GLuint ProgramHandle{};
 	};
 }

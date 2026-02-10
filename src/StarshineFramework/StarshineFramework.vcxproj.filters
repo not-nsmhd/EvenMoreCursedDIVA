@@ -8,9 +8,6 @@
     <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{8dfb469a-05f0-4a46-8c4f-9ea70a748641}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\OpenGL">
-      <UniqueIdentifier>{7b08b7d8-ba31-4b41-9537-f32e1c0a3d4e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Input">
       <UniqueIdentifier>{c0cd3ac6-f04a-4351-b6ed-ab7c60cbf94d}</UniqueIdentifier>
     </Filter>
@@ -23,17 +20,14 @@
     <Filter Include="Source Files\Audio\SampleProvider">
       <UniqueIdentifier>{8cb9ec05-f97c-49aa-9417-a8235f877c85}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\D3D9">
-      <UniqueIdentifier>{47a5ecfa-16cb-4d1a-b4fe-8bbd46bfefd1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Direct3D 9 Shaders">
-      <UniqueIdentifier>{2e0a10f2-ea8e-4178-b9f4-9481ca7b60b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Rendering\Render2D">
       <UniqueIdentifier>{4d30b4a9-7c6a-46f6-9bc5-a373f930bc3c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\D3D9\Detail">
-      <UniqueIdentifier>{a7d012cd-8ac0-4879-98fc-ade660559128}</UniqueIdentifier>
+    <Filter Include="Source Files\Rendering\D3D11">
+      <UniqueIdentifier>{4d6a99db-9292-4550-b535-1c04be53da0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Direct3D 11 Shaders">
+      <UniqueIdentifier>{2e0a10f2-ea8e-4178-b9f4-9481ca7b60b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,35 +37,17 @@
     <ClInclude Include="src\Rendering\Types.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLDevice.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLVertexDesc.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\VertexDesc.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Buffers.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLBuffers.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\Shader.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLShader.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\Texture.h">
       <Filter>Source Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLTexture.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLCommon.h">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Device.h">
       <Filter>Source Files\Rendering</Filter>
@@ -133,26 +109,8 @@
     <ClInclude Include="src\Window.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9Device.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9Buffers.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9Common.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9VertexDesc.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9Shader.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\D3D9Texture.h">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D9\Detail\HalfPixelFixup.h">
-      <Filter>Source Files\Rendering\D3D9\Detail</Filter>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Device.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -163,24 +121,6 @@
   <ItemGroup>
     <ClCompile Include="src\GameInstance.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\glad.c">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLDevice.cpp">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLBuffers.cpp">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLVertexDesc.cpp">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLShader.cpp">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLTexture.cpp">
-      <Filter>Source Files\Rendering\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\Device.cpp">
       <Filter>Source Files\Rendering</Filter>
@@ -233,40 +173,25 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\D3D9Device.cpp">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\D3D9Buffers.cpp">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\D3D9VertexDesc.cpp">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\D3D9Shader.cpp">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\D3D9Texture.cpp">
-      <Filter>Source Files\Rendering\D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\D3D9\Detail\HalfPixelFixup.cpp">
-      <Filter>Source Files\Rendering\D3D9\Detail</Filter>
+    <ClCompile Include="src\Rendering\D3D11\D3D11Device.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="d3d9shaders\src\FS_Test.hlsl">
-      <Filter>Direct3D 9 Shaders</Filter>
+    <FxCompile Include="d3d11shaders\src\FS_Test.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_Test.hlsl">
-      <Filter>Direct3D 9 Shaders</Filter>
+    <FxCompile Include="d3d11shaders\src\VS_MatrixTransform.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_MatrixTransform.hlsl">
-      <Filter>Direct3D 9 Shaders</Filter>
+    <FxCompile Include="d3d11shaders\src\VS_SpriteDefault.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_SpriteDefault.hlsl">
-      <Filter>Direct3D 9 Shaders</Filter>
+    <FxCompile Include="d3d11shaders\src\VS_Test.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\FS_SpriteDefault.hlsl">
-      <Filter>Direct3D 9 Shaders</Filter>
+    <FxCompile Include="d3d11shaders\src\FS_SpriteDefault.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

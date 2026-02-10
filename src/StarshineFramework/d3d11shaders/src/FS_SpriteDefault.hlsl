@@ -11,7 +11,7 @@ sampler fs_TextureSampler = sampler_state
 	Texture = fs_Texture;
 };
 
-float4 main(FSInput input) : COLOR0
+float4 main(FSInput input) : SV_Target0
 {
-	return tex2D(fs_TextureSampler, input.TexCoord).bgra * input.Color;
+	return input.Color;
 }

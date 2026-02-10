@@ -1,29 +1,33 @@
 #pragma once
 #include "Rendering/Device.h"
 
-namespace Starshine::Rendering::D3D9
+namespace Starshine::Rendering::D3D11
 {
-	class D3D9Device : public Device
+	class D3D11Device : public Device
 	{
 	public:
-		D3D9Device();
-		~D3D9Device();
+		D3D11Device();
+		~D3D11Device();
 
 	public:
 		bool Initialize(SDL_Window* gameWindow);
 		void Destroy();
 
 	public:
-		RectangleF GetViewportSize() const;
+		void OnWindowResize(i32 width, i32 height);
+
 	public:
-		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil);
+		RectangleF GetViewportSize() const;
+
+	public:
+		void Clear(ClearFlags flags, const Color & color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
 	public:
 		void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha);
 		void SetBlendOperation(BlendOperation op);
 
-		void SetFaceCullingState(bool enable, PolygonOrientation frontFaceOrientation);
+		void SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation);
 
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
 		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount);
@@ -31,7 +35,7 @@ namespace Starshine::Rendering::D3D9
 	public:
 		std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic);
 		std::unique_ptr<IndexBuffer> CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic);
-		std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount);
+		std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib * attribs, size_t attribCount);
 
 		std::unique_ptr<Shader> LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize);
 
@@ -45,6 +49,6 @@ namespace Starshine::Rendering::D3D9
 
 	private:
 		struct Impl;
-		std::unique_ptr<Impl> impl = nullptr;
+		std::unique_ptr<Impl> impl{ nullptr };
 	};
 }

@@ -68,17 +68,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;d3d9.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
-      <ShaderModel>2.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)d3d9shaders\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>$(ProjectDir)d3d11shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)d3d9shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d9\ /y</Command>
+      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying D3D9 shader objects...</Message>
@@ -103,17 +103,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;d3d9.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <FxCompile>
-      <ShaderModel>2.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)d3d9shaders\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>$(ProjectDir)d3d11shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)d3d9shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d9\ /y</Command>
+      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying D3D9 shader objects...</Message>
@@ -134,20 +134,8 @@
     <ClInclude Include="src\Input\Keyboard.h" />
     <ClInclude Include="src\Input\Mouse.h" />
     <ClInclude Include="src\Rendering\Buffers.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9Buffers.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9Common.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9Device.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9Shader.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9Texture.h" />
-    <ClInclude Include="src\Rendering\D3D9\D3D9VertexDesc.h" />
-    <ClInclude Include="src\Rendering\D3D9\Detail\HalfPixelFixup.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11Device.h" />
     <ClInclude Include="src\Rendering\Device.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLBuffers.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLCommon.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLDevice.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLShader.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLTexture.h" />
-    <ClInclude Include="src\Rendering\OpenGL\OpenGLVertexDesc.h" />
     <ClInclude Include="src\Rendering\Render2D\Font.h" />
     <ClInclude Include="src\Rendering\Render2D\FontRenderer.h" />
     <ClInclude Include="src\Rendering\Render2D\SpriteRenderer.h" />
@@ -174,19 +162,8 @@
     <ClCompile Include="src\Input\Gamepad.cpp" />
     <ClCompile Include="src\Input\Keyboard.cpp" />
     <ClCompile Include="src\Input\Mouse.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\D3D9Buffers.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\D3D9Device.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\D3D9Shader.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\D3D9Texture.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\D3D9VertexDesc.cpp" />
-    <ClCompile Include="src\Rendering\D3D9\Detail\HalfPixelFixup.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11Device.cpp" />
     <ClCompile Include="src\Rendering\Device.cpp" />
-    <ClCompile Include="src\Rendering\OpenGL\glad.c" />
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLBuffers.cpp" />
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLDevice.cpp" />
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLShader.cpp" />
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLTexture.cpp" />
-    <ClCompile Include="src\Rendering\OpenGL\OpenGLVertexDesc.cpp" />
     <ClCompile Include="src\Rendering\Render2D\Font.cpp" />
     <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteRenderer.cpp" />
@@ -201,23 +178,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="d3d9shaders\src\FS_SpriteDefault.hlsl">
+    <FxCompile Include="d3d11shaders\src\FS_SpriteDefault.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\FS_Test.hlsl">
+    <FxCompile Include="d3d11shaders\src\FS_Test.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_MatrixTransform.hlsl">
+    <FxCompile Include="d3d11shaders\src\VS_MatrixTransform.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_SpriteDefault.hlsl">
+    <FxCompile Include="d3d11shaders\src\VS_SpriteDefault.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="d3d9shaders\src\VS_Test.hlsl">
+    <FxCompile Include="d3d11shaders\src\VS_Test.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

@@ -23,6 +23,9 @@ namespace Starshine::Rendering
 		virtual void Destroy() = 0;
 
 	public:
+		virtual void OnWindowResize(i32 width, i32 height) = 0;
+
+	public:
 		virtual RectangleF GetViewportSize() const = 0;
 
 	public:
@@ -52,6 +55,9 @@ namespace Starshine::Rendering
 		virtual void SetIndexBuffer(const IndexBuffer* buffer) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
 		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
+
+	public:
+		bool ResizeViewportOnWindowResize{ true };
 	};
 
 	bool InitializeDevice(SDL_Window* sdlWindow, DeviceType type);

@@ -1,6 +1,5 @@
 #include "Device.h"
-#include "OpenGL/OpenGLDevice.h"
-#include "D3D9/D3D9Device.h"
+#include "D3D11/D3D11Device.h"
 #include "Common/Logging/Logging.h"
 
 namespace Starshine::Rendering
@@ -17,10 +16,10 @@ namespace Starshine::Rendering
 		switch (type)
 		{
 		case DeviceType::OpenGL:
-			GlobalDevice = std::make_unique<OpenGL::OpenGLDevice>();
+			assert(false && "OpenGL rendering device is not implemented yet");
 			break;
-		case DeviceType::D3D9:
-			GlobalDevice = std::make_unique<D3D9::D3D9Device>();
+		case DeviceType::D3D11:
+			GlobalDevice = std::make_unique<D3D11::D3D11Device>();
 			break;
 		}
 

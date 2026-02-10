@@ -42,6 +42,14 @@ namespace Starshine::Rendering::OpenGL
 			}
 
 			GameWindow = gameWindow;
+
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#if defined (_DEBUG)
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+
 			if ((GLContext = SDL_GL_CreateContext(GameWindow)) == NULL)
 			{
 				char message[512] = {};
@@ -65,17 +73,10 @@ namespace Starshine::Rendering::OpenGL
 
 			LogInfo(LogName, "OpenGL Version: %s", glGetString(GL_VERSION));
 			LogInfo(LogName, "OpenGL Renderer: %s", glGetString(GL_RENDERER));
-
-			glEnable(GL_VERTEX_PROGRAM_ARB);
-			glEnable(GL_FRAGMENT_PROGRAM_ARB);
 			
 			glEnable(GL_CULL_FACE);
 			glFrontFace(GL_CW);
 			glCullFace(GL_BACK);
-
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_COLOR_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			return true;
 		}
@@ -114,13 +115,13 @@ namespace Starshine::Rendering::OpenGL
 		{
 			if (buffer == nullptr)
 			{
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				VertexBufferSet = false;
 			}
 			else
 			{
 				GLuint glBufferHandle = buffer->Handle;
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, glBufferHandle);
+				glBindBuffer(GL_ARRAY_BUFFER, glBufferHandle);
 				VertexBufferSet = true;
 			}
 		}
@@ -134,13 +135,13 @@ namespace Starshine::Rendering::OpenGL
 					switch (attrib.Type)
 					{
 					case VertexAttribType::Position:
-						glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						//glVertexPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
 						break;
 					case VertexAttribType::Color:
-						glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						//glColorPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
 						break;
 					case VertexAttribType::TexCoord:
-						glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
+						//glTexCoordPointer(attrib.Components, attrib.Format, attrib.VertexSize, (const void*)attrib.Offset);
 						break;
 					}
 				}
@@ -157,13 +158,13 @@ namespace Starshine::Rendering::OpenGL
 		{
 			if (buffer == nullptr)
 			{
-				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				IndexBufferSet = false;
 			}
 			else
 			{
 				GLuint glBufferHandle = buffer->Handle;
-				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, glBufferHandle);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBufferHandle);
 				CurrentIndexFormat = ConversionTables::GLIndexFormats[static_cast<size_t>(buffer->Format)];
 				IndexBufferSet = true;
 			}
@@ -186,6 +187,14 @@ namespace Starshine::Rendering::OpenGL
 	void OpenGLDevice::Destroy()
 	{
 		impl->Destroy();
+	}
+
+	void OpenGLDevice::OnWindowResize(i32 width, i32 height)
+	{
+		if (ResizeViewportOnWindowResize)
+		{
+			glViewport(0, 0, width, height);
+		}
 	}
 
 	RectangleF OpenGLDevice::GetViewportSize() const
@@ -294,19 +303,19 @@ namespace Starshine::Rendering::OpenGL
 		}
 
 		GLsizeiptr bufferLength = static_cast<GLsizeiptr>(size);
-		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
+		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
 		GLuint bufferHandle = 0;
-		glGenBuffersARB(1, &bufferHandle);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, bufferHandle);
+		glGenBuffers(1, &bufferHandle);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
 
 		if (initialData != nullptr)
 		{
-			glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, initialData, bufferUsage);
+			glBufferData(GL_ARRAY_BUFFER, bufferLength, initialData, bufferUsage);
 		}
 		else
 		{
-			glBufferDataARB(GL_ARRAY_BUFFER_ARB, bufferLength, NULL, bufferUsage);
+			glBufferData(GL_ARRAY_BUFFER, bufferLength, NULL, bufferUsage);
 		}
 
 		std::unique_ptr<VertexBuffer_OpenGL> buffer = std::make_unique<VertexBuffer_OpenGL>(*this, size, dynamic);
@@ -323,19 +332,19 @@ namespace Starshine::Rendering::OpenGL
 		}
 
 		GLsizeiptr bufferLength = static_cast<GLsizeiptr>(size);
-		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
+		GLenum bufferUsage = (dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
 		GLuint bufferHandle = 0;
-		glGenBuffersARB(1, &bufferHandle);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferHandle);
+		glGenBuffers(1, &bufferHandle);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
 
 		if (initialData != nullptr)
 		{
-			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, initialData, bufferUsage);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferLength, initialData, bufferUsage);
 		}
 		else
 		{
-			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, bufferLength, NULL, bufferUsage);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferLength, NULL, bufferUsage);
 		}
 
 		std::unique_ptr<IndexBuffer_OpenGL> buffer = std::make_unique<IndexBuffer_OpenGL>(*this, size, format, dynamic);
@@ -430,7 +439,7 @@ namespace Starshine::Rendering::OpenGL
 		return texture;
 	}
 
-	void OpenGLDevice::SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc)
+	void OpenGLDevice::SetVertexBuffer(VertexBuffer* buffer, const VertexDesc* desc)
 	{
 		if (buffer == nullptr || desc == nullptr)
 		{
@@ -446,7 +455,7 @@ namespace Starshine::Rendering::OpenGL
 		}
 	}
 
-	void OpenGLDevice::SetIndexBuffer(const IndexBuffer* buffer)
+	void OpenGLDevice::SetIndexBuffer(IndexBuffer* buffer)
 	{
 		if (buffer == nullptr)
 		{

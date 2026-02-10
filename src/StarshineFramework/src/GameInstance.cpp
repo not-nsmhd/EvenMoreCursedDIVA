@@ -71,7 +71,7 @@ namespace Starshine
 
 			BaseWindow = Parent->GameWindow->GetBaseWindow();
 
-			Rendering::InitializeDevice(BaseWindow, DeviceType::D3D9);
+			Rendering::InitializeDevice(BaseWindow, DeviceType::D3D11);
 			GFXDevice = Rendering::GetDevice();
 
 			Keyboard::Initialize();
@@ -146,6 +146,17 @@ namespace Starshine
 					{
 					case SDL_QUIT:
 						Running = false;
+						break;
+					case SDL_WINDOWEVENT:
+						switch (SDLEvent.window.event)
+						{
+						case SDL_WINDOWEVENT_CLOSE:
+							Running = false;
+							break;
+						case SDL_WINDOWEVENT_RESIZED:
+							GFXDevice->OnWindowResize(SDLEvent.window.data1, SDLEvent.window.data2);
+							break;
+						}
 						break;
 					case SDL_KEYDOWN:
 					case SDL_KEYUP:

@@ -13,6 +13,8 @@ namespace Starshine::Rendering::OpenGL
 		bool Initialize(SDL_Window* gameWindow);
 		void Destroy();
 
+		void OnWindowResize(i32 width, i32 height);
+
 	public:
 		RectangleF GetViewportSize() const;
 	public:

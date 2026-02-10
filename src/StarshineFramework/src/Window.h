@@ -14,7 +14,10 @@ namespace Starshine
 		bool Exists() const;
 
 		void SetSize(const ivec2& newSize);
-		ivec2& GetSize() const;
+		ivec2 GetSize() const;
+
+		void SetResizing(bool allow);
+		bool CanBeResized() const;
 
 		void SetTitle(std::string_view title);
 		std::string_view GetTitle() const;

@@ -5,8 +5,8 @@ namespace Starshine::Rendering
 {
 	enum class DeviceType : i32
 	{
-		OpenGL,
-		D3D9, // TODO: Implement
+		OpenGL, // TODO: Implement
+		D3D11,
 
 		Count
 	};
@@ -110,6 +110,6 @@ namespace Starshine::Rendering
 	constexpr std::array<const char*, EnumCount<DeviceType>()> DeviceTypeNames =
 	{
 		"OpenGL",
-		"D3D9"
+		"D3D11"
 	};
 }
