@@ -1,6 +1,6 @@
 struct FSInput
 {
-	float4 Position : SV_POSITION;
+	float4 Position : SV_Position;
 	float4 Color : COLOR0;
 };
 

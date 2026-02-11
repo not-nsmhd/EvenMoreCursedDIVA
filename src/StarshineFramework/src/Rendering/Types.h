@@ -37,28 +37,6 @@ namespace Starshine::Rendering
 		Count
 	};
 
-	enum class VertexAttribType : u8
-	{
-		Position,
-		Color,
-		TexCoord,
-
-		Count
-	};
-
-	enum class VertexAttribFormat : u8
-	{
-		Float1,
-		Float2,
-		Float3,
-		Float4,
-
-		UnsignedByte4,
-		UnsignedByte4Norm,
-
-		Count
-	};
-
 	enum class BlendFactor : i8
 	{
 		None = -1,

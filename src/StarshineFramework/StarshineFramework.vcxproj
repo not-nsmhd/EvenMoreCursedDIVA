@@ -134,7 +134,12 @@
     <ClInclude Include="src\Input\Keyboard.h" />
     <ClInclude Include="src\Input\Mouse.h" />
     <ClInclude Include="src\Rendering\Buffers.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11Buffers.h" />
     <ClInclude Include="src\Rendering\D3D11\D3D11Device.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11Shader.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11State.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11Texture.h" />
+    <ClInclude Include="src\Rendering\D3D11\D3D11VertexDesc.h" />
     <ClInclude Include="src\Rendering\Device.h" />
     <ClInclude Include="src\Rendering\Render2D\Font.h" />
     <ClInclude Include="src\Rendering\Render2D\FontRenderer.h" />
@@ -142,6 +147,7 @@
     <ClInclude Include="src\Rendering\Render2D\SpriteSheet.h" />
     <ClInclude Include="src\Rendering\Render2D\SpriteSheetRenderer.h" />
     <ClInclude Include="src\Rendering\Shader.h" />
+    <ClInclude Include="src\Rendering\State.h" />
     <ClInclude Include="src\Rendering\Texture.h" />
     <ClInclude Include="src\Rendering\Types.h" />
     <ClInclude Include="src\Rendering\Utilities.h" />
@@ -162,7 +168,12 @@
     <ClCompile Include="src\Input\Gamepad.cpp" />
     <ClCompile Include="src\Input\Keyboard.cpp" />
     <ClCompile Include="src\Input\Mouse.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11Buffers.cpp" />
     <ClCompile Include="src\Rendering\D3D11\D3D11Device.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11Shader.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11State.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11Texture.cpp" />
+    <ClCompile Include="src\Rendering\D3D11\D3D11VertexDesc.cpp" />
     <ClCompile Include="src\Rendering\Device.cpp" />
     <ClCompile Include="src\Rendering\Render2D\Font.cpp" />
     <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp" />

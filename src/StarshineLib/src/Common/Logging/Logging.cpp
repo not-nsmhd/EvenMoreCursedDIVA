@@ -21,6 +21,7 @@ namespace Starshine
 
 	void LogMessage(const char* text, ...)
 	{
+#ifdef _DEBUG
 		va_list list;
 
 		va_start(list, text);
@@ -32,10 +33,12 @@ namespace Starshine
 		}
 
 		va_end(list);
+#endif
 	}
 
 	void LogInfo(const char* component, const char* text, ...)
 	{
+#ifdef _DEBUG
 		va_list list;
 
 		va_start(list, text);
@@ -48,10 +51,12 @@ namespace Starshine
 		}
 
 		va_end(list);
+#endif
 	}
 
 	void LogWarn(const char* component, const char* text, ...)
 	{
+#ifdef _DEBUG
 		va_list list;
 
 		va_start(list, text);
@@ -64,10 +69,12 @@ namespace Starshine
 		}
 
 		va_end(list);
+#endif
 	}
 
 	void LogError(const char* component, const char* text, ...)
 	{
+#ifdef _DEBUG
 		va_list list;
 
 		va_start(list, text);
@@ -80,10 +87,12 @@ namespace Starshine
 		}
 
 		va_end(list);
+#endif
 	}
 
 	void SDLLogFunction(void* userdata, int category, SDL_LogPriority priority, const char* message)
 	{
+#ifdef _DEBUG
 		switch (priority)
 		{
 		case SDL_LogPriority::SDL_LOG_PRIORITY_INFO:
@@ -99,5 +108,6 @@ namespace Starshine
 			LogError("SDL", message);
 			break;
 		}
+#endif
 	}
 }

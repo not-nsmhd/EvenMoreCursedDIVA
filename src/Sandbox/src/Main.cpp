@@ -1,6 +1,6 @@
 #include <SDL2/SDL_main.h>
 #include "GameInstance.h"
-#include "Graphics/GraphicsTest.h"
+#include "Graphics/SpriteRendererTest.h"
 
 int SDL_main(int argc, char* argv[])
 {
@@ -9,9 +9,9 @@ int SDL_main(int argc, char* argv[])
 	if (game.Initialize())
 	{
 		game.GetWindow()->SetTitle("Sandbox");
-		//game.GetWindow()->SetResizing(true);
+		game.GetWindow()->SetResizing(true);
 
-		game.SetState(std::make_unique<TestState>());
+		game.SetState(std::make_unique<SpriteRendererTest>());
 		game.EnterLoop();
 
 		return 0;

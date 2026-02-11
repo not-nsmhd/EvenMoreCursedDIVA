@@ -103,7 +103,6 @@
     <None Include="src\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CLI\CommandLine.h" />
     <ClInclude Include="src\QOI\qoi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

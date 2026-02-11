@@ -788,8 +788,14 @@ namespace DIVA::MainGame
 			}
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
-			GFXDevice->SetFaceCullingState(false, PolygonOrientation::Clockwise);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
+
+			std::array<char, 32> trailText;
+			for (auto& note : ActiveNotes)
+			{
+				note.UpdateTrail();
+				note.DrawTrail();
+			}
 
 			for (auto& note : ActiveNotes)
 			{

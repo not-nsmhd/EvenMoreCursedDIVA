@@ -23,9 +23,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CLI\CommandLine.h">
-      <Filter>Source Files\CLI</Filter>
-    </ClInclude>
     <ClInclude Include="src\QOI\qoi.h">
       <Filter>Source Files\QOI</Filter>
     </ClInclude>

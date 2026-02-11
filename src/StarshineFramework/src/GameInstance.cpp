@@ -50,8 +50,6 @@ namespace Starshine
 		{
 #if defined (_DEBUG)
 			LogMessage("--- Starshine %02d.%02d [Debug] ---", BuildInfo::BuildYear - 2000, BuildInfo::BuildMonth);
-#else
-			LogMessage("--- Starshine %02d.%02d ---", BuildInfo::BuildYear - 2000, BuildInfo::BuildMonth);
 #endif
 
 			LogMessage("SDL Platform: %s", SDL_GetPlatform());
@@ -60,7 +58,7 @@ namespace Starshine
 			LogMessage("Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
 
 			SDL_Init(SDL_INIT_EVERYTHING);
-			Parent->GameWindow = std::make_unique<Window>("Starshine", 1280, 720, SDL_WINDOW_SHOWN);
+			Parent->GameWindow = std::make_unique<Window>("", 1280, 720, SDL_WINDOW_SHOWN);
 
 			if (!Parent->GameWindow->Exists())
 			{
@@ -88,7 +86,6 @@ namespace Starshine
 			{
 				CurrentState->UnloadContent();
 				CurrentState->Destroy();
-				CurrentState = nullptr;
 			}
 
 			AudioEngine::DestroyInstance();

@@ -8,11 +8,12 @@ namespace Starshine::Rendering
 	{
 	public:
 		Texture() = default;
+		virtual ~Texture() = default;
 
-		virtual u32 GetWidth() const = 0;
-		virtual u32 GetHeight() const = 0;
+		virtual i32 GetWidth() const = 0;
+		virtual i32 GetHeight() const = 0;
 		virtual GFX::TextureFormat GetFormat() const = 0;
 
-		virtual void SetData(const void* source, u32 x, u32 y, u32 width, u32 height) = 0;
+		virtual void SetData(const void* source, i32 x, i32 y, i32 width, i32 height) = 0;
 	};
 }

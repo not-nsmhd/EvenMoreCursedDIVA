@@ -1,5 +1,6 @@
 #pragma once
 #include "Rendering/Device.h"
+#include <d3d11.h>
 
 namespace Starshine::Rendering::D3D11
 {
@@ -8,6 +9,9 @@ namespace Starshine::Rendering::D3D11
 	public:
 		D3D11Device();
 		~D3D11Device();
+
+	public:
+		ID3D11Device* GetBaseDevice();
 
 	public:
 		bool Initialize(SDL_Window* gameWindow);
@@ -24,28 +28,29 @@ namespace Starshine::Rendering::D3D11
 		void SwapBuffers();
 
 	public:
-		void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha);
-		void SetBlendOperation(BlendOperation op);
-
-		void SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation);
-
 		void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount);
-		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount);
+		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 baseVertexIndex, u32 indexCount);
 
 	public:
 		std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic);
 		std::unique_ptr<IndexBuffer> CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic);
-		std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib * attribs, size_t attribCount);
+		std::unique_ptr<UniformBuffer> CreateUniformBuffer(size_t size, const void* initialData, bool dynamic);
 
 		std::unique_ptr<Shader> LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize);
+		std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib * attribs, size_t attribCount, const Shader* shader);
 
-		std::unique_ptr<Texture> CreateTexture(u32 width, u32 height, GFX::TextureFormat format, bool nearestFilter, bool repeat);
+		std::unique_ptr<Texture> CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData);
+
+		std::unique_ptr<BlendState> CreateBlendState(const BlendStateDesc& desc);
 
 	public:
 		void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc);
 		void SetIndexBuffer(const IndexBuffer* buffer);
+		void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex);
 		void SetShader(const Shader* shader);
 		void SetTexture(const Texture* texture, u32 slot);
+
+		void SetBlendState(const BlendState* state);
 
 	private:
 		struct Impl;

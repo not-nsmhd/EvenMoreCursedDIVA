@@ -5,13 +5,10 @@ struct FSInput
 	float4 Color : COLOR0;
 };
 
-texture fs_Texture;
-sampler fs_TextureSampler = sampler_state
-{
-	Texture = fs_Texture;
-};
+Texture2D Texture : register(t0);
+sampler TextureSampler : register(s0);
 
 float4 main(FSInput input) : SV_Target0
 {
-	return input.Color;
+	return Texture.Sample(TextureSampler, input.TexCoord) * input.Color;
 }

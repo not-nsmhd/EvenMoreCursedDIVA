@@ -30,6 +30,32 @@ namespace DIVA::MainGame
 		return HitEvaluation != HitEvaluation::None;
 	}
 
+	void GameNote::UpdateTrail()
+	{
+		if (Type == NoteType::HoldStart && NextNote != nullptr)
+		{
+			Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
+			Trail.End = MathExtensions::Min<f32>(TrailMaxProgress, NextNote->GetNormalizedRemainingTime());
+			Trail.Hold = true;
+		}
+
+		if (!HasBeenHit)
+		{
+			if (Type == NoteType::Normal || Type == NoteType::Double)
+			{
+				static constexpr f32 lengthFactor = 2.15f;
+
+				f32 trailPixelLength = (Distance / 1000.0f) * (120.0f / static_cast<f32>(FlyTime) * lengthFactor);
+				f32 normalizedLength = trailPixelLength / Distance;
+
+				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
+				Trail.End = Trail.Start + normalizedLength;
+
+				//DrawTrail();
+			}
+		}
+	}
+
 	void GameNote::DrawTrail()
 	{
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
@@ -161,14 +187,17 @@ namespace DIVA::MainGame
 
 		if (Expired || Expiring || ShouldBeRemoved) { return; }
 
-		if (Type == NoteType::HoldStart && HasBeenHit && (Hold.PrimaryHeld || Hold.AlternativeHeld))
+		if (Type == NoteType::HoldStart)
 		{
-			if (!NextNote->HasBeenHit && !NextNote->Expiring)
+			if (HasBeenHit && (Hold.PrimaryHeld || Hold.AlternativeHeld))
 			{
-				i32 bonusMultiplier = HitWrong ? 0 : (HitEvaluation == HitEvaluation::Cool ? 20 : (HitEvaluation == HitEvaluation::Good ? 10 : 0));
+				if (!NextNote->HasBeenHit && !NextNote->Expiring)
+				{
+					i32 bonusMultiplier = HitWrong ? 0 : (HitEvaluation == HitEvaluation::Cool ? 20 : (HitEvaluation == HitEvaluation::Good ? 10 : 0));
 
-				Hold.TimeSinceHoldStart += deltaTime_ms / 100.0;
-				Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier + Hold.BonusBaseValue;
+					Hold.TimeSinceHoldStart += deltaTime_ms / 100.0;
+					Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier + Hold.BonusBaseValue;
+				}
 			}
 		}
 	}
@@ -221,11 +250,7 @@ namespace DIVA::MainGame
 
 		if (Type == NoteType::HoldStart && NextNote != nullptr)
 		{
-			Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
-			Trail.End = MathExtensions::Min<f32>(TrailMaxProgress, NextNote->GetNormalizedRemainingTime());
-			Trail.Hold = true;
-
-			DrawTrail();
+			//DrawTrail();
 
 			if (HasBeenHit && NextNote->ElapsedTime < 0.0f)
 			{
@@ -237,19 +262,6 @@ namespace DIVA::MainGame
 
 		if (!HasBeenHit)
 		{
-			if (Type == NoteType::Normal || Type == NoteType::Double)
-			{
-				static constexpr f32 lengthFactor = 2.15f;
-
-				f32 trailPixelLength = (Distance / 1000.0f) * (120.0f / static_cast<f32>(FlyTime) * lengthFactor);
-				f32 normalizedLength = trailPixelLength / Distance;
-
-				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
-				Trail.End = Trail.Start + normalizedLength;
-
-				DrawTrail();
-			}
-
 			sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *iconSprite, IconPosition, vec2(1.0f), DefaultColors::White);
 		}
 	}

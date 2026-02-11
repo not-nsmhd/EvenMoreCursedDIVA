@@ -67,8 +67,7 @@ namespace Starshine::Rendering::Render2D
 			return false;
 		}
 
-		Texture = Rendering::GetDevice()->CreateTexture(texSize.x, texSize.y, GFX::TextureFormat::RGBA8, false, false);
-		Texture->SetData(texData.get(), 0, 0, texSize.x, texSize.y);
+		Texture = Rendering::GetDevice()->CreateTexture(texSize.x, texSize.y, GFX::TextureFormat::RGBA8, texData.get());
 
 		Xml::Element* charsElement = rootElement->FirstChildElement("chars");
 

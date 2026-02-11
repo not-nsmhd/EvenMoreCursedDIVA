@@ -9,12 +9,24 @@ namespace Starshine::GFX
 
 		RGBA8,
 		RG8,
-		A8,
+		R8,
 
 		DXT1,
 		DXT3,
 		DXT5,
 
 		Count
+	};
+
+	constexpr std::array<size_t, EnumCount<GFX::TextureFormat>()> TexturePixelSizes
+	{
+		4,
+		2,
+		1,
+
+		// TODO: Implement
+		0,
+		0,
+		0
 	};
 }

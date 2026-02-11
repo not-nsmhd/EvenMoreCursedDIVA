@@ -17,6 +17,14 @@ namespace Starshine::Rendering::Render2D
 		Count
 	};
 
+	constexpr std::array<std::string_view, EnumCount<BlendMode>()> BlendModeNames
+	{
+		"Normal",
+		"Add",
+		"Multiply",
+		"Overlay"
+	};
+
 	struct SpriteVertex
 	{
 		vec2 Position{};
@@ -49,10 +57,6 @@ namespace Starshine::Rendering::Render2D
 
 		void SetSpriteFlip(bool flipHorizontal, bool flipVertical);
 		void SetSpriteColor(const Color& color);
-		
-		// NOTE: Coloring order: top-left, top-right, bottom-left, bottom-right
-		void SetSpriteColors(const Color colors[4]);
-		void SetSpriteColors(const Color& topLeft, const Color& topRight, const Color& bottomLeft, const Color& bottomRight);
 
 		void SetBlendMode(BlendMode mode);
 
@@ -73,6 +77,6 @@ namespace Starshine::Rendering::Render2D
 
 	private:
 		struct Impl;
-		Impl* impl = nullptr;
+		std::unique_ptr<Impl> impl{};
 	};
 };

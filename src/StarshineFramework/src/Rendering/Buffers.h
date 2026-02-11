@@ -8,6 +8,7 @@ namespace Starshine::Rendering
 	{
 	public:
 		VertexBuffer() = default;
+		~VertexBuffer() = default;
 
 		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
 	};
@@ -16,6 +17,16 @@ namespace Starshine::Rendering
 	{
 	public:
 		IndexBuffer() = default;
+		~IndexBuffer() = default;
+
+		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
+	};
+
+	struct UniformBuffer : public GFX::GPUResource, NonCopyable
+	{
+	public:
+		UniformBuffer() = default;
+		~UniformBuffer() = default;
 
 		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
 	};

@@ -18,8 +18,8 @@ enum SpriteTextureFlags : u16
 	STXFlags_None = 0,
 
 	STXFlags_NearestFilter = (1 << 0),
-	STXFlags_ClampS = (1 << 1),
-	STXFlags_ClampT = (1 << 2),
+	STXFlags_WrapS = (1 << 1),
+	STXFlags_WrapT = (1 << 2),
 
 	STXFlags_CompressedQOI = (1 << 8),
 	STXFlags_CompressedZLIB = (1 << 9), // TODO: Implement
@@ -32,11 +32,10 @@ int main(int argc, char* argv[])
 	using namespace Starshine::IO;
 
 	SpritePacker sprPacker;
-	sprPacker.Initialize();
-	sprPacker.AddFromDirectory("spr_devtest2");
+	sprPacker.AddFromDirectory("devtest_src");
 	sprPacker.Pack();
 
-	FileStream outputStream = File::CreateWrite("spr_devtest2.dat");
+	FileStream outputStream = File::CreateWrite("devtest.dat");
 	StreamWriter writer = StreamWriter(outputStream);
 
 	writer.WriteBuffer(FileSignature.data(), FileSignature.size());
@@ -77,7 +76,7 @@ int main(int argc, char* argv[])
 				writer.WriteU16(tex->Size.y);
 
 				writer.WriteU16(0); // Base Format (RGBA8)
-				writer.WriteU16(STXFlags_CompressedQOI);
+				writer.WriteU16(0);
 
 				qoi_desc qoiDesc {};
 				qoiDesc.width = tex->Size.x;

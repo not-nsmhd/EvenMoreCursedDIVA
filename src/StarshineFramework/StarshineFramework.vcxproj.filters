@@ -112,6 +112,24 @@
     <ClInclude Include="src\Rendering\D3D11\D3D11Device.h">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Shader.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\D3D11\D3D11VertexDesc.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Buffers.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Texture.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\State.h">
+      <Filter>Source Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\D3D11\D3D11State.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -174,6 +192,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\D3D11\D3D11Device.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\D3D11\D3D11Shader.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\D3D11\D3D11VertexDesc.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\D3D11\D3D11Buffers.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\D3D11\D3D11Texture.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\D3D11\D3D11State.cpp">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClCompile>
   </ItemGroup>

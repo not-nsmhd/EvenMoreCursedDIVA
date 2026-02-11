@@ -1,10 +1,12 @@
 #include "Utilities.h"
 #include "IO/Path/File.h"
 #include "IO/Xml.h"
+#include "Misc/ImageHelper.h"
 
 namespace Starshine::Rendering
 {
 	using namespace IO;
+	using namespace Misc;
 
 	namespace Utilities
 	{
@@ -41,6 +43,22 @@ namespace Starshine::Rendering
 
 			document.Clear();
 #endif
+			return nullptr;
+		}
+
+		std::unique_ptr<Texture> LoadImage(std::string_view filePath)
+		{
+			if (!File::Exists(filePath)) { return nullptr; }
+
+			std::unique_ptr<u8[]> imagePixels{};
+			ivec2 imageSize{};
+			i32 imageChannels{};
+
+			if (ImageHelper::ReadImageFile(filePath, imageSize, imageChannels, imagePixels))
+			{
+				return Rendering::GetDevice()->CreateTexture(imageSize.x, imageSize.y, GFX::TextureFormat::RGBA8, imagePixels.get());
+			}
+
 			return nullptr;
 		}
 	}

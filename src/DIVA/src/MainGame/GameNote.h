@@ -101,6 +101,7 @@ namespace DIVA::MainGame
 			bool Hold{ false };
 		} Trail;
 
+		void UpdateTrail();
 		void DrawTrail();
 
 	public:

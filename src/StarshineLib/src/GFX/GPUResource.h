@@ -7,5 +7,7 @@ namespace Starshine::GFX
 	{
 	public:
 		virtual ~GPUResource() = default;
+
+		virtual void SetDebugName(std::string_view name) {};
 	};
 }

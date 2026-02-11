@@ -7,6 +7,7 @@
 #include "Rendering/VertexDesc.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Texture.h"
+#include "Rendering/State.h"
 #include <memory>
 #include <SDL2/SDL_video.h>
 
@@ -33,28 +34,29 @@ namespace Starshine::Rendering
 		virtual void SwapBuffers() = 0;
 
 	public:
-		virtual void SetBlendState(bool enable, BlendFactor srcColor, BlendFactor destColor, BlendFactor srcAlpha, BlendFactor destAlpha) = 0;
-		virtual void SetBlendOperation(BlendOperation op) = 0;
-
-		virtual void SetFaceCullingState(bool enable, PolygonOrientation backFaceOrientation) = 0;
-
 		virtual void DrawArrays(PrimitiveType type, u32 firstVertex, u32 vertexCount) = 0;
-		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 vertexCount, u32 indexCount) = 0;
+		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 baseVertexIndex, u32 indexCount) = 0;
 
 	public:
 		virtual std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic) = 0;
 		virtual std::unique_ptr<IndexBuffer> CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic) = 0;
-		virtual std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount) = 0;
+		virtual std::unique_ptr<UniformBuffer> CreateUniformBuffer(size_t size, const void* initialData, bool dynamic) = 0;
 
 		virtual std::unique_ptr<Shader> LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize) = 0;
+		virtual std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader) = 0;
 		 
-		virtual std::unique_ptr<Texture> CreateTexture(u32 width, u32 height, GFX::TextureFormat format, bool nearestFilter, bool repeat) = 0;
+		virtual std::unique_ptr<Texture> CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData) = 0;
+
+		virtual std::unique_ptr<BlendState> CreateBlendState(const BlendStateDesc& desc) = 0;
 
 	public:
 		virtual void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc) = 0;
 		virtual void SetIndexBuffer(const IndexBuffer* buffer) = 0;
+		virtual void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
 		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
+
+		virtual void SetBlendState(const BlendState* state) = 0;
 
 	public:
 		bool ResizeViewportOnWindowResize{ true };

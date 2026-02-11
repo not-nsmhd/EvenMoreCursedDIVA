@@ -16,6 +16,9 @@
     <ClCompile Include="src\Graphics\GraphicsTest.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\SpriteRendererTest.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -24,6 +27,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Graphics\GraphicsTest.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\SpriteRendererTest.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
