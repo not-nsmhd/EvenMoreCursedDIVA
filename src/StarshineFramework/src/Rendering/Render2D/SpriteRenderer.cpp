@@ -268,15 +268,10 @@ namespace Starshine::Rendering::Render2D
 
 			Texture* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
-			if (CurrentList.Texture != listTex)
+			if (CurrentList.Texture != listTex || CurrentList.ShapeVertexCount != 0)
 			{
 				if (PushedDrawCommands == 0)
 				{
-					if (CurrentList.ShapeVertexCount != 0)
-					{
-
-					}
-
 					CurrentList.Texture = listTex;
 					CurrentList.PrimitiveType = PrimitiveType::Triangles;
 

@@ -795,6 +795,7 @@ namespace DIVA::MainGame
 			{
 				note.UpdateTrail();
 				note.DrawTrail();
+				spriteRenderer->RenderSprites(nullptr);
 			}
 
 			for (auto& note : ActiveNotes)

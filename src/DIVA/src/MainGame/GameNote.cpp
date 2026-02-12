@@ -32,10 +32,20 @@ namespace DIVA::MainGame
 
 	void GameNote::UpdateTrail()
 	{
+		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart)) { return; }
+
 		if (Type == NoteType::HoldStart && NextNote != nullptr)
 		{
-			Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
-			Trail.End = MathExtensions::Min<f32>(TrailMaxProgress, NextNote->GetNormalizedRemainingTime());
+			if (NextNote->Expired || NextNote->HasBeenHit)
+			{
+				Trail.Start = 0.0f;
+				Trail.End = 0.0f;
+			}
+			else
+			{
+				Trail.Start = MathExtensions::Clamp<f32>(HasBeenHit ? 0.0f : GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
+				Trail.End = MathExtensions::Min<f32>(TrailMaxProgress, NextNote->GetNormalizedRemainingTime());
+			}
 			Trail.Hold = true;
 		}
 
@@ -58,6 +68,8 @@ namespace DIVA::MainGame
 
 	void GameNote::DrawTrail()
 	{
+		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart)) { return; }
+
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
 
