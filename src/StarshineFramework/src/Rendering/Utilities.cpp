@@ -10,45 +10,26 @@ namespace Starshine::Rendering
 
 	namespace Utilities
 	{
-		std::unique_ptr<Shader> LoadShader(std::string_view vsPath, std::string_view fsPath)
+		bool LoadShader(std::string_view vsPath, std::string_view fsPath, std::unique_ptr<Shader>& shader)
 		{
-			if (!File::Exists(vsPath) || !File::Exists(fsPath)) { return nullptr; }
+			if (!File::Exists(vsPath) || !File::Exists(fsPath)) { return false; }
 
 			std::unique_ptr<u8[]> vsData{};
 			size_t vsSize = File::ReadAllBytes(vsPath, vsData);
 
-			if (vsSize == 0) { return nullptr; }
+			if (vsSize == 0) { return false; }
 
 			std::unique_ptr<u8[]> fsData{};
 			size_t fsSize = File::ReadAllBytes(fsPath, fsData);
 
-			if (fsSize == 0) { return nullptr; }
+			if (fsSize == 0) { return false; }
 
-			std::unique_ptr<Shader> shader = Rendering::GetDevice()->LoadShader(vsData.get(), vsSize, fsData.get(), fsSize);
-			return shader;
+			return Rendering::GetDevice()->CreateShader(vsData.get(), vsSize, fsData.get(), fsSize, shader);
 		}
 
-		std::unique_ptr<Shader> LoadShaderFromXml(std::string_view filePath)
+		bool LoadImage(std::string_view filePath, std::unique_ptr<Texture>& texture)
 		{
-#if 0
-			Xml::Document document;
-			if (!Xml::ParseFromFile(document, filePath)) { return nullptr; }
-
-			Xml::Element* root = document.RootElement();
-			Xml::Element* filesElement = root->FirstChildElement("Files");
-
-			if (filesElement != nullptr)
-			{
-			}
-
-			document.Clear();
-#endif
-			return nullptr;
-		}
-
-		std::unique_ptr<Texture> LoadImage(std::string_view filePath)
-		{
-			if (!File::Exists(filePath)) { return nullptr; }
+			if (!File::Exists(filePath)) { return false; }
 
 			std::unique_ptr<u8[]> imagePixels{};
 			ivec2 imageSize{};
@@ -56,10 +37,10 @@ namespace Starshine::Rendering
 
 			if (ImageHelper::ReadImageFile(filePath, imageSize, imageChannels, imagePixels))
 			{
-				return Rendering::GetDevice()->CreateTexture(imageSize.x, imageSize.y, GFX::TextureFormat::RGBA8, imagePixels.get());
+				return Rendering::GetDevice()->CreateTexture(imageSize.x, imageSize.y, GFX::TextureFormat::RGBA8, imagePixels.get(), texture);
 			}
 
-			return nullptr;
+			return false;
 		}
 	}
 }

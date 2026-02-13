@@ -67,7 +67,11 @@ namespace Starshine::Rendering::Render2D
 			return false;
 		}
 
-		Texture = Rendering::GetDevice()->CreateTexture(texSize.x, texSize.y, GFX::TextureFormat::RGBA8, texData.get());
+		if (!Rendering::GetDevice()->CreateTexture(texSize.x, texSize.y, GFX::TextureFormat::RGBA8, texData.get(), Texture))
+		{
+			LogMessage("Failed to create font texture");
+			return false;
+		}
 
 		Xml::Element* charsElement = rootElement->FirstChildElement("chars");
 

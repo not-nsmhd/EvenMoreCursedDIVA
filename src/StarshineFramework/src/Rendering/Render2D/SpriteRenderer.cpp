@@ -156,16 +156,19 @@ namespace Starshine::Rendering::Render2D
 		void Internal_CreateVertexBuffer()
 		{
 			size_t vertexBufferSize = MaxVertices * sizeof(SpriteVertex);
-			GraphicsResources.SpriteVertexBuffer = GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true);
-			GraphicsResources.SpriteVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::SpriteVertexBuffer");
+			GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true, GraphicsResources.SpriteVertexBuffer);
 
 			vertexBufferSize = MaxShapeVertices * sizeof(SpriteVertex);
-			GraphicsResources.ShapeVertexBuffer = GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true);
-			GraphicsResources.ShapeVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::ShapeVertexBuffer");
+			GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true, GraphicsResources.ShapeVertexBuffer);
 
-			GraphicsResources.VertexDesc = GFXDevice->CreateVertexDesc(SpriteVertexAttribs.data(), SpriteVertexAttribs.size(),
-				DefaultSpriteResources.DefaultShader.get());
+			GFXDevice->CreateVertexDesc(SpriteVertexAttribs.data(), SpriteVertexAttribs.size(), 
+				DefaultSpriteResources.DefaultShader.get(), GraphicsResources.VertexDesc);
+
+#if defined(_DEBUG)
+			GraphicsResources.SpriteVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::SpriteVertexBuffer");
+			GraphicsResources.ShapeVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::ShapeVertexBuffer");
 			GraphicsResources.VertexDesc->SetDebugName("[Starshine] SpriteRenderer::SpriteVertexDesc");
+#endif
 		}
 
 		void Internal_CreateIndexBuffer()
@@ -196,8 +199,12 @@ namespace Starshine::Rendering::Render2D
 			}
 
 			size_t indexBufferSize = MaxIndices * sizeof(u16);
-			GraphicsResources.SpriteIndexBuffer = GFXDevice->CreateIndexBuffer(indexBufferSize, IndexFormat::Index16bit, indexData.get(), false);
+			GFXDevice->CreateIndexBuffer(indexBufferSize, IndexFormat::Index16bit, indexData.get(), false, GraphicsResources.SpriteIndexBuffer);
+			
+#if defined (_DEBUG)
 			GraphicsResources.SpriteIndexBuffer->SetDebugName("[Starshine] SpriteRenderer::SpriteIndexBuffer");
+#endif
+
 		}
 	
 		void Internal_CreateBlendStates()
@@ -213,24 +220,24 @@ namespace Starshine::Rendering::Render2D
 			size_t i = 0;
 			for (auto& mode : BlendModes)
 			{
-				mode.StateObject = GFXDevice->CreateBlendState(mode.Desc);
+				GFXDevice->CreateBlendState(mode.Desc, mode.StateObject);
 				mode.StateObject->SetDebugName(debugBlendStateNames[i++]);
 			}
 		}
 
 		void Internal_CreateDefaultSpriteResources()
 		{
-			DefaultSpriteResources.DefaultShader = Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso");
+			Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
 			DefaultSpriteResources.DefaultShader->SetDebugName("[Starshine] SpriteRenderer::DefaultShader");
 
 			static constexpr array<u8, 4> defaultTexData { 0xFF, 0xFF, 0xFF, 0xFF };
-			DefaultSpriteResources.DefaultTexture = GFXDevice->CreateTexture(1, 1, TextureFormat::RGBA8, defaultTexData.data());
+			GFXDevice->CreateTexture(1, 1, TextureFormat::RGBA8, defaultTexData.data(), DefaultSpriteResources.DefaultTexture);
 			DefaultSpriteResources.DefaultTexture->SetDebugName("[Starshine] SpriteRenderer::DefaultTexture");
 		}
 
 		void Internal_CreateShaderUniformBuffer()
 		{
-			GraphicsResources.ShaderUniformBuffer = GFXDevice->CreateUniformBuffer(sizeof(ShaderUniformsBufferData), nullptr, false);
+			GFXDevice->CreateUniformBuffer(sizeof(ShaderUniformsBufferData), nullptr, false, GraphicsResources.ShaderUniformBuffer);
 			GraphicsResources.ShaderUniformBuffer->SetDebugName("[Starshine] SpriteRenderer::ShaderUniformBuffer");
 		}
 

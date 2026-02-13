@@ -32,16 +32,16 @@ namespace Starshine::Rendering::D3D11
 		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 baseVertexIndex, u32 indexCount);
 
 	public:
-		std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic);
-		std::unique_ptr<IndexBuffer> CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic);
-		std::unique_ptr<UniformBuffer> CreateUniformBuffer(size_t size, const void* initialData, bool dynamic);
+		bool CreateVertexBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<VertexBuffer>& buffer);
+		bool CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic, std::unique_ptr<IndexBuffer>& buffer);
+		bool CreateUniformBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<UniformBuffer>& buffer);
 
-		std::unique_ptr<Shader> LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize);
-		std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib * attribs, size_t attribCount, const Shader* shader);
+		bool CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader);
+		bool CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc);
 
-		std::unique_ptr<Texture> CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData);
+		bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture);
 
-		std::unique_ptr<BlendState> CreateBlendState(const BlendStateDesc& desc);
+		bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state);
 
 	public:
 		void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc);

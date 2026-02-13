@@ -453,61 +453,62 @@ namespace Starshine::Rendering::D3D11
 		impl->DrawIndexed(type, firstIndex, baseVertexIndex, indexCount);
 	}
 
-	std::unique_ptr<VertexBuffer> D3D11Device::CreateVertexBuffer(size_t size, const void* initialData, bool dynamic)
+	bool D3D11Device::CreateVertexBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<VertexBuffer>& buffer)
 	{
-		if ((!dynamic && initialData == nullptr) || (size == 0)) { return nullptr; }
+		if ((!dynamic && initialData == nullptr) || (size == 0)) { return false; }
 
-		std::unique_ptr<D3D11VertexBuffer> vertexBuffer = std::make_unique<D3D11VertexBuffer>(GetBaseDevice(), size, dynamic, initialData);
-		return vertexBuffer;
+		buffer = std::make_unique<D3D11VertexBuffer>(GetBaseDevice(), size, dynamic, initialData);
+		return true;
 	}
 
-	std::unique_ptr<IndexBuffer> D3D11Device::CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic)
+	bool D3D11Device::CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic, std::unique_ptr<IndexBuffer>& buffer)
 	{
-		if ((!dynamic && initialData == nullptr) || (size == 0)) { return nullptr; }
+		if ((!dynamic && initialData == nullptr) || (size == 0)) { return false; }
 
-		std::unique_ptr<D3D11IndexBuffer> indexBuffer = std::make_unique<D3D11IndexBuffer>(GetBaseDevice(), format, size, dynamic, initialData);
-		return indexBuffer;
+		buffer = std::make_unique<D3D11IndexBuffer>(GetBaseDevice(), format, size, dynamic, initialData);
+		return true;
 	}
 
-	std::unique_ptr<UniformBuffer> D3D11Device::CreateUniformBuffer(size_t size, const void* initialData, bool dynamic)
+	bool D3D11Device::CreateUniformBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<UniformBuffer>& buffer)
 	{
-		if (size == 0) { return nullptr; }
+		if (size == 0) { return false; }
 
-		std::unique_ptr<D3D11UniformBuffer> uniformBuffer = std::make_unique<D3D11UniformBuffer>(GetBaseDevice(), size, dynamic, initialData);
-		return uniformBuffer;
+		buffer = std::make_unique<D3D11UniformBuffer>(GetBaseDevice(), size, dynamic, initialData);
+		return true;
 	}
 
-	std::unique_ptr<Shader> D3D11Device::LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize)
+	bool D3D11Device::CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader)
 	{
-		std::unique_ptr<D3D11Shader> shader = std::make_unique<D3D11Shader>(GetBaseDevice(),
+		if (vsData == nullptr || fsData == nullptr || vsSize == 0 || fsSize == 0) { return false; }
+
+		shader = std::make_unique<D3D11Shader>(GetBaseDevice(),
 			D3D11ShaderConstBytecode{ reinterpret_cast<const u8*>(vsData), vsSize }, D3D11ShaderConstBytecode{ reinterpret_cast<const u8*>(fsData), fsSize });
 
-		if (!shader->IsUsable()) { return nullptr; }
-		return shader;
+		return true;
 	}
 
-	std::unique_ptr<VertexDesc> D3D11Device::CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader)
+	bool D3D11Device::CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc)
 	{
-		if (shader == nullptr || attribs == nullptr || attribCount == 0 || attribCount > 8) { return nullptr; }
+		if (shader == nullptr || attribs == nullptr || attribCount == 0 || attribCount > 8) { return false; }
 
 		const D3D11Shader* d3dShader = static_cast<const D3D11Shader*>(shader);
-		std::unique_ptr<D3D11VertexDesc> vertexDesc = std::make_unique<D3D11VertexDesc>(
-			GetBaseDevice(), attribs, attribCount, d3dShader->VertexShaderBytecode);
+		desc = std::make_unique<D3D11VertexDesc>(GetBaseDevice(), attribs, attribCount, d3dShader->VertexShaderBytecode);
 
-		return vertexDesc;
+		return true;
 	}
 
-	std::unique_ptr<Texture> D3D11Device::CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData)
+	bool D3D11Device::CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture)
 	{
-		if (initialData == nullptr) { return nullptr; }
-		std::unique_ptr<D3D11Texture> d3dTexture = std::make_unique<D3D11Texture>(GetBaseDevice(), width, height, format, initialData, false);
+		if (initialData == nullptr) { return false; }
+		texture = std::make_unique<D3D11Texture>(GetBaseDevice(), width, height, format, initialData, false);
 
-		return d3dTexture;
+		return true;
 	}
 
-	std::unique_ptr<BlendState> D3D11Device::CreateBlendState(const BlendStateDesc& desc)
+	bool D3D11Device::CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state)
 	{
-		return std::make_unique<D3D11BlendState>(GetBaseDevice(), desc);
+		state = std::make_unique<D3D11BlendState>(GetBaseDevice(), desc);
+		return true;
 	}
 
 	void D3D11Device::SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc)

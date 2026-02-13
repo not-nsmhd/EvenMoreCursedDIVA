@@ -49,8 +49,11 @@ namespace Starshine::Rendering::Render2D
 			const SheetTextureInfo* texInfo = spritePacker.GetTextureInfo(static_cast<i32>(i));
 			if (texInfo != nullptr)
 			{
-				std::unique_ptr<Texture> gpuTex = device->CreateTexture(texInfo->Size.x, texInfo->Size.y, TextureFormat::RGBA8, texInfo->Data.get());
-				textures.push_back(std::move(gpuTex));
+				std::unique_ptr<Texture> gpuTex{};
+				if (device->CreateTexture(texInfo->Size.x, texInfo->Size.y, TextureFormat::RGBA8, texInfo->Data.get(), gpuTex))
+				{
+					textures.push_back(std::move(gpuTex));
+				}
 			}
 		}
 	}

@@ -38,16 +38,16 @@ namespace Starshine::Rendering
 		virtual void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 baseVertexIndex, u32 indexCount) = 0;
 
 	public:
-		virtual std::unique_ptr<VertexBuffer> CreateVertexBuffer(size_t size, const void* initialData, bool dynamic) = 0;
-		virtual std::unique_ptr<IndexBuffer> CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic) = 0;
-		virtual std::unique_ptr<UniformBuffer> CreateUniformBuffer(size_t size, const void* initialData, bool dynamic) = 0;
+		virtual bool CreateVertexBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<VertexBuffer>& buffer) = 0;
+		virtual bool CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic, std::unique_ptr<IndexBuffer>& buffer) = 0;
+		virtual bool CreateUniformBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<UniformBuffer>& buffer) = 0;
 
-		virtual std::unique_ptr<Shader> LoadShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize) = 0;
-		virtual std::unique_ptr<VertexDesc> CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader) = 0;
+		virtual bool CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader) = 0;
+		virtual bool CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc) = 0;
 		 
-		virtual std::unique_ptr<Texture> CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData) = 0;
+		virtual bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture) = 0;
 
-		virtual std::unique_ptr<BlendState> CreateBlendState(const BlendStateDesc& desc) = 0;
+		virtual bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state) = 0;
 
 	public:
 		virtual void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc) = 0;
