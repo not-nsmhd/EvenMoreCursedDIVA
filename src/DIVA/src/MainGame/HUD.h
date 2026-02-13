@@ -23,6 +23,8 @@ namespace DIVA::MainGame
 		void SetScoreBonusDisplayState(u32 value, vec2& position);
 		void HoldScoreBonus();
 		void ReleaseScoreBonus(bool drop);
+
+		void SetLyricsText(std::string_view text, const Starshine::Color& color = Starshine::DefaultColors::White);
 	private:
 		MainGameContext& mainGameContext;
 

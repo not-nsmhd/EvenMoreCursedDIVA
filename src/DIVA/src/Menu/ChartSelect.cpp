@@ -80,6 +80,7 @@ namespace DIVA::Menu
 				{
 					auto mgState = std::make_unique<MainGame::MainGameState>();
 					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
+					mgState->LoadSettings.LyricsPath = info.LyricsFilePath;
 					mgState->LoadSettings.MusicPath = info.MusicFilePath;
 					GameInstance->SetState(std::move(mgState));
 				}

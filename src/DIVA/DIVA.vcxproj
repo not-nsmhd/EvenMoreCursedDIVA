@@ -99,6 +99,7 @@
     <ClCompile Include="src\MainGame\Chart.cpp" />
     <ClCompile Include="src\MainGame\GameNote.cpp" />
     <ClCompile Include="src\MainGame\HUD.cpp" />
+    <ClCompile Include="src\MainGame\Lyrics.cpp" />
     <ClCompile Include="src\MainGame\MainGame.cpp" />
     <ClCompile Include="src\Menu\ChartSelect.cpp" />
   </ItemGroup>
@@ -113,6 +114,7 @@
     <ClInclude Include="src\MainGame\GameNote.h" />
     <ClInclude Include="src\MainGame\HitEvaluation.h" />
     <ClInclude Include="src\MainGame\HUD.h" />
+    <ClInclude Include="src\MainGame\Lyrics.h" />
     <ClInclude Include="src\MainGame\MainGame.h" />
     <ClInclude Include="src\Menu\ChartSelect.h" />
   </ItemGroup>

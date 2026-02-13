@@ -7,17 +7,22 @@ namespace DIVA::Formats
 	using namespace Starshine;
 	using namespace Starshine::IO;
 
+	namespace PropertyNames
+	{
+		static constexpr std::string_view SongInfo = "SongInfo";
+		static constexpr std::string_view SongName = "Name";
+
+		static constexpr std::string_view ChartFileList = "Charts";
+		static constexpr std::string_view LyricsFile = "LyricsFile";
+		static constexpr std::string_view MusicFile = "MusicFile";
+	}
+
 	bool SongInfo::ParseFromFile(std::string_view filePath)
 	{
 		if (!File::Exists(filePath)) { return false; }
 
-		std::unique_ptr<u8[]> fileData;
-		size_t fileSize = File::ReadAllBytes(filePath, fileData);
-
-		if (fileSize == 0 || fileData == nullptr) { return false; }
-
 		Xml::Document infoDocument;
-		if (!Xml::Parse(infoDocument, reinterpret_cast<const char*>(fileData.get()), fileSize)) { return false; }
+		if (!Xml::ParseFromFile(infoDocument, filePath)) { return false; }
 
 		// --------------
 
@@ -39,7 +44,7 @@ namespace DIVA::Formats
 
 		while (childElement != nullptr)
 		{
-			if (!::strncmp(childElement->Name(), "Charts", 8))
+			if (!::strncmp(childElement->Name(), PropertyNames::ChartFileList.data(), PropertyNames::ChartFileList.size()))
 			{
 				for (size_t i = 0; i < EnumCount<ChartDifficulty>(); i++)
 				{
@@ -49,7 +54,11 @@ namespace DIVA::Formats
 					getAttributeValue(chartPathElement, "Path", ChartFilePaths[i]);
 				}
 			}
-			else if (!::strncmp(childElement->Name(), "MusicFile", 11))
+			else if (!::strncmp(childElement->Name(), PropertyNames::LyricsFile.data(), PropertyNames::LyricsFile.size()))
+			{
+				getAttributeValue(childElement, "Path", LyricsFilePath);
+			}
+			else if (!::strncmp(childElement->Name(), PropertyNames::MusicFile.data(), PropertyNames::MusicFile.size()))
 			{
 				getAttributeValue(childElement, "Path", MusicFilePath);
 			}

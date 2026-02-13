@@ -2,6 +2,7 @@
 #include <Common/MathExt.h>
 #include "MainGame.h"
 #include "Chart.h"
+#include "Lyrics.h"
 #include "GameNote.h"
 #include "HitEvaluation.h"
 #include "HUD.h"
@@ -55,6 +56,9 @@ namespace DIVA::MainGame
 
 		Chart songChart;
 		size_t chartNoteOffset = 0;
+
+		std::vector<Lyrics::Lyric> songLyrics;
+		size_t songLyricsOffset = 0;
 
 		f64 ElapsedTime_Seconds = 0.0;
 		std::deque<GameNote> ActiveNotes;
@@ -135,6 +139,7 @@ namespace DIVA::MainGame
 		void Reset()
 		{
 			chartNoteOffset = 0;
+			songLyricsOffset = 0;
 			ElapsedTime_Seconds = 0.0;
 			ActiveNotes.clear();
 
@@ -256,6 +261,11 @@ namespace DIVA::MainGame
 		{
 			return songChart.LoadXml(chartPath);
 		}
+
+		bool LoadLyrics(std::string_view lyricsPath)
+		{
+			return Lyrics::LoadXml(lyricsPath, songLyrics);
+		}
 		
 		bool LoadMusic(std::string_view musicPath)
 		{
@@ -308,7 +318,7 @@ namespace DIVA::MainGame
 			return nullptr;
 		}
 
-		void UpdateChart(f64 deltaTime_ms)
+		void UpdateChart()
 		{
 			for (auto chartNote = songChart.Notes.cbegin() + chartNoteOffset; chartNote != songChart.Notes.cend(); chartNote++)
 			{
@@ -663,6 +673,23 @@ namespace DIVA::MainGame
 			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
 		}
 
+		void UpdateLyrics()
+		{
+			for (auto lyric = songLyrics.cbegin() + songLyricsOffset; lyric != songLyrics.cend(); lyric++)
+			{
+				if (lyric->StartTime <= ElapsedTime_Seconds)
+				{
+					if (lyric->EndTime <= ElapsedTime_Seconds)
+					{
+						hud.SetLyricsText("", DefaultColors::Transparent);
+						songLyricsOffset++;
+						continue;
+					}
+					hud.SetLyricsText(lyric->Text, lyric->Color);
+				}
+			}
+		}
+
 		void Update(f64 deltaTime_ms)
 		{
 			if (CurrentSubState == SubState::Results)
@@ -690,26 +717,18 @@ namespace DIVA::MainGame
 					ChartDeltaTime = deltaTime_ms / 1000.0;
 				}
 
-				UpdateChart(ChartDeltaTime);
+				UpdateChart();
+				UpdateLyrics();
 				UpdateActiveNotes(deltaTime_ms);
 
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
 					UpdateInputBinding(KeyboardBinds.Notes[i].EnumValue, KeyboardBinds.Notes[i].MappedValue);
 				}
-#if 0
-				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
-				{
-					UpdateInputGamepadBinding(GamepadBinds.Notes[i].EnumValue, GamepadBinds.Notes[i].MappedValue);
-				}
-#endif
 				hud.Update(deltaTime_ms);
 			}
 
 			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
-#if 0
-			if (Gamepad::IsAnyButtonTapped(GamepadBinds.Pause, nullptr, nullptr))
-#endif
 			{
 				Paused = !Paused;
 				if (MusicSource != SourceHandle::Invalid)
@@ -790,7 +809,6 @@ namespace DIVA::MainGame
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
-			std::array<char, 32> trailText;
 			for (auto& note : ActiveNotes)
 			{
 				note.UpdateTrail();
@@ -847,6 +865,7 @@ namespace DIVA::MainGame
 	bool MainGameState::LoadContent()
 	{
 		impl->LoadChart(LoadSettings.ChartPath);
+		impl->LoadLyrics(LoadSettings.LyricsPath);
 		impl->LoadMusic(LoadSettings.MusicPath);
 		return impl->LoadContent();
 	}

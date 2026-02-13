@@ -26,6 +26,7 @@ namespace DIVA::Formats
 		std::string Name;
 
 		std::array<std::string, Starshine::EnumCount<ChartDifficulty>()> ChartFilePaths;
+		std::string LyricsFilePath;
 		std::string MusicFilePath;
 
 	public:

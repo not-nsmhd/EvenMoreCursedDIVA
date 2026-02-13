@@ -55,6 +55,10 @@ namespace DIVA::MainGame
 			float IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
 
+		std::array<char, 128> LyricsTextBuffer{};
+		Color LyricsColor{};
+		vec2 LyricsTextDisplaySize{};
+
 		Impl(MainGame::MainGameContext& context) : mainGameContext{ context }
 		{
 		}
@@ -68,6 +72,9 @@ namespace DIVA::MainGame
 			ComboDisplayState.HitEvaluation = HitEvaluation::None;
 			ScoreBonusDisplay.Value = 0;
 			ScoreDisplay.DisplayValue = 0;
+
+			::memset(LyricsTextBuffer.data(), 0, LyricsTextBuffer.max_size());
+			LyricsTextDisplaySize = {};
 		}
 
 		bool LoadSprites(GFX::SpritePacker& sprPacker)
@@ -297,6 +304,24 @@ namespace DIVA::MainGame
 			}
 			ScoreBonusDisplay.Held = false;
 		}
+
+		void SetLyricsText(std::string_view text, const Color& color)
+		{
+			::strncpy_s(LyricsTextBuffer.data(), LyricsTextBuffer.max_size(), text.data(), LyricsTextBuffer.size());
+			LyricsTextDisplaySize = mainGameContext.SpriteRenderer->Font().MeasureString(mainGameContext.DebugFont, LyricsTextBuffer.data());
+			LyricsColor = color;
+		}
+
+		void DrawLyricsText()
+		{
+			if (LyricsTextBuffer.size() > 0)
+			{
+				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
+				
+				vec2 pos{ 640.0f - LyricsTextDisplaySize.x / 2.0f, 640.0f - LyricsTextDisplaySize.y / 2.0f };
+				fontRenderer.PushString(mainGameContext.DebugFont, LyricsTextBuffer.data(), pos, vec2(1.0f), LyricsColor);
+			}
+		}
 	};
 
 	void HUD::Initialize()
@@ -332,6 +357,7 @@ namespace DIVA::MainGame
 		impl->DrawComboDisplay(deltaTime_ms);
 		impl->DrawScoreBonusDisplay(deltaTime_ms);
 		impl->DrawScoreDisplay();
+		impl->DrawLyricsText();
 	}
 
 	void HUD::SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, bool wrong, vec2& position)
@@ -363,5 +389,10 @@ namespace DIVA::MainGame
 	void HUD::ReleaseScoreBonus(bool drop)
 	{
 		impl->ReleaseScoreBonusDisplay(drop);
+	}
+
+	void HUD::SetLyricsText(std::string_view text, const Color& color)
+	{
+		impl->SetLyricsText(text, color);
 	}
 }

@@ -44,6 +44,9 @@
     <ClCompile Include="src\GameContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MainGame\Lyrics.cpp">
+      <Filter>Source Files\MainGame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -77,6 +80,9 @@
     </ClInclude>
     <ClInclude Include="src\GameContext.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MainGame\Lyrics.h">
+      <Filter>Source Files\MainGame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
