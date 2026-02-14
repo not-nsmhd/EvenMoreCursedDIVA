@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClCompile Include="src\Graphics\GraphicsTest.cpp" />
     <ClCompile Include="src\Graphics\SpriteRendererTest.cpp" />
+    <ClCompile Include="src\GUI\ImGuiTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +111,7 @@
   <ItemGroup>
     <ClInclude Include="src\Graphics\GraphicsTest.h" />
     <ClInclude Include="src\Graphics\SpriteRendererTest.h" />
+    <ClInclude Include="src\GUI\ImGuiTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

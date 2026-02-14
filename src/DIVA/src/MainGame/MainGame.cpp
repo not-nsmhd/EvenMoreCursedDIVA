@@ -826,7 +826,6 @@ namespace DIVA::MainGame
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			spriteRenderer->RenderSprites(nullptr);
-			GFXDevice->SwapBuffers();
 		}
 
 		void DrawResults()
@@ -843,7 +842,6 @@ namespace DIVA::MainGame
 			}
 
 			spriteRenderer->RenderSprites(nullptr);
-			GFXDevice->SwapBuffers();
 		}
 	};
 

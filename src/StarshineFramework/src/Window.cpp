@@ -31,6 +31,11 @@ namespace Starshine
 		return result;
 	}
 
+	void Window::CenterWindow()
+	{
+		SDL_SetWindowPosition(baseWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	}
+
 	void Window::SetResizing(bool allow)
 	{
 		SDL_SetWindowResizable(baseWindow, allow ? SDL_TRUE : SDL_FALSE);

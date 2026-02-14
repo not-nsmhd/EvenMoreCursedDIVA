@@ -23,7 +23,7 @@ struct SpriteRendererTest::Impl
 
 	void LoadContent()
 	{
-		TestTexture = Rendering::Utilities::LoadImage("testfiles/test.png");
+		Rendering::Utilities::LoadImage("testfiles/test.png", TestTexture);
 		TestTexture->SetDebugName("TestTexture");
 		spriteRenderer = std::make_unique<SpriteRenderer>();
 	}
@@ -49,8 +49,6 @@ struct SpriteRendererTest::Impl
 		spriteRenderer->PushSprite(TestTexture.get());
 
 		spriteRenderer->RenderSprites(nullptr);
-
-		Rendering::GetDevice()->SwapBuffers();
 	}
 };
 

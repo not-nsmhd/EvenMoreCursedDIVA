@@ -7,6 +7,12 @@
 #include "Input/Gamepad.h"
 #include "Audio/AudioEngine.h"
 
+#include "ImGui/imgui.h"
+#include "ImGui/backends/imgui_impl_sdl2.h"
+#include "ImGui/backends/imgui_impl_dx11.h"
+#include "Rendering/D3D11/D3D11Device.h"
+#include "ImGui/imgui_styles.h"
+
 namespace Starshine
 {
 	using namespace Rendering;
@@ -77,6 +83,29 @@ namespace Starshine
 
 			AudioEngine::CreateInstance();
 
+			IMGUI_CHECKVERSION();
+			ImGui::CreateContext();
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+			ImGui_ImplSDL2_InitForD3D(Parent->GameWindow->GetBaseWindow());
+
+			// HACK: no Starshine::Rendering wrapper yet...
+			// TODO: Add option to disable ImGui at compile time
+			if (Rendering::GetDeviceType() == Rendering::DeviceType::D3D11)
+			{
+				Rendering::D3D11::D3D11Device* gfxDevice = static_cast<Rendering::D3D11::D3D11Device*>(Rendering::GetDevice());
+				ID3D11Device* d3dDevice = gfxDevice->GetBaseDevice();
+				ID3D11DeviceContext* d3dDevContext = nullptr;
+				d3dDevice->GetImmediateContext(&d3dDevContext);
+				ImGui_ImplDX11_Init(d3dDevice, d3dDevContext);
+			}
+
+			ImGuiStyle& style = ImGui::GetStyle();
+			style.FontSizeBase = 18.0f;
+			io.Fonts->AddFontFromFileTTF("imgui/SourceSans3-Regular.ttf");
+			ImGuiStyles::ApplyImGuiStyle();
+
 			return true;
 		}
 
@@ -87,6 +116,10 @@ namespace Starshine
 				CurrentState->UnloadContent();
 				CurrentState->Destroy();
 			}
+
+			ImGui_ImplDX11_Shutdown();
+			ImGui_ImplSDL2_Shutdown();
+			ImGui::DestroyContext();
 
 			AudioEngine::DestroyInstance();
 
@@ -131,6 +164,10 @@ namespace Starshine
 
 		void Loop()
 		{
+			// HACK: This is to make sure that the viewport is set to the correct size if the game resizes the window before entering the loop
+			ivec2 windowSize = Parent->GameWindow->GetSize();
+			GFXDevice->OnWindowResize(windowSize.x, windowSize.y);
+
 			while (Running)
 			{
 				UpdateTimingData();
@@ -139,6 +176,9 @@ namespace Starshine
 
 				while (SDL_PollEvent(&SDLEvent))
 				{
+					ImGui_ImplSDL2_ProcessEvent(&SDLEvent);
+					ImGuiIO& io = ImGui::GetIO();
+
 					switch (SDLEvent.type)
 					{
 					case SDL_QUIT:
@@ -157,7 +197,7 @@ namespace Starshine
 						break;
 					case SDL_KEYDOWN:
 					case SDL_KEYUP:
-						Keyboard::Poll(SDLEvent.key);
+						if (!io.WantCaptureKeyboard) { Keyboard::Poll(SDLEvent.key); }
 						break;
 					case SDL_CONTROLLERDEVICEADDED:
 						Gamepad::Connect(SDLEvent.cdevice.which);
@@ -174,13 +214,20 @@ namespace Starshine
 					}
 				}
 
+				ImGui_ImplSDL2_NewFrame();
+				ImGui_ImplDX11_NewFrame();
+				ImGui::NewFrame();
+
 				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Update(Timing.DeltaTime_Milliseconds); }
 				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Draw(Timing.DeltaTime_Milliseconds); }
 				else
 				{
 					GFXDevice->Clear(ClearFlags_Color, DefaultColors::Black, 1.0f, 0);
-					GFXDevice->SwapBuffers();
 				}
+
+				ImGui::Render();
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+				GFXDevice->SwapBuffers();
 
 				Timing.FirstFrame = false;
 			}

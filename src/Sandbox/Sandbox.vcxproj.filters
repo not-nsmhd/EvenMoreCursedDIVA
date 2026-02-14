@@ -8,6 +8,9 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{7c0b195c-299c-48d1-9a7c-d3f40ee6412a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{8c9ab83e-0993-4312-bef3-92ffa5b38fc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -18,6 +21,9 @@
     </ClCompile>
     <ClCompile Include="src\Graphics\SpriteRendererTest.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GUI\ImGuiTest.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="src\Graphics\SpriteRendererTest.h">
       <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GUI\ImGuiTest.h">
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

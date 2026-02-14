@@ -15,6 +15,7 @@ namespace Starshine
 
 		void SetSize(const ivec2& newSize);
 		ivec2 GetSize() const;
+		void CenterWindow();
 
 		void SetResizing(bool allow);
 		bool CanBeResized() const;

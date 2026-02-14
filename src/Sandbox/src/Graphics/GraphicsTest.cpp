@@ -66,33 +66,21 @@ bool TestState::Initialize()
 
 bool TestState::LoadContent()
 {
-	blendState = GFXDevice->CreateBlendState(alphaBlendDesc);
+	GFXDevice->CreateBlendState(alphaBlendDesc, blendState);
 
-	testShader = Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso");
-	vertexDesc = GFXDevice->CreateVertexDesc(testVertexDesc.data(), testVertexDesc.size(), testShader.get());
-	vertexBuffer = GFXDevice->CreateVertexBuffer(testVertexData.size() * sizeof(TestVertex), testVertexData.data(), false);
-	indexBuffer = GFXDevice->CreateIndexBuffer(testIndexData.size() * sizeof(u16), IndexFormat::Index16bit, testIndexData.data(), false);
-	uniformBuffer = GFXDevice->CreateUniformBuffer(sizeof(VertexShaderUniforms), nullptr, false);
+	Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso", testShader);
+	GFXDevice->CreateVertexDesc(testVertexDesc.data(), testVertexDesc.size(), testShader.get(), vertexDesc);
+	GFXDevice->CreateVertexBuffer(testVertexData.size() * sizeof(TestVertex), testVertexData.data(), false, vertexBuffer);
+	GFXDevice->CreateIndexBuffer(testIndexData.size() * sizeof(u16), IndexFormat::Index16bit, testIndexData.data(), false, indexBuffer);
+	GFXDevice->CreateUniformBuffer(sizeof(VertexShaderUniforms), nullptr, false, uniformBuffer);
 
-	std::unique_ptr<u8[]> testTexData{};
-	ivec2 texSize{};
-	i32 texChannels{};
-
-	Misc::ImageHelper::ReadImageFile("testfiles/test2.png", texSize, texChannels, testTexData);
-	testTexture = GFXDevice->CreateTexture(texSize.x, texSize.y, TextureFormat::RGBA8, testTexData.get());
-	testTexData = nullptr;
+	Rendering::Utilities::LoadImage("testfiles/test2.png", testTexture);
 
 	return true;
 }
 
 void TestState::UnloadContent()
 {
-	blendState = nullptr;
-	vertexBuffer = nullptr;
-	indexBuffer = nullptr;
-	vertexDesc = nullptr;
-	testShader = nullptr;
-	testTexture = nullptr;
 }
 
 void TestState::Destroy()
@@ -122,8 +110,6 @@ void TestState::Draw(f64 deltaTime_milliseconds)
 
 	GFXDevice->SetTexture(testTexture.get(), 0);
 	GFXDevice->DrawIndexed(PrimitiveType::Triangles, 0, 0, 6);
-
-	GFXDevice->SwapBuffers();
 }
 
 std::string_view TestState::GetStateName() const
