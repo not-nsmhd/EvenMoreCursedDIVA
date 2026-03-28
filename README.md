@@ -1,16 +1,14 @@
-(todo)
-
 # Even More Cursed DIVA/Starshine
 ![Main Game Screenshot](readme_img/Screenshot_MainGame.png)
 
-A Project DIVA ⭐⭐⭐rip-off⭐⭐⭐ written in C++ and using OpenGL 1.4 with ARB extensions (and Direct3D 9, I guess) ✅✅❌✅❌❌❌✅❌❌❌
+A Project DIVA ⭐⭐⭐rip-off⭐⭐⭐ written in C++ ✅✅❌✅❌❌❌✅❌❌❌
 
 ### Preamble
 Among sus has ruined my life
 
 I can't take it any more. Among Us has singlehandedly ruined my life. The other day my teacher was teaching us Greek Mythology and he mentioned a pegasus and I immediately thought 'Pegasus? more like Mega Sus!!!!' and I've never wanted to die more. I can't look at a vent without breaking down and sobbing in shambles. I can't eat pasta without thinking 'IMPASTA??? THATS PRETTY SUS!!!!' Skit 4 by Kanye West. The lyrics ruined me. A Mongoose, or the 25th island of greece. The scientific name for pig. I CAN'T take it anymore. Please end my suffering.
 
-Having that said, here's some shitty code I'm currently working on. The project itself is actually a custom game engine thing named Starshine and written with compatibility with Windows XP-era integrated GPUs in mind (such as Intel GMA 3150). The "Project DIVA" part of this is actually a test game for said engine (i'm really good with my game ideas). If you're curious about the name, I guess I seem to really like that equilateral concave decagon that most people refer to as "star" (yes, I looked that up on Wikipedia) and I thought that the name "Starshine" sounded really cool, or something along those lines.
+Having that said, here's some shitty code I'm currently working on. The project itself is actually a custom game engine thing named Starshine ~~and written with compatibility with Windows XP-era integrated GPUs in mind (such as Intel GMA 3150)~~(*not anymore, oops*). The "Project DIVA" part of this is actually a test game for said engine (i'm really good with my game ideas). If you're curious about the name, I guess I seem to really like that equilateral concave decagon that most people refer to as "star" (yes, I looked that up on Wikipedia) and I thought that the name "Starshine" sounded really cool, or something along those lines.
 
 Naming really do be hard...
 
