@@ -16,8 +16,8 @@ namespace DIVA::MainGame
 		bool LoadSprites(Starshine::GFX::SpritePacker& sprPacker);
 
 		void Destroy();
-		void Update(float deltaTime_ms);
-		void Draw(float deltaTime_ms);
+		void Update(Starshine::GameTime& gameTime);
+		void Draw(Starshine::GameTime& gameTime);
 
 		void SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, bool wrong, vec2& position);
 		void SetScoreBonusDisplayState(u32 value, vec2& position);

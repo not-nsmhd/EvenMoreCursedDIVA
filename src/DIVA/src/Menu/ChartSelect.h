@@ -17,8 +17,8 @@ namespace DIVA::Menu
 		void UnloadContent();
 		void Destroy();
 
-		void Update(f64 deltaTime_ms);
-		void Draw(f64 deltaTime_ms);
+		void Update(Starshine::GameTime& gameTime);
+		void Draw(Starshine::GameTime& gameTime);
 
 		std::string_view GetStateName() const;
 

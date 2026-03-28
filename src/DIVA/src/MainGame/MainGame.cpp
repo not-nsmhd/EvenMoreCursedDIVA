@@ -60,7 +60,7 @@ namespace DIVA::MainGame
 		std::vector<Lyrics::Lyric> songLyrics;
 		size_t songLyricsOffset = 0;
 
-		f64 ElapsedTime_Seconds = 0.0;
+		TimeSpan ElapsedTime{};
 		std::deque<GameNote> ActiveNotes;
 
 		bool IsChanceTime{ false };
@@ -140,7 +140,7 @@ namespace DIVA::MainGame
 		{
 			chartNoteOffset = 0;
 			songLyricsOffset = 0;
-			ElapsedTime_Seconds = 0.0;
+			ElapsedTime = {};
 			ActiveNotes.clear();
 
 			MainGameContext.Score.Score = 0;
@@ -322,9 +322,9 @@ namespace DIVA::MainGame
 		{
 			for (auto chartNote = songChart.Notes.cbegin() + chartNoteOffset; chartNote != songChart.Notes.cend(); chartNote++)
 			{
-				if (chartNote->AppearTime <= ElapsedTime_Seconds)
+				if (chartNote->AppearTime <= ElapsedTime)
 				{
-					f32 flyTime = songChart.GetNoteTime(chartNote->AppearTime);
+					TimeSpan flyTime = songChart.GetNoteTime(chartNote->AppearTime);
 					const ChanceTime* nextCT = songChart.GetNextChanceTime(chartNote->AppearTime + flyTime);
 
 					if (chartNote->Type == NoteType::HoldEnd) { chartNoteOffset++; break; }
@@ -332,7 +332,7 @@ namespace DIVA::MainGame
 					GameNote& newNote = ActiveNotes.emplace_back(*chartNote, MainGameContext);
 					newNote.FlyTime = flyTime;
 
-					if (nextCT != nullptr && chartNote->AppearTime + flyTime >= nextCT->StartTime && chartNote->AppearTime + flyTime <= nextCT->EndTime)
+					if (nextCT != nullptr && chartNote->AppearTime >= nextCT->StartTime && chartNote->AppearTime <= nextCT->EndTime)
 					{
 						newNote.ActiveDuringChanceTime = true;
 					}
@@ -343,7 +343,7 @@ namespace DIVA::MainGame
 					{
 						GameNote& holdEndNote = ActiveNotes.emplace_back(*chartNote->NextNote, MainGameContext);
 						holdEndNote.FlyTime = songChart.GetNoteTime(chartNote->NextNote->AppearTime);
-						holdEndNote.ElapsedTime = ElapsedTime_Seconds - chartNote->NextNote->AppearTime;
+						holdEndNote.ElapsedTime = ElapsedTime - chartNote->NextNote->AppearTime;
 
 						holdEndNote.Trail.ScrollResetThreshold = newNote.Trail.ScrollResetThreshold;
 
@@ -357,14 +357,14 @@ namespace DIVA::MainGame
 
 			if (NextChanceTime == nullptr && songChart.ChanceTimes.size() > PassedChanceTimes)
 			{
-				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime_Seconds);
+				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime.GetSeconds());
 			}
 
 			if (NextChanceTime != nullptr)
 			{
-				if (NextChanceTime->StartTime <= ElapsedTime_Seconds)
+				if (NextChanceTime->StartTime <= ElapsedTime.GetSeconds())
 				{
-					if (NextChanceTime->EndTime <= ElapsedTime_Seconds)
+					if (NextChanceTime->EndTime <= ElapsedTime.GetSeconds())
 					{
 						IsChanceTime = false;
 						NextChanceTime = nullptr;
@@ -375,7 +375,7 @@ namespace DIVA::MainGame
 			}
 		}
 
-		void UpdateActiveNotes(f64 deltaTime_ms)
+		void UpdateActiveNotes(GameTime& gameTime)
 		{
 			size_t noteIndex = 0;
 			while (noteIndex < ActiveNotes.size())
@@ -408,7 +408,7 @@ namespace DIVA::MainGame
 					}
 				}
 
-				note->Update(deltaTime_ms);
+				note->Update(gameTime);
 				noteIndex++;
 			}
 		}
@@ -677,9 +677,9 @@ namespace DIVA::MainGame
 		{
 			for (auto lyric = songLyrics.cbegin() + songLyricsOffset; lyric != songLyrics.cend(); lyric++)
 			{
-				if (lyric->StartTime <= ElapsedTime_Seconds)
+				if (lyric->StartTime <= ElapsedTime.GetSeconds())
 				{
-					if (lyric->EndTime <= ElapsedTime_Seconds)
+					if (lyric->EndTime <= ElapsedTime.GetSeconds())
 					{
 						hud.SetLyricsText("", DefaultColors::Transparent);
 						songLyricsOffset++;
@@ -690,15 +690,15 @@ namespace DIVA::MainGame
 			}
 		}
 
-		void Update(f64 deltaTime_ms)
+		void Update(GameTime& gameTime)
 		{
 			if (CurrentSubState == SubState::Results)
 			{
-				UpdateResults(deltaTime_ms);
+				UpdateResults();
 				return;
 			}
 
-			if (ElapsedTime_Seconds >= songChart.Duration)
+			if (ElapsedTime.GetSeconds() >= songChart.Duration)
 			{
 				CurrentSubState = SubState::Results;
 				return;
@@ -706,26 +706,24 @@ namespace DIVA::MainGame
 
 			if (!Paused)
 			{	
-				if (MusicSource != SourceHandle::Invalid && MusicVoice.IsPlaying())
+				if (MusicSource != SourceHandle::Invalid)
 				{
-					ElapsedTime_Seconds = static_cast<f64>(MusicVoice.GetFramePosition()) / 44100.0;
-					ChartDeltaTime = deltaTime_ms / 1000.0;
+					ElapsedTime = TimeSpanConversion::FromSeconds(static_cast<f64>(MusicVoice.GetFramePosition() / 44100.0));
 				}
 				else
 				{
-					ElapsedTime_Seconds += deltaTime_ms / 1000.0;
-					ChartDeltaTime = deltaTime_ms / 1000.0;
+					ElapsedTime += gameTime.ElapsedFrameTime;
 				}
 
 				UpdateChart();
 				UpdateLyrics();
-				UpdateActiveNotes(deltaTime_ms);
+				UpdateActiveNotes(gameTime);
 
 				for (size_t i = 0; i < EnumCount<NoteShape>(); i++)
 				{
 					UpdateInputBinding(KeyboardBinds.Notes[i].EnumValue, KeyboardBinds.Notes[i].MappedValue);
 				}
-				hud.Update(deltaTime_ms);
+				hud.Update(gameTime);
 			}
 
 			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
@@ -740,7 +738,7 @@ namespace DIVA::MainGame
 			SDL_memset(debugText, 0, sizeof(debugText));
 
 			size_t lastPos = 0;
-			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f\n", ElapsedTime_Seconds);
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f\n", ElapsedTime.GetSeconds());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
 			if (Paused)
@@ -749,7 +747,7 @@ namespace DIVA::MainGame
 			}
 		}
 
-		void UpdateResults(f64 deltaTime_ms)
+		void UpdateResults()
 		{
 			if (!resultsSaved)
 			{
@@ -798,7 +796,7 @@ namespace DIVA::MainGame
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Max Combo: %d\n", MainGameContext.Score.MaxCombo);
 		}
 
-		void Draw(f64 deltaTime_ms)
+		void Draw(GameTime& gameTime)
 		{
 			if (CurrentSubState == SubState::Results)
 			{
@@ -818,10 +816,10 @@ namespace DIVA::MainGame
 
 			for (auto& note : ActiveNotes)
 			{
-				note.Draw(deltaTime_ms);
+				note.Draw(gameTime);
 			}
 
-			hud.Draw(deltaTime_ms);
+			hud.Draw(gameTime);
 
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
@@ -878,14 +876,14 @@ namespace DIVA::MainGame
 		impl->Destroy();
 	}
 	
-	void MainGameState::Update(f64 deltaTime_milliseconds)
+	void MainGameState::Update(GameTime& gameTime)
 	{
-		impl->Update(deltaTime_milliseconds);
+		impl->Update(gameTime);
 	}
 	
-	void MainGameState::Draw(f64 deltaTime_milliseconds)
+	void MainGameState::Draw(GameTime& gameTime)
 	{
-		impl->Draw(deltaTime_milliseconds);
+		impl->Draw(gameTime);
 	}
 
 	std::string_view MainGameState::GetStateName() const

@@ -7,6 +7,7 @@
 #include "Rendering/VertexDesc.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Texture.h"
+#include "Rendering/Framebuffer.h"
 #include "Rendering/State.h"
 #include <memory>
 #include <SDL2/SDL_video.h>
@@ -28,6 +29,7 @@ namespace Starshine::Rendering
 
 	public:
 		virtual RectangleF GetViewportSize() const = 0;
+		virtual void SetViewportSize(const RectangleF& newSize) = 0;
 
 	public:
 		virtual void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil) = 0;
@@ -47,6 +49,8 @@ namespace Starshine::Rendering
 		 
 		virtual bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture) = 0;
 
+		virtual bool CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer) = 0;
+
 		virtual bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state) = 0;
 
 	public:
@@ -55,6 +59,8 @@ namespace Starshine::Rendering
 		virtual void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
 		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
+		virtual void SetTexture(const Framebuffer* framebuffer, u32 slot) = 0;
+		virtual void SetFramebuffer(Framebuffer* framebuffer) = 0;
 
 		virtual void SetBlendState(const BlendState* state) = 0;
 

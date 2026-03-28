@@ -8,6 +8,7 @@
 #include "D3D11VertexDesc.h"
 #include "D3D11Buffers.h"
 #include "D3D11Texture.h"
+#include "D3D11Framebuffer.h"
 #include "D3D11State.h"
 
 using namespace Microsoft::WRL;
@@ -67,6 +68,7 @@ namespace Starshine::Rendering::D3D11
 
 		D3D11_VIEWPORT CurrentViewport{};
 		D3D11_RECT CurrentScissorRect{};
+		ID3D11RenderTargetView* CurrentRTView{};
 
 		struct DrawCheckFlagsData
 		{
@@ -171,6 +173,7 @@ namespace Starshine::Rendering::D3D11
 			D3D11.DeviceContext->RSSetViewports(1, &CurrentViewport);
 			D3D11.DeviceContext->RSSetScissorRects(1, &CurrentScissorRect);
 			D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
+			CurrentRTView = SwapChainResources.RTView.Get();
 
 			D3D11_DEPTH_STENCIL_DESC dsStateDesc{};
 			dsStateDesc.DepthEnable = FALSE;
@@ -218,7 +221,7 @@ namespace Starshine::Rendering::D3D11
 					static_cast<FLOAT>(color.A) / 255.0f
 				};
 
-				D3D11.DeviceContext->ClearRenderTargetView(SwapChainResources.RTView.Get(), d3dColor);
+				D3D11.DeviceContext->ClearRenderTargetView(CurrentRTView, d3dColor);
 			}
 
 			bool clearDepth = ((flags & ClearFlags_Depth) != 0);
@@ -233,7 +236,6 @@ namespace Starshine::Rendering::D3D11
 		void SwapBuffers()
 		{
 			SwapChain.DXGISwapChain->Present(1, 0);
-			D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
 		}
 
 		void OnWindowResize(i32 width, i32 height)
@@ -266,6 +268,7 @@ namespace Starshine::Rendering::D3D11
 			D3D11.DeviceContext->RSSetState(D3D11.NoCullRSState.Get());
 
 			D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
+			CurrentRTView = SwapChainResources.RTView.Get();
 
 			LogInfo(LogName, "Main render target and viewport have been resized. New size: %dx%d", width, height);
 		}
@@ -384,6 +387,26 @@ namespace Starshine::Rendering::D3D11
 			}
 		}
 
+		void SetD3DTexture(ID3D11ShaderResourceView* const* textureSRV, ID3D11SamplerState* const* sampler, u32 slot)
+		{
+			D3D11.DeviceContext->PSSetShaderResources(slot, 1, textureSRV);
+			D3D11.DeviceContext->PSSetSamplers(slot, 1, sampler);
+		}
+
+		void SetFramebuffer(D3D11Framebuffer* framebuffer)
+		{
+			if (framebuffer == nullptr)
+			{
+				D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
+				CurrentRTView = SwapChainResources.RTView.Get();
+			}
+			else
+			{
+				D3D11.DeviceContext->OMSetRenderTargets(1, framebuffer->RenderTargetView.GetAddressOf(), nullptr);
+				CurrentRTView = framebuffer->RenderTargetView.Get();
+			}
+		}
+
 		void SetBlendState(const D3D11BlendState* state)
 		{
 			static constexpr UINT sampleMask = 0xFFFFFFFF;
@@ -431,6 +454,19 @@ namespace Starshine::Rendering::D3D11
 		D3D11_VIEWPORT viewport{};
 		impl->D3D11.DeviceContext->RSGetViewports(&viewportIndex, &viewport);
 		return RectangleF(viewport.TopLeftX, viewport.TopLeftY, viewport.Width, viewport.Height);
+	}
+
+	void D3D11Device::SetViewportSize(const RectangleF& newSize)
+	{
+		D3D11_VIEWPORT viewport{};
+		viewport.TopLeftX = static_cast<FLOAT>(newSize.X);
+		viewport.TopLeftY = static_cast<FLOAT>(newSize.Y);
+		viewport.Width = static_cast<FLOAT>(newSize.Width);
+		viewport.Height = static_cast<FLOAT>(newSize.Height);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		impl->D3D11.DeviceContext->RSSetViewports(1, &viewport);
 	}
 
 	void D3D11Device::Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
@@ -505,6 +541,12 @@ namespace Starshine::Rendering::D3D11
 		return true;
 	}
 
+	bool D3D11Device::CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer)
+	{
+		framebuffer = std::make_unique<D3D11Framebuffer>(GetBaseDevice(), width, height, format);
+		return true;
+	}
+
 	bool D3D11Device::CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state)
 	{
 		state = std::make_unique<D3D11BlendState>(GetBaseDevice(), desc);
@@ -574,6 +616,32 @@ namespace Starshine::Rendering::D3D11
 		{
 			const D3D11Texture* d3dTexture = static_cast<const D3D11Texture*>(texture);
 			impl->SetTexture(d3dTexture, slot);
+		}
+	}
+
+	void D3D11Device::SetTexture(const Framebuffer* framebuffer, u32 slot)
+	{
+		if (framebuffer != nullptr)
+		{
+			const D3D11Framebuffer* d3dFramebuffer = static_cast<const D3D11Framebuffer*>(framebuffer);
+			impl->SetD3DTexture(d3dFramebuffer->ShaderResourceView.GetAddressOf(), d3dFramebuffer->Sampler.GetAddressOf(), slot);
+		}
+		else
+		{
+			impl->SetTexture(nullptr, slot);
+		}
+	}
+
+	void D3D11Device::SetFramebuffer(Framebuffer* framebuffer)
+	{
+		if (framebuffer == nullptr)
+		{
+			impl->SetFramebuffer(nullptr);
+		}
+		else
+		{
+			D3D11Framebuffer* d3dFramebuffer = static_cast<D3D11Framebuffer*>(framebuffer);
+			impl->SetFramebuffer(d3dFramebuffer);
 		}
 	}
 

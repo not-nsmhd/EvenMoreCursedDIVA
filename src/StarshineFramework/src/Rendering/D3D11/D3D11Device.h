@@ -22,6 +22,7 @@ namespace Starshine::Rendering::D3D11
 
 	public:
 		RectangleF GetViewportSize() const;
+		void SetViewportSize(const RectangleF& newSize);
 
 	public:
 		void Clear(ClearFlags flags, const Color & color, f32 depth, u8 stencil);
@@ -41,6 +42,8 @@ namespace Starshine::Rendering::D3D11
 
 		bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture);
 
+		bool CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer);
+
 		bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state);
 
 	public:
@@ -49,6 +52,8 @@ namespace Starshine::Rendering::D3D11
 		void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex);
 		void SetShader(const Shader* shader);
 		void SetTexture(const Texture* texture, u32 slot);
+		void SetTexture(const Framebuffer* framebuffer, u32 slot);
+		void SetFramebuffer(Framebuffer* framebuffer);
 
 		void SetBlendState(const BlendState* state);
 

@@ -7,11 +7,11 @@
 #include "Input/Gamepad.h"
 #include "Audio/AudioEngine.h"
 
-#include "ImGui/imgui.h"
-#include "ImGui/backends/imgui_impl_sdl2.h"
-#include "ImGui/backends/imgui_impl_dx11.h"
+#include "ImGui/Core/imgui.h"
+#include "ImGui/Core/backends/imgui_impl_sdl2.h"
+#include "ImGui/Core/backends/imgui_impl_dx11.h"
 #include "Rendering/D3D11/D3D11Device.h"
-#include "ImGui/imgui_styles.h"
+#include "ImGui/Core/imgui_styles.h"
 
 namespace Starshine
 {
@@ -30,7 +30,7 @@ namespace Starshine
 		Device* GFXDevice{ nullptr };
 		std::unique_ptr<GameState> CurrentState{};
 
-		static constexpr u64 DefaultTargetFrameTime_Ticks = 166667;
+		static constexpr TimeSpan TargetFrameTime = TimeSpan(16667);
 
 		struct TimingData
 		{
@@ -42,10 +42,7 @@ namespace Starshine
 			u64 Ticks_Delta = 0;
 			u64 Ticks_Error = 0;
 
-			f64 ActualFrameTime_Milliseconds = 0.0;
-			u64 TargetFrameTime_Ticks = DefaultTargetFrameTime_Ticks;
-
-			f64 DeltaTime_Milliseconds = 0.0;
+			GameTime GameTime;
 		} Timing;
 
 		Impl(GameInstance* instance) : Parent(instance)
@@ -87,6 +84,7 @@ namespace Starshine
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 			ImGui_ImplSDL2_InitForD3D(Parent->GameWindow->GetBaseWindow());
 
@@ -103,7 +101,7 @@ namespace Starshine
 
 			ImGuiStyle& style = ImGui::GetStyle();
 			style.FontSizeBase = 18.0f;
-			io.Fonts->AddFontFromFileTTF("imgui/SourceSans3-Regular.ttf");
+			io.Fonts->AddFontFromFileTTF("imgui/fonts/SourceSans3-Regular.ttf");
 			ImGuiStyles::ApplyImGuiStyle();
 
 			return true;
@@ -139,31 +137,34 @@ namespace Starshine
 			}
 
 			Timing.Ticks_LastFrame = Timing.Ticks_Current;
-			Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
+			Timing.Ticks_Current = SDL_GetPerformanceCounter() * 1000000 / Timing.Ticks_Frequency;
 			Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
 
-			Timing.ActualFrameTime_Milliseconds = static_cast<double>(Timing.Ticks_Delta) / 10000.0;
-
-			if (Timing.Ticks_Error > Timing.TargetFrameTime_Ticks)
+			if (Timing.Ticks_Error > TargetFrameTime.Microseconds)
 			{
 				Timing.Ticks_Error = 0;
 			}
 
-			while (Timing.Ticks_Delta < Timing.TargetFrameTime_Ticks - Timing.Ticks_Error)
+			while (Timing.Ticks_Delta < TargetFrameTime.Microseconds - Timing.Ticks_Error)
 			{
 				SDL_Delay(1);
-				Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
+				Timing.Ticks_Current = SDL_GetPerformanceCounter() * 1000000 / Timing.Ticks_Frequency;
 				Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
 			}
-			Timing.Ticks_Current = SDL_GetPerformanceCounter() * 10000000 / Timing.Ticks_Frequency;
+			Timing.Ticks_Current = SDL_GetPerformanceCounter() * 1000000 / Timing.Ticks_Frequency;
 			Timing.Ticks_Delta = Timing.Ticks_Current - Timing.Ticks_LastFrame;
 
-			Timing.Ticks_Error = Timing.Ticks_Delta - Timing.TargetFrameTime_Ticks;
-			Timing.DeltaTime_Milliseconds = static_cast<double>(Timing.Ticks_Delta) / 10000.0;
+			Timing.Ticks_Error = Timing.Ticks_Delta - TargetFrameTime.Microseconds;
+
+			Timing.GameTime.ElapsedFrameTime.Microseconds = Timing.Ticks_Delta;
+			Timing.GameTime.TimeSinceLaunch.Microseconds += Timing.Ticks_Delta;
+			Timing.GameTime.TargetFrameTime = TargetFrameTime;
 		}
 
 		void Loop()
 		{
+			GFXDevice->SetFramebuffer(nullptr);
+
 			// HACK: This is to make sure that the viewport is set to the correct size if the game resizes the window before entering the loop
 			ivec2 windowSize = Parent->GameWindow->GetSize();
 			GFXDevice->OnWindowResize(windowSize.x, windowSize.y);
@@ -214,19 +215,20 @@ namespace Starshine
 					}
 				}
 
-				ImGui_ImplSDL2_NewFrame();
+				/*ImGui_ImplSDL2_NewFrame();
 				ImGui_ImplDX11_NewFrame();
-				ImGui::NewFrame();
+				ImGui::NewFrame();*/
 
-				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Update(Timing.DeltaTime_Milliseconds); }
-				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Draw(Timing.DeltaTime_Milliseconds); }
+				GFXDevice->SetFramebuffer(nullptr);
+				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Update(Timing.GameTime); }
+				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Draw(Timing.GameTime); }
 				else
 				{
 					GFXDevice->Clear(ClearFlags_Color, DefaultColors::Black, 1.0f, 0);
 				}
 
-				ImGui::Render();
-				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+				/*ImGui::Render();
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());*/
 				GFXDevice->SwapBuffers();
 
 				Timing.FirstFrame = false;

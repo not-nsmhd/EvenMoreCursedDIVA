@@ -32,8 +32,14 @@
     <Filter Include="Source Files\ImGui">
       <UniqueIdentifier>{fb29ebd7-3d29-42e6-8279-4dc695146d1f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ImGui\backends">
-      <UniqueIdentifier>{c88e3d26-458c-4956-9933-385109112424}</UniqueIdentifier>
+    <Filter Include="Source Files\ImGui\Core">
+      <UniqueIdentifier>{662444fe-30ff-4302-9789-07a06311ac97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGui\Core\backends">
+      <UniqueIdentifier>{77c6f826-7685-448d-b0e2-09945d30d4d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGui\Extensions">
+      <UniqueIdentifier>{813ced81-37c6-4758-a770-52e0ce684ae3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -136,32 +142,47 @@
     <ClInclude Include="src\Rendering\D3D11\D3D11State.h">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imgui_internal.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\Rendering\Framebuffer.h">
+      <Filter>Source Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imstb_rectpack.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Framebuffer.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imstb_textedit.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\Rendering\D3D11\D3D11Common.h">
+      <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imstb_truetype.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\ImGui\Core\imgui_internal.h">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imconfig.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\ImGui\Core\imgui_styles.h">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imgui.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\ImGui\Core\imstb_rectpack.h">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\backends\imgui_impl_sdl2.h">
-      <Filter>Source Files\ImGui\backends</Filter>
+    <ClInclude Include="src\ImGui\Core\imstb_textedit.h">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\backends\imgui_impl_dx11.h">
-      <Filter>Source Files\ImGui\backends</Filter>
+    <ClInclude Include="src\ImGui\Core\imstb_truetype.h">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ImGui\imgui_styles.h">
-      <Filter>Source Files\ImGui</Filter>
+    <ClInclude Include="src\ImGui\Core\imconfig.h">
+      <Filter>Source Files\ImGui\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImGui\Core\imgui.h">
+      <Filter>Source Files\ImGui\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImGui\Core\backends\imgui_impl_dx11.h">
+      <Filter>Source Files\ImGui\Core\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImGui\Core\backends\imgui_impl_sdl2.h">
+      <Filter>Source Files\ImGui\Core\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImGui\Extensions\StarshineExtensions.h">
+      <Filter>Source Files\ImGui\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TimeSpan.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,29 +263,32 @@
     <ClCompile Include="src\Rendering\D3D11\D3D11State.cpp">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui_demo.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\Rendering\D3D11\D3D11Framebuffer.cpp">
+      <Filter>Source Files\Rendering\D3D11</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui_draw.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui_demo.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui_tables.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui_draw.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui_widgets.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui_styles.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui_tables.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\backends\imgui_impl_sdl2.cpp">
-      <Filter>Source Files\ImGui\backends</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui_widgets.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\backends\imgui_impl_dx11.cpp">
-      <Filter>Source Files\ImGui\backends</Filter>
+    <ClCompile Include="src\ImGui\Core\imgui.cpp">
+      <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGui\imgui_styles.cpp">
-      <Filter>Source Files\ImGui</Filter>
+    <ClCompile Include="src\ImGui\Core\backends\imgui_impl_sdl2.cpp">
+      <Filter>Source Files\ImGui\Core\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImGui\Core\backends\imgui_impl_dx11.cpp">
+      <Filter>Source Files\ImGui\Core\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

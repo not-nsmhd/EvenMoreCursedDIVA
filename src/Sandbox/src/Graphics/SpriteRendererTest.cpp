@@ -2,16 +2,23 @@
 #include "Rendering/Device.h"
 #include "Rendering/Utilities.h"
 #include "Rendering/Render2D/SpriteRenderer.h"
+#include "GameContext.h"
+#include "Animations/Animation.h"
+#include "Animations/AnimationUtil.h"
 
 using namespace Starshine;
 using namespace Starshine::Rendering;
 using namespace Starshine::Rendering::Render2D;
 using namespace Starshine::GFX;
+using namespace Sandbox;
 
 struct SpriteRendererTest::Impl
 {
 	std::unique_ptr<Texture> TestTexture{};
-	std::unique_ptr<SpriteRenderer> spriteRenderer{};
+	SpriteRenderer* spriteRenderer{};
+
+	Animations::AnimatedObject animObj;
+	f32 animFrame{};
 
 	Impl()
 	{
@@ -25,30 +32,57 @@ struct SpriteRendererTest::Impl
 	{
 		Rendering::Utilities::LoadImage("testfiles/test.png", TestTexture);
 		TestTexture->SetDebugName("TestTexture");
-		spriteRenderer = std::make_unique<SpriteRenderer>();
+
+		spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
+
+		animObj.Position.X.KeyFrames.emplace_back(0, 0.0f, 0.5f, 1.0f);
+		animObj.Position.Y.KeyFrames.emplace_back(0, 0.0f, 0.5f, 1.0f);
+
+		animObj.Position.X.KeyFrames.emplace_back(30, 120.0f, 0.5f, 0.75f);
+		animObj.Position.Y.KeyFrames.emplace_back(30, 120.0f, 0.5f, 0.75f);
+
+		animObj.Position.X.KeyFrames.emplace_back(60, 240.0f);
+		animObj.Position.Y.KeyFrames.emplace_back(60, 0.0f);
+
+		animObj.Rotation.KeyFrames.emplace_back(0, 0.0f, 0.75f, 1.0f);
+		animObj.Rotation.KeyFrames.emplace_back(30, 90.0f, 0.5f, 0.75f);
+		animObj.Rotation.KeyFrames.emplace_back(60, 180.0f);
 	}
 
-	void Update(f64 deltaTime_ms)
+	void Update(GameTime& gameTime)
 	{
+		animFrame += gameTime.ElapsedFrameTime.GetMilliseconds() / 16.6667f;
+		if (animFrame >= 60.0f) { animFrame = 0.0f; }
 	}
 
-	void Draw(f64 deltaTime_ms)
+	void Draw(GameTime& gameTime)
 	{
 		Rendering::GetDevice()->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
 
-		spriteRenderer->SetSpritePosition(vec2{ 64.0f, 64.0f });
+		f32 xPos = Animations::GetValueAt(animObj.Position.X.KeyFrames, animFrame);
+		f32 yPos = Animations::GetValueAt(animObj.Position.Y.KeyFrames, animFrame);
+
+		f32 rotationDeg = Animations::GetValueAt(animObj.Rotation.KeyFrames, animFrame);
+
+		spriteRenderer->SetSpritePosition(vec2{ xPos, yPos });
+		spriteRenderer->SetSpriteRotation(glm::radians(rotationDeg));
 		spriteRenderer->SetSpriteSize(vec2{ 128.0f, 128.0f });
 		spriteRenderer->SetSpriteSource(RectangleF{ 0.0f, 0.0f, 1.0f, 1.0f });
 		spriteRenderer->SetSpriteColor(DefaultColors::White);
 		spriteRenderer->PushSprite(TestTexture.get());
 
-		spriteRenderer->SetSpritePosition(vec2{ 96.0f, 96.0f });
-		spriteRenderer->SetSpriteSize(vec2{ 128.0f, 128.0f });
-		spriteRenderer->SetSpriteSource(RectangleF{ 0.0f, 0.0f, 1.0f, 1.0f });
-		spriteRenderer->SetSpriteColor(DefaultColors::White);
-		spriteRenderer->PushSprite(TestTexture.get());
+		DrawDebugText();
 
 		spriteRenderer->RenderSprites(nullptr);
+	}
+
+	void DrawDebugText()
+	{
+		std::array<char, 1024> debugText;
+		::sprintf_s(debugText.data(), debugText.size() - 1, "Frame: %.3f", animFrame);
+
+		const Font* font = GameContext::GetInstance()->DebugFont.get();
+		spriteRenderer->Font().PushString(font, debugText.data(), {}, vec2(1.0f), DefaultColors::White);
 	}
 };
 
@@ -79,14 +113,14 @@ void SpriteRendererTest::Destroy()
 {
 }
 
-void SpriteRendererTest::Update(f64 deltaTime_milliseconds)
+void SpriteRendererTest::Update(GameTime& gameTime)
 {
-	impl->Update(deltaTime_milliseconds);
+	impl->Update(gameTime);
 }
 
-void SpriteRendererTest::Draw(f64 deltaTime_milliseconds)
+void SpriteRendererTest::Draw(GameTime& gameTime)
 {
-	impl->Draw(deltaTime_milliseconds);
+	impl->Draw(gameTime);
 }
 
 std::string_view SpriteRendererTest::GetStateName() const

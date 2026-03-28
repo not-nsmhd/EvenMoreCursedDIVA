@@ -7,17 +7,17 @@ namespace DIVA::MainGame
 	using namespace Starshine::Rendering;
 	using namespace Starshine::Rendering::Render2D;
 
-	constexpr f64 NoteRemoveTimeThreshold{ -1.0 };
+	constexpr TimeSpan NoteRemoveTimeThreshold = TimeSpanConversion::FromMilliseconds(-1000.0);
 	constexpr f32 TrailMaxProgress{ 1.0f };
 
-	f64 GameNote::GetRemainingTime() const
+	TimeSpan GameNote::GetRemainingTime() const
 	{
 		return FlyTime - ElapsedTime;
 	}
 
 	f64 GameNote::GetNormalizedElapsedTime() const
 	{
-		return ElapsedTime / FlyTime;
+		return MathExtensions::ConvertRange<f64>(0.0, FlyTime.Microseconds, 0.0, 1.0, ElapsedTime.Microseconds);
 	}
 
 	f64 GameNote::GetNormalizedRemainingTime() const
@@ -55,7 +55,7 @@ namespace DIVA::MainGame
 			{
 				static constexpr f32 lengthFactor = 2.15f;
 
-				f32 trailPixelLength = (Distance / 1000.0f) * (120.0f / static_cast<f32>(FlyTime) * lengthFactor);
+				f32 trailPixelLength = (Distance / 1000.0f) * (120.0f / static_cast<f32>(FlyTime.GetSeconds()) * lengthFactor);
 				f32 normalizedLength = trailPixelLength / Distance;
 
 				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
@@ -169,19 +169,21 @@ namespace DIVA::MainGame
 		sprRenderer->PushShape(trailVertices.data(), trailVertices.size(), PrimitiveType::TriangleStrip, trailTexture);
 	}
 
-	void GameNote::Update(f64 deltaTime_ms)
+	void GameNote::Update(GameTime& gameTime)
 	{
-		ElapsedTime += deltaTime_ms / 1000.0;
+		ElapsedTime += gameTime.ElapsedFrameTime;
 
 		if (ShouldBeRemoved) { return; }
 
-		if ((GetRemainingTime() * 1000.0) <= HitThresholds::ThresholdMiss && !HasBeenHit)
+		TimeSpan remainingTime = GetRemainingTime();
+
+		if (remainingTime <= HitThresholds::ThresholdMiss && !HasBeenHit)
 		{
 			Expiring = true;
 			if (NextNote != nullptr) { NextNote->Expiring = true; }
 		}
 
-		if (GetRemainingTime() <= NoteRemoveTimeThreshold)
+		if (remainingTime <= NoteRemoveTimeThreshold)
 		{
 			if (NextNote != nullptr)
 			{
@@ -195,7 +197,7 @@ namespace DIVA::MainGame
 		}
 
 		IconPosition = MathExtensions::GetSinePoint(GetNormalizedRemainingTime(), TargetPosition, EntryAngle, Frequency, Amplitude, Distance);
-		Trail.Scroll = std::fmodf(Trail.Scroll + 0.64f * (16.6667 / deltaTime_ms), Trail.ScrollResetThreshold);
+		Trail.Scroll = std::fmodf(Trail.Scroll + 0.64f * (16.6667 / gameTime.ElapsedFrameTime.GetMilliseconds()), Trail.ScrollResetThreshold);
 
 		if (Expired || Expiring || ShouldBeRemoved) { return; }
 
@@ -207,16 +209,16 @@ namespace DIVA::MainGame
 				{
 					i32 bonusMultiplier = HitWrong ? 0 : (HitEvaluation == HitEvaluation::Cool ? 20 : (HitEvaluation == HitEvaluation::Good ? 10 : 0));
 
-					Hold.TimeSinceHoldStart += deltaTime_ms / 100.0;
-					Hold.CurrentBonus = bonusMultiplier + static_cast<i32>(Hold.TimeSinceHoldStart) * bonusMultiplier + Hold.BonusBaseValue;
+					Hold.TimeSinceHoldStart += gameTime.ElapsedFrameTime;
+					Hold.CurrentBonus = bonusMultiplier + (static_cast<int>(Hold.TimeSinceHoldStart.GetMilliseconds() / 100.0)) * bonusMultiplier + Hold.BonusBaseValue;
 				}
 			}
 		}
 	}
 
-	void GameNote::Draw(f64 deltaTime_ms)
+	void GameNote::Draw(GameTime& gameTime)
 	{
-		if (Expired || ShouldBeRemoved || ElapsedTime < 0.0f) { return; }
+		if (Expired || ShouldBeRemoved || ElapsedTime.Microseconds < 0) { return; }
 		if (HasBeenHit && Type != NoteType::HoldStart) { return; }
 
 		if (HasBeenHit && NextNote != nullptr)
@@ -264,7 +266,7 @@ namespace DIVA::MainGame
 		{
 			//DrawTrail();
 
-			if (HasBeenHit && NextNote->ElapsedTime < 0.0f)
+			if (HasBeenHit && NextNote->ElapsedTime.Microseconds < 0)
 			{
 				sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 				sprRenderer->SetSpriteRotation(0.0f);
@@ -280,10 +282,10 @@ namespace DIVA::MainGame
 
 	bool GameNote::Evaluate(NoteShape shape)
 	{
-		f64 remainingTime_ms = GetRemainingTime() * 1000.0;
+		TimeSpan remaniningTime = GetRemainingTime();
 		bool shapeMatches = Shape == shape;
 
-		if (remainingTime_ms > HitThresholds::ThresholdStart)
+		if (remaniningTime > HitThresholds::ThresholdStart)
 		{
 			if (Type == NoteType::HoldEnd && shapeMatches)
 			{
@@ -305,28 +307,28 @@ namespace DIVA::MainGame
 			else { DoubleTap.GiveBonus = false; }
 		}
 
-		if (MathExtensions::IsInRange(-HitThresholds::CoolThreshold, HitThresholds::CoolThreshold, remainingTime_ms))
+		if (MathExtensions::IsInRange(-HitThresholds::CoolThreshold.Microseconds, HitThresholds::CoolThreshold.Microseconds, remaniningTime.Microseconds))
 		{
 			HitEvaluation = HitEvaluation::Cool;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::GoodThreshold, HitThresholds::GoodThreshold, remainingTime_ms))
+		else if (MathExtensions::IsInRange(-HitThresholds::GoodThreshold.Microseconds, HitThresholds::GoodThreshold.Microseconds, remaniningTime.Microseconds))
 		{
 			HitEvaluation = HitEvaluation::Good;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::SafeThreshold, HitThresholds::SafeThreshold, remainingTime_ms))
+		else if (MathExtensions::IsInRange(-HitThresholds::SafeThreshold.Microseconds, HitThresholds::SafeThreshold.Microseconds, remaniningTime.Microseconds))
 		{
 			HitEvaluation = HitEvaluation::Safe;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::BadThreshold, HitThresholds::BadThreshold, remainingTime_ms))
+		else if (MathExtensions::IsInRange(-HitThresholds::BadThreshold.Microseconds, HitThresholds::BadThreshold.Microseconds, remaniningTime.Microseconds))
 		{
 			HitEvaluation = HitEvaluation::Bad;
 			HasBeenHit = true;

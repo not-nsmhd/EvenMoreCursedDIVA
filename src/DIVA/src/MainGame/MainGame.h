@@ -55,8 +55,8 @@ namespace DIVA::MainGame
 		void UnloadContent();
 		void Destroy();
 
-		void Update(f64 deltaTime_milliseconds);
-		void Draw(f64 deltaTime_milliseconds);
+		void Update(Starshine::GameTime& gameTime);
+		void Draw(Starshine::GameTime& gameTime);
 
 		std::string_view GetStateName() const;
 

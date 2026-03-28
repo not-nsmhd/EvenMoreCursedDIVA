@@ -2,6 +2,8 @@
 #include "Common/Types.h"
 #include "Window.h"
 #include <memory>
+#include <functional>
+#include "TimeSpan.h"
 
 namespace Starshine
 {
@@ -20,8 +22,8 @@ namespace Starshine
 		virtual void UnloadContent() = 0;
 		virtual void Destroy() = 0;
 
-		virtual void Update(f64 deltaTime_milliseconds) = 0;
-		virtual void Draw(f64 deltaTime_milliseconds) = 0;
+		virtual void Update(GameTime& gameTime) = 0;
+		virtual void Draw(GameTime& gameTime) = 0;
 
 		virtual std::string_view GetStateName() const = 0;
 

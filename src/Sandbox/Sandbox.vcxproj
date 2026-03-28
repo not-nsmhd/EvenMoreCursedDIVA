@@ -61,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src/Sandbox/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -80,7 +80,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src/Sandbox/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -92,6 +92,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Animations\AnimationUtil.cpp" />
+    <ClCompile Include="src\GameContext.cpp" />
     <ClCompile Include="src\Graphics\GraphicsTest.cpp" />
     <ClCompile Include="src\Graphics\SpriteRendererTest.cpp" />
     <ClCompile Include="src\GUI\ImGuiTest.cpp" />
@@ -109,9 +111,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Animations\Animation.h" />
+    <ClInclude Include="src\Animations\AnimationUtil.h" />
+    <ClInclude Include="src\GameContext.h" />
     <ClInclude Include="src\Graphics\GraphicsTest.h" />
     <ClInclude Include="src\Graphics\SpriteRendererTest.h" />
     <ClInclude Include="src\GUI\ImGuiTest.h" />
+    <ClInclude Include="src\GUI\Timeline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

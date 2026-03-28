@@ -345,17 +345,21 @@ namespace DIVA::MainGame
 		delete impl;
 	}
 
-	void HUD::Update(float deltaTime_ms)
+	void HUD::Update(Starshine::GameTime& gameTime)
 	{
-		impl->UpdateScoreDisplay(deltaTime_ms);
-		impl->UpdateComboDisplay(deltaTime_ms);
-		impl->UpdateScoreBonusDisplay(deltaTime_ms);
+		f32 deltaTime = gameTime.ElapsedFrameTime.GetMilliseconds();
+
+		impl->UpdateScoreDisplay(deltaTime);
+		impl->UpdateComboDisplay(deltaTime);
+		impl->UpdateScoreBonusDisplay(deltaTime);
 	}
 
-	void HUD::Draw(float deltaTime_ms)
+	void HUD::Draw(Starshine::GameTime& gameTime)
 	{
-		impl->DrawComboDisplay(deltaTime_ms);
-		impl->DrawScoreBonusDisplay(deltaTime_ms);
+		f32 deltaTime = gameTime.ElapsedFrameTime.GetMilliseconds();
+
+		impl->DrawComboDisplay(deltaTime);
+		impl->DrawScoreBonusDisplay(deltaTime);
 		impl->DrawScoreDisplay();
 		impl->DrawLyricsText();
 	}

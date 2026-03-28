@@ -2,7 +2,7 @@
 
 namespace DIVA::MainGame
 {
-	constexpr f32 DefaultNoteDuration { 60.0f / 120.0f * 4.0f };
+	constexpr TimeSpan DefaultNoteDuration = Starshine::TimeSpanConversion::FromSeconds(2.0);
 
 	using namespace Starshine;
 
@@ -12,7 +12,9 @@ namespace DIVA::MainGame
 		if (!Xml::ParseFromFile(chartDoc, filePath)) { return false; }
 
 		Xml::Element* rootElement = chartDoc.RootElement();
-		rootElement->QueryFloatAttribute("Duration", &Duration);
+		float time_seconds = 0.0f;
+		rootElement->QueryFloatAttribute("Duration", &time_seconds);
+		Duration = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
 
 		size_t noteCount = static_cast<size_t>(rootElement->ChildElementCount("Note"));
 		size_t noteTimeChangesCount = static_cast<size_t>(rootElement->ChildElementCount("SetNoteTime"));
@@ -27,7 +29,9 @@ namespace DIVA::MainGame
 		{
 			ChartNote& newNote = Notes.emplace_back();
 
-			element->QueryFloatAttribute("Time", &newNote.AppearTime);
+			time_seconds = 0.0f;
+			element->QueryFloatAttribute("Time", &time_seconds);
+			newNote.AppearTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
 
 			curAttrib = element->FindAttribute("Shape");
 			newNote.Shape = Starshine::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
@@ -51,8 +55,12 @@ namespace DIVA::MainGame
 		{
 			NoteTimeChange& newTimeChange = NoteTimeChanges.emplace_back();
 
-			element->QueryFloatAttribute("Time", &newTimeChange.Time);
-			element->QueryFloatAttribute("Value", &newTimeChange.Value);
+			time_seconds = 0.0f;
+			element->QueryFloatAttribute("Time", &time_seconds);
+			newTimeChange.Time = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+
+			element->QueryFloatAttribute("Value", &time_seconds);
+			newTimeChange.Value = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
 
 			element = element->NextSiblingElement("SetNoteTime");
 		}
@@ -61,12 +69,18 @@ namespace DIVA::MainGame
 		for (size_t i = 0; i < chanceTimeCount; i++)
 		{
 			ChanceTime chanceTime{};
-			element->QueryFloatAttribute("Time", &chanceTime.StartTime);
+
+			time_seconds = 0.0f;
+			element->QueryFloatAttribute("Time", &time_seconds);
+			chanceTime.StartTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
 
 			element = rootElement->FirstChildElement("ChanceTimeEnd");
 			if (element != nullptr)
 			{
-				element->QueryFloatAttribute("Time", &chanceTime.EndTime);
+				time_seconds = 0.0f;
+				element->QueryFloatAttribute("Time", &time_seconds);
+				chanceTime.EndTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+
 				ChanceTimes.push_back(chanceTime);
 			}
 		}
@@ -102,7 +116,7 @@ namespace DIVA::MainGame
 		}
 	}
 
-	f32 Chart::GetNoteTime(f32 timeSeconds)
+	TimeSpan Chart::GetNoteTime(const TimeSpan& time)
 	{
 		if (NoteTimeChanges.size() == 0)
 		{
@@ -111,7 +125,7 @@ namespace DIVA::MainGame
 
 		for (auto& noteTimeChange : NoteTimeChanges)
 		{
-			if (noteTimeChange.Time <= timeSeconds)
+			if (noteTimeChange.Time <= time)
 			{
 				return noteTimeChange.Value;
 			}
@@ -120,13 +134,13 @@ namespace DIVA::MainGame
 		return DefaultNoteDuration;
 	}
 
-	const ChanceTime* Chart::GetNextChanceTime(f32 timeSeconds)
+	const ChanceTime* Chart::GetNextChanceTime(const TimeSpan& time)
 	{
 		if (ChanceTimes.empty()) { return nullptr; }
 
 		for (auto& chanceTime : ChanceTimes)
 		{
-			if (chanceTime.StartTime <= timeSeconds && chanceTime.EndTime >= timeSeconds) { return &chanceTime; }
+			if (chanceTime.StartTime <= time && chanceTime.EndTime >= time) { return &chanceTime; }
 		}
 
 		return nullptr;

@@ -110,4 +110,11 @@ namespace Starshine::MathExtensions
 		static_assert(std::is_floating_point_v<T>);
 		return newStart + (value - originalStart) * (newEnd - newStart) / (originalEnd - originalStart);
 	}
+
+	template <typename T>
+	constexpr T Lerp(T start, T end, T value)
+	{
+		static_assert(std::is_floating_point_v<T>);
+		return start + (end - start) * value;
+	}
 };

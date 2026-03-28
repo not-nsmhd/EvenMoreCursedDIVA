@@ -1,21 +1,8 @@
 #include "D3D11Texture.h"
+#include "D3D11Common.h"
 
 namespace Starshine::Rendering::D3D11
 {
-	namespace ConversionTables
-	{
-		static constexpr std::array<DXGI_FORMAT, EnumCount<GFX::TextureFormat>()> DXGITextureFormats
-		{
-			DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT::DXGI_FORMAT_R8G8_UNORM,
-			DXGI_FORMAT::DXGI_FORMAT_R8_UNORM,
-
-			DXGI_FORMAT::DXGI_FORMAT_BC1_UNORM,
-			DXGI_FORMAT::DXGI_FORMAT_BC2_UNORM,
-			DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM
-		};
-	}
-
 	D3D11Texture::D3D11Texture(ID3D11Device* device, i32 width, i32 height, GFX::TextureFormat format, const void* initialData, bool dynamic)
 		: Width(width), Height(height), Format(format), Dynamic(dynamic)
 	{
@@ -99,11 +86,7 @@ namespace Starshine::Rendering::D3D11
 #if defined (_DEBUG)
 		BaseTexture->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
 
-		std::string temp(name);
-		temp.append("_Sampler");
-		Sampler->SetPrivateData(WKPDID_D3DDebugObjectName, temp.length(), temp.data());
-
-		temp = name;
+		std::string temp = std::string(name);
 		temp.append("_ShaderResourceView");
 		ShaderResourceView->SetPrivateData(WKPDID_D3DDebugObjectName, temp.length(), temp.data());
 #endif

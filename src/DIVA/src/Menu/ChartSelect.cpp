@@ -158,12 +158,12 @@ namespace DIVA::Menu
 		impl->Destroy();
 	}
 
-	void ChartSelect::Update(f64 deltaTime_ms)
+	void ChartSelect::Update(GameTime& gameTime)
 	{
 		impl->Update();
 	}
 
-	void ChartSelect::Draw(f64 deltaTime_ms)
+	void ChartSelect::Draw(GameTime& gameTime)
 	{
 		impl->Draw();
 	}

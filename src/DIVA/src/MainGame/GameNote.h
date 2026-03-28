@@ -1,8 +1,12 @@
 #pragma once
 #include "Common/Types.h"
+#include "TimeSpan.h"
 #include "Chart.h"
 #include "HitEvaluation.h"
 #include "MainGame.h"
+
+using Starshine::TimeSpan;
+using Starshine::GameTime;
 
 namespace DIVA::MainGame
 {
@@ -27,10 +31,10 @@ namespace DIVA::MainGame
 		MainGameContext* MainGameContext{};
 
 	public:
-		f64 FlyTime{};
-		f64 ElapsedTime{};
+		TimeSpan FlyTime{};
+		TimeSpan ElapsedTime{};
 
-		f64 RemainingTimeOnHit{};
+		TimeSpan RemainingTimeOnHit{};
 
 		NoteShape Shape{};
 		NoteType Type{};
@@ -69,7 +73,7 @@ namespace DIVA::MainGame
 			bool PrimaryHeld = false;
 			bool AlternativeHeld = false;
 
-			f64 TimeSinceHoldStart{};
+			TimeSpan TimeSinceHoldStart{};
 
 			i32 BonusBaseValue{};
 			i32 CurrentBonus{};
@@ -79,9 +83,8 @@ namespace DIVA::MainGame
 		GameNote* NextNote{ nullptr };
 
 	public:
-		// NOTE: Functions
-		// NOTE: Returned value is specified in seconds
-		f64 GetRemainingTime() const;
+		TimeSpan GetRemainingTime() const;
+
 		f64 GetNormalizedElapsedTime() const;
 		f64 GetNormalizedRemainingTime() const;
 
@@ -105,8 +108,8 @@ namespace DIVA::MainGame
 		void DrawTrail();
 
 	public:
-		void Update(f64 deltaTime_ms);
-		void Draw(f64 deltaTime_ms);
+		void Update(GameTime& gameTime);
+		void Draw(GameTime& gameTime);
 
 		bool Evaluate(NoteShape shape);
 	};

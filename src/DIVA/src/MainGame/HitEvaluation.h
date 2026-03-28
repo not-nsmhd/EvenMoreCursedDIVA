@@ -1,6 +1,9 @@
 #pragma once
 #include "Common/Types.h"
 
+using Starshine::TimeSpan;
+using namespace Starshine;
+
 namespace DIVA::MainGame
 {
 	enum class HitEvaluation : u8
@@ -16,16 +19,15 @@ namespace DIVA::MainGame
 		Count
 	};
 
-	// NOTE: All values are specified in milliseconds
 	namespace HitThresholds
 	{
-		constexpr f64 CoolThreshold = 30.0;
-		constexpr f64 GoodThreshold = 70.0;
-		constexpr f64 SafeThreshold = 100.0;
-		constexpr f64 BadThreshold = 130.0;
+		constexpr TimeSpan CoolThreshold = TimeSpanConversion::FromMilliseconds(30.0);
+		constexpr TimeSpan GoodThreshold = TimeSpanConversion::FromMilliseconds(70.0);
+		constexpr TimeSpan SafeThreshold = TimeSpanConversion::FromMilliseconds(100.0);
+		constexpr TimeSpan BadThreshold = TimeSpanConversion::FromMilliseconds(130.0);
 				  
-		constexpr f64 ThresholdStart = 130.0;
-		constexpr f64 ThresholdMiss = -130.0;
+		constexpr TimeSpan ThresholdStart = TimeSpanConversion::FromMilliseconds(130.0);
+		constexpr TimeSpan ThresholdMiss = TimeSpanConversion::FromMilliseconds(-130.0);
 	}
 
 	namespace ScoreValues
