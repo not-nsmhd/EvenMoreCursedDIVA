@@ -100,7 +100,6 @@ namespace Starshine::MathExtensions
 	template <typename T>
 	constexpr bool IsInRange(T start, T end, T value)
 	{
-		static_assert(std::is_floating_point_v<T> || std::is_integral_v<T>);
 		return (value >= start && value <= end);
 	}
 

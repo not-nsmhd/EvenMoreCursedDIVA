@@ -40,8 +40,16 @@ namespace DIVA::MainGame
 		MainGameContext& MainGameContext;
 
 		SubState CurrentSubState{ SubState::MainGame };
+		i32 pause_optionIndex = 0;
 		i32 results_optionIndex = 0;
 		bool resultsSaved = false;
+
+		static constexpr std::array<std::string_view, 3> pauseMenu_OptionLabels
+		{
+			"Resume",
+			"Retry",
+			"Return to Chart Select"
+		};
 
 		static constexpr std::array<std::string_view, 2> results_OptionNames
 		{
@@ -50,7 +58,7 @@ namespace DIVA::MainGame
 		};
 
 		SpriteRenderer* spriteRenderer{};
-		Font* debugFont;
+		Font* debugFont{};
 
 		bool Paused = false;
 
@@ -142,6 +150,10 @@ namespace DIVA::MainGame
 			songLyricsOffset = 0;
 			ElapsedTime = {};
 			ActiveNotes.clear();
+
+			MusicVoice.SetFramePosition(0);
+			MusicVoice.SetVolume(0.5f);
+			MusicVoice.SetPlaying(true);
 
 			MainGameContext.Score.Score = 0;
 			MainGameContext.Score.Combo = 0;
@@ -325,7 +337,7 @@ namespace DIVA::MainGame
 				if (chartNote->AppearTime <= ElapsedTime)
 				{
 					TimeSpan flyTime = songChart.GetNoteTime(chartNote->AppearTime);
-					const ChanceTime* nextCT = songChart.GetNextChanceTime(chartNote->AppearTime + flyTime);
+					const ChanceTime* nextCT = songChart.GetNextChanceTime(chartNote->AppearTime);
 
 					if (chartNote->Type == NoteType::HoldEnd) { chartNoteOffset++; break; }
 
@@ -357,14 +369,14 @@ namespace DIVA::MainGame
 
 			if (NextChanceTime == nullptr && songChart.ChanceTimes.size() > PassedChanceTimes)
 			{
-				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime.GetSeconds());
+				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime);
 			}
 
 			if (NextChanceTime != nullptr)
 			{
-				if (NextChanceTime->StartTime <= ElapsedTime.GetSeconds())
+				if (NextChanceTime->StartTime <= ElapsedTime)
 				{
-					if (NextChanceTime->EndTime <= ElapsedTime.GetSeconds())
+					if (NextChanceTime->EndTime <= ElapsedTime)
 					{
 						IsChanceTime = false;
 						NextChanceTime = nullptr;
@@ -698,7 +710,7 @@ namespace DIVA::MainGame
 				return;
 			}
 
-			if (ElapsedTime.GetSeconds() >= songChart.Duration)
+			if (ElapsedTime >= songChart.Duration)
 			{
 				CurrentSubState = SubState::Results;
 				return;
@@ -725,6 +737,10 @@ namespace DIVA::MainGame
 				}
 				hud.Update(gameTime);
 			}
+			else
+			{
+				UpdatePauseMenu();
+			}
 
 			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
 			{
@@ -741,9 +757,33 @@ namespace DIVA::MainGame
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f\n", ElapsedTime.GetSeconds());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
-			if (Paused)
+		}
+
+		void UpdatePauseMenu()
+		{
+			if (Keyboard::IsKeyTapped(SDLK_DOWN)) { pause_optionIndex++; }
+			if (Keyboard::IsKeyTapped(SDLK_UP)) { pause_optionIndex--; }
+			pause_optionIndex = MathExtensions::Clamp<i32>(pause_optionIndex, 0, 2);
+
+			if (Keyboard::IsKeyTapped(SDLK_RETURN))
 			{
-				lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "PAUSED\n");
+				switch (pause_optionIndex)
+				{
+				case 0:
+					Paused = false;
+					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
+					break;
+				case 1:
+					CurrentSubState = SubState::MainGame;
+					Reset();
+					break;
+				case 2:
+					GameInstance->SetState(std::make_unique<Menu::ChartSelect>());
+					return;
+				}
+
+				pause_optionIndex = 0;
+				return;
 			}
 		}
 
@@ -823,7 +863,27 @@ namespace DIVA::MainGame
 
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
+			if (Paused)
+			{
+				DrawPauseMenu();
+			}
+
 			spriteRenderer->RenderSprites(nullptr);
+		}
+
+		void DrawPauseMenu()
+		{
+			spriteRenderer->SetBlendMode(BlendMode::Normal);
+			spriteRenderer->SetSpriteColor({ 0, 0, 0, 128 });
+			spriteRenderer->SetSpritePosition({ 0.0f, 0.0f });
+			spriteRenderer->SetSpriteSize({ 1280.0f, 720.0f });
+			spriteRenderer->PushSprite(nullptr);
+
+			for (i32 i = 0; i < pauseMenu_OptionLabels.size(); i++)
+			{
+				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i], vec2(640.0f, 320.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+					i == pause_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
+			}
 		}
 
 		void DrawResults()

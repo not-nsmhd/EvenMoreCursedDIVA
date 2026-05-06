@@ -44,6 +44,12 @@ namespace Starshine
 		return result;
 	};
 
+	inline TimeSpan& operator-(const TimeSpan& value)
+	{
+		TimeSpan result = TimeSpan(-value.Microseconds);
+		return result;
+	};
+
 	inline bool operator>(const TimeSpan& a, const TimeSpan& b) { return a.Microseconds > b.Microseconds; };
 	inline bool operator>=(const TimeSpan& a, const TimeSpan& b) { return a.Microseconds >= b.Microseconds; };
 	inline bool operator<(const TimeSpan& a, const TimeSpan& b) { return a.Microseconds < b.Microseconds; };

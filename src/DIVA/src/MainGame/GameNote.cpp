@@ -307,28 +307,28 @@ namespace DIVA::MainGame
 			else { DoubleTap.GiveBonus = false; }
 		}
 
-		if (MathExtensions::IsInRange(-HitThresholds::CoolThreshold.Microseconds, HitThresholds::CoolThreshold.Microseconds, remaniningTime.Microseconds))
+		if (MathExtensions::IsInRange(-HitThresholds::CoolThreshold, HitThresholds::CoolThreshold, remaniningTime))
 		{
 			HitEvaluation = HitEvaluation::Cool;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::GoodThreshold.Microseconds, HitThresholds::GoodThreshold.Microseconds, remaniningTime.Microseconds))
+		else if (MathExtensions::IsInRange(-HitThresholds::GoodThreshold, HitThresholds::GoodThreshold, remaniningTime))
 		{
 			HitEvaluation = HitEvaluation::Good;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::SafeThreshold.Microseconds, HitThresholds::SafeThreshold.Microseconds, remaniningTime.Microseconds))
+		else if (MathExtensions::IsInRange(-HitThresholds::SafeThreshold, HitThresholds::SafeThreshold, remaniningTime))
 		{
 			HitEvaluation = HitEvaluation::Safe;
 			HasBeenHit = true;
 			HitWrong = !shapeMatches;
 			return true;
 		}
-		else if (MathExtensions::IsInRange(-HitThresholds::BadThreshold.Microseconds, HitThresholds::BadThreshold.Microseconds, remaniningTime.Microseconds))
+		else if (MathExtensions::IsInRange(-HitThresholds::BadThreshold, HitThresholds::BadThreshold, remaniningTime))
 		{
 			HitEvaluation = HitEvaluation::Bad;
 			HasBeenHit = true;
