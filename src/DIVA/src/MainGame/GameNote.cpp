@@ -68,7 +68,7 @@ namespace DIVA::MainGame
 
 	void GameNote::DrawTrail()
 	{
-		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart)) { return; }
+		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart) || Type == NoteType::HoldEnd) { return; }
 
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
@@ -86,7 +86,10 @@ namespace DIVA::MainGame
 		}
 
 		static constexpr size_t verticesPerSegment = 2;
-		std::array<SpriteVertex, trailSegmentCount * verticesPerSegment> trailVertices{};
+
+		// HACK: One extra invisible segment at the start and at the end is needed to prevent polygons between
+		// trails from appearing while also being able to draw all trails as a single triangle strip
+		std::array<SpriteVertex, (trailSegmentCount + 2) * verticesPerSegment> trailVertices{};
 
 		const Sprite* trailSprite = Trail.Hold ? iconSet.HoldNoteTrails[static_cast<size_t>(Shape)] :
 			(ActiveDuringChanceTime ? iconSet.Trail_CT : iconSet.Trail_Normal);
@@ -127,16 +130,50 @@ namespace DIVA::MainGame
 		const f32 segmentDistance = glm::distance(trailSegments[0], trailSegments[1]) / (spriteRect.Width * 0.05f);
 
 		const auto getNormal = [](vec2 v) { return vec2(v.y, -v.x); };
-		for (size_t i = 0, v = 0; i < trailSegments.size(); i++, v += 2)
+		for (offset_t i = -1, v = 0; i <= (offset_t)trailSegments.size(); i++, v += 2)
 		{
+			const f32 thickness = (ActiveDuringChanceTime && !Trail.Hold) ? 0.7f : 0.5f;
+
+			if (i == -1)
+			{
+				// First invisible vertex
+				const auto normal = glm::normalize(getNormal(trailSegments[1] - trailSegments[0]));
+
+				trailVertices[0].Position = trailSegments[0] + normal * spriteRect.Height * thickness;
+				trailVertices[0].Color = DefaultColors::Transparent;
+
+				trailVertices[1].Position = trailSegments[0] - normal * spriteRect.Height * thickness;
+				trailVertices[1].Color = DefaultColors::Transparent;
+				continue;
+			}
+			else if (i == trailSegments.size())
+			{
+				#ifdef _MSC_VER
+				#pragma warning(push)
+				#pragma warning(disable:28020) // msvc stfu
+				#endif
+
+				// Second invisible vertex
+				const auto normal = glm::normalize(getNormal(trailSegments[i - 1] - trailSegments[i - 2]));
+
+				trailVertices[v].Position = trailSegments[i - 1] + normal * spriteRect.Height * thickness;
+				trailVertices[v].Color = DefaultColors::Transparent;
+
+				trailVertices[v + 1].Position = trailSegments[i - 1] - normal * spriteRect.Height * thickness;
+				trailVertices[v + 1].Color = DefaultColors::Transparent;
+				break;
+
+				#ifdef _MSC_VER
+				#pragma warning(pop)
+				#endif
+			}
+
 			const auto normal = (i < 1) ? glm::normalize(getNormal(trailSegments[i + 1] - trailSegments[i])) :
 				(i >= trailSegmentCount - 1) ? glm::normalize(getNormal(trailSegments[i] - trailSegments[i - 1])) :
 				glm::normalize(getNormal(trailSegments[i] - trailSegments[i - 1]) + getNormal(trailSegments[i + 1] - trailSegments[i]));
 
-			const f32 thickness = (ActiveDuringChanceTime && !Trail.Hold) ? 0.7f : 0.5f;
-
-			trailVertices[v + 0].Position = trailSegments[i] + normal * spriteRect.Height * thickness;
-			trailVertices[v + 1].Position = trailSegments[i] - normal * spriteRect.Height * thickness;
+			trailVertices[v + 0].Position = trailSegments[i] + normal * spriteRect.Height * thickness; // Left
+			trailVertices[v + 1].Position = trailSegments[i] - normal * spriteRect.Height * thickness; // Right
 
 			const u8 alpha = ActiveDuringChanceTime ? trailAlphaValues_ChanceTime[i] : trailAlphaValues[i];
 

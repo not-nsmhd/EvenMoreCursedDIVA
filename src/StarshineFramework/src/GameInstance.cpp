@@ -215,9 +215,9 @@ namespace Starshine
 					}
 				}
 
-				/*ImGui_ImplSDL2_NewFrame();
+				ImGui_ImplSDL2_NewFrame();
 				ImGui_ImplDX11_NewFrame();
-				ImGui::NewFrame();*/
+				ImGui::NewFrame();
 
 				GFXDevice->SetFramebuffer(nullptr);
 				if (CurrentState != nullptr && !Timing.FirstFrame) { CurrentState->Update(Timing.GameTime); }
@@ -227,8 +227,8 @@ namespace Starshine
 					GFXDevice->Clear(ClearFlags_Color, DefaultColors::Black, 1.0f, 0);
 				}
 
-				/*ImGui::Render();
-				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());*/
+				ImGui::Render();
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 				GFXDevice->SwapBuffers();
 
 				Timing.FirstFrame = false;

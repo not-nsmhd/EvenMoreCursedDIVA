@@ -18,6 +18,8 @@ using u64 = uint64_t;
 using f32 = float;
 using f64 = double;
 
+using offset_t = int64_t;
+
 using vec2 = glm::vec<2, f32, glm::defaultp>;
 using vec3 = glm::vec<3, f32, glm::defaultp>;
 using vec4 = glm::vec<4, f32, glm::defaultp>;

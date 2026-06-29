@@ -153,7 +153,6 @@ namespace DIVA::MainGame
 
 			MusicVoice.SetFramePosition(0);
 			MusicVoice.SetVolume(0.5f);
-			MusicVoice.SetPlaying(true);
 
 			MainGameContext.Score.Score = 0;
 			MainGameContext.Score.Combo = 0;
@@ -258,7 +257,7 @@ namespace DIVA::MainGame
 
 			HitSound_Hold_LoopVoice = AudioEngine::GetInstance()->AllocateVoice(HitSound_Hold_Loop);
 			HitSound_Hold_LoopVoice.SetLoopState(true);
-			HitSound_Hold_LoopVoice.SetVolume(0.35f);
+			HitSound_Hold_LoopVoice.SetVolume(0.135f);
 			
 			if (MusicSource != SourceHandle::Invalid)
 			{
@@ -445,7 +444,7 @@ namespace DIVA::MainGame
 			{
 				if (tapped)
 				{
-					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
 				}
 				return;
 			}
@@ -487,7 +486,7 @@ namespace DIVA::MainGame
 			{
 				if (tapped)
 				{
-					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
 				}
 				return;
 			}
@@ -532,7 +531,7 @@ namespace DIVA::MainGame
 					MainGameContext.Score.Score += 200;
 					hud.SetScoreBonusDisplayState(200 + (IsChanceTime ? noteScore : 0), note->TargetPosition);
 				}
-				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.25f);
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.125f);
 			}
 			else if (note->Type == NoteType::HoldStart)
 			{
@@ -551,14 +550,12 @@ namespace DIVA::MainGame
 				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
 				hud.ReleaseScoreBonus(drop);
 
-				HitSound_Hold_LoopVoice.SetSource(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd);
-				HitSound_Hold_LoopVoice.SetFramePosition(0);
-				HitSound_Hold_LoopVoice.SetLoopState(false);
-				HitSound_Hold_LoopVoice.SetPlaying(true);
+				HitSound_Hold_LoopVoice.SetPlaying(false);
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd, 0.135f);
 			}
 			else
 			{
-				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.25f);
+				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
 				if (IsChanceTime)
 				{
 					hud.SetScoreBonusDisplayState(noteScore, note->TargetPosition);
@@ -774,8 +771,9 @@ namespace DIVA::MainGame
 					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
 					break;
 				case 1:
-					CurrentSubState = SubState::MainGame;
 					Reset();
+					Paused = false;
+					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
 					break;
 				case 2:
 					GameInstance->SetState(std::make_unique<Menu::ChartSelect>());
@@ -851,7 +849,7 @@ namespace DIVA::MainGame
 			{
 				note.UpdateTrail();
 				note.DrawTrail();
-				spriteRenderer->RenderSprites(nullptr);
+				//spriteRenderer->RenderSprites(nullptr);
 			}
 
 			for (auto& note : ActiveNotes)
