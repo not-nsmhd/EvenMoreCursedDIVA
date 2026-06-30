@@ -123,12 +123,19 @@ namespace DIVA::MainGame
 			return DefaultNoteDuration;
 		}
 
-		for (auto& noteTimeChange : NoteTimeChanges)
+		const auto* prevTimeChange = &NoteTimeChanges[0];
+		for (size_t i = 0; i <= NoteTimeChanges.size(); i++)
 		{
-			if (noteTimeChange.Time <= time)
+			if (i == NoteTimeChanges.size()) { return NoteTimeChanges[i - 1].Value; }
+			const auto* timeChange = &NoteTimeChanges[i];
+
+			if (timeChange->Time <= time)
 			{
-				return noteTimeChange.Value;
+				prevTimeChange = timeChange;
+				continue;
 			}
+
+			return prevTimeChange->Value;
 		}
 
 		return DefaultNoteDuration;
