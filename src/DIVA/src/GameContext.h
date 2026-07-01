@@ -19,6 +19,7 @@ namespace DIVA
 
 	public:
 		std::unique_ptr<Starshine::Rendering::Render2D::Font> DebugFont;
+		std::unique_ptr<Starshine::Rendering::Render2D::Font> TestCJKFont;
 		std::unique_ptr<Starshine::Rendering::Render2D::SpriteRenderer> SpriteRenderer;
 
 		std::vector<Formats::SongInfo> SongList;

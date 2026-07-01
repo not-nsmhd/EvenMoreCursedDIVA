@@ -1,5 +1,6 @@
 #include "FontRenderer.h"
 #include "SpriteRenderer.h"
+#include <utf8.h>
 
 namespace Starshine::Rendering::Render2D
 {
@@ -12,6 +13,34 @@ namespace Starshine::Rendering::Render2D
 		vec2 basePos{};
 		vec2 glyphOffset{};
 
+		auto c = text.cbegin();
+		while (c != text.cend())
+		{
+			i32 utfChar = utf8::next(c, text.cend());
+
+			if (utfChar == '\n')
+			{
+				basePos.x = 0.0f;
+				basePos.y += font->LineHeight;
+				continue;
+			}
+
+			const FontGlyph* glyph = font->GetGlyph(utfChar);
+
+			if (utfChar == ' ')
+			{
+				basePos.x += glyph->XAdvance;
+				continue;
+			}
+
+			glyphOffset.x = glyph->XOffset;
+			glyphOffset.y = glyph->YOffset;
+			PushGlyph(font, glyph, position + basePos + glyphOffset, scale, color);
+
+			basePos.x += glyph->XAdvance;
+		}
+
+#if 0
 		for (size_t i = 0; i < text.length(); i++)
 		{
 			char c = text.at(i);
@@ -37,12 +66,37 @@ namespace Starshine::Rendering::Render2D
 
 			basePos.x += glyph->XAdvance;
 		}
+#endif
 	}
 
 	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)
 	{
 		vec2 basePos{};
 
+		auto c = text.cbegin();
+		while (c != text.cend())
+		{
+			i32 utfChar = utf8::next(c, text.cend());
+
+			if (utfChar == '\n')
+			{
+				basePos.x = 0.0f;
+				basePos.y += font->LineHeight;
+				continue;
+			}
+
+			const FontGlyph* glyph = font->GetGlyph(utfChar);
+
+			if (utfChar == ' ')
+			{
+				basePos.x += glyph->XAdvance;
+				continue;
+			}
+
+			basePos.x += glyph->XAdvance;
+		}
+
+#if 0
 		for (size_t i = 0; i < text.length(); i++)
 		{
 			char c = text.at(i);
@@ -64,6 +118,7 @@ namespace Starshine::Rendering::Render2D
 
 			basePos.x += glyph->XAdvance;
 		}
+#endif
 
 		return basePos;
 	}

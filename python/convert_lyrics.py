@@ -46,7 +46,7 @@ chartFile = sys.argv[3]
 
 pvDbFile = open(pvDbFile_path, "r", encoding='utf-8', newline='\n')
 pvIndex = int(pvIndexString)
-pvLyricPrefix = f"pv_{pvIndex}.lyric"
+pvLyricPrefix = f"pv_{pvIndex:03d}.lyric"
 
 pvLyrics = [];
 
@@ -119,7 +119,7 @@ while True:
 xmlLyricsList = XmlET.Element("Lyrics")
 
 for l in convLyrics:
-    if l.Text == None:
+    if (l.Text == None or len(l.Text) == 0):
         continue
         
     xmlLyric = XmlET.SubElement(xmlLyricsList, "Lyric",

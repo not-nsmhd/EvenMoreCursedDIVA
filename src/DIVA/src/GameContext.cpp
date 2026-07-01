@@ -55,8 +55,12 @@ namespace DIVA
 		auto gfxDevice = Rendering::GetDevice();
 
 		SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
+
 		DebugFont = std::make_unique<Render2D::Font>();
 		if (!DebugFont->ReadBMFont("diva/fonts/debug.fnt")) { return false; }
+
+		TestCJKFont = std::make_unique<Render2D::Font>();
+		if (!TestCJKFont->ReadBMFont("diva/fonts/test_cjk.fnt")) { return false; }
 
 		return true;
 	}

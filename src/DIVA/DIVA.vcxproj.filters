@@ -84,6 +84,9 @@
     <ClInclude Include="src\MainGame\Lyrics.h">
       <Filter>Source Files\MainGame</Filter>
     </ClInclude>
+    <ClInclude Include="src\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\GameIcon.ico">

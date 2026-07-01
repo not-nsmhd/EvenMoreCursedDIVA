@@ -13,13 +13,13 @@ int SDL_main(int argc, char* argv[])
 	if (game.Initialize())
 	{
 		game.GetWindow()->SetTitle("Sandbox");
-		//game.GetWindow()->SetSize(ivec2(1600, 900));
+		game.GetWindow()->SetSize(ivec2(1600, 900));
 		game.GetWindow()->CenterWindow();
-		//game.GetWindow()->SetResizing(true);
+		game.GetWindow()->SetResizing(true);
 
 		Sandbox::GameContext::CreateInstance();
 
-		game.SetState(std::make_unique<SpriteRendererTest>());
+		game.SetState(std::make_unique<ImGuiTest>());
 		game.EnterLoop();
 
 		Sandbox::GameContext::DestroyInstance();

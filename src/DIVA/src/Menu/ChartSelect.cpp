@@ -6,6 +6,7 @@
 #include "MainGame/MainGame.h"
 #include <vector>
 #include "Formats/SongInfo.h"
+#include "../Definitions.h"
 
 namespace DIVA::Menu
 {
@@ -32,6 +33,12 @@ namespace DIVA::Menu
 
 		~Impl()
 		{
+		}
+
+		void Reset()
+		{
+			selectionIndex = 0;
+			currentDifficultyIndex = 0;
 		}
 
 		void LoadContent()
@@ -78,11 +85,11 @@ namespace DIVA::Menu
 
 				if (!info.ChartFilePaths[currentDifficultyIndex].empty())
 				{
-					auto mgState = std::make_unique<MainGame::MainGameState>();
+					auto mgState = static_cast<MainGame::MainGameState*>(GameInstance->GetStateInstance(GameState_MainGame));
 					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
 					mgState->LoadSettings.LyricsPath = info.LyricsFilePath;
 					mgState->LoadSettings.MusicPath = info.MusicFilePath;
-					GameInstance->SetState(std::move(mgState));
+					GameInstance->SetState(GameState_MainGame);
 				}
 			}
 		}
@@ -140,6 +147,7 @@ namespace DIVA::Menu
 	bool ChartSelect::Initialize()
 	{
 		impl->GameInstance = GameInstance;
+		impl->Reset();
 		return true;
 	}
 
@@ -168,8 +176,8 @@ namespace DIVA::Menu
 		impl->Draw();
 	}
 
-	std::string_view ChartSelect::GetStateName() const
+	i64 ChartSelect::GetStateID() const
 	{
-		return "Chart Select";
+		return GameState_ChartSelect;
 	}
 }

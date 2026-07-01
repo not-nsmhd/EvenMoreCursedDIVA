@@ -11,11 +11,6 @@ namespace Starshine::Rendering::Render2D
 
 	void SpriteSheet::Destroy()
 	{
-		for (auto texture = textures.begin(); texture != textures.end(); texture++)
-		{
-			*texture = nullptr;
-		}
-
 		textures.clear();
 		sprites.clear();	
 	}

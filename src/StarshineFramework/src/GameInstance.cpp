@@ -28,7 +28,9 @@ namespace Starshine
 		SDL_Event SDLEvent{};
 
 		Device* GFXDevice{ nullptr };
-		std::unique_ptr<GameState> CurrentState{};
+
+		GameState* CurrentState{};
+		i64 CurrentStateID{};
 
 		static constexpr TimeSpan TargetFrameTime = TimeSpan(16667);
 
@@ -237,12 +239,35 @@ namespace Starshine
 			Destroy();
 		}
 
-		bool SetState(std::unique_ptr<GameState> state)
+		bool SetState(i64 stateID)
 		{
+			if (Parent->GameStates.empty())
+			{
+				LogMessage("No game states have been registered. Have you called \"GameInstance->RegisterState<T>()\"?");
+				return false;
+			}
+
+			GameState* newState = nullptr;
+
+			for (auto& state : Parent->GameStates)
+			{
+				if (state->GetStateID() == stateID)
+				{
+					newState = state.get();
+					break;
+				}
+			}
+
+			if (newState == nullptr)
+			{
+				LogMessage("No state with ID %d has been registered", stateID);
+				return false;
+			}
+
 			if (CurrentState != nullptr)
 			{
-				LogMessage("Changing state: [%s] -> [%s]",
-					CurrentState->GetStateName().data(), state->GetStateName().data());
+				LogMessage("Changing state: [%d] -> [%d]",
+					CurrentState->GetStateID(), stateID);
 
 				CurrentState->UnloadContent();
 				CurrentState->Destroy();
@@ -250,19 +275,33 @@ namespace Starshine
 			}
 			else
 			{
-				LogMessage("Setting initial state: [%s]", state->GetStateName().data());
+				LogMessage("Setting initial state: [%d]", stateID);
 			}
 
-			state->GameInstance = Parent;
+			newState->GameInstance = Parent;
 
-			if (!state->Initialize()) { return false; }
+			if (!newState->Initialize()) { return false; }
 			LogMessage("Initialized new state");
 
-			if (!state->LoadContent()) { return false; }
+			if (!newState->LoadContent()) { return false; }
 			LogMessage("Loaded content of the new state");
 
-			CurrentState = std::move(state);
+			CurrentState = newState;
 			return true;
+		}
+
+		GameState* GetStateInstance(i64 stateID)
+		{
+			for (auto& state : Parent->GameStates)
+			{
+				if (state->GetStateID() == stateID)
+				{
+					return state.get();
+					break;
+				}
+			}
+
+			return nullptr;
 		}
 	};
 
@@ -290,9 +329,15 @@ namespace Starshine
 		impl->Loop();
 	}
 
-	bool GameInstance::SetState(std::unique_ptr<GameState> state)
+	bool GameInstance::SetState(i64 stateID)
 	{
-		if (state == nullptr) { return false; }
-		return impl->SetState(std::move(state));
+		if (stateID == -1) { return false; }
+		return impl->SetState(stateID);
+	}
+
+	GameState* Starshine::GameInstance::GetStateInstance(i64 stateID)
+	{
+		if (stateID == -1) { return nullptr; }
+		return impl->GetStateInstance(stateID);
 	}
 }

@@ -61,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -94,7 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/glad/include;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib_vs/libogg/include;$(SolutionDir)lib_vs/libvorbis/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

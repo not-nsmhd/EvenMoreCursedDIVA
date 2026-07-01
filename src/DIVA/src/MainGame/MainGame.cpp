@@ -1,5 +1,6 @@
 #include <Common/Types.h>
 #include <Common/MathExt.h>
+#include "../Definitions.h"
 #include "MainGame.h"
 #include "Chart.h"
 #include "Lyrics.h"
@@ -138,27 +139,42 @@ namespace DIVA::MainGame
 		{
 		}
 
-		void Initialize()
-		{
-			GFXDevice = Rendering::GetDevice();
-			hud.Initialize();
-		}
-
 		void Reset()
 		{
 			chartNoteOffset = 0;
 			songLyricsOffset = 0;
-			ElapsedTime = {};
+
 			ActiveNotes.clear();
 
 			MusicVoice.SetFramePosition(0);
 			MusicVoice.SetVolume(0.5f);
 
+			ElapsedTime = { 0 };
+
 			MainGameContext.Score.Score = 0;
 			MainGameContext.Score.Combo = 0;
 			MainGameContext.Score.MaxCombo = 0;
 
+			IsChanceTime = false;
+			NextChanceTime = nullptr;
+			PassedChanceTimes = 0;
+
+			Paused = false;
+			pause_optionIndex = 0;
+			results_optionIndex = 0;
+
+			CurrentSubState = SubState::MainGame;
+			resultsSaved = false;
+
 			hud.Reset();
+		}
+
+		void Initialize()
+		{
+			GFXDevice = Rendering::GetDevice();
+			hud.Initialize();
+
+			Reset();
 		}
 
 		bool CreateIconSetSpriteSheet()
@@ -309,14 +325,15 @@ namespace DIVA::MainGame
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_LoopEnd);
 
 			MainGameContext.IconSetSprites.SpriteSheet.Destroy();
+			hud.Destroy();
 
 			ActiveNotes.clear();
 			songChart.Clear();
+			songLyrics.clear();
 		}
 
 		void Destroy()
 		{
-			hud.Destroy();
 		}
 
 		GameNote* FindNoteToEvaluate()
@@ -776,7 +793,7 @@ namespace DIVA::MainGame
 					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
 					break;
 				case 2:
-					GameInstance->SetState(std::make_unique<Menu::ChartSelect>());
+					GameInstance->SetState(GameState_ChartSelect);
 					return;
 				}
 
@@ -819,7 +836,7 @@ namespace DIVA::MainGame
 					Reset();
 					break;
 				case 1:
-					GameInstance->SetState(std::make_unique<Menu::ChartSelect>());
+					GameInstance->SetState(GameState_ChartSelect);
 					return;
 				}
 
@@ -944,8 +961,8 @@ namespace DIVA::MainGame
 		impl->Draw(gameTime);
 	}
 
-	std::string_view MainGameState::GetStateName() const
+	i64 MainGameState::GetStateID() const
 	{
-		return "Main Game";
+		return GameState_MainGame;
 	}
 }

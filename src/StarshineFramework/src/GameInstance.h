@@ -1,6 +1,7 @@
 #pragma once
 #include "Common/Types.h"
 #include "Window.h"
+#include <vector>
 #include <memory>
 #include <functional>
 #include "TimeSpan.h"
@@ -25,7 +26,7 @@ namespace Starshine
 		virtual void Update(GameTime& gameTime) = 0;
 		virtual void Draw(GameTime& gameTime) = 0;
 
-		virtual std::string_view GetStateName() const = 0;
+		virtual i64 GetStateID() const = 0;
 
 	public:
 		GameInstance* GameInstance{};
@@ -45,12 +46,25 @@ namespace Starshine
 		void EnterLoop();
 
 	public:
-		bool SetState(std::unique_ptr<GameState> state);
+		template<typename T>
+		void RegisterState();
+
+		GameState* GetStateInstance(i64 stateID);
+		bool SetState(i64 stateID);
 
 	private:
 		std::unique_ptr<Window> GameWindow{ nullptr };
 
 		struct Impl;
 		std::unique_ptr<Impl> impl{ nullptr };
+
+		std::vector<std::unique_ptr<GameState>> GameStates;
 	};
+
+	template<typename T>
+	inline void Starshine::GameInstance::RegisterState()
+	{
+		static_assert(std::is_base_of_v<GameState, T>, "T must be inherited from GameState");
+		GameStates.push_back(std::make_unique<T>());
+	}
 }

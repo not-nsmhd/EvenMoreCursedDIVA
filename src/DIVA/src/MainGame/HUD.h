@@ -9,7 +9,8 @@ namespace DIVA::MainGame
 	class HUD : NonCopyable
 	{
 	public:
-		HUD(MainGameContext& context) : mainGameContext{ context } {}
+		HUD(MainGameContext& context);
+		~HUD();
 
 		void Initialize();
 		void Reset();
@@ -29,6 +30,6 @@ namespace DIVA::MainGame
 		MainGameContext& mainGameContext;
 
 		struct Impl;
-		Impl* impl{ nullptr };
+		Impl* impl{};
 	};
 }

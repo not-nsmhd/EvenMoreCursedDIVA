@@ -94,6 +94,8 @@ namespace DIVA::MainGame
 	void Chart::Clear()
 	{
 		Notes.clear();
+		NoteTimeChanges.clear();
+		ChanceTimes.clear();
 	}
 
 	void Chart::ProcessNoteReferences()

@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\Formats\SongInfo.h" />
     <ClInclude Include="src\GameContext.h" />
     <ClInclude Include="src\MainGame\Chart.h" />

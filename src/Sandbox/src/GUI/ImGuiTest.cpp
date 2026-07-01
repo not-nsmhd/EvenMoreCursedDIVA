@@ -20,10 +20,8 @@ using namespace Starshine::ImGuiExtensions;
 struct ImGuiTest::Impl
 {
 	std::unique_ptr<Texture> TestTexture{};	
-	std::unique_ptr<Framebuffer> TestFB{};
 
 	vec2 testPos{};
-	ImVec2 dragDelta{};
 
 	i32 currentTimelineFrame = 0;
 	i32 timelineFrames = 100;
@@ -33,6 +31,12 @@ struct ImGuiTest::Impl
 	};
 
 	f32 timelineScroll = 0.0f;
+
+	vec2 viewportSize{ 1280.0f, 720.0f };
+	vec2 viewPosOffset{ 0.0f, 0.0f };
+	float viewScale{ 1.0f };
+
+	ImVec2 viewportDragOffset{};
 
 	Impl()
 	{
@@ -46,8 +50,6 @@ struct ImGuiTest::Impl
 	{
 		Rendering::Utilities::LoadImage("testfiles/test.png", TestTexture);
 		TestTexture->SetDebugName("TestTexture");
-
-		Rendering::GetDevice()->CreateFramebuffer(1280, 720, TextureFormat::RGBA8, TestFB);
 	}
 
 	void TestPropsWindow()
@@ -76,14 +78,8 @@ struct ImGuiTest::Impl
 
 		constexpr f32 frameLineDistance = 16.0f;
 
-		ImGui::SetNextWindowSize(windowSize);
-		ImGui::SetNextWindowPos(windowPos);
-
 		constexpr ImGuiWindowFlags windowFlags =
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoSavedSettings;
+			ImGuiWindowFlags_NoCollapse;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{});
 
@@ -254,66 +250,41 @@ struct ImGuiTest::Impl
 		ImGui::PopStyleVar(1);
 	}
 
-	void TestHitbox()
+	void TestViewport()
 	{
-		constexpr ImGuiWindowFlags overlayWindowFlags =
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_AlwaysAutoResize;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-		if (ImGui::Begin("Testing Viewport", nullptr, overlayWindowFlags))
+		ImGuiIO& io = ImGui::GetIO();
+		if (ImGui::IsKeyDown(ImGuiKey::ImGuiKey_MouseMiddle))
 		{
-			ImDrawList* drawList = ImGui::GetWindowDrawList();
-
-			// HACK: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-			if (Rendering::GetDeviceType() == Rendering::DeviceType::D3D11)
-			{
-				D3D11Framebuffer* d3dFB = static_cast<D3D11Framebuffer*>(TestFB.get());
-				ImVec2 fbSize = { 960.0f, 540.0f };
-
-				f32 xMul = (fbSize.x / 1280.0f);
-				f32 yMul = (fbSize.y / 720.0f);
-
-				f32 xMul_inv = (1280.0f / fbSize.x);
-				f32 yMul_inv = (720.0f / fbSize.y);
-
-				ImGui::Image((ImTextureRef)((ImU64)d3dFB->ShaderResourceView.Get()), fbSize);
-
-				ImVec2 windowPos = ImGui::GetWindowPos();
-				f32 titleBarHeight = ImGui::GetWindowContentRegionMin().y;
-
-				ImVec2 boxStart = ImVec2(windowPos.x + (testPos.x * xMul) + dragDelta.x, windowPos.y + (testPos.y * yMul) + titleBarHeight + dragDelta.y);
-				ImVec2 boxEnd = ImVec2(boxStart.x + (128.0f * xMul), boxStart.y + (128.0f * yMul));
-
-				ImVec2 mousePos = ImGui::GetMousePos();
-				bool mouseInsideHitbox = ImRect(boxStart, boxEnd).Contains(mousePos);
-				
-				bool dragging = ImGui::IsMouseDragging(ImGuiMouseButton_Left);
-
-				if (mouseInsideHitbox && dragging)
-				{
-					dragDelta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-				}
-				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && (std::abs(dragDelta.x) > 0.0f || std::abs(dragDelta.y) > 0.0f))
-				{
-					testPos.x += dragDelta.x * xMul_inv;
-					testPos.y += dragDelta.y * yMul_inv;
-					dragDelta = {};
-				}
-
-				static constexpr ImU32 normalColor = 0;
-				static constexpr ImU32 hoveredColor = IM_COL32(255, 0, 0, 64);
-				
-				drawList->AddRectFilled(boxStart, boxEnd, mouseInsideHitbox ? hoveredColor : normalColor);
-				drawList->AddRect(boxStart, boxEnd, IM_COL32(255, 0, 0, 255));
-			}
-
+			viewportDragOffset = ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle);
 		}
-		ImGui::End();
+		if (ImGui::IsKeyReleased(ImGuiKey::ImGuiKey_MouseMiddle))
+		{
+			viewPosOffset.x += viewportDragOffset.x;
+			viewPosOffset.y += viewportDragOffset.y;
+			viewportDragOffset = {};
+		}
 
-		ImGui::PopStyleVar(1);
+		SpriteRenderer* sprRenderer = Sandbox::GameContext::GetInstance()->SpriteRenderer.get();
+		vec2 mergedViewportPos = vec2{ viewPosOffset.x + viewportDragOffset.x, viewPosOffset.y + viewportDragOffset.y };
+
+		// Viewport base
+		sprRenderer->ResetSprite();
+		sprRenderer->SetSpritePosition(mergedViewportPos);
+		sprRenderer->SetSpriteSize(viewportSize * viewScale);
+		sprRenderer->SetSpriteColor(DefaultColors::White);
+		sprRenderer->PushSprite(nullptr);
+
+		sprRenderer->PushOutlineRect(mergedViewportPos, viewportSize * viewScale, {}, DefaultColors::Black);
+			
+		// Objects
+		sprRenderer->SetBlendMode(BlendMode::Normal);
+		sprRenderer->SetSpritePosition(vec2{ testPos.x, testPos.y } + mergedViewportPos);
+		sprRenderer->SetSpriteSize(vec2{ 128.0f, 128.0f } * viewScale);
+		sprRenderer->SetSpriteSource(RectangleF{ 0.0f, 0.0f, 1.0f, 1.0f });
+		sprRenderer->SetSpriteColor(DefaultColors::White);
+		sprRenderer->PushSprite(TestTexture.get());
+
+		sprRenderer->RenderSprites(nullptr);
 	}
 
 	void Update(f64 deltaTime_ms)
@@ -322,25 +293,9 @@ struct ImGuiTest::Impl
 
 	void Draw(f64 deltaTime_ms)
 	{
-		Rendering::GetDevice()->SetFramebuffer(TestFB.get());
-		Rendering::GetDevice()->SetViewportSize(RectangleF(0, 0, 1920, 1080));
-		Rendering::GetDevice()->Clear(ClearFlags_Color, Color(0, 64, 64, 255), 1.0f, 0);
+		Rendering::GetDevice()->Clear(ClearFlags_Color, DefaultColors::Gray, 1.0f, 0);
 
-		SpriteRenderer* sprRenderer = Sandbox::GameContext::GetInstance()->SpriteRenderer.get();
-
-		sprRenderer->SetBlendMode(BlendMode::Normal);
-		sprRenderer->SetSpritePosition({ testPos.x + dragDelta.x, testPos.y + dragDelta.y });
-		sprRenderer->SetSpriteSize(vec2{ 128.0f, 128.0f });
-		sprRenderer->SetSpriteSource(RectangleF{ 0.0f, 0.0f, 1.0f, 1.0f });
-		sprRenderer->SetSpriteColor(DefaultColors::White);
-		sprRenderer->PushSprite(TestTexture.get());
-
-		sprRenderer->RenderSprites(nullptr);
-
-		Rendering::GetDevice()->SetFramebuffer(nullptr);
-		Rendering::GetDevice()->Clear(ClearFlags_Color, DefaultColors::ClearColor_InGame, 1.0f, 0);
-
-		TestHitbox();
+		TestViewport();
 		//TestPropsWindow();
 		TestTimeline();
 
@@ -375,14 +330,14 @@ void ImGuiTest::Destroy()
 {
 }
 
-void ImGuiTest::Update(f64 deltaTime_milliseconds)
+void ImGuiTest::Update(Starshine::GameTime& gameTime)
 {
-	impl->Update(deltaTime_milliseconds);
+	impl->Update(gameTime.ElapsedFrameTime.GetMilliseconds());
 }
 
-void ImGuiTest::Draw(f64 deltaTime_milliseconds)
+void ImGuiTest::Draw(Starshine::GameTime& gameTime)
 {
-	impl->Draw(deltaTime_milliseconds);
+	impl->Draw(gameTime.ElapsedFrameTime.GetMilliseconds());
 }
 
 std::string_view ImGuiTest::GetStateName() const

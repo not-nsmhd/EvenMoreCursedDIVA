@@ -2,6 +2,7 @@
 #include <Common/Color.h>
 #include <Common/MathExt.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
+#include "../GameContext.h"
 
 namespace DIVA::MainGame
 {
@@ -11,8 +12,7 @@ namespace DIVA::MainGame
 
 	struct HUD::Impl
 	{
-		MainGame::MainGameContext& mainGameContext;
-
+		MainGame::MainGameContext* mainGameContext = nullptr;
 		Font* debugFont = nullptr;
 
 		struct SpriteCache
@@ -59,7 +59,11 @@ namespace DIVA::MainGame
 		Color LyricsColor{};
 		vec2 LyricsTextDisplaySize{};
 
-		Impl(MainGame::MainGameContext& context) : mainGameContext{ context }
+		Impl(MainGame::MainGameContext& context) : mainGameContext{ &context }
+		{
+		}
+
+		~Impl()
 		{
 		}
 
@@ -149,13 +153,13 @@ namespace DIVA::MainGame
 
 		void UpdateScoreDisplay(float deltaTime_ms)
 		{
-			i32 scoreDiff = mainGameContext.Score.Score - ScoreDisplay.DisplayValue;
+			i32 scoreDiff = mainGameContext->Score.Score - ScoreDisplay.DisplayValue;
 
 			if (scoreDiff < 61)
 			{
 				if (scoreDiff < 21)
 				{
-					ScoreDisplay.DisplayValue = mainGameContext.Score.Score;
+					ScoreDisplay.DisplayValue = mainGameContext->Score.Score;
 				}
 				else
 				{
@@ -188,7 +192,7 @@ namespace DIVA::MainGame
 		// NOTE: Value text is displayed from right to left
 		float DrawSpriteNumericValue(u32 value, const Sprite* spriteArray[], const vec2& position, const vec2& scale, float spacing, int length = -1)
 		{
-			SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
+			SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 			vec2 displayOffset{ 0.0f, 0.0f };
 
 			int realLength = (length == -1) ? 10 : length;
@@ -237,7 +241,7 @@ namespace DIVA::MainGame
 		{
 			if (ComboDisplayState.HitEvaluation != HitEvaluation::None && ComboDisplayState.ElapsedDisplayTime <= 2.0f)
 			{
-				SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
+				SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 
 				size_t valuIndex = static_cast<size_t>(ComboDisplayState.HitEvaluation);
 
@@ -269,7 +273,7 @@ namespace DIVA::MainGame
 		{
 			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f)
 			{
-				SpriteSheetRenderer& sprRenderer = mainGameContext.SpriteRenderer->SpriteSheet();
+				SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 
 				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, 15.0f);
 				float plusWidth = spriteCache.ScoreBonus_Plus->SourceRectangle.Width;
@@ -307,8 +311,10 @@ namespace DIVA::MainGame
 
 		void SetLyricsText(std::string_view text, const Color& color)
 		{
+			auto font = GameContext::GetInstance()->TestCJKFont.get();
+
 			::strncpy_s(LyricsTextBuffer.data(), LyricsTextBuffer.max_size(), text.data(), LyricsTextBuffer.size());
-			LyricsTextDisplaySize = mainGameContext.SpriteRenderer->Font().MeasureString(mainGameContext.DebugFont, LyricsTextBuffer.data());
+			LyricsTextDisplaySize = mainGameContext->SpriteRenderer->Font().MeasureString(font, LyricsTextBuffer.data());
 			LyricsColor = color;
 		}
 
@@ -316,17 +322,27 @@ namespace DIVA::MainGame
 		{
 			if (LyricsTextBuffer.size() > 0)
 			{
-				FontRenderer& fontRenderer = mainGameContext.SpriteRenderer->Font();
-				
+				FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
+				auto font = GameContext::GetInstance()->TestCJKFont.get();
+
 				vec2 pos{ 640.0f - LyricsTextDisplaySize.x / 2.0f, 640.0f - LyricsTextDisplaySize.y / 2.0f };
-				fontRenderer.PushString(mainGameContext.DebugFont, LyricsTextBuffer.data(), pos, vec2(1.0f), LyricsColor);
+				fontRenderer.PushString(font, LyricsTextBuffer.data(), pos, vec2(1.0f), LyricsColor);
 			}
 		}
 	};
 
+	HUD::HUD(MainGameContext& context) : mainGameContext(context)
+	{
+		impl = new Impl(context);
+	}
+
+	HUD::~HUD()
+	{
+		delete impl;
+	}
+
 	void HUD::Initialize()
 	{
-		impl = new Impl(mainGameContext);
 		impl->Initialize();
 	}
 
@@ -342,7 +358,6 @@ namespace DIVA::MainGame
 
 	void HUD::Destroy()
 	{
-		delete impl;
 	}
 
 	void HUD::Update(Starshine::GameTime& gameTime)
