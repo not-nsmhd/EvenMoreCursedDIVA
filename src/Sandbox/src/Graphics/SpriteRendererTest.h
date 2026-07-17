@@ -16,7 +16,7 @@ public:
 	void Update(Starshine::GameTime& gameTime);
 	void Draw(Starshine::GameTime& gameTime);
 
-	std::string_view GetStateName() const;
+	i64 GetStateID() const;
 
 private:
 	struct Impl;

@@ -34,6 +34,9 @@
     <ClCompile Include="src\Animations\AnimationUtil.cpp">
       <Filter>Source Files\Animations</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\FontTest.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -50,9 +53,6 @@
     <ClInclude Include="src\GUI\ImGuiTest.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="src\GUI\Timeline.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="src\GameContext.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -61,6 +61,12 @@
     </ClInclude>
     <ClInclude Include="src\Animations\AnimationUtil.h">
       <Filter>Source Files\Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\FontTest.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

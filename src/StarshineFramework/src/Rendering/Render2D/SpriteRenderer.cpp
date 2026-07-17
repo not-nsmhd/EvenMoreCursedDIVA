@@ -69,6 +69,7 @@ namespace Starshine::Rendering::Render2D
 	array<BlendModeState, EnumCount<BlendMode>()> BlendModes
 	{
 		BlendModeState
+		{ { BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add } },
 		{ { BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
 		{ { BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
 		{ { BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
@@ -462,8 +463,15 @@ namespace Starshine::Rendering::Render2D
 
 		void SetBlendMode(BlendMode mode)
 		{
-			const BlendModeState& blendState = BlendModes[static_cast<size_t>(mode)];
-			GFXDevice->SetBlendState(blendState.StateObject.get());
+			if (mode == BlendMode::Disabled)
+			{
+				GFXDevice->SetBlendState(nullptr);
+			}
+			else
+			{
+				const BlendModeState& blendState = BlendModes[static_cast<size_t>(mode)];
+				GFXDevice->SetBlendState(blendState.StateObject.get());
+			}
 		}
 	};
 

@@ -8,7 +8,7 @@ namespace Starshine::IO
 	class StreamWriter : public StreamManipulator, NonCopyable
 	{
 	public:
-		static constexpr u8 DefaultPaddingValue{ 0xEE };
+		static constexpr u8 DefaultPaddingValue{ 0 };
 
 	public:
 		explicit StreamWriter(IStream& stream) : StreamManipulator(stream)

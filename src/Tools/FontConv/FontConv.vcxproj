@@ -13,8 +13,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{4508002b-5545-4cc1-b214-63586895e641}</ProjectGuid>
-    <RootNamespace>Sandbox</RootNamespace>
+    <ProjectGuid>{2e277393-0afd-4761-837c-0fa39ff134c0}</ProjectGuid>
+    <RootNamespace>FontConv</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -45,12 +45,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)bin\Tools\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)bin\Tools\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -61,13 +61,13 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/Sandbox/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\StarshineLib\src;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib_vs\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -80,46 +80,27 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/Sandbox/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\StarshineLib\src;$(SolutionDir)lib\glm\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\tinyxml2\include;$(SolutionDir)lib_vs\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Animations\AnimationUtil.cpp" />
-    <ClCompile Include="src\GameContext.cpp" />
-    <ClCompile Include="src\Graphics\FontTest.cpp" />
-    <ClCompile Include="src\Graphics\GraphicsTest.cpp" />
-    <ClCompile Include="src\Graphics\SpriteRendererTest.cpp" />
-    <ClCompile Include="src\GUI\ImGuiTest.cpp" />
-    <ClCompile Include="src\Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\.editorconfig" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\StarshineFramework\StarshineFramework.vcxproj">
-      <Project>{f964f200-541c-4312-ae56-9485a0ab6848}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\StarshineLib\StarshineLib.vcxproj">
+    <ProjectReference Include="..\..\StarshineLib\StarshineLib.vcxproj">
       <Project>{71aa7175-a2c5-405b-9946-d79260200bda}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Animations\Animation.h" />
-    <ClInclude Include="src\Animations\AnimationUtil.h" />
-    <ClInclude Include="src\Definitions.h" />
-    <ClInclude Include="src\GameContext.h" />
-    <ClInclude Include="src\Graphics\FontTest.h" />
-    <ClInclude Include="src\Graphics\GraphicsTest.h" />
-    <ClInclude Include="src\Graphics\SpriteRendererTest.h" />
-    <ClInclude Include="src\GUI\ImGuiTest.h" />
+    <ClCompile Include="src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\.editorconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

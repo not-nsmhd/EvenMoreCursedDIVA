@@ -15,6 +15,8 @@ namespace Starshine
 		inline TimeSpan& operator+=(const TimeSpan& other) { Microseconds += other.Microseconds; return *this; };
 		inline TimeSpan& operator-=(const TimeSpan& other) { Microseconds -= other.Microseconds; return *this; };
 
+		static TimeSpan GetTimeNow();
+
 		i64 Microseconds{ 0 };
 	};
 

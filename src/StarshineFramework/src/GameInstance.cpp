@@ -278,6 +278,10 @@ namespace Starshine
 				LogMessage("Setting initial state: [%d]", stateID);
 			}
 
+			// HACK: This is to make sure that the viewport is set to the correct size if the game resizes the window before entering the loop
+			ivec2 windowSize = Parent->GameWindow->GetSize();
+			GFXDevice->OnWindowResize(windowSize.x, windowSize.y);
+
 			newState->GameInstance = Parent;
 
 			if (!newState->Initialize()) { return false; }

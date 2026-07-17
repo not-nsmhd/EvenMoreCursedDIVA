@@ -106,14 +106,12 @@ namespace Starshine::MathExtensions
 	template <typename T>
 	constexpr T ConvertRange(T originalStart, T originalEnd, T newStart, T newEnd, T value)
 	{
-		static_assert(std::is_floating_point_v<T>);
 		return newStart + (value - originalStart) * (newEnd - newStart) / (originalEnd - originalStart);
 	}
 
 	template <typename T>
 	constexpr T Lerp(T start, T end, T value)
 	{
-		static_assert(std::is_floating_point_v<T>);
 		return start + (end - start) * value;
 	}
 };

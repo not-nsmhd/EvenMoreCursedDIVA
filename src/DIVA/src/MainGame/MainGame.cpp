@@ -888,7 +888,6 @@ namespace DIVA::MainGame
 
 		void DrawPauseMenu()
 		{
-			spriteRenderer->SetBlendMode(BlendMode::Normal);
 			spriteRenderer->SetSpriteColor({ 0, 0, 0, 128 });
 			spriteRenderer->SetSpritePosition({ 0.0f, 0.0f });
 			spriteRenderer->SetSpriteSize({ 1280.0f, 720.0f });

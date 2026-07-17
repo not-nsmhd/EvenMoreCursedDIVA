@@ -1,4 +1,5 @@
 ﻿#include "ImGuiTest.h"
+#include "Definitions.h"
 #include "Rendering/Device.h"
 #include "Rendering/Utilities.h"
 #include "GameContext.h"
@@ -21,22 +22,17 @@ struct ImGuiTest::Impl
 {
 	std::unique_ptr<Texture> TestTexture{};	
 
-	vec2 testPos{};
-
-	i32 currentTimelineFrame = 0;
-	i32 timelineFrames = 100;
-	static constexpr std::array<int, 4> keyframeLocations
-	{
-		4, 5, 6, 9
-	};
-
 	f32 timelineScroll = 0.0f;
 
+	vec2 testPos{};
+	
 	vec2 viewportSize{ 1280.0f, 720.0f };
 	vec2 viewPosOffset{ 0.0f, 0.0f };
 	float viewScale{ 1.0f };
 
 	ImVec2 viewportDragOffset{};
+
+	f32 currentFrame{};
 
 	Impl()
 	{
@@ -52,15 +48,6 @@ struct ImGuiTest::Impl
 		TestTexture->SetDebugName("TestTexture");
 	}
 
-	void TestPropsWindow()
-	{
-		if (ImGui::Begin("Testing Properties"))
-		{
-			ImGui::DragFloat2("Position", &testPos[0]);
-		}
-		ImGui::End();
-	}
-
 	void TestTimeline_Frames()
 	{
 
@@ -70,184 +57,27 @@ struct ImGuiTest::Impl
 	{
 		const ImGuiViewport* mainViewport = ImGui::GetMainViewport();
 
-		const ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, 256.0f);
-		const ImVec2 windowPos = ImVec2(0.0f, mainViewport->WorkSize.y - windowSize.y);
-
-		constexpr f32 headerHeight = 24.0f;
-		constexpr f32 objectListWidth = 256.0f;
-
-		constexpr f32 frameLineDistance = 16.0f;
-
 		constexpr ImGuiWindowFlags windowFlags =
 			ImGuiWindowFlags_NoCollapse;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{});
-
-		auto drawObjectInList = [](std::string_view name)
+		if (ImGui::Begin("Timeline", nullptr, windowFlags))
 		{
-			bool open = ImGui::TreeNodeEx(name.data());
-			if (open)
-			{
-				ImGui::Text("Origin");
-				ImGui::Text("Position");
-				ImGui::Text("Scale");
-				ImGui::Text("Rotation");
-				ImGui::Text("Color");
-				ImGui::Text("Sprite");
-				ImGui::TreePop();
-			}
-		};
-
-		if (ImGui::Begin(u8"Timeline", nullptr, windowFlags))
-		{
-			const ImVec2 contentRegion = ImGui::GetContentRegionAvail();
-			const ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
-
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text("Frame");
-			ImGui::SameLine();
 			ImGui::SetNextItemWidth(32.0f);
-			ImGui::DragInt("##1", &currentTimelineFrame, 1.0f, 0, 100);
-
-			ImGui::SameLine(objectListWidth);
-			ImGui::BeginChild("##TestTimeline_DopeSheetHeader", {0.0f, 24.0f});
-			{
-				ImDrawList* drawList = ImGui::GetWindowDrawList();
-
-				const ImVec2 headerRegionStart = { ImGui::GetCursorScreenPos().x + itemSpacing.x, ImGui::GetCursorScreenPos().y + itemSpacing.y };
-				const ImVec2 headerRegionEnd = { ImGui::GetContentRegionAvail().x - itemSpacing.x, ImGui::GetContentRegionAvail().y - itemSpacing.y };
-
-				ImVec2 framePos = headerRegionStart;
-				framePos.x += 4.0f - timelineScroll;
-
-				ImVec2 currentFrameRectStart = { framePos.x - 4.0f, headerRegionStart.y };
-				ImVec2 currentFrameRectEnd = { framePos.x + 5.0f, currentFrameRectStart.y + headerRegionEnd.y };
-
-				std::array<char, 8> frameIndexText;
-
-				for (int i = 0; i < 100; i++)
-				{
-					if (i % 5 == 0)
-					{
-						::sprintf_s(frameIndexText.data(), frameIndexText.size() - 1, "%d", i);
-						ImVec2 textSize = ImGui::CalcTextSize(frameIndexText.data());
-						drawList->AddText({ framePos.x - textSize.x / 2.0f, framePos.y }, GetU32StyleColor(ImGuiCol_PlotLines), frameIndexText.data());
-					}
-					else
-					{
-						drawList->AddLine(framePos, { framePos.x, framePos.y + headerRegionEnd.y }, GetU32StyleColor(ImGuiCol_PlotLines));
-					}
-
-					if (currentTimelineFrame == i)
-					{
-						drawList->AddRect(currentFrameRectStart, currentFrameRectEnd, GetU32StyleColor(ImGuiCol_PlotHistogramHovered));
-					}
-
-					framePos.x += frameLineDistance;
-					currentFrameRectStart.x += frameLineDistance;
-					currentFrameRectEnd.x += frameLineDistance;
-				}
-			}
-			ImGui::EndChild();
-
-			ImGui::BeginChild("##TestTimeline_ObjectList", { objectListWidth, 0.0f }, ImGuiChildFlags_FrameStyle);
-			{
-				drawObjectInList("HitEffect_Note");
-				//drawObjectInList("HitEffect_Explosion");
-				//drawObjectInList("HitEffect_Shockwave");
-			}
-			ImGui::EndChild();
-
+			ImGui::DragFloat("Frame", &currentFrame, 1.0f, 0.0f, 100.0f, "%.0f");
 			ImGui::SameLine();
 
-			ImGui::BeginChild("##TestTimeline_DopeSheet", {}, ImGuiChildFlags_FrameStyle, ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::Button("Play");
+			
+			ImGui::BeginGroup();
 			{
-				ImDrawList* drawList = ImGui::GetWindowDrawList();
-
-				const ImVec2 dopeSheetRegionStart = ImGui::GetCursorScreenPos();
-				const ImVec2 dopeSheetRegionEnd = ImGui::GetContentRegionAvail();
-
-				timelineScroll = ImGui::GetScrollX();
-
-				ImVec2 frameLineStart = dopeSheetRegionStart;
-				f32 frameLineVisibilityTestValue = frameLineStart.x - timelineScroll;
-				for (int i = 0; i < 100; i++)
-				{
-					if ((frameLineVisibilityTestValue <= dopeSheetRegionStart.x + dopeSheetRegionEnd.x) && (frameLineVisibilityTestValue >= dopeSheetRegionStart.x))
-					{
-						u32 color = (i == currentTimelineFrame) ? GetU32StyleColor(ImGuiCol_PlotHistogramHovered) : GetU32StyleColor(ImGuiCol_Border);
-						drawList->AddLine(frameLineStart, { frameLineStart.x, frameLineStart.y + dopeSheetRegionEnd.y }, color);
-					}
-					if (i < 99)
-					{
-						frameLineStart.x += frameLineDistance;
-						frameLineVisibilityTestValue += frameLineDistance;
-					}
-				}
-
-				for (auto it : keyframeLocations)
-				{
-					constexpr f32 radius = 6.0f;
-
-					ImVec2 keyframeDisplayPos { it * frameLineDistance + dopeSheetRegionStart.x, 8.0f + dopeSheetRegionStart.y };
-					f32 visibilityTestValue = keyframeDisplayPos.x + (radius * 2.0f) - timelineScroll;
-
-					if ((visibilityTestValue <= dopeSheetRegionStart.x + dopeSheetRegionEnd.x) && (visibilityTestValue >= dopeSheetRegionStart.x))
-					{
-						drawList->AddCircleFilled(keyframeDisplayPos, radius, GetU32StyleColor(ImGuiCol_PlotLines), 4);
-					}
-				}
-
-				ImGui::InvisibleButton("##TestTimeline_DopeSheetRegion", { frameLineStart.x - dopeSheetRegionStart.x, dopeSheetRegionEnd.y });
+				ImGui::BulletText("TestObject1");
+				ImGui::BulletText("TestObject2");
+				ImGui::BulletText("TestObject3");
 			}
-			ImGui::EndChild();
+			ImGui::EndGroup();
 
-#if 0
-			ImDrawList* drawList = ImGui::GetWindowDrawList();
-			ImVec2 basePos = ImGui::GetCursorScreenPos();
-
-			// Header
-			ImGui::BeginChild("##TestTimeline_Header");
-			{
-				ImRect timelineHeaderRegion = ImRect(basePos.x, basePos.y, contentRegion.x, basePos.y + headerHeight);
-				drawList->AddRectFilled(timelineHeaderRegion.GetTL(), timelineHeaderRegion.GetBR(), GetU32StyleColor(ImGuiCol_Tab));
-
-				timelineHeaderRegion.Max.x = frameTypePanelWidth;
-				drawList->AddRect(timelineHeaderRegion.GetTL(), timelineHeaderRegion.GetBR(), GetU32StyleColor(ImGuiCol_Border));
-
-				ImVec2 frameLineStart = ImVec2(basePos.x + frameTypePanelWidth, basePos.y);
-				ImVec2 frameLineEnd = ImVec2(frameLineStart.x, frameLineStart.y + headerHeight);
-
-				std::array<char, 20> frameIndexText{};
-				ImVec2 frameIndexTextPos = ImVec2(frameLineStart.x + 4.0f, frameLineStart.y + 2.0f);
-
-				for (int i = 0; i < timelineFrames; i++)
-				{
-					drawList->AddLine(frameLineStart, frameLineEnd, GetU32StyleColor(ImGuiCol_PlotLines));
-
-					frameLineStart.x += frameWidth;
-					frameLineEnd.x += frameWidth;
-					frameIndexTextPos.x += frameWidth;
-				}
-
-				basePos = timelineHeaderRegion.GetBL();
-			}
-			ImGui::EndChild();
-
-			// Object List
-			ImGui::BeginChild("##TestTimeline_ObjectList");
-			{
-				ImRect objectListRegion = ImRect(basePos.x, basePos.y, frameTypePanelWidth, basePos.y + contentRegion.y);
-				drawList->AddRectFilled(objectListRegion.GetTL(), objectListRegion.GetBR(), GetU32StyleColor(ImGuiCol_WindowBg));
-				drawList->AddRect(objectListRegion.GetTL(), objectListRegion.GetBR(), GetU32StyleColor(ImGuiCol_Border));
-
-				ImGui::TreeNodeEx("Test");
-			}
-			ImGui::EndChild();
-#endif
+			ImGui::End();
 		}
-		ImGui::End();
-		ImGui::PopStyleVar(1);
 	}
 
 	void TestViewport()
@@ -262,6 +92,13 @@ struct ImGuiTest::Impl
 			viewPosOffset.x += viewportDragOffset.x;
 			viewPosOffset.y += viewportDragOffset.y;
 			viewportDragOffset = {};
+		}
+
+		static constexpr float wheelScale = 1.0f / 33.3f;
+
+		if (io.MouseWheel != 0.0f)
+		{
+			viewScale += io.MouseWheel * wheelScale;
 		}
 
 		SpriteRenderer* sprRenderer = Sandbox::GameContext::GetInstance()->SpriteRenderer.get();
@@ -287,6 +124,30 @@ struct ImGuiTest::Impl
 		sprRenderer->RenderSprites(nullptr);
 	}
 
+	void MainMenu()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				ImGui::MenuItem("New", "Ctrl + N");
+
+				ImGui::Separator();
+
+				ImGui::MenuItem("Open", "Ctrl + O");
+				ImGui::MenuItem("Save", "Ctrl + S");
+				ImGui::MenuItem("Save as...", "Ctrl + Shift + S");
+
+				ImGui::Separator();
+
+				ImGui::MenuItem("Quit");
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
+	}
+
 	void Update(f64 deltaTime_ms)
 	{
 	}
@@ -296,8 +157,9 @@ struct ImGuiTest::Impl
 		Rendering::GetDevice()->Clear(ClearFlags_Color, DefaultColors::Gray, 1.0f, 0);
 
 		TestViewport();
-		//TestPropsWindow();
 		TestTimeline();
+
+		MainMenu();
 
 		//ImGui::ShowMetricsWindow();
 	}
@@ -340,7 +202,7 @@ void ImGuiTest::Draw(Starshine::GameTime& gameTime)
 	impl->Draw(gameTime.ElapsedFrameTime.GetMilliseconds());
 }
 
-std::string_view ImGuiTest::GetStateName() const
+i64 ImGuiTest::GetStateID() const
 {
-	return "ImGui Test";
+	return Sandbox::GameState_Editor;
 }

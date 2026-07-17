@@ -9,6 +9,7 @@ namespace Starshine::Rendering::Render2D
 {
 	enum class BlendMode : u8
 	{
+		Disabled,
 		Normal,
 		Add,
 		Mulitply,

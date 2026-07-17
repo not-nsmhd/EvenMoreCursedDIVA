@@ -204,6 +204,7 @@
     <ClCompile Include="src\Rendering\Render2D\SpriteSheet.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp" />
     <ClCompile Include="src\Rendering\Utilities.cpp" />
+    <ClCompile Include="src\TimeSpan.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

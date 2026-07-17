@@ -5,7 +5,7 @@ namespace Starshine::IO
 {
 	void StreamWriter::WriteString(std::string_view value)
 	{
-		// Length-prefixed strings >>>>>>>>>>>>>>> Null-terminated strings
+		// Length-prefixed strings >>>>>>>>>>>>>>> Null-terminated strings, fight me
 		WriteU32(static_cast<u32>(value.size()));
 		if (value.size() > 0)
 		{

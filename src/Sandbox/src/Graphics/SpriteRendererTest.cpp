@@ -1,4 +1,5 @@
 #include "SpriteRendererTest.h"
+#include "Definitions.h"
 #include "Rendering/Device.h"
 #include "Rendering/Utilities.h"
 #include "Rendering/Render2D/SpriteRenderer.h"
@@ -123,7 +124,7 @@ void SpriteRendererTest::Draw(GameTime& gameTime)
 	impl->Draw(gameTime);
 }
 
-std::string_view SpriteRendererTest::GetStateName() const
+i64 SpriteRendererTest::GetStateID() const
 {
-	return "Sprite Renderer Test";
+	return GameState_Editor;
 }

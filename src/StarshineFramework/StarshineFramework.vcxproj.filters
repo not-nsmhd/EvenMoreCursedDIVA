@@ -290,6 +290,9 @@
     <ClCompile Include="src\ImGui\Core\backends\imgui_impl_dx11.cpp">
       <Filter>Source Files\ImGui\Core\backends</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimeSpan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="d3d11shaders\src\FS_Test.hlsl">

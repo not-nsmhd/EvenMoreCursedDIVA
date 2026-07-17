@@ -15,7 +15,7 @@ def GetNoteShapeString(value):
             return "Cross"
         case 3 | 7 | 11:
             return "Square"
-        case 12 | 15:
+        case 12 | 15 | 22 | 23:
             return "Star"
        
     print("Unknown shape value: {0}".format(value));
@@ -32,8 +32,13 @@ def GetNoteTypeString(value):
     print("Unknown type value: {0}".format(value));
     return "Normal"
     
-if len(sys.argv) < 2:
-    print("Please specify the chart file you want to convert as a command-line argument")
+if len(sys.argv) < 3:
+    print(f"Usage: {sys.argv[0]} <script format> <script file path>")
+    print()
+    print("Script formats:")
+    print("\tinfo_A12 - Dreamy Theater 1st/Arcade")
+    print("\tinfo_f - F/Dreamy Theater 2nd/Dreamy Theater Extend")
+    print("\tinfo_F2 - F 2nd")
     exit()
 
 opcode_dbFile = open("opcode_db.json")
@@ -42,18 +47,20 @@ opcode_db = json.load(opcode_dbFile)
 opcodes = list(opcode_db)
 opcodeSizes = dict()
 
+scriptFormat = sys.argv[1]
+
 for i in range(len(opcode_db)):
     key = opcodes[i]
     
-    if "info_f" in opcode_db[key]:    
-        opcode_info = opcode_db[key]["info_f"]
+    if scriptFormat in opcode_db[key]:    
+        opcode_info = opcode_db[key][scriptFormat]
         opcodeSizes[int(opcode_info["id"])] = int(opcode_info["len"])
 
 opcode_dbFile.close()
 
 # ---------------
 
-chartFile = sys.argv[1]
+chartFile = sys.argv[2]
 dscFile = open(chartFile, "rb")
 
 dscFile.seek(0, io.SEEK_END)
@@ -70,6 +77,9 @@ xmlChart = XmlET.Element("Chart")
 opcodeIdx = 1
 nextCommandTime_divaTime = 0
 
+if (scriptFormat == "info_F2"):
+    opcodeIdx = 18 # 72 / 4
+
 prevShapeString = ""
 prevTypeString = ""
 prevNoteTime = 0
@@ -78,6 +88,8 @@ while True:
         break
 
     opcode = dscData[opcodeIdx]
+    if (opcode == 0x43464f45):
+        break
     
     match opcode:
         case 0: # END
