@@ -79,6 +79,11 @@ namespace Starshine
 		bool playing = false;
 		bool showMetricsWindow = false;
 
+		Layer* layerToRename = nullptr;
+
+		std::vector<Layer>::iterator layerToDelete{ layers.begin() };
+		bool layerToDeleteIsSet{ false };
+
 		Impl()
 		{
 		}
@@ -267,18 +272,18 @@ namespace Starshine
 				}
 				Gui::EndMenuBar();
 
-				auto addPropFields_vec2 = [&](const std::string_view name, const std::string_view baseID, vec2& value)
+				auto addPropFields_vec2 = [&](const std::string_view name, i32 layerIndex, vec2& value)
 				{
 					Gui::Text(name.data());
 					char idBuffer[64]{};
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_Drag", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_Drag", layerIndex, name.data());
 
 					Gui::SameLine();
 					Gui::SetNextItemWidth(56.0f * 2.0f);
 					Gui::DragFloat2(idBuffer, &value.x, 1.0f, 0.0f, 0.0f, "%.1f");
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_AddFrameButton", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_AddFrame", layerIndex, name.data());
 
 					Gui::SameLine();
 					Gui::PushID(idBuffer);
@@ -286,18 +291,18 @@ namespace Starshine
 					Gui::PopID();
 				};
 
-				auto addPropFields_f32 = [&](const std::string_view name, const std::string_view baseID, f32& value)
+				auto addPropFields_f32 = [&](const std::string_view name, i32 layerIndex, f32& value)
 				{
 					Gui::Text(name.data());
 					char idBuffer[64]{};
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_Drag", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_Drag", layerIndex, name.data());
 
 					Gui::SameLine();
 					Gui::SetNextItemWidth(56.0f * 2.0f);
 					Gui::DragFloat(idBuffer, &value, 1.0f, 0.0f, 0.0f, "%.1f");
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_AddFrameButton", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_AddFrame", layerIndex, name.data());
 
 					Gui::SameLine();
 					Gui::PushID(idBuffer);
@@ -305,12 +310,12 @@ namespace Starshine
 					Gui::PopID();
 				};
 
-				auto addPropFields_color = [&](const std::string_view name, const std::string_view baseID, Color& value)
+				auto addPropFields_color = [&](const std::string_view name, i32 layerIndex, Color& value)
 				{
 					Gui::Text(name.data());
 					char idBuffer[64]{};
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_Edit", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_Edit", layerIndex, name.data());
 
 					vec4 colorVec4 = value.ToVector4();
 					Gui::SameLine();
@@ -318,7 +323,7 @@ namespace Starshine
 					Gui::ColorEdit4(idBuffer, &colorVec4.r);
 					value = Color(colorVec4);
 
-					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "%s_AddFrameButton", baseID.data());
+					SDL_snprintf(idBuffer, sizeof(idBuffer) - 1, "##%d%s_AddFrame", layerIndex, name.data());
 
 					Gui::SameLine();
 					Gui::PushID(idBuffer);
@@ -327,21 +332,38 @@ namespace Starshine
 				};
 
 				i32 layerIndex = 0;
-				for (auto& layer : layers)
+
+				for (auto it = layers.begin(); it != layers.end(); it++)
 				{
-					Gui::PushID(layerIndex++);
-					if (Gui::TreeNode("", layer.Name.c_str()))
+					Gui::PushID(layerIndex);
+					if (Gui::TreeNode("", it->Name.c_str()))
 					{
 						//layerExpanded = true;
-						addPropFields_vec2("Origin", "##Layer0_Origin", currentOrigin);
-						addPropFields_vec2("Position", "##Layer0_Position", currentPos);
-						addPropFields_vec2("Size", "##Layer0_Size", currentSize);
-						addPropFields_f32("Rotation", "##Layer0_Rotation", currentRotation);
-						addPropFields_color("Color", "##Layer0_Color", currentColor);
 
+						addPropFields_vec2("Origin", layerIndex, currentOrigin);
+						addPropFields_vec2("Position", layerIndex, currentPos);
+						addPropFields_vec2("Size", layerIndex, currentSize);
+						addPropFields_f32("Rotation", layerIndex, currentRotation);
+						addPropFields_color("Color", layerIndex, currentColor);
 						Gui::TreePop();
 					}
 					Gui::PopID();
+
+					if (Gui::BeginPopupContextItem())
+					{
+						if (Gui::Selectable("Rename"))
+						{
+							layerToRename = &*it;
+						}
+						if (Gui::Selectable("Delete"))
+						{
+							layerToDelete = it;
+							layerToDeleteIsSet = true;
+						}
+						Gui::EndPopup();
+					}
+
+					layerIndex++;
 				}
 			}
 			Gui::EndChild();
@@ -485,9 +507,65 @@ namespace Starshine
 		vec2 basePoint{};
 		int axisToFavor{ -1 };
 
+		std::array<char, 64> newLayerName{};
+
+		void RenameLayerPopUp()
+		{
+			if (layerToRename == nullptr)
+				return;
+
+			const ImGuiViewport* viewport = Gui::GetMainViewport();
+			const ImVec2 windowPos = { viewport->Size.x / 2.0f, viewport->Size.y / 2.0f };
+
+			Gui::SetNextWindowPos(windowPos, 0, ImVec2(0.5f, 0.5f));
+			if (Gui::Begin("Rename Layer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				Gui::Text("Enter a new name for layer \"%s\"", layerToRename->Name.c_str());
+				bool newNameEntered = Gui::InputText("##RenameLayer_Input", newLayerName.data(), newLayerName.size() - 1);
+
+				if (Gui::Button("OK"))
+				{
+					layerToRename->Name = newLayerName.data();
+					newLayerName.fill(0);
+					layerToRename = nullptr;
+				};
+				Gui::SameLine();
+				if (Gui::Button("Cancel"))
+				{
+					newLayerName.fill(0);
+					layerToRename = nullptr;
+				}
+				Gui::End();
+			}
+		}
+
+		void DeleteLayerPopUp()
+		{
+			if (!layerToDeleteIsSet)
+				return;
+
+			const ImGuiViewport* viewport = Gui::GetMainViewport();
+			const ImVec2 windowPos = { viewport->Size.x / 2.0f, viewport->Size.y / 2.0f };
+
+			Gui::SetNextWindowPos(windowPos, 0, ImVec2(0.5f, 0.5f));
+			if (Gui::Begin("Delete Layer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				Gui::Text("Are you sure you want to delete layer \"%s\"?", layerToDelete->Name.c_str());
+
+				if (Gui::Button("Yes"))
+				{
+					layers.erase(layerToDelete);
+					layerToDeleteIsSet = false;
+				};
+				Gui::SameLine();
+				if (Gui::Button("No")) { layerToDeleteIsSet = false; }
+				Gui::End();
+			}
+		}
+
 		void DrawObjectGizmos(SpriteRenderer* sprRenderer)
 		{
-			if (playing || Gui::IsAnyItemFocused()) { return; }
+			if (playing || Gui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) { return; }
 
 			auto& io = Gui::GetIO();
 			auto debugFont = GameContext::GetInstance()->DebugFont.get();
@@ -628,6 +706,9 @@ namespace Starshine
 			DrawTimeline();
 			MainMenu();
 
+			RenameLayerPopUp();
+			DeleteLayerPopUp();
+
 			if (showMetricsWindow)
 			{
 				Gui::ShowMetricsWindow(&showMetricsWindow);
@@ -724,7 +805,7 @@ namespace Starshine
 			sprRenderer->SetSpritePosition(currentPos + viewPan);
 			sprRenderer->SetSpriteSize(currentSize);
 			sprRenderer->SetSpriteOrigin(currentOrigin);
-			sprRenderer->SetSpriteRotation(currentRotation);
+			sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentRotation));
 			sprRenderer->SetSpriteColor(currentColor);
 			sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
 
