@@ -83,4 +83,14 @@ namespace Starshine::Rendering::Render2D
 		if (index >= textures.size()) { return textures[0].get(); }
 		return textures[index].get();
 	}
+
+	const std::vector<Sprite>& SpriteSheet::GetSprites() const
+	{
+		return sprites;
+	}
+
+	size_t SpriteSheet::GetSpriteCount() const
+	{
+		return sprites.size();
+	}
 };

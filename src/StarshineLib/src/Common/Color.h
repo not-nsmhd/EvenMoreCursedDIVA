@@ -1,5 +1,6 @@
 #pragma once
 #include "Types.h"
+#include "MathExt.h"
 
 namespace Starshine
 {
@@ -32,12 +33,34 @@ namespace Starshine
 			return Color(R - right.R, G - right.G, B - right.B, A - right.A);
 		}
 
+		constexpr Color operator*(const f32& right)
+		{
+			u8 newR = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
+			u8 newG = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(G) * right, 0.0f, 255.0f));
+			u8 newB = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(B) * right, 0.0f, 255.0f));
+			u8 newA = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(A) * right, 0.0f, 255.0f));
+			return Color(newR, newG, newB, newA);
+		}
+
+		constexpr Color operator/(const f32& right)
+		{
+			if (right <= 0.0f)
+				return Color(255, 255, 255, 255);
+
+			u8 newR = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) / right, 0.0f, 255.0f));
+			u8 newG = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(G) / right, 0.0f, 255.0f));
+			u8 newB = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(B) / right, 0.0f, 255.0f));
+			u8 newA = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(A) / right, 0.0f, 255.0f));
+			return Color(newR, newG, newB, newA);
+		}
+
 		Color& operator+=(const Color& right)
 		{
 			R += right.R;
 			G += right.G;
 			B += right.B;
 			A += right.A;
+			return *this;
 		}
 
 		Color& operator-=(const Color& right)
@@ -46,6 +69,35 @@ namespace Starshine
 			G -= right.G;
 			B -= right.B;
 			A -= right.A;
+			return *this;
+		}
+
+		Color& operator*=(const f32& right)
+		{
+			R = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
+			G = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
+			B = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
+			A = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
+			return *this;
+		}
+
+		Color& operator/=(const f32& right)
+		{
+			if (right <= 0.0f)
+			{
+				R = 255;
+				G = 255;
+				B = 255;
+				A = 255;
+			}
+			else
+			{
+				R = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) / right, 0.0f, 255.0f));
+				G = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) / right, 0.0f, 255.0f));
+				B = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) / right, 0.0f, 255.0f));
+				A = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) / right, 0.0f, 255.0f));
+			}
+			return *this;
 		}
 
 		constexpr vec4 ToVector4()

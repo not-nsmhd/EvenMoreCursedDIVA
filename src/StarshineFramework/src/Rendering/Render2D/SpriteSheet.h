@@ -31,6 +31,9 @@ namespace Starshine::Rendering::Render2D
 		const Sprite& GetSprite(std::string_view name) const;
 		i32 GetSpriteIndex(std::string_view name) const;
 
+		const std::vector<Sprite>& GetSprites() const;
+		size_t GetSpriteCount() const;
+
 		Texture* GetTexture(i32 index) const;
 
 	public:
