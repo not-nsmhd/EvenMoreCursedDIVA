@@ -33,6 +33,10 @@ namespace Starshine
 		inline bool Intersects(const Rectangle& rect) const { return Intersects(rect.X, rect.Y, rect.Width, rect.Height); };
 
 		constexpr i32 Area() const { return Width * Height; };
+
+		constexpr ivec2 Position() const { return ivec2{ X, Y }; };
+		constexpr ivec2 Size() const { return ivec2{ Width, Height }; };
+		constexpr vec2 Center() const { return vec2{ Width / 2.0f, Height / 2.0f }; };
 	};
 
 	struct RectangleF
@@ -72,5 +76,6 @@ namespace Starshine
 
 		constexpr vec2 Position() const { return vec2{ X, Y }; };
 		constexpr vec2 Size() const { return vec2{ Width, Height }; };
+		constexpr vec2 Center() const { return vec2{ Width / 2.0f, Height / 2.0f }; };
 	};
 };

@@ -62,6 +62,7 @@ namespace Starshine
 		SpriteSheet spriteSheet{};
 
 		std::vector<Layer> layers{};
+		Layer* selectedLayer{ nullptr };
 
 		f32 timelineFrame{};
 		f32 animLength{ 60.0f };
@@ -220,6 +221,58 @@ namespace Starshine
 			DrawLayerProperty_End(layerIndex, propName_data, idBuffer);
 		}
 
+		void LayerContextMenu(size_t layerIndex)
+		{
+			if (Gui::BeginPopupContextItem())
+			{
+				auto layer = layers.begin() + layerIndex;
+				if (Gui::Selectable("Rename"))
+				{
+					layerToModify = &*layer;
+					renameLayer = true;
+				}
+				if (Gui::Selectable("Change Sprite"))
+				{
+					layerToModify = &*layer;
+					changeLayerSprite = true;
+				}
+
+				Gui::Separator();
+
+				if (Gui::Selectable("Position at center"))
+				{
+					layer->CurrentEditTransform.Position.x = canvasSize.x / 2.0f;
+					layer->CurrentEditTransform.Position.y = canvasSize.y / 2.0f;
+				}
+
+				if (Gui::BeginMenu("Set layer's origin..."))
+				{
+					if (Gui::Selectable("at sprite's origin"))
+					{
+						layer->CurrentEditTransform.Origin = layer->Sprite->Origin;
+					}
+					if (Gui::Selectable("at sprite's center"))
+					{
+						layer->CurrentEditTransform.Origin = layer->Sprite->SourceRectangle.Center();
+					}
+					if (Gui::Selectable("at layer's center"))
+					{
+						layer->CurrentEditTransform.Origin = layer->CurrentEditTransform.Size / 2.0f;
+					}
+					Gui::EndMenu();
+				}
+
+				Gui::Separator();
+
+				if (Gui::Selectable("Delete"))
+				{
+					layerToDelete = layer;
+					layerToDeleteIsSet = true;
+				}
+				Gui::EndPopup();
+			}
+		}
+
 		void LayerList()
 		{
 			const ImRect dopeSheetRegion = GetRelativeContentRegion();
@@ -273,26 +326,7 @@ namespace Starshine
 					}
 					Gui::PopID();
 
-					if (Gui::BeginPopupContextItem())
-					{
-						if (Gui::Selectable("Rename"))
-						{
-							layerToModify = &*layer;
-							renameLayer = true;
-						}
-						if (Gui::Selectable("Change Sprite"))
-						{
-							layerToModify = &*layer;
-							changeLayerSprite = true;
-						}
-						if (Gui::Selectable("Delete"))
-						{
-							layerToDelete = layer;
-							layerToDeleteIsSet = true;
-						}
-						Gui::EndPopup();
-					}
-
+					LayerContextMenu(layerIndex);
 					layerIndex++;
 				}
 			}
@@ -519,6 +553,7 @@ namespace Starshine
 
 				if (Gui::Button("Yes"))
 				{
+					if (&*layerToDelete == selectedLayer) { selectedLayer = nullptr; }
 					layers.erase(layerToDelete);
 					layerToDeleteIsSet = false;
 				};
@@ -528,30 +563,42 @@ namespace Starshine
 			}
 		}
 
-		void DrawObjectGizmos(SpriteRenderer* sprRenderer)
+		void UpdateViewportInput()
 		{
-#if 0
-			if (playing || Gui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) { return; }
+			if (playing || Gui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || Gui::IsAnyItemHovered() || Gui::IsAnyItemFocused() || Gui::IsAnyItemActive())
+			{
+				return;
+			}
 
 			auto& io = Gui::GetIO();
-			auto debugFont = GameContext::GetInstance()->DebugFont.get();
 
-			const vec2 pannedPos = currentPos + viewPan;
+			Layer* hoveredLayer = nullptr;
+			for (auto& layer : layers)
+			{
+				const vec2 origin = layer.CurrentEditTransform.Origin;
+				const vec2 pos = layer.CurrentEditTransform.Position;
+				const vec2 size = layer.CurrentEditTransform.Size;
+				const RectangleF layerRect(viewPan.x + pos.x - origin.x, viewPan.y + pos.y - origin.y, size.x, size.y);
 
-			const RectangleF sprRect(pannedPos.x - currentOrigin.x, pannedPos.y - currentOrigin.y, currentSize.x, currentSize.y);
-			bool hovered = sprRect.Contains(io.MousePos.x, io.MousePos.y);
+				if (layerRect.Contains(io.MousePos.x, io.MousePos.y))
+				{
+					hoveredLayer = &layer;
+				}
+			}
 
-			if (io.MouseDown[0])
+			if (io.MouseClicked[0])
+			{
+				selectedLayer = hoveredLayer;
+			}
+
+			if (io.MouseDown[0] && selectedLayer != nullptr)
 			{
 				if (baseMousePosNotSet)
 				{
 					baseMousePosNotSet = false;
 					baseMousePos = io.MousePos;
 
-					if (hovered)
-					{
-						basePoint = currentPos;
-					}
+					basePoint = selectedLayer->CurrentEditTransform.Position;
 				}
 
 				mouseDrag.x = io.MousePos.x - baseMousePos.x;
@@ -575,70 +622,35 @@ namespace Starshine
 					axisToFavor = -1;
 				}
 
-				if (hovered)
+				vec2 newPos{};
+				if (axisToFavor == 0)
 				{
-					if (axisToFavor == 0)
-					{
-						currentPos.x = basePoint.x + mouseDrag.x;
-						currentPos.y = basePoint.y;
-					}
-					else if (axisToFavor == 1)
-					{
-						currentPos.x = basePoint.x;
-						currentPos.y = basePoint.y + mouseDrag.y;
-					}
-					else
-					{
-						currentPos.x = basePoint.x + mouseDrag.x;
-						currentPos.y = basePoint.y + mouseDrag.y;
-					}
+					newPos.x = basePoint.x + mouseDrag.x;
+					newPos.y = basePoint.y;
 				}
+				else if (axisToFavor == 1)
+				{
+					newPos.x = basePoint.x;
+					newPos.y = basePoint.y + mouseDrag.y;
+				}
+				else
+				{
+					newPos.x = basePoint.x + mouseDrag.x;
+					newPos.y = basePoint.y + mouseDrag.y;
+				}
+				selectedLayer->CurrentEditTransform.Position = newPos;
 			}
+
 			if (io.MouseReleased[0])
 			{
 				mouseDrag = {};
 				baseMousePos = {};
 
-				if (hovered)
-				{
-					basePoint = {};
-					axisToFavor = -1;
-				}
+				basePoint = {};
+				axisToFavor = -1;
 
 				baseMousePosNotSet = true;
 			}
-
-			u8 alpha = hovered ? 128 : 0;
-
-			const vec2 realPos = sprRect.Position();
-
-			// Base rect
-			sprRenderer->SetSpritePosition(realPos);
-			sprRenderer->SetSpriteSize(sprRect.Size());
-			sprRenderer->SetSpriteColor({ 255, 0, 0, alpha });
-			sprRenderer->PushSprite(nullptr);
-
-			sprRenderer->PushOutlineRect(realPos, sprRect.Size(), {}, DefaultColors::Red);
-
-			// Origin axes
-			sprRenderer->SetSpritePosition(vec2{ realPos.x, realPos.y + currentOrigin.y }); // X axis
-			sprRenderer->SetSpriteSize(vec2{ currentSize.x, 1.0f });
-			sprRenderer->SetSpriteColor(DefaultColors::Red);
-			sprRenderer->PushSprite(nullptr);
-
-			sprRenderer->SetSpritePosition(vec2{ realPos.x + currentOrigin.x, realPos.y }); // Y axis
-			sprRenderer->SetSpriteSize(vec2{ 1.0f, currentSize.y });
-			sprRenderer->SetSpriteColor(DefaultColors::Red);
-			sprRenderer->PushSprite(nullptr);
-
-			// Offset info text
-			if (io.MouseDown[0] && hovered)
-			{
-				char textBuf[128];
-				SDL_snprintf(textBuf, sizeof(textBuf) - 1, "X: %.1f\nY: %.1f", mouseDrag.x, mouseDrag.y);
-				sprRenderer->Font().PushString(debugFont, textBuf, { io.MousePos.x, io.MousePos.y }, vec2(1.0f), DefaultColors::White);
-			}
-#endif
 		}
 
 		void MainMenu()
@@ -676,6 +688,8 @@ namespace Starshine
 			RenameLayerPopUp();
 			ChangeLayerSpritePopUp();
 			DeleteLayerPopUp();
+
+			UpdateViewportInput();
 
 			if (showMetricsWindow)
 			{
@@ -764,19 +778,9 @@ namespace Starshine
 			}
 
 			auto sprRenderer = GameContext::GetInstance()->SpriteRenderer.get();
+			auto font = GameContext::GetInstance()->DebugFont.get();
 
 			DrawCanvas(sprRenderer);
-
-			/*i32 texIndex{};
-			sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, 0, {}, &texIndex);
-			sprRenderer->SetSpritePosition(currentPos + viewPan);
-			sprRenderer->SetSpriteSize(currentSize);
-			sprRenderer->SetSpriteOrigin(currentOrigin);
-			sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentRotation));
-			sprRenderer->SetSpriteColor(currentColor);
-			sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
-
-			DrawObjectGizmos(sprRenderer);*/
 
 			for (const auto& layer : layers)
 			{
@@ -790,6 +794,40 @@ namespace Starshine
 				sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentTransform.Rotation));
 				sprRenderer->SetSpriteColor(currentTransform.Color);
 				sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
+			}
+
+			if (selectedLayer != nullptr)
+			{
+				const Transform2D& transform = selectedLayer->CurrentEditTransform;
+				static constexpr Color boxColor(255, 0, 0, 92);
+				static constexpr Color borderColor(255, 0, 0, 255);
+
+				// Bounding box
+				sprRenderer->SetSpriteOrigin(transform.Origin);
+				sprRenderer->SetSpritePosition(transform.Position + viewPan);
+				sprRenderer->SetSpriteSize(transform.Size);
+				sprRenderer->SetSpriteColor(boxColor);
+				sprRenderer->PushSprite(nullptr);
+
+				sprRenderer->PushOutlineRect(transform.Position + viewPan, transform.Size, transform.Origin, borderColor);
+
+				// Origin axes
+				sprRenderer->SetSpritePosition(vec2{ transform.Position.x, transform.Position.y - transform.Origin.y} + viewPan); // X axis
+				sprRenderer->SetSpriteSize(vec2{ 1.0f, transform.Size.y });
+				sprRenderer->SetSpriteColor(DefaultColors::Red);
+				sprRenderer->PushSprite(nullptr);
+
+				sprRenderer->SetSpritePosition(vec2{ transform.Position.x - transform.Origin.x, transform.Position.y } + viewPan); // Y axis
+				sprRenderer->SetSpriteSize(vec2{ transform.Size.x, 1.0f });
+				sprRenderer->SetSpriteColor(DefaultColors::Red);
+				sprRenderer->PushSprite(nullptr);
+
+				if (!baseMousePosNotSet) // Dragging position text
+				{
+					char posText[64]{};
+					SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", mouseDrag.x, mouseDrag.y);
+					sprRenderer->Font().PushString(font, posText, vec2(mouseDrag.x + baseMousePos.x, mouseDrag.y + baseMousePos.y), vec2(1.0f), DefaultColors::White);
+				}
 			}
 
 			sprRenderer->RenderSprites(nullptr);
