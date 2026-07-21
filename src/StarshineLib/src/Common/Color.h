@@ -23,17 +23,17 @@ namespace Starshine
 			B{ static_cast<u8>(vector.b * 255.0f) },
 			A{ static_cast<u8>(vector.a * 255.0f) } {};
 
-		constexpr Color operator+(const Color& right)
+		constexpr Color operator+(const Color& right) const
 		{ 
 			return Color(R + right.R, G + right.G, B + right.B, A + right.A);
 		}
 
-		constexpr Color operator-(const Color& right)
+		constexpr Color operator-(const Color& right) const
 		{
 			return Color(R - right.R, G - right.G, B - right.B, A - right.A);
 		}
 
-		constexpr Color operator*(const f32& right)
+		constexpr Color operator*(const f32& right) const
 		{
 			u8 newR = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(R) * right, 0.0f, 255.0f));
 			u8 newG = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(G) * right, 0.0f, 255.0f));
@@ -42,7 +42,7 @@ namespace Starshine
 			return Color(newR, newG, newB, newA);
 		}
 
-		constexpr Color operator/(const f32& right)
+		constexpr Color operator/(const f32& right) const
 		{
 			if (right <= 0.0f)
 				return Color(255, 255, 255, 255);

@@ -61,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/Tools/AnimEditor/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src/Tools/AnimEditor/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -80,7 +80,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)src/Tools/AnimEditor/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src/Tools/AnimEditor/src;$(SolutionDir)src/StarshineLib/src;$(SolutionDir)src/StarshineFramework/src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)lib/utf8cpp/include;$(SolutionDir)lib/tinyxml2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,6 +93,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Editor\AnimEditor.cpp" />
+    <ClCompile Include="src\Editor\FileDialog.cpp" />
     <ClCompile Include="src\GameContext.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
@@ -107,6 +108,7 @@
   <ItemGroup>
     <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\Editor\AnimEditor.h" />
+    <ClInclude Include="src\Editor\FileDialog.h" />
     <ClInclude Include="src\GameContext.h" />
   </ItemGroup>
   <ItemGroup>

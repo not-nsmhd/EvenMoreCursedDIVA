@@ -53,21 +53,43 @@ namespace Starshine::Xml
 	inline size_t GetValueLength(Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 	inline size_t GetValueLength(const Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 
+	static constexpr std::string_view DefaultColorFormat = "%02x%02x%02x%02x";
+	static constexpr std::string_view DefaultVec2Format = "%.8g %.8g";
+
 	inline Color TryGetHexColor(const Attribute* attrib)
 	{
 		if (attrib != nullptr && GetValueLength(attrib) > 1)
 		{
 			const char* value = attrib->Value();
+
 			if (*value == '#')
-			{
 				value++;
-			}
 
 			u32 r = 0, g = 0, b = 0, a = 0;
-			sscanf_s(value, "%02x%02x%02x%02x", &r, &g, &b, &a);
+			sscanf_s(value, DefaultColorFormat.data(), &r, &g, &b, &a);
 			return Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
 		}
 
 		return Color{};
+	}
+
+	inline void SetAttribute(Element* element, std::string_view name, const vec2& value)
+	{
+		if (!name.empty())
+		{
+			char valueString[32]{};
+			SDL_snprintf(valueString, sizeof(valueString) - 1, DefaultVec2Format.data(), value.x, value.y);
+			element->SetAttribute(name.data(), valueString);
+		}
+	}
+
+	inline void SetAttribute(Element* element, std::string_view name, const Color& value)
+	{
+		if (!name.empty())
+		{
+			char hexColorString[32]{};
+			SDL_snprintf(hexColorString, sizeof(hexColorString) - 1, DefaultColorFormat.data(), value.R, value.G, value.B, value.A);
+			element->SetAttribute(name.data(), hexColorString);
+		}
 	}
 }

@@ -5,8 +5,6 @@
 #include "Definitions.h"
 #include "Editor/AnimEditor.h"
 
-using namespace Starshine;
-
 int SDL_main(int argc, char* argv[])
 {
 	Starshine::GameInstance game;
@@ -20,7 +18,7 @@ int SDL_main(int argc, char* argv[])
 
 		GameContext::CreateInstance();
 
-		game.RegisterState<AnimEditor>();
+		game.RegisterState<Starshine::AnimEditor>();
 
 		game.SetState(GameState_Main);
 		game.EnterLoop();
