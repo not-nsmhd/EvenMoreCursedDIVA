@@ -49,7 +49,7 @@ namespace Starshine
 					offset_t length = static_cast<offset_t>(lstrlenW(fileName));
 
 					utf8::utf16to8(fileName, fileName + length, fileNameBuffer.data());
-					OutputFilePath = std::string(fileNameBuffer.data());
+					OutputFilePath = std::string(fileNameBuffer.data(), length);
 
 					CoTaskMemFree(fileName);
 				}
