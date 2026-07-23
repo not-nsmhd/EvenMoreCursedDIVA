@@ -11,6 +11,7 @@ namespace Starshine
 		std::string OutputFilePath;
 
 	public:
+		bool OpenRead();
 		bool OpenSave();
 
 	private:

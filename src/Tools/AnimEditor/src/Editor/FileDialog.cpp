@@ -8,6 +8,11 @@ using namespace Microsoft::WRL;
 
 namespace Starshine
 {
+	bool FileDialog::OpenRead()
+	{
+		return InternalOpenDialog(false);
+	}
+
 	bool FileDialog::OpenSave()
 	{
 		return InternalOpenDialog(true);

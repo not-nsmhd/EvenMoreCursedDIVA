@@ -18,6 +18,34 @@ using namespace Starshine;
 
 namespace Starshine
 {
+	namespace XmlElementNames
+	{
+		static constexpr const char* AnimationSet = "AnimationSet";
+		static constexpr const char* AnimationSet_Width = "Width";
+		static constexpr const char* AnimationSet_Height = "Height";
+		static constexpr const char* AnimationSet_FPS = "FPS";
+		static constexpr const char* AnimationSet_StageColor = "StageColor";
+		static constexpr const char* AnimationSet_SpriteSheet = "SpriteSheet";
+
+		static constexpr const char* Common_Name = "Name";
+		static constexpr const char* Common_Start = "Start";
+		static constexpr const char* Common_Duration = "Duration";
+
+		static constexpr const char* Animation = "Animation";
+		static constexpr const char* AnimationLayer = "Layer";
+		static constexpr const char* AnimationLayer_Sprite = "Sprite";
+
+		static constexpr std::string_view Keyframes_Origin = "Origin";
+		static constexpr std::string_view Keyframes_Position = "Position";
+		static constexpr std::string_view Keyframes_Size = "Size";
+		static constexpr std::string_view Keyframes_Rotation = "Rotation";
+		static constexpr std::string_view Keyframes_Color = "Color";
+
+		static constexpr const char* Keyframe = "Keyframe";
+		static constexpr const char* Keyframe_Frame = "Frame";
+		static constexpr const char* Keyframe_Value = "Value";
+	}
+
 	struct Transform2D
 	{
 		vec2 Origin{};
@@ -793,9 +821,9 @@ namespace Starshine
 			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
 			for (const auto& frame : keyframes)
 			{
-				Xml::Element* frameElement = frameListElement->InsertNewChildElement("Keyframe");
-				frameElement->SetAttribute("Frame", static_cast<i32>(frame.Frame));
-				Xml::SetAttribute(frameElement, "Value", frame.Value);
+				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, static_cast<i32>(frame.Frame));
+				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}
 
@@ -807,12 +835,58 @@ namespace Starshine
 			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
 			for (const auto& frame : keyframes)
 			{
-				Xml::Element* frameElement = frameListElement->InsertNewChildElement("Keyframe");
-				frameElement->SetAttribute("Frame", static_cast<i32>(frame.Frame));
-				frameElement->SetAttribute("Value", frame.Value);
+				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, static_cast<i32>(frame.Frame));
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}
-		
+
+		template <typename T>
+		void ReadKeyframes_Xml(std::vector<Keyframe<T>>& keyframes, std::string_view elementName, const Xml::Element* layerElement)
+		{
+			const Xml::Element* frameListElement = layerElement->FirstChildElement(elementName.data());
+			if (frameListElement == nullptr)
+				return;
+
+			for (const Xml::Element* frameElement = frameListElement->FirstChildElement(XmlElementNames::Keyframe);
+				frameElement;
+				frameElement = frameElement->NextSiblingElement(XmlElementNames::Keyframe))
+			{
+				i32 frame = 0;
+				if (frameElement->QueryIntAttribute(XmlElementNames::Keyframe_Frame, &frame) != 0)
+					return;
+
+				T value;
+				const Xml::Attribute* valueAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Value);
+				Xml::TryGetValue(value, valueAttrib);
+
+				keyframes.emplace_back(Keyframe<T>(static_cast<f32>(frame), value));
+			}
+		}
+
+		void ReadKeyframes_Xml(std::vector<Keyframe<f32>>& keyframes, std::string_view elementName, const Xml::Element* layerElement)
+		{
+			const Xml::Element* frameListElement = layerElement->FirstChildElement(elementName.data());
+			if (frameListElement == nullptr)
+				return;
+
+			for (const Xml::Element* frameElement = frameListElement->FirstChildElement(XmlElementNames::Keyframe);
+				frameElement;
+				frameElement = frameElement->NextSiblingElement(XmlElementNames::Keyframe))
+			{
+				i32 frame = 0;
+				f32 value = 0.0f;
+
+				if (frameElement->QueryIntAttribute(XmlElementNames::Keyframe_Frame, &frame) != 0)
+					return;
+
+				if (frameElement->QueryFloatAttribute(XmlElementNames::Keyframe_Frame, &value) != 0)
+					return;
+
+				keyframes.emplace_back(Keyframe<f32>(static_cast<f32>(frame), value));
+			}
+		}
+
 		void SaveFileDialog()
 		{
 			FileDialog saveFileDialog;
@@ -822,36 +896,82 @@ namespace Starshine
 				return;
 
 			Xml::Document animSetDoc;
-			Xml::Element* rootElement = animSetDoc.NewElement("AnimationSet");
+			Xml::Element* rootElement = animSetDoc.NewElement(XmlElementNames::AnimationSet);
 
-			rootElement->SetAttribute("Width", canvasSize.x);
-			rootElement->SetAttribute("Height", canvasSize.y);
-			rootElement->SetAttribute("FPS", 60);
-			Xml::SetAttribute(rootElement, "StageColor", DefaultColors::White);
-			rootElement->SetAttribute("SpriteSheet", "sprites/devtest");
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_Width, canvasSize.x);
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_Height, canvasSize.y);
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, 60);
+			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, DefaultColors::White);
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, "sprites/devtest");
 
-			Xml::Element* animElement = rootElement->InsertNewChildElement("Animation");
-			animElement->SetAttribute("Name", "Testing00");
-			animElement->SetAttribute("Duration", 60u);
+			Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
+			animElement->SetAttribute(XmlElementNames::Common_Name, "Testing00");
+			animElement->SetAttribute(XmlElementNames::Common_Duration, 60u);
 
 			for (const auto& layer : layers)
 			{
-				Xml::Element* layerElement = animElement->InsertNewChildElement("Layer");
-				layerElement->SetAttribute("Name", layer.Name.c_str());
-				layerElement->SetAttribute("Sprite", layer.Sprite->Name.c_str());
-				layerElement->SetAttribute("Start", static_cast<i32>(layer.StartTime));
-				layerElement->SetAttribute("Duration", static_cast<i32>(layer.Duration));
+				Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
+				layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
+				layerElement->SetAttribute(XmlElementNames::AnimationLayer_Sprite, layer.Sprite->Name.c_str());
+				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
+				layerElement->SetAttribute(XmlElementNames::Common_Duration, static_cast<i32>(layer.Duration));
 
 				// Oh boy, I can't wait to start abusing the C++ type system!
-				WriteKeyframes_Xml(layer.Origin, "Origin", layerElement);
-				WriteKeyframes_Xml(layer.Position, "Position", layerElement);
-				WriteKeyframes_Xml(layer.Size, "Size", layerElement);
-				WriteKeyframes_Xml(layer.Rotation, "Rotation", layerElement);
-				WriteKeyframes_Xml(layer.Color, "Color", layerElement);
+				WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
+				WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
+				WriteKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
+				WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
+				WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
 			}
 
 			animSetDoc.InsertFirstChild(rootElement);
 			animSetDoc.SaveFile(saveFileDialog.OutputFilePath.c_str());
+		}
+
+		void OpenFileDialog()
+		{
+			FileDialog openFileDialog;
+			openFileDialog.Title = "Open";
+
+			if (!openFileDialog.OpenRead())
+				return;
+
+			Xml::Document animSetDoc;
+			if (!Xml::ParseFromFile(animSetDoc, openFileDialog.OutputFilePath));
+
+			const Xml::Element* rootElement = animSetDoc.FirstChildElement(XmlElementNames::AnimationSet);
+			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Width, &canvasSize.x);
+			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Height, &canvasSize.y);
+
+			for (const Xml::Element* animElement = rootElement->FirstChildElement(XmlElementNames::Animation);
+				animElement;
+				animElement = animElement->NextSiblingElement(XmlElementNames::Animation))
+			{
+				for (const Xml::Element* layerElement = animElement->FirstChildElement(XmlElementNames::AnimationLayer);
+					layerElement;
+					layerElement = layerElement->NextSiblingElement(XmlElementNames::AnimationLayer))
+				{
+					Layer& layer = layers.emplace_back();
+
+					const char* elementName = layerElement->Attribute(XmlElementNames::Common_Name);
+					layer.Name = std::string(elementName);
+
+					const char* refName{};
+					if (layerElement->QueryAttribute(XmlElementNames::AnimationLayer_Sprite, &refName) == 0)
+						layer.Sprite = &spriteSheet.GetSprite(refName);
+
+					// TODO: Implement animation referencing
+
+					layerElement->QueryFloatAttribute(XmlElementNames::Common_Start, &layer.StartTime);
+					layerElement->QueryFloatAttribute(XmlElementNames::Common_Duration, &layer.Duration);
+
+					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
+					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
+					ReadKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
+					ReadKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
+					ReadKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
+				}
+			}
 		}
 
 		void MainMenu()
@@ -861,7 +981,8 @@ namespace Starshine
 				if (Gui::BeginMenu("File"))
 				{
 					Gui::MenuItem("New");
-					Gui::MenuItem("Open");
+					if (Gui::MenuItem("Open"))
+						OpenFileDialog();
 					if (Gui::MenuItem("Save"))
 						SaveFileDialog();
 					if (Gui::MenuItem("Save as..."))
