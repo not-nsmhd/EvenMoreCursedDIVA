@@ -20,6 +20,7 @@ namespace Starshine::Rendering::Render2D
 
 	constexpr std::array<std::string_view, EnumCount<BlendMode>()> BlendModeNames
 	{
+		"Disabled",
 		"Normal",
 		"Add",
 		"Multiply",

@@ -11,6 +11,7 @@
 
 #include "FileDialog.h"
 #include <IO/Xml.h>
+#include <Common/Logging/Logging.h>
 
 namespace Gui = ImGui;
 using namespace Starshine::Rendering::Render2D;
@@ -34,6 +35,7 @@ namespace Starshine
 		static constexpr const char* Animation = "Animation";
 		static constexpr const char* AnimationLayer = "Layer";
 		static constexpr const char* AnimationLayer_Sprite = "Sprite";
+		static constexpr const char* AnimationLayer_BlendMode = "BlendMode";
 
 		static constexpr std::string_view Keyframes_Origin = "Origin";
 		static constexpr std::string_view Keyframes_Position = "Position";
@@ -58,19 +60,21 @@ namespace Starshine
 	template <typename T>
 	struct Keyframe
 	{
-		f32 Frame{};
+		u32 Frame{};
 		T Value{};
 
 		Keyframe() {};
-		Keyframe(const f32& frame, const T& value) : Frame(frame), Value(value) {};
+		Keyframe(const u32& frame, const T& value) : Frame(frame), Value(value) {};
 	};
 
 	struct Layer
 	{
 		std::string Name;
 
-		f32 StartTime{};
-		f32 Duration{};
+		u32 StartTime{};
+		u32 Duration{};
+
+		BlendMode BlendMode{};
 
 		std::vector<Keyframe<vec2>> Origin;
 		std::vector<Keyframe<vec2>> Position;
@@ -89,7 +93,7 @@ namespace Starshine
 		if (keyframes.empty())
 			return false;
 
-		if (keyframes.size() == 1)
+		if (keyframes.size() == 1 || frame <= 0.0f)
 		{
 			value = keyframes[0].Value;
 			return true;
@@ -115,13 +119,15 @@ namespace Starshine
 			start = end;
 		}
 
-		f32 frameFactor = MathExtensions::ConvertRange<f32>(start->Frame, end->Frame, 0.0f, 1.0f, frame);
+		const f32 range = static_cast<f32>(end->Frame - start->Frame);
+		const f32 f = frame - static_cast<f32>(start->Frame);
+		const f32 frameFactor = MathExtensions::ConvertRange<f32>(0.0f, range, 0.0f, 1.0f, f);
 		value = start->Value * (1.0f - frameFactor) + end->Value * frameFactor;
 
 		return true;
 	}
 
-	Transform2D GetTransformAtFrame(const Layer& layer, f32 frame)
+	Transform2D GetTransformAtFrame(const Layer& layer, const f32& frame)
 	{
 		Transform2D result{};
 		result.Origin = layer.Sprite->Origin;
@@ -162,7 +168,7 @@ namespace Starshine
 		Layer* selectedLayer{ nullptr };
 
 		f32 timelineFrame{};
-		f32 animLength{ 60.0f };
+		u32 animLength{ 60 };
 
 		ivec2 canvasSize{ 1280, 720 };
 		vec2 viewPan{};
@@ -208,7 +214,7 @@ namespace Starshine
 		}
 
 		template <typename T>
-		void InsertKeyframe(std::vector<Keyframe<T>>& keyframes, const f32& frame, const T& value)
+		void InsertKeyframe(std::vector<Keyframe<T>>& keyframes, const u32& frame, const T& value)
 		{
 			if (keyframes.size() == 0)
 			{
@@ -227,7 +233,7 @@ namespace Starshine
 				if (i == kfCount) { break; }
 
 				Keyframe<T>& kf = keyframes[i];
-				if ((i32)kf.Frame == (i32)frame)
+				if (kf.Frame == frame)
 				{
 					kf.Value = value;
 					return;
@@ -250,11 +256,21 @@ namespace Starshine
 			Gui::SameLine();
 			Gui::SetNextItemWidth(56.0f);
 			Gui::DragFloat("##Timeline_FrameDrag", &timelineFrame, 1.0f, 0.0f, animLength - 1.0f, "%.0f", playing ? ImGuiSliderFlags_ReadOnly : 0);
+			if (Gui::IsItemEdited() && !playing)
+			{
+				for (auto& layer : layers)
+					layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
+			}
 
 			Gui::SameLine();
 			if (Gui::Button("Play"))
 			{
 				playing = !playing;
+				if (!playing)
+				{
+					for (auto& layer : layers)
+						layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
+				}
 			}
 		}
 
@@ -269,7 +285,7 @@ namespace Starshine
 		template <typename T>
 		void InsertKeyframeButton(std::vector<Keyframe<T>>& keyframes, const T& value)
 		{
-			InsertKeyframe(keyframes, timelineFrame, value);
+			InsertKeyframe(keyframes, static_cast<u32>(timelineFrame), value);
 		}
 
 		template <typename T>
@@ -311,7 +327,7 @@ namespace Starshine
 			DrawLayerProperty_Begin(propName_data);
 			Gui::PushID(propIndex);
 
-			static vec4 colorTemp = value.ToVector4();
+			vec4 colorTemp = value.ToVector4();
 			Gui::ColorEdit4("", &colorTemp.r, ImGuiColorEditFlags_NoInputs);
 			value = Color(colorTemp);
 
@@ -413,7 +429,7 @@ namespace Starshine
 			layersRegionSize.x *= 0.2f;
 			layersRegionSize.y = Gui::GetContentRegionAvail().y;
 
-			if (Gui::BeginChild("##Timeline_DopeSheet_Layers", layersRegionSize,
+			if (Gui::BeginChild("##Timeline_Layers", layersRegionSize,
 				ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX, ImGuiWindowFlags_MenuBar))
 			{
 				if (Gui::BeginMenuBar())
@@ -427,6 +443,8 @@ namespace Starshine
 						const Sprite& defaultSprite = spriteSheet.GetSprite(0);
 						Layer& newLayer = layers.emplace_back();
 						newLayer.Name = layerName;
+						newLayer.BlendMode = BlendMode::Normal;
+						newLayer.Duration = animLength;
 						newLayer.Sprite = &defaultSprite;
 						newLayer.CurrentEditTransform.Size = vec2(defaultSprite.SourceRectangle.Width, defaultSprite.SourceRectangle.Height);
 						newLayer.CurrentEditTransform.Origin = defaultSprite.Origin;
@@ -445,11 +463,12 @@ namespace Starshine
 				for (auto layer = layers.begin(); layer != layers.end(); layer++)
 				{
 					Gui::PushID(layerIndex);
-					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth;
+					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
 
 					if (selectedLayer == &*layer)
 						nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
+					Gui::SetNextItemAllowOverlap();
 					if (Gui::TreeNodeEx(layer->Name.c_str(), nodeFlags))
 					{
 						layer->Expanded = true;
@@ -464,6 +483,21 @@ namespace Starshine
 					else
 					{
 						layer->Expanded = false;
+					}
+
+					Gui::SameLine();
+
+					const char* blendModeName_layer = BlendModeNames[static_cast<size_t>(layer->BlendMode)].data();
+					if (Gui::BeginCombo("", blendModeName_layer))
+					{
+						for (size_t i = 0; i < EnumCount<BlendMode>(); i++)
+						{
+							const char* blendModeName = BlendModeNames[i].data();
+							if (Gui::Selectable(blendModeName))
+								layer->BlendMode = static_cast<BlendMode>(i);
+						}
+
+						Gui::EndCombo();
 					}
 
 					if (Gui::IsItemClicked())
@@ -482,18 +516,149 @@ namespace Starshine
 		static constexpr f32 frameLineDistance = 15.0f;
 
 		template <typename T>
-		void DrawKeyframes(const std::vector<Keyframe<T>>& frames, const f32& xPos, const f32& yPos, const f32& yPos_duplicate, bool drawDuplicate, ImDrawList* drawList)
+		void DrawKeyframes(const std::vector<Keyframe<T>>& frames, const vec2& pos, std::string_view strID, ImDrawList* drawList)
 		{
 			const ImGuiStyle& style = Gui::GetStyle();
+			ImGuiWindow* window = Gui::GetCurrentWindow();
 
+			Gui::PushID(strID.data());
+
+			i32 keyframeID = 0;
 			for (auto& keyframe : frames)
 			{
-				const f32 framePos_x = xPos + keyframe.Frame * frameLineDistance;
+				const f32 framePos_x = pos.x + keyframe.Frame * frameLineDistance;
+				const ImRect frameBB = { framePos_x - 6.0f, pos.y - 6.0f, framePos_x + 6.0f, pos.y + 6.0f };
 
-				drawList->AddCircleFilled(ImVec2(framePos_x, yPos), 6.0f, Gui::GetColorU32(style.Colors[ImGuiCol_Text]), 4);
-				if (drawDuplicate)
-					drawList->AddCircleFilled(ImVec2(framePos_x, yPos_duplicate), 6.0f, Gui::GetColorU32(style.Colors[ImGuiCol_Text]), 4);
+				bool clicked{};
+				bool held{};
+				bool released{};
+
+				Gui::ItemSize(frameBB);
+				Gui::ItemAdd(frameBB, keyframeID);
+				bool hovered = Gui::ItemHoverable(frameBB, keyframeID, 0);
+
+				ImU32 keyframeColor = Gui::GetColorU32(style.Colors[ImGuiCol_Text]);
+				if (hovered)
+				{
+					keyframeColor = Gui::GetColorU32(style.Colors[ImGuiCol_PlotLinesHovered]);
+					Gui::SetHoveredID(keyframeID);
+				}
+
+				if (hovered)
+				{
+					clicked = Gui::IsMouseClicked(ImGuiMouseButton_Left);
+					held = Gui::IsMouseDown(ImGuiMouseButton_Left) && !clicked;
+					released = Gui::IsMouseReleased(ImGuiMouseButton_Left);
+				}
+
+				drawList->AddCircleFilled(ImVec2(framePos_x, pos.y), 6.0f, keyframeColor, 4);
+
+				keyframeID++;
 			}
+
+			Gui::PopID();
+		}
+
+		const f32 resizeGripRange = 5.0f;
+		f32 TimelineRangeResizeGrips(const ImVec2& startPos, const ImVec2& endPos, i32& hoveredID)
+		{
+			ImGuiIO& io = Gui::GetIO();
+			f32 dragAmount = 0.0f;
+
+			Gui::PushID("#Resize");
+			for (i32 i = 0; i < 2; i++)
+			{
+				const f32 resizeGripX = i == 1 ? endPos.x : startPos.x;
+				const ImRect resizeGripRect = ImRect(resizeGripX - resizeGripRange, startPos.y,
+					resizeGripX + resizeGripRange, endPos.y);
+
+				const ImGuiID resizeGripID = Gui::GetID(i + 2);
+
+				bool resizeGripHovered = false;
+				bool resizeGripHeld = false;
+
+				Gui::ItemAdd(resizeGripRect, resizeGripID, 0, ImGuiItemFlags_NoNav);
+				Gui::ButtonBehavior(resizeGripRect, resizeGripID, &resizeGripHovered, &resizeGripHeld, ImGuiButtonFlags_FlattenChildren | ImGuiButtonFlags_NoNavFocus);
+
+				if (resizeGripHovered || resizeGripHeld)
+				{
+					Gui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+				}
+
+				if (resizeGripHeld)
+				{
+					if (baseMousePosNotSet)
+					{
+						baseMousePosNotSet = false;
+						baseMousePos = io.MousePos;
+					}
+
+					dragAmount = io.MousePos.x - baseMousePos.x;
+					hoveredID = i;
+
+					if (io.MouseReleased[0])
+						baseMousePosNotSet = true;
+				}
+			}
+			Gui::PopID(); // "#Resize"
+			return dragAmount;
+		}
+
+		i32 baseDragValue = -1;
+		void TimelineRange(std::string_view strID, u32& start, u32& duration, const vec2& position, const f32& thickness)
+		{
+			ImDrawList* drawList = Gui::GetWindowDrawList();
+
+			const f32 rangeRect_startX = start * frameLineDistance;
+			const f32 rangeRect_endX = (start + duration) * frameLineDistance;
+			const f32 rangeRect_distX = duration * frameLineDistance;
+
+			const ImVec2 rangeRect_Start(position.x + rangeRect_startX, position.y);
+			const ImVec2 rangeRect_End(position.x + rangeRect_endX, rangeRect_Start.y + thickness);
+
+			const ImRect rangeRect = ImRect(rangeRect_Start, rangeRect_End);
+			const ImRect rangeRect_input = ImRect(rangeRect_Start.x - resizeGripRange, rangeRect_Start.y,
+				rangeRect_End.x + resizeGripRange, rangeRect_End.y);
+
+			Gui::PushID(strID.data());
+
+			const ImGuiID rangeID = Gui::GetID("#Range");
+			Gui::PushID(rangeID);
+
+			Gui::ItemAdd(rangeRect_input, rangeID, nullptr, 0);
+			bool hovered = Gui::ItemHoverable(rangeRect_input, rangeID, ImGuiItemFlags_AllowOverlap);
+
+			i32 hoveredGripID = -1;
+			f32 dragAmount = TimelineRangeResizeGrips(rangeRect.GetTL(), rangeRect.GetBR(), hoveredGripID);
+
+			if (hoveredGripID != -1)
+			{
+				i32 frameAmount = static_cast<i32>(dragAmount / frameLineDistance);
+
+				if (hoveredGripID == 0) // Start
+				{
+					if (baseDragValue == -1)
+						baseDragValue = start;
+
+					start = frameAmount - baseDragValue;
+				}
+				if (hoveredGripID == 1) // End
+				{
+					if (baseDragValue == -1)
+						baseDragValue = duration;
+
+					duration = frameAmount - baseDragValue;
+				}
+			}
+			else
+			{
+				baseDragValue = -1;
+			}
+
+			drawList->AddRectFilled(rangeRect_Start, rangeRect_End, IM_COL32(255, 0, 0, 255));
+
+			Gui::PopID(); // "#Range"
+			Gui::PopID(); // strID
 		}
 
 		void DrawTimeline()
@@ -508,6 +673,7 @@ namespace Starshine
 				// NOTE: https://github.com/ocornut/imgui/issues/3284#issuecomment-641397151
 				const ImVec2 padding = style.FramePadding;
 				const ImVec2 itemSpacing = style.ItemSpacing;
+				const f32 horizontalPadding = padding.x * 2.0f;
 				const f32 verticalPadding = padding.y * 2.0f;
 				const f32 verticalSpacing = itemSpacing.y * 2.0f;
 				const f32 menuBarHeight = style.FontSizeBase + verticalPadding;
@@ -534,9 +700,9 @@ namespace Starshine
 					drawList->AddRectFilled(frameNumbersRegion.GetTL(), frameNumbersRegion.GetBR(), Gui::GetColorU32(style.Colors[ImGuiCol_Button]));
 					drawList->AddRect(timelineRegion.GetTL(), timelineRegion.GetBR(), Gui::GetColorU32(style.Colors[ImGuiCol_Border]));
 
-					for (i32 i = 0; i < (i32)animLength; i++)
+					for (i32 i = 0; i <= animLength; i++)
 					{
-						const ImVec2 lineStart{ frameNumbersRegion.Min.x + i * frameLineDistance + padding.x - timelineScroll, frameNumbersRegion.Max.y };
+						const ImVec2 lineStart{ frameNumbersRegion.Min.x + i * frameLineDistance + horizontalPadding - timelineScroll, frameNumbersRegion.Max.y };
 						const ImVec2 lineEnd{ lineStart.x, keyframesRegion.Max.y };
 
 						if (i % 5 == 0)
@@ -551,8 +717,61 @@ namespace Starshine
 						drawList->AddLine(lineStart, lineEnd, Gui::GetColorU32(style.Colors[ImGuiCol_PlotLines]));
 					}
 
+					// --- Keyframs (finally)
+					f32 layerHeight = keyframesRegion.Min.y + verticalSpacing - layerListScroll;
+
+					drawList->PushClipRect(keyframesRegion.GetTL(), keyframesRegion.GetBR());
+
+					vec2 keyframePos = vec2(keyframesRegion.Min.x + horizontalPadding - timelineScroll,
+						layerHeight + style.FontSizeBase + padding.y);
+
+					for (auto& layer : layers)
+					{
+						/*const ImVec2 durationRect_Start(keyframePos.x + (layer.StartTime * frameLineDistance), layerHeight);
+						const ImVec2 durationRect_End(durationRect_Start.x + (layer.Duration * frameLineDistance),
+							durationRect_Start.y + style.FontSizeBase + padding.y);
+
+						drawList->AddRectFilled(durationRect_Start, durationRect_End, IM_COL32(255, 0, 0, 255));*/
+
+						const vec2 rangePos(keyframePos.x + (layer.StartTime * frameLineDistance), layerHeight);
+						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.Duration, rangePos, style.FontSizeBase + padding.y);
+
+						layer.StartTime = MathExtensions::Clamp<u32>(layer.StartTime, 0, animLength);
+						layer.Duration = MathExtensions::Clamp<u32>(layer.Duration, layer.StartTime + 1, animLength - layer.StartTime);
+
+						if (layer.Expanded)
+						{
+							DrawKeyframes<vec2>(layer.Origin, keyframePos, "Origin", drawList);
+							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+
+							DrawKeyframes<vec2>(layer.Position, keyframePos, "Position", drawList);
+							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+
+							DrawKeyframes<vec2>(layer.Size, keyframePos, "Size", drawList);
+							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+
+							DrawKeyframes<f32>(layer.Rotation, keyframePos, "Rotation", drawList);
+							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+
+							DrawKeyframes<Color>(layer.Color, keyframePos, "Color", drawList);
+							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+
+							layerHeight = keyframePos.y;
+						}
+						else
+						{
+							layerHeight += style.FontSizeBase + verticalSpacing + padding.y;
+						}
+
+						keyframePos.x = keyframesRegion.Min.x + padding.x - timelineScroll;
+					}
+
+					drawList->PopClipRect();
+					drawList->PopClipRect();
+					ImGui::InvisibleButton("##Timeline_DopeSheet_KeyframeRegion", { frameLineDistance * animLength, 1.0f });
+
 					// --- Current frame line
-					const ImVec2 frameMarkerPos = ImVec2{ keyframesRegion.Min.x + timelineFrame * frameLineDistance + padding.x - timelineScroll,
+					const ImVec2 frameMarkerPos = ImVec2{ keyframesRegion.Min.x + timelineFrame * frameLineDistance + horizontalPadding - timelineScroll,
 						frameNumbersRegion.GetTL().y + menuBarHeight / 2.0f };
 
 					const ImVec2 lineStart = frameMarkerPos;
@@ -560,48 +779,34 @@ namespace Starshine
 
 					drawList->AddCircleFilled(frameMarkerPos, 6.0f, Gui::GetColorU32(style.Colors[ImGuiCol_PlotLinesHovered]), 4);
 					drawList->AddLine(lineStart, lineEnd, Gui::GetColorU32(style.Colors[ImGuiCol_PlotLinesHovered]));
-
-					// --- Keyframs (finally)
-					const f32 layerListStartHeight = style.FontSizeBase;
-					f32 layerHeight = keyframesRegion.Min.y + layerListStartHeight - layerListScroll;
-
-					drawList->PushClipRect(keyframesRegion.GetTL(), keyframesRegion.GetBR());
-
-					for (auto& layer : layers)
-					{
-						f32 xPos = keyframesRegion.Min.x + padding.x - timelineScroll;
-						f32 propStartHeight = layerHeight + style.FontSizeBase;
-
-						bool drawDuplicates = layer.Expanded;
-
-						DrawKeyframes<vec2>(layer.Origin, xPos, layerHeight, propStartHeight, drawDuplicates, drawList);
-						propStartHeight += style.FontSizeBase + verticalSpacing + padding.y;
-
-						DrawKeyframes<vec2>(layer.Position, xPos, layerHeight, propStartHeight, drawDuplicates, drawList);
-						propStartHeight += style.FontSizeBase + verticalSpacing + padding.y;
-
-						DrawKeyframes<vec2>(layer.Size, xPos, layerHeight, propStartHeight, drawDuplicates, drawList);
-						propStartHeight += style.FontSizeBase + verticalSpacing + padding.y;
-
-						DrawKeyframes<f32>(layer.Rotation, xPos, layerHeight, propStartHeight, drawDuplicates, drawList);
-						propStartHeight += style.FontSizeBase + verticalSpacing + padding.y;
-
-						DrawKeyframes<Color>(layer.Color, xPos, layerHeight, propStartHeight, drawDuplicates, drawList);
-						propStartHeight += style.FontSizeBase + verticalSpacing + padding.y;
-
-						if (drawDuplicates)
-							layerHeight = propStartHeight;
-						else
-							layerHeight += style.FontSizeBase + padding.y;
-					}
-
-					drawList->PopClipRect();
-					drawList->PopClipRect();
-					ImGui::InvisibleButton("##Timeline_DopeSheet_KeyframeRegion", { frameLineDistance * animLength, 1.0f });
 				}
 				Gui::EndChild();
 			}
 			Gui::End();
+		}
+
+		void ResourcesWindow()
+		{
+#if 0
+			if (Gui::Begin("Resources"))
+			{
+				if (Gui::BeginTabBar("##Resources_TabBar"))
+				{
+					if (Gui::BeginTabItem("Sprites"))
+					{
+						Gui::Text("fjiofjeoiwfjwoejfoewijoew sprites tab\njfiorjfew");
+						Gui::EndTabItem();
+					}
+					if (Gui::BeginTabItem("Animations"))
+					{
+						Gui::Text("fjiofjeoiwfjwoejfoewijoew anims tab\njfiorjfew");
+						Gui::EndTabItem();
+					}
+					Gui::EndTabBar();
+				}
+			}
+			Gui::End();
+#endif
 		}
 
 		bool baseMousePosNotSet{ true };
@@ -822,7 +1027,7 @@ namespace Starshine
 			for (const auto& frame : keyframes)
 			{
 				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
-				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, static_cast<i32>(frame.Frame));
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
 				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}
@@ -836,7 +1041,7 @@ namespace Starshine
 			for (const auto& frame : keyframes)
 			{
 				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
-				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, static_cast<i32>(frame.Frame));
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
 				frameElement->SetAttribute(XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}
@@ -860,7 +1065,7 @@ namespace Starshine
 				const Xml::Attribute* valueAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Value);
 				Xml::TryGetValue(value, valueAttrib);
 
-				keyframes.emplace_back(Keyframe<T>(static_cast<f32>(frame), value));
+				keyframes.emplace_back(Keyframe<T>(frame, value));
 			}
 		}
 
@@ -880,10 +1085,10 @@ namespace Starshine
 				if (frameElement->QueryIntAttribute(XmlElementNames::Keyframe_Frame, &frame) != 0)
 					return;
 
-				if (frameElement->QueryFloatAttribute(XmlElementNames::Keyframe_Frame, &value) != 0)
+				if (frameElement->QueryFloatAttribute(XmlElementNames::Keyframe_Value, &value) != 0)
 					return;
 
-				keyframes.emplace_back(Keyframe<f32>(static_cast<f32>(frame), value));
+				keyframes.emplace_back(Keyframe<f32>(frame, value));
 			}
 		}
 
@@ -913,6 +1118,10 @@ namespace Starshine
 				Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
 				layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
 				layerElement->SetAttribute(XmlElementNames::AnimationLayer_Sprite, layer.Sprite->Name.c_str());
+
+				size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
+				layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
+
 				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
 				layerElement->SetAttribute(XmlElementNames::Common_Duration, static_cast<i32>(layer.Duration));
 
@@ -935,6 +1144,8 @@ namespace Starshine
 
 			if (!openFileDialog.OpenRead())
 				return;
+
+			layers.clear();
 
 			Xml::Document animSetDoc;
 			if (!Xml::ParseFromFile(animSetDoc, openFileDialog.OutputFilePath));
@@ -962,14 +1173,29 @@ namespace Starshine
 
 					// TODO: Implement animation referencing
 
-					layerElement->QueryFloatAttribute(XmlElementNames::Common_Start, &layer.StartTime);
-					layerElement->QueryFloatAttribute(XmlElementNames::Common_Duration, &layer.Duration);
+					const char* blendModeName{};
+					if (layerElement->QueryAttribute(XmlElementNames::AnimationLayer_BlendMode, &blendModeName) == 0)
+					{
+						for (size_t i = 0; i < EnumCount<BlendMode>(); i++)
+						{
+							if (BlendModeNames[i] == blendModeName)
+							{
+								layer.BlendMode = static_cast<BlendMode>(i);
+								break;
+							}
+						}
+					}
+
+					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &layer.StartTime);
+					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Duration, &layer.Duration);
 
 					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
 					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
 					ReadKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
 					ReadKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
 					ReadKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
+
+					layer.CurrentEditTransform = GetTransformAtFrame(layer, 0.0f);
 				}
 			}
 		}
@@ -995,6 +1221,13 @@ namespace Starshine
 
 					Gui::EndMenu();
 				}
+
+				if (Gui::BeginMenu("Edit"))
+				{
+					Gui::MenuItem("Animation Set Properties");
+					Gui::EndMenu();
+				}
+
 				if (Gui::BeginMenu("Debug"))
 				{
 					Gui::MenuItem("Metrics Window", nullptr, &showMetricsWindow);
@@ -1004,10 +1237,74 @@ namespace Starshine
 			}
 			Gui::EndMainMenuBar();
 		}
-		
+
+		constexpr f32 GetHermiteSplinePoint(const f32& start, const f32& end, const f32& t)
+		{
+			const f32 tSquared = t * t;
+			const f32 tCubed = t * t * t;
+
+			f32 value = (2.0f * tCubed - 3.0f * tSquared + 1.0f) * 0.0f;
+			value += (tCubed - 2.0f * tSquared + t) * start;
+			value += (3.0f * tSquared - 2.0f * tCubed) * 1.0f;
+			value += (tCubed - tSquared) * end;
+
+			return value;
+		}
+
+		constexpr f32 GetCubicBezierPoint(const f32& start, const f32& end, const f32& t)
+		{
+			const f32 tSquared = t * t;
+			const f32 tCubed = t * t * t;
+			const f32 tInv = 1.0f - t;
+
+			f32 value = 3 * (tInv * tInv) * t * start;
+			value += 3 * tInv * tSquared * end;
+			value += tCubed * 1.0f;
+
+			return value;
+		}
+
+		vec2 easingTime{ 0.5f, 0.5f };
+		vec2 easingValue{ 0.5f, 0.5f };
+
+		void EasingPlotWindow()
+		{
+			f32 hermitePoints[60]{};
+			f32 t = 0.0f;
+			for (size_t i = 0.0f; i < 60; i++)
+			{
+				t += 1.0f / 60.0f;
+				f32 easedT = GetCubicBezierPoint(easingTime.x, easingTime.y, t);
+				hermitePoints[i] = GetCubicBezierPoint(easingValue.x, easingValue.y, easedT);
+			}
+
+			if (Gui::Begin("Easing"))
+			{
+				const ImVec2 contentRegion = Gui::GetContentRegionAvail();
+
+				Gui::Text("Graph");
+
+				Gui::PlotLines("##PlotPoints", hermitePoints, 60, 0, nullptr, 0.0f, 1.0f, ImVec2(contentRegion.x, contentRegion.y - 128.0f));
+
+				Gui::Text("Time");
+				Gui::SameLine();
+				Gui::SetNextItemWidth(128.0f);
+				Gui::DragFloat2("##EaseTime", &easingTime.x, 0.1f, 0.0f, 1.0f);
+
+				Gui::Text("Value");
+				Gui::SameLine();
+				Gui::SetNextItemWidth(128.0f);
+				Gui::DragFloat2("##EaseValue", &easingValue.x, 0.1f, 0.0f, 1.0f);
+
+				Gui::End();
+			}
+		}
+
 		void OnGUI()
 		{
 			DrawTimeline();
+			//EasingPlotWindow();
+			ResourcesWindow();
 
 			RenameLayerPopUp();
 			ChangeLayerSpritePopUp();
@@ -1065,11 +1362,22 @@ namespace Starshine
 
 		void DrawAnimation(SpriteRenderer* sprRenderer)
 		{
+			BlendMode prevBlendMode{};
 			for (const auto& layer : layers)
 			{
+				if (timelineFrame < layer.StartTime || timelineFrame > layer.StartTime + layer.Duration)
+					continue;
+
 				const Transform2D transform = GetTransformAtFrame(layer, timelineFrame);
 
+				if (prevBlendMode != layer.BlendMode)
+				{
+					sprRenderer->RenderSprites(nullptr);
+					sprRenderer->SetBlendMode(layer.BlendMode);
+				}
+
 				i32 texIndex{};
+
 				sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, *layer.Sprite, {}, &texIndex);
 				sprRenderer->SetSpriteOrigin(transform.Origin);
 				sprRenderer->SetSpritePosition(transform.Position + viewPan);
@@ -1077,7 +1385,26 @@ namespace Starshine
 				sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
 				sprRenderer->SetSpriteColor(transform.Color);
 				sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
+
+				prevBlendMode = layer.BlendMode;
 			}
+
+			sprRenderer->RenderSprites(nullptr);
+		}
+
+		f32 easeTime{};
+		void EasingTest(SpriteRenderer* sprRenderer)
+		{
+			easeTime += (1.0f / 60.0f);
+			if (easeTime >= 1.0f)
+				easeTime = 0.0f;
+
+			f32 easedT = GetCubicBezierPoint(easingTime.x, easingTime.y, easeTime);
+			f32 value = GetCubicBezierPoint(easingValue.x, easingValue.y, easedT);
+
+			const vec2 sprPos(640.0f + value * 200.0f, 360.0f);
+
+			sprRenderer->SpriteSheet().PushSprite(spriteSheet, 0, sprPos, vec2(1.0f), DefaultColors::White);
 		}
 
 		void Draw(Starshine::GameTime& gameTime)
@@ -1096,9 +1423,19 @@ namespace Starshine
 			}
 			else
 			{
+				BlendMode prevBlendMode{};
 				for (const auto& layer : layers)
 				{
+					if (timelineFrame < layer.StartTime || timelineFrame > layer.StartTime + layer.Duration)
+						continue;
+
 					const Transform2D& currentTransform = layer.CurrentEditTransform;
+
+					if (prevBlendMode != layer.BlendMode)
+					{
+						sprRenderer->RenderSprites(nullptr);
+						sprRenderer->SetBlendMode(layer.BlendMode);
+					}
 
 					i32 texIndex{};
 					sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, *layer.Sprite, {}, &texIndex);
@@ -1108,8 +1445,13 @@ namespace Starshine
 					sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentTransform.Rotation));
 					sprRenderer->SetSpriteColor(currentTransform.Color);
 					sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
-				}
 
+					prevBlendMode = layer.BlendMode;
+				}
+				
+				sprRenderer->RenderSprites(nullptr);
+
+				sprRenderer->SetBlendMode(BlendMode::Normal);
 				if (selectedLayer != nullptr)
 				{
 					const Transform2D& transform = selectedLayer->CurrentEditTransform;
@@ -1142,11 +1484,10 @@ namespace Starshine
 						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", mouseDrag.x, mouseDrag.y);
 						sprRenderer->Font().PushString(font, posText, vec2(mouseDrag.x + baseMousePos.x, mouseDrag.y + baseMousePos.y), vec2(1.0f), DefaultColors::White);
 					}
+
+					sprRenderer->RenderSprites(nullptr);
 				}
 			}
-
-			sprRenderer->RenderSprites(nullptr);
-
 			OnGUI();
 		}
 	};
