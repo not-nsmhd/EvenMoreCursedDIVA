@@ -161,6 +161,8 @@ namespace Starshine
 
 	struct AnimEditor::Impl
 	{
+		AnimEditor* parent{};
+
 		GFX::SpritePacker sprPacker{};
 		SpriteSheet spriteSheet{};
 
@@ -185,7 +187,7 @@ namespace Starshine
 		std::vector<Layer>::iterator layerToDelete{ layers.begin() };
 		bool layerToDeleteIsSet = false;
 
-		Impl()
+		Impl(AnimEditor* parent) : parent{ parent }
 		{
 		}
 
@@ -199,6 +201,7 @@ namespace Starshine
 
 			viewPan.x = viewportSize.Width / 2.0f - canvasSize.x / 2.0f;
 			viewPan.y = viewportSize.Height / 2.0f - canvasSize.y / 2.0f;
+
 			return true;
 		}
 
@@ -211,6 +214,12 @@ namespace Starshine
 
 			sprPacker.Clear();
 			return true;
+		}
+
+		void ResetDragState()
+		{
+			parent->DragState.AxisToFavor = DragAxis::None;
+			parent->DragState.HeldMouseButtonsMask = 0;
 		}
 
 		template <typename T>
@@ -927,6 +936,61 @@ namespace Starshine
 			}
 		}
 
+		void UpdateDragState()
+		{
+			ImGuiIO& io = Gui::GetIO();
+			DragStateData& dragState = parent->DragState;
+
+			dragState.HeldMouseButtonsMask = 0;
+
+			for (i32 i = 0; i < ImGuiMouseButton_COUNT; i++)
+			{
+				dragState.HeldMouseButtonsMask |= (io.MouseDown[i] << i);
+			}
+
+			if (dragState.HeldMouseButtonsMask != 0)
+			{
+				if (!dragState.BaseMousePositionSet)
+				{
+					dragState.BaseMousePosition = vec2(io.MousePos.x, io.MousePos.y);
+					dragState.BaseMousePositionSet = true;
+				}
+
+				dragState.AbsoluteMousePosition = vec2(io.MousePos.x, io.MousePos.y);
+				dragState.RelativeMousePosition = dragState.AbsoluteMousePosition - dragState.BaseMousePosition;
+				dragState.DeltaMousePosition = vec2(io.MouseDelta.x, io.MouseDelta.y);
+
+				if (dragState.AxisToFavor == DragAxis::None && io.KeyShift)
+				{
+					const f32 absX = SDL_fabsf(dragState.RelativeMousePosition.x);
+					const f32 absY = SDL_fabsf(dragState.RelativeMousePosition.y);
+
+					if (absX > AxisToFavorThreshold && absX > absY)
+						dragState.AxisToFavor = DragAxis::Horizontal;
+					else if (absY > AxisToFavorThreshold && absY > absX)
+						dragState.AxisToFavor = DragAxis::Vertical;
+				}
+			}
+			else
+			{
+				if (dragState.BaseMousePositionSet)
+				{
+					dragState.BaseMousePosition = {};
+					dragState.AbsoluteMousePosition = {};
+					dragState.RelativeMousePosition = {};
+					dragState.BaseMousePositionSet = false;
+				}
+
+				dragState.AxisToFavor = DragAxis::None;
+				dragState.FavorOneAxis = false;
+			}
+		}
+
+		void Update()
+		{
+			UpdateDragState();
+		}
+
 		void UpdateViewportInput()
 		{
 			if (playing || Gui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || Gui::IsAnyItemHovered() || Gui::IsAnyItemFocused() || Gui::IsAnyItemActive())
@@ -935,6 +999,7 @@ namespace Starshine
 			}
 
 			auto& io = Gui::GetIO();
+			DragStateData& dragState = parent->DragState;
 
 			Layer* hoveredLayer = nullptr;
 			for (auto& layer : layers)
@@ -955,65 +1020,9 @@ namespace Starshine
 				selectedLayer = hoveredLayer;
 			}
 
-			if (io.MouseDown[0] && selectedLayer != nullptr)
+			if ((dragState.HeldMouseButtonsMask && (1 << ImGuiMouseButton_Left)) && selectedLayer != nullptr)
 			{
-				if (baseMousePosNotSet)
-				{
-					baseMousePosNotSet = false;
-					baseMousePos = io.MousePos;
-
-					basePoint = selectedLayer->CurrentEditTransform.Position;
-				}
-
-				mouseDrag.x = io.MousePos.x - baseMousePos.x;
-				mouseDrag.y = io.MousePos.y - baseMousePos.y;
-
-				if (io.KeyShift)
-				{
-					i32 absX = SDL_abs(mouseDrag.x);
-					i32 absY = SDL_abs(mouseDrag.y);
-
-					if (axisToFavor == -1)
-					{
-						if (absX > 15)
-							axisToFavor = 0;
-						else if (absY > 15)
-							axisToFavor = 1;
-					}
-				}
-				else
-				{
-					axisToFavor = -1;
-				}
-
-				vec2 newPos{};
-				if (axisToFavor == 0)
-				{
-					newPos.x = basePoint.x + mouseDrag.x;
-					newPos.y = basePoint.y;
-				}
-				else if (axisToFavor == 1)
-				{
-					newPos.x = basePoint.x;
-					newPos.y = basePoint.y + mouseDrag.y;
-				}
-				else
-				{
-					newPos.x = basePoint.x + mouseDrag.x;
-					newPos.y = basePoint.y + mouseDrag.y;
-				}
-				selectedLayer->CurrentEditTransform.Position = newPos;
-			}
-
-			if (io.MouseReleased[0])
-			{
-				mouseDrag = {};
-				baseMousePos = {};
-
-				basePoint = {};
-				axisToFavor = -1;
-
-				baseMousePosNotSet = true;
+				selectedLayer->CurrentEditTransform.Position += dragState.DeltaMousePosition;
 			}
 		}
 
@@ -1492,7 +1501,7 @@ namespace Starshine
 		}
 	};
 
-	AnimEditor::AnimEditor() : impl(std::make_unique<Impl>())
+	AnimEditor::AnimEditor() : impl(std::make_unique<Impl>(this))
 	{
 	}
 
@@ -1520,6 +1529,7 @@ namespace Starshine
 
 	void AnimEditor::Update(Starshine::GameTime& gameTime)
 	{
+		impl->Update();
 	}
 
 	void AnimEditor::Draw(Starshine::GameTime& gameTime)
@@ -1530,6 +1540,11 @@ namespace Starshine
 		device->Clear(Rendering::ClearFlags_Color, clearColor, 1.0f, 0);
 
 		impl->Draw(gameTime);
+	}
+
+	void AnimEditor::ResetDragState()
+	{
+		impl->ResetDragState();
 	}
 
 	i64 AnimEditor::GetStateID() const
