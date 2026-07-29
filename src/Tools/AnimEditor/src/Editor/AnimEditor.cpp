@@ -72,7 +72,7 @@ namespace Starshine
 		std::string Name;
 
 		u32 StartTime{};
-		u32 Duration{};
+		u32 EndTime{};
 
 		BlendMode BlendMode{};
 
@@ -453,7 +453,7 @@ namespace Starshine
 						Layer& newLayer = layers.emplace_back();
 						newLayer.Name = layerName;
 						newLayer.BlendMode = BlendMode::Normal;
-						newLayer.Duration = animLength;
+						newLayer.EndTime = animLength;
 						newLayer.Sprite = &defaultSprite;
 						newLayer.CurrentEditTransform.Size = vec2(defaultSprite.SourceRectangle.Width, defaultSprite.SourceRectangle.Height);
 						newLayer.CurrentEditTransform.Origin = defaultSprite.Origin;
@@ -572,6 +572,8 @@ namespace Starshine
 		f32 TimelineRangeResizeGrips(const ImVec2& startPos, const ImVec2& endPos, i32& hoveredID)
 		{
 			ImGuiIO& io = Gui::GetIO();
+			DragStateData& dragState = parent->DragState;
+
 			f32 dragAmount = 0.0f;
 
 			Gui::PushID("#Resize");
@@ -592,38 +594,31 @@ namespace Starshine
 				if (resizeGripHovered || resizeGripHeld)
 				{
 					Gui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+					hoveredID = i;
 				}
 
 				if (resizeGripHeld)
 				{
-					if (baseMousePosNotSet)
+					if (dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Left))
 					{
-						baseMousePosNotSet = false;
-						baseMousePos = io.MousePos;
+						dragAmount = dragState.DeltaMousePosition.x;
+						break;
 					}
-
-					dragAmount = io.MousePos.x - baseMousePos.x;
-					hoveredID = i;
-
-					if (io.MouseReleased[0])
-						baseMousePosNotSet = true;
 				}
 			}
 			Gui::PopID(); // "#Resize"
 			return dragAmount;
 		}
 
-		i32 baseDragValue = -1;
-		void TimelineRange(std::string_view strID, u32& start, u32& duration, const vec2& position, const f32& thickness)
+		void TimelineRange(std::string_view strID, u32& start, u32& end, const vec2& position, const f32& thickness)
 		{
 			ImDrawList* drawList = Gui::GetWindowDrawList();
 
 			const f32 rangeRect_startX = start * frameLineDistance;
-			const f32 rangeRect_endX = (start + duration) * frameLineDistance;
-			const f32 rangeRect_distX = duration * frameLineDistance;
+			const f32 rangeRect_endX = end * frameLineDistance;
 
 			const ImVec2 rangeRect_Start(position.x + rangeRect_startX, position.y);
-			const ImVec2 rangeRect_End(position.x + rangeRect_endX, rangeRect_Start.y + thickness);
+			const ImVec2 rangeRect_End(position.x + rangeRect_endX, position.y + thickness);
 
 			const ImRect rangeRect = ImRect(rangeRect_Start, rangeRect_End);
 			const ImRect rangeRect_input = ImRect(rangeRect_Start.x - resizeGripRange, rangeRect_Start.y,
@@ -644,24 +639,14 @@ namespace Starshine
 			{
 				i32 frameAmount = static_cast<i32>(dragAmount / frameLineDistance);
 
-				if (hoveredGripID == 0) // Start
+				if (hoveredGripID == 0 && frameAmount != 0) // Start
 				{
-					if (baseDragValue == -1)
-						baseDragValue = start;
-
-					start = frameAmount - baseDragValue;
+					start += frameAmount;
 				}
-				if (hoveredGripID == 1) // End
+				if (hoveredGripID == 1 && frameAmount != 0) // End
 				{
-					if (baseDragValue == -1)
-						baseDragValue = duration;
-
-					duration = frameAmount - baseDragValue;
+					end += frameAmount;
 				}
-			}
-			else
-			{
-				baseDragValue = -1;
 			}
 
 			drawList->AddRectFilled(rangeRect_Start, rangeRect_End, IM_COL32(255, 0, 0, 255));
@@ -736,17 +721,11 @@ namespace Starshine
 
 					for (auto& layer : layers)
 					{
-						/*const ImVec2 durationRect_Start(keyframePos.x + (layer.StartTime * frameLineDistance), layerHeight);
-						const ImVec2 durationRect_End(durationRect_Start.x + (layer.Duration * frameLineDistance),
-							durationRect_Start.y + style.FontSizeBase + padding.y);
+						const vec2 rangePos(keyframePos.x, layerHeight);
+						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.EndTime, rangePos, style.FontSizeBase + padding.y);
 
-						drawList->AddRectFilled(durationRect_Start, durationRect_End, IM_COL32(255, 0, 0, 255));*/
-
-						const vec2 rangePos(keyframePos.x + (layer.StartTime * frameLineDistance), layerHeight);
-						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.Duration, rangePos, style.FontSizeBase + padding.y);
-
-						layer.StartTime = MathExtensions::Clamp<u32>(layer.StartTime, 0, animLength);
-						layer.Duration = MathExtensions::Clamp<u32>(layer.Duration, layer.StartTime + 1, animLength - layer.StartTime);
+						layer.StartTime = MathExtensions::ClampInclusive<i32>(layer.StartTime, 0, animLength - 1);
+						layer.EndTime = MathExtensions::ClampInclusive<i32>(layer.EndTime, layer.StartTime + 1, animLength);
 
 						if (layer.Expanded)
 						{
@@ -772,7 +751,7 @@ namespace Starshine
 							layerHeight += style.FontSizeBase + verticalSpacing + padding.y;
 						}
 
-						keyframePos.x = keyframesRegion.Min.x + padding.x - timelineScroll;
+						keyframePos.x = keyframesRegion.Min.x + horizontalPadding - timelineScroll;
 					}
 
 					drawList->PopClipRect();
@@ -817,13 +796,6 @@ namespace Starshine
 			Gui::End();
 #endif
 		}
-
-		bool baseMousePosNotSet{ true };
-		ImVec2 baseMousePos{};
-		ImVec2 mouseDrag{};
-
-		vec2 basePoint{};
-		int axisToFavor{ -1 };
 
 		std::array<char, 64> newLayerName{};
 
@@ -945,7 +917,8 @@ namespace Starshine
 
 			for (i32 i = 0; i < ImGuiMouseButton_COUNT; i++)
 			{
-				dragState.HeldMouseButtonsMask |= (io.MouseDown[i] << i);
+				if (io.MouseDown[i])
+					dragState.HeldMouseButtonsMask |= (1 << i);
 			}
 
 			if (dragState.HeldMouseButtonsMask != 0)
@@ -962,6 +935,8 @@ namespace Starshine
 
 				if (dragState.AxisToFavor == DragAxis::None && io.KeyShift)
 				{
+					dragState.FavorOneAxis = true;
+
 					const f32 absX = SDL_fabsf(dragState.RelativeMousePosition.x);
 					const f32 absY = SDL_fabsf(dragState.RelativeMousePosition.y);
 
@@ -969,6 +944,11 @@ namespace Starshine
 						dragState.AxisToFavor = DragAxis::Horizontal;
 					else if (absY > AxisToFavorThreshold && absY > absX)
 						dragState.AxisToFavor = DragAxis::Vertical;
+				}
+				else
+				{
+					dragState.AxisToFavor = DragAxis::None;
+					dragState.FavorOneAxis = false;
 				}
 			}
 			else
@@ -1022,7 +1002,22 @@ namespace Starshine
 
 			if ((dragState.HeldMouseButtonsMask && (1 << ImGuiMouseButton_Left)) && selectedLayer != nullptr)
 			{
-				selectedLayer->CurrentEditTransform.Position += dragState.DeltaMousePosition;
+				if (dragState.FavorOneAxis)
+				{
+					switch (dragState.AxisToFavor)
+					{
+					case DragAxis::Horizontal:
+						selectedLayer->CurrentEditTransform.Position.x += dragState.DeltaMousePosition.x;
+						break;
+					case DragAxis::Vertical:
+						selectedLayer->CurrentEditTransform.Position.y += dragState.DeltaMousePosition.y;
+						break;
+					}
+				}
+				else
+				{
+					selectedLayer->CurrentEditTransform.Position += dragState.DeltaMousePosition;
+				}
 			}
 		}
 
@@ -1132,7 +1127,7 @@ namespace Starshine
 				layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
 
 				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
-				layerElement->SetAttribute(XmlElementNames::Common_Duration, static_cast<i32>(layer.Duration));
+				layerElement->SetAttribute(XmlElementNames::Common_Duration, static_cast<i32>(layer.EndTime));
 
 				// Oh boy, I can't wait to start abusing the C++ type system!
 				WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
@@ -1196,7 +1191,7 @@ namespace Starshine
 					}
 
 					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &layer.StartTime);
-					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Duration, &layer.Duration);
+					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Duration, &layer.EndTime);
 
 					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
 					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
@@ -1245,19 +1240,6 @@ namespace Starshine
 				}
 			}
 			Gui::EndMainMenuBar();
-		}
-
-		constexpr f32 GetHermiteSplinePoint(const f32& start, const f32& end, const f32& t)
-		{
-			const f32 tSquared = t * t;
-			const f32 tCubed = t * t * t;
-
-			f32 value = (2.0f * tCubed - 3.0f * tSquared + 1.0f) * 0.0f;
-			value += (tCubed - 2.0f * tSquared + t) * start;
-			value += (3.0f * tSquared - 2.0f * tCubed) * 1.0f;
-			value += (tCubed - tSquared) * end;
-
-			return value;
 		}
 
 		constexpr f32 GetCubicBezierPoint(const f32& start, const f32& end, const f32& t)
@@ -1333,30 +1315,11 @@ namespace Starshine
 
 		void DrawCanvas(SpriteRenderer* sprRenderer)
 		{
-			auto& io = Gui::GetIO();
+			DragStateData& dragState = parent->DragState;
 
-			if (io.MouseDown[2]) // Panning
+			if (dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Middle)) // Panning
 			{
-				if (baseMousePosNotSet)
-				{
-					baseMousePosNotSet = false;
-					baseMousePos = io.MousePos;
-
-					baseViewPan = viewPan;
-				}
-
-				mouseDrag.x = io.MousePos.x - baseMousePos.x;
-				mouseDrag.y = io.MousePos.y - baseMousePos.y;
-
-				viewPan.x = baseViewPan.x + mouseDrag.x;
-				viewPan.y = baseViewPan.y + mouseDrag.y;
-			}
-			if (io.MouseReleased[2])
-			{
-				mouseDrag = {};
-				baseMousePos = {};
-
-				baseMousePosNotSet = true;
+				viewPan += dragState.DeltaMousePosition;
 			}
 
 			const vec2 realCanvasSize = vec2(canvasSize) * viewZoom;
@@ -1374,7 +1337,7 @@ namespace Starshine
 			BlendMode prevBlendMode{};
 			for (const auto& layer : layers)
 			{
-				if (timelineFrame < layer.StartTime || timelineFrame > layer.StartTime + layer.Duration)
+				if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
 					continue;
 
 				const Transform2D transform = GetTransformAtFrame(layer, timelineFrame);
@@ -1432,10 +1395,12 @@ namespace Starshine
 			}
 			else
 			{
+				DragStateData& dragState = parent->DragState;
+
 				BlendMode prevBlendMode{};
 				for (const auto& layer : layers)
 				{
-					if (timelineFrame < layer.StartTime || timelineFrame > layer.StartTime + layer.Duration)
+					if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
 						continue;
 
 					const Transform2D& currentTransform = layer.CurrentEditTransform;
@@ -1487,11 +1452,14 @@ namespace Starshine
 					sprRenderer->SetSpriteColor(DefaultColors::Red);
 					sprRenderer->PushSprite(nullptr);
 
-					if (!baseMousePosNotSet) // Dragging position text
+					if (dragState.HeldMouseButtonsMask != 0) // Dragging position text
 					{
 						char posText[64]{};
-						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", mouseDrag.x, mouseDrag.y);
-						sprRenderer->Font().PushString(font, posText, vec2(mouseDrag.x + baseMousePos.x, mouseDrag.y + baseMousePos.y), vec2(1.0f), DefaultColors::White);
+						const vec2 relMousePos = dragState.RelativeMousePosition;
+						const vec2 absMousePos = dragState.AbsoluteMousePosition;
+
+						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", relMousePos.x, relMousePos.y);
+						sprRenderer->Font().PushString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
 					}
 
 					sprRenderer->RenderSprites(nullptr);
