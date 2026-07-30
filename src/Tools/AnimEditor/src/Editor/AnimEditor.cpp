@@ -272,7 +272,7 @@ namespace Starshine
 			}
 
 			Gui::SameLine();
-			if (Gui::Button("Play"))
+			if (Gui::Button(playing ? "Stop" : "Play"))
 			{
 				playing = !playing;
 				if (!playing)
@@ -453,6 +453,7 @@ namespace Starshine
 						Layer& newLayer = layers.emplace_back();
 						newLayer.Name = layerName;
 						newLayer.BlendMode = BlendMode::Normal;
+						newLayer.StartTime = timelineFrame;
 						newLayer.EndTime = animLength;
 						newLayer.Sprite = &defaultSprite;
 						newLayer.CurrentEditTransform.Size = vec2(defaultSprite.SourceRectangle.Width, defaultSprite.SourceRectangle.Height);
@@ -569,7 +570,7 @@ namespace Starshine
 		}
 
 		const f32 resizeGripRange = 5.0f;
-		f32 TimelineRangeResizeGrips(const ImVec2& startPos, const ImVec2& endPos, i32& hoveredID)
+		f32 TimelineRangeResizeGrips(const ImVec2& startPos, const ImVec2& endPos, const ImGuiID& hoveredRangeID, i32& hoveredGripID)
 		{
 			ImGuiIO& io = Gui::GetIO();
 			DragStateData& dragState = parent->DragState;
@@ -583,7 +584,7 @@ namespace Starshine
 				const ImRect resizeGripRect = ImRect(resizeGripX - resizeGripRange, startPos.y,
 					resizeGripX + resizeGripRange, endPos.y);
 
-				const ImGuiID resizeGripID = Gui::GetID(i + 2);
+				const ImGuiID resizeGripID = Gui::GetID(i + 2 + hoveredRangeID);
 
 				bool resizeGripHovered = false;
 				bool resizeGripHeld = false;
@@ -594,14 +595,14 @@ namespace Starshine
 				if (resizeGripHovered || resizeGripHeld)
 				{
 					Gui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-					hoveredID = i;
+					hoveredGripID = i;
 				}
 
 				if (resizeGripHeld)
 				{
 					if (dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Left))
 					{
-						dragAmount = dragState.DeltaMousePosition.x;
+						dragAmount = dragState.RelativeMousePosition.x;
 						break;
 					}
 				}
@@ -610,9 +611,12 @@ namespace Starshine
 			return dragAmount;
 		}
 
+		i32 baseDrag = -1;
+		ImGuiID draggingRangeID = 0;
 		void TimelineRange(std::string_view strID, u32& start, u32& end, const vec2& position, const f32& thickness)
 		{
 			ImDrawList* drawList = Gui::GetWindowDrawList();
+			ImGuiWindow* window = Gui::GetCurrentWindow();
 
 			const f32 rangeRect_startX = start * frameLineDistance;
 			const f32 rangeRect_endX = end * frameLineDistance;
@@ -624,16 +628,27 @@ namespace Starshine
 			const ImRect rangeRect_input = ImRect(rangeRect_Start.x - resizeGripRange, rangeRect_Start.y,
 				rangeRect_End.x + resizeGripRange, rangeRect_End.y);
 
-			Gui::PushID(strID.data());
-
 			const ImGuiID rangeID = Gui::GetID("#Range");
 			Gui::PushID(rangeID);
 
-			Gui::ItemAdd(rangeRect_input, rangeID, nullptr, 0);
-			bool hovered = Gui::ItemHoverable(rangeRect_input, rangeID, ImGuiItemFlags_AllowOverlap);
+			const ImGuiID rangeNameID = Gui::GetID(strID.data());
+			Gui::PushID(rangeNameID);
+
+			Gui::ItemAdd(rangeRect_input, rangeNameID, nullptr, 0);
+			bool hovered = Gui::ItemHoverable(rangeRect_input, rangeNameID, ImGuiItemFlags_AllowOverlap);
 
 			i32 hoveredGripID = -1;
-			f32 dragAmount = TimelineRangeResizeGrips(rangeRect.GetTL(), rangeRect.GetBR(), hoveredGripID);
+			f32 dragAmount = TimelineRangeResizeGrips(rangeRect.GetTL(), rangeRect.GetBR(), rangeNameID, hoveredGripID);
+
+			if (draggingRangeID != 0)
+			{
+				if (draggingRangeID != rangeNameID)
+					goto DrawRangeAndReturn;
+			}
+			else
+			{
+				draggingRangeID = rangeNameID;
+			}
 
 			if (hoveredGripID != -1)
 			{
@@ -641,18 +656,30 @@ namespace Starshine
 
 				if (hoveredGripID == 0 && frameAmount != 0) // Start
 				{
-					start += frameAmount;
+					if (baseDrag == -1)
+						baseDrag = start;
+
+					start = baseDrag + frameAmount;
 				}
 				if (hoveredGripID == 1 && frameAmount != 0) // End
 				{
-					end += frameAmount;
+					if (baseDrag == -1)
+						baseDrag = end;
+
+					end = baseDrag + frameAmount;
 				}
 			}
+			else
+			{
+				baseDrag = -1;
+				draggingRangeID = 0;
+			}
 
+DrawRangeAndReturn:
 			drawList->AddRectFilled(rangeRect_Start, rangeRect_End, IM_COL32(255, 0, 0, 255));
 
+			Gui::PopID(); // rangeNameID
 			Gui::PopID(); // "#Range"
-			Gui::PopID(); // strID
 		}
 
 		void DrawTimeline()
@@ -1199,6 +1226,7 @@ namespace Starshine
 					ReadKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
 					ReadKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
 
+					timelineFrame = 0.0f;
 					layer.CurrentEditTransform = GetTransformAtFrame(layer, 0.0f);
 				}
 			}
@@ -1210,7 +1238,11 @@ namespace Starshine
 			{
 				if (Gui::BeginMenu("File"))
 				{
-					Gui::MenuItem("New");
+					if (Gui::MenuItem("New"))
+					{
+						layers.clear();
+						timelineFrame = 0.0f;
+					}
 					if (Gui::MenuItem("Open"))
 						OpenFileDialog();
 					if (Gui::MenuItem("Save"))
