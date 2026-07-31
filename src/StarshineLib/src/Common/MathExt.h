@@ -97,10 +97,6 @@ namespace Starshine::MathExtensions
 	template <typename T> constexpr T Max(T a, T b) { return (a > b) ? a : b; };
 	template <typename T> constexpr T Clamp(T value, T min, T max) { return Min<T>(Max<T>(value, min), max); };
 
-	template <typename T> constexpr T MinInclusive(T a, T b) { return (a <= b) ? a : b; };
-	template <typename T> constexpr T MaxInclusive(T a, T b) { return (a >= b) ? a : b; };
-	template <typename T> constexpr T ClampInclusive(T value, T min, T max) { return MinInclusive<T>(MaxInclusive<T>(value, min), max); };
-
 	template <typename T>
 	constexpr bool IsInRange(T start, T end, T value)
 	{

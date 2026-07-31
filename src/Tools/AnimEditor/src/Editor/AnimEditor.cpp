@@ -30,7 +30,7 @@ namespace Starshine
 
 		static constexpr const char* Common_Name = "Name";
 		static constexpr const char* Common_Start = "Start";
-		static constexpr const char* Common_Duration = "Duration";
+		static constexpr const char* Common_End = "End";
 
 		static constexpr const char* Animation = "Animation";
 		static constexpr const char* AnimationLayer = "Layer";
@@ -46,6 +46,12 @@ namespace Starshine
 		static constexpr const char* Keyframe = "Keyframe";
 		static constexpr const char* Keyframe_Frame = "Frame";
 		static constexpr const char* Keyframe_Value = "Value";
+	}
+
+	namespace ValueRanges
+	{
+		static constexpr vec2 MinResolution{ 480, 270 };
+		static constexpr vec2 MaxResolution{ 1920, 1080 };
 	}
 
 	struct Transform2D
@@ -173,6 +179,8 @@ namespace Starshine
 		u32 animLength{ 60 };
 
 		ivec2 canvasSize{ 1280, 720 };
+		Color canvasColor = DefaultColors::White;
+		i32 baseFPS{ 60 };
 		vec2 viewPan{};
 		f32 viewZoom{ 1.0f };
 
@@ -523,50 +531,38 @@ namespace Starshine
 			Gui::EndChild();
 		}
 
-		static constexpr f32 frameLineDistance = 15.0f;
+		static constexpr f32 frameLineDistance = 20.0f;
+
+		void TimelineKeyframe(std::string_view strID, const u32& time, const vec2& position)
+		{
+			ImDrawList* drawList = Gui::GetWindowDrawList();
+			const ImGuiStyle& style = Gui::GetStyle();
+
+			const f32 doublePadding_y = style.FramePadding.y * 2.0f;
+			const f32 propCenter_y = style.FontSizeBase / 2.0f + doublePadding_y;
+
+			const f32 keyframePosX = static_cast<f32>(time) * frameLineDistance;
+			const ImVec2 keyframeAbsPos(position.x + keyframePosX, position.y + propCenter_y - 3.0f);
+
+			const ImRect keyframeRect(keyframeAbsPos.x, keyframeAbsPos.y, keyframeAbsPos.x + 6.0f, keyframeAbsPos.y + 6.0f);
+
+			const ImGuiID keyframeNameID = Gui::GetID(strID.data());
+			Gui::PushID(keyframeNameID);
+
+			drawList->AddCircleFilled(keyframeAbsPos, 6.0f, IM_COL32(255, 0, 0, 255), 4);
+
+			Gui::PopID(); // keyframeNameID
+		}
 
 		template <typename T>
-		void DrawKeyframes(const std::vector<Keyframe<T>>& frames, const vec2& pos, std::string_view strID, ImDrawList* drawList)
+		void DrawTimelineKeyframes(const std::vector<Keyframe<T>>& frames, const vec2& pos, std::string_view strID)
 		{
 			const ImGuiStyle& style = Gui::GetStyle();
-			ImGuiWindow* window = Gui::GetCurrentWindow();
 
-			Gui::PushID(strID.data());
-
-			i32 keyframeID = 0;
 			for (auto& keyframe : frames)
 			{
-				const f32 framePos_x = pos.x + keyframe.Frame * frameLineDistance;
-				const ImRect frameBB = { framePos_x - 6.0f, pos.y - 6.0f, framePos_x + 6.0f, pos.y + 6.0f };
-
-				bool clicked{};
-				bool held{};
-				bool released{};
-
-				Gui::ItemSize(frameBB);
-				Gui::ItemAdd(frameBB, keyframeID);
-				bool hovered = Gui::ItemHoverable(frameBB, keyframeID, 0);
-
-				ImU32 keyframeColor = Gui::GetColorU32(style.Colors[ImGuiCol_Text]);
-				if (hovered)
-				{
-					keyframeColor = Gui::GetColorU32(style.Colors[ImGuiCol_PlotLinesHovered]);
-					Gui::SetHoveredID(keyframeID);
-				}
-
-				if (hovered)
-				{
-					clicked = Gui::IsMouseClicked(ImGuiMouseButton_Left);
-					held = Gui::IsMouseDown(ImGuiMouseButton_Left) && !clicked;
-					released = Gui::IsMouseReleased(ImGuiMouseButton_Left);
-				}
-
-				drawList->AddCircleFilled(ImVec2(framePos_x, pos.y), 6.0f, keyframeColor, 4);
-
-				keyframeID++;
+				TimelineKeyframe(strID, keyframe.Frame, pos);
 			}
-
-			Gui::PopID();
 		}
 
 		const f32 resizeGripRange = 5.0f;
@@ -616,7 +612,6 @@ namespace Starshine
 		void TimelineRange(std::string_view strID, u32& start, u32& end, const vec2& position, const f32& thickness)
 		{
 			ImDrawList* drawList = Gui::GetWindowDrawList();
-			ImGuiWindow* window = Gui::GetCurrentWindow();
 
 			const f32 rangeRect_startX = start * frameLineDistance;
 			const f32 rangeRect_endX = end * frameLineDistance;
@@ -624,8 +619,8 @@ namespace Starshine
 			const ImVec2 rangeRect_Start(position.x + rangeRect_startX, position.y);
 			const ImVec2 rangeRect_End(position.x + rangeRect_endX, position.y + thickness);
 
-			const ImRect rangeRect = ImRect(rangeRect_Start, rangeRect_End);
-			const ImRect rangeRect_input = ImRect(rangeRect_Start.x - resizeGripRange, rangeRect_Start.y,
+			const ImRect rangeRect(rangeRect_Start, rangeRect_End);
+			const ImRect rangeRect_input(rangeRect_Start.x - resizeGripRange, rangeRect_Start.y,
 				rangeRect_End.x + resizeGripRange, rangeRect_End.y);
 
 			const ImGuiID rangeID = Gui::GetID("#Range");
@@ -675,8 +670,12 @@ namespace Starshine
 				draggingRangeID = 0;
 			}
 
-DrawRangeAndReturn:
-			drawList->AddRectFilled(rangeRect_Start, rangeRect_End, IM_COL32(255, 0, 0, 255));
+		DrawRangeAndReturn:
+			const ImGuiStyle& style = Gui::GetStyle();
+			ImU32 rangeColor = (hovered || hoveredGripID != -1) ? Gui::GetColorU32(style.Colors[ImGuiCol_PlotHistogramHovered])
+				: Gui::GetColorU32(style.Colors[ImGuiCol_PlotHistogram]);
+
+			drawList->AddRectFilled(rangeRect_Start, rangeRect_End, rangeColor);
 
 			Gui::PopID(); // rangeNameID
 			Gui::PopID(); // "#Range"
@@ -714,7 +713,8 @@ DrawRangeAndReturn:
 					f32 timelineScroll = Gui::GetScrollX();
 
 					const ImRect frameNumbersRegion = ImRect{ timelineRegion.Min.x, timelineRegion.Min.y, timelineRegion.Max.x, timelineRegion.Min.y + menuBarHeight };
-					const ImRect keyframesRegion = ImRect{ timelineRegion.Min.x, timelineRegion.Min.y + menuBarHeight, timelineRegion.Max.x, timelineRegion.Max.y - style.ScrollbarSize };
+					const ImRect keyframesRegion = ImRect{ timelineRegion.Min.x, timelineRegion.Min.y + menuBarHeight, timelineRegion.Max.x,
+						timelineRegion.Max.y };
 
 					// --- Frame lines + numbers (top bar)
 					drawList->AddRectFilled(keyframesRegion.GetTL(), keyframesRegion.GetBR(), Gui::GetColorU32(style.Colors[ImGuiCol_FrameBg]));
@@ -743,39 +743,41 @@ DrawRangeAndReturn:
 
 					drawList->PushClipRect(keyframesRegion.GetTL(), keyframesRegion.GetBR());
 
-					vec2 keyframePos = vec2(keyframesRegion.Min.x + horizontalPadding - timelineScroll,
-						layerHeight + style.FontSizeBase + padding.y);
+					vec2 keyframePos = vec2(keyframesRegion.Min.x + horizontalPadding - timelineScroll, layerHeight);
+
+					const f32 rangeSize = style.FontSizeBase + verticalPadding;
+					const f32 heightDelta = rangeSize + itemSpacing.y;
 
 					for (auto& layer : layers)
 					{
-						const vec2 rangePos(keyframePos.x, layerHeight);
-						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.EndTime, rangePos, style.FontSizeBase + padding.y);
+						const vec2 rangePos = keyframePos;
+						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.EndTime, rangePos, rangeSize);
 
-						layer.StartTime = MathExtensions::ClampInclusive<i32>(layer.StartTime, 0, animLength - 1);
-						layer.EndTime = MathExtensions::ClampInclusive<i32>(layer.EndTime, layer.StartTime + 1, animLength);
+						layer.StartTime = MathExtensions::Clamp<i32>(layer.StartTime, 0, animLength - 1);
+						layer.EndTime = MathExtensions::Clamp<i32>(layer.EndTime, layer.StartTime + 1, animLength);
 
 						if (layer.Expanded)
 						{
-							DrawKeyframes<vec2>(layer.Origin, keyframePos, "Origin", drawList);
-							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+							keyframePos.y += heightDelta;
 
-							DrawKeyframes<vec2>(layer.Position, keyframePos, "Position", drawList);
-							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+							DrawTimelineKeyframes<vec2>(layer.Origin, keyframePos, "Origin");
+							keyframePos.y += heightDelta;
 
-							DrawKeyframes<vec2>(layer.Size, keyframePos, "Size", drawList);
-							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+							DrawTimelineKeyframes<vec2>(layer.Position, keyframePos, "Position");
+							keyframePos.y += heightDelta;
 
-							DrawKeyframes<f32>(layer.Rotation, keyframePos, "Rotation", drawList);
-							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+							DrawTimelineKeyframes<vec2>(layer.Size, keyframePos, "Size");
+							keyframePos.y += heightDelta;
 
-							DrawKeyframes<Color>(layer.Color, keyframePos, "Color", drawList);
-							keyframePos.y += style.FontSizeBase + verticalSpacing + padding.y;
+							DrawTimelineKeyframes<f32>(layer.Rotation, keyframePos, "Rotation");
+							keyframePos.y += heightDelta;
 
-							layerHeight = keyframePos.y;
+							DrawTimelineKeyframes<Color>(layer.Color, keyframePos, "Color");
+							keyframePos.y += heightDelta;
 						}
 						else
 						{
-							layerHeight += style.FontSizeBase + verticalSpacing + padding.y;
+							keyframePos.y += heightDelta;
 						}
 
 						keyframePos.x = keyframesRegion.Min.x + horizontalPadding - timelineScroll;
@@ -1136,13 +1138,13 @@ DrawRangeAndReturn:
 
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_Width, canvasSize.x);
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_Height, canvasSize.y);
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, 60);
-			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, DefaultColors::White);
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, baseFPS);
+			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, canvasColor);
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, "sprites/devtest");
 
 			Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
 			animElement->SetAttribute(XmlElementNames::Common_Name, "Testing00");
-			animElement->SetAttribute(XmlElementNames::Common_Duration, 60u);
+			animElement->SetAttribute(XmlElementNames::Common_End, animLength);
 
 			for (const auto& layer : layers)
 			{
@@ -1154,7 +1156,7 @@ DrawRangeAndReturn:
 				layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
 
 				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
-				layerElement->SetAttribute(XmlElementNames::Common_Duration, static_cast<i32>(layer.EndTime));
+				layerElement->SetAttribute(XmlElementNames::Common_End, static_cast<i32>(layer.EndTime));
 
 				// Oh boy, I can't wait to start abusing the C++ type system!
 				WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
@@ -1184,6 +1186,8 @@ DrawRangeAndReturn:
 			const Xml::Element* rootElement = animSetDoc.FirstChildElement(XmlElementNames::AnimationSet);
 			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Width, &canvasSize.x);
 			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Height, &canvasSize.y);
+			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_FPS, &baseFPS);
+			Xml::TryGetValue(canvasColor, rootElement->FindAttribute(XmlElementNames::AnimationSet_StageColor));
 
 			for (const Xml::Element* animElement = rootElement->FirstChildElement(XmlElementNames::Animation);
 				animElement;
@@ -1218,7 +1222,7 @@ DrawRangeAndReturn:
 					}
 
 					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &layer.StartTime);
-					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Duration, &layer.EndTime);
+					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_End, &layer.EndTime);
 
 					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
 					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
@@ -1252,7 +1256,15 @@ DrawRangeAndReturn:
 
 					Gui::Separator();
 
-					Gui::MenuItem("Close");
+					if (Gui::BeginMenu("Import sprites..."))
+					{
+						Gui::MenuItem("From folder");
+						Gui::MenuItem("From file");
+						Gui::EndMenu();
+					}
+
+					Gui::Separator();
+
 					Gui::MenuItem("Exit");
 
 					Gui::EndMenu();
@@ -1260,7 +1272,9 @@ DrawRangeAndReturn:
 
 				if (Gui::BeginMenu("Edit"))
 				{
-					Gui::MenuItem("Animation Set Properties");
+					if (Gui::MenuItem("Animation Set Properties"))
+						animSetProperites_display = true;
+
 					Gui::EndMenu();
 				}
 
@@ -1323,11 +1337,47 @@ DrawRangeAndReturn:
 			}
 		}
 
+		bool animSetProperites_display = false;
+		void AnimationSetPropertiesWindow()
+		{
+			if (!animSetProperites_display)
+				return;
+
+			if (Gui::Begin("Animation Set Properties", &animSetProperites_display))
+			{
+				Gui::Text("Resolution");
+				Gui::SameLine();
+				
+				Gui::DragInt2("##AnimSetProperties_Resolution", &canvasSize[0]);
+				if (Gui::IsItemEdited())
+				{
+					canvasSize.x = MathExtensions::Clamp<i32>(canvasSize.x, ValueRanges::MinResolution.x, ValueRanges::MaxResolution.x);
+					canvasSize.y = MathExtensions::Clamp<i32>(canvasSize.y, ValueRanges::MinResolution.y, ValueRanges::MaxResolution.y);
+				}
+
+				Gui::Text("FPS");
+				Gui::SameLine();
+				Gui::DragInt("##AnimSetProperties_FPS", &baseFPS, 1.0f, 30, 120);
+
+				Gui::Text("Stage Color");
+				Gui::SameLine();
+
+				vec4 stageColor_vec4 = canvasColor.ToVector4();
+				Gui::ColorEdit3("##AnimSetProperties_StageColor", &stageColor_vec4[0]);
+				if (Gui::IsItemEdited())
+					canvasColor = Color(stageColor_vec4);
+
+				Gui::End();
+			}
+		}
+
 		void OnGUI()
 		{
 			DrawTimeline();
 			//EasingPlotWindow();
 			ResourcesWindow();
+
+			AnimationSetPropertiesWindow();
 
 			RenameLayerPopUp();
 			ChangeLayerSpritePopUp();
@@ -1358,7 +1408,7 @@ DrawRangeAndReturn:
 
 			sprRenderer->SetSpritePosition(viewPan);
 			sprRenderer->SetSpriteSize(realCanvasSize);
-			sprRenderer->SetSpriteColor(DefaultColors::White);
+			sprRenderer->SetSpriteColor(canvasColor);
 			sprRenderer->PushSprite(nullptr);
 
 			sprRenderer->PushOutlineRect(viewPan, realCanvasSize, {}, DefaultColors::Black);
