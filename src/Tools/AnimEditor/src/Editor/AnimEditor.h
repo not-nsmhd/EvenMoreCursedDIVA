@@ -49,6 +49,20 @@ namespace Starshine
 			vec2 DeltaMousePosition{};
 
 			i32 HeldMouseButtonsMask{};
+
+			struct UserBaseValuesData
+			{
+				union
+				{
+					u8 Bytes[32]{};
+					ivec4 Intergers;
+					vec4 Floats;
+				};
+				bool BaseValuesSet{ false };
+			} UserBaseValues;
+
+			static_assert(alignof(UserBaseValuesData) == 4);
+			static_assert(sizeof(UserBaseValuesData) == 36); // NOTE: Extra 3 bytes are needed due to struct alignment (4 bytes)
 		} DragState;
 
 		void ResetDragState();

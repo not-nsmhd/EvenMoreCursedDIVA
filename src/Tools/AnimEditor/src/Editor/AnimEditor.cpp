@@ -12,6 +12,7 @@
 #include "FileDialog.h"
 #include <IO/Xml.h>
 #include <Common/Logging/Logging.h>
+#include <algorithm>
 
 namespace Gui = ImGui;
 using namespace Starshine::Rendering::Render2D;
@@ -105,7 +106,14 @@ namespace Starshine
 			return true;
 		}
 
+		const Keyframe<T>& first = keyframes.front();
 		const Keyframe<T>& last = keyframes.back();
+
+		if (frame <= first.Frame)
+		{
+			value = first.Value;
+			return true;
+		}
 
 		if (frame >= last.Frame)
 		{
@@ -187,6 +195,7 @@ namespace Starshine
 		bool playing = false;
 		bool showMetricsWindow = false;
 		bool showIDStackWindow = false;
+		bool showKeyframeListWindow = false;
 
 		Layer* layerToModify = nullptr;
 		bool renameLayer = false;
@@ -228,6 +237,7 @@ namespace Starshine
 		{
 			parent->DragState.AxisToFavor = DragAxis::None;
 			parent->DragState.HeldMouseButtonsMask = 0;
+			parent->DragState.UserBaseValues.BaseValuesSet = false;
 		}
 
 		template <typename T>
@@ -531,10 +541,23 @@ namespace Starshine
 			Gui::EndChild();
 		}
 
+		template <typename T>
+		void SortKeyframes(std::vector<Keyframe<T>>& keyframes)
+		{
+			if (keyframes.size() <= 1)
+				return;
+
+			std::sort(keyframes.begin(), keyframes.end(),
+				[](const Keyframe<T>& a, const Keyframe<T>& b) { return a.Frame < b.Frame; });
+		}
+
 		static constexpr f32 frameLineDistance = 20.0f;
 
-		void TimelineKeyframe(std::string_view strID, const u32& time, const vec2& position)
+		bool TimelineKeyframe(const i32& index, const u32& time, const vec2& position)
 		{
+			static constexpr f32 keyframeSize = 6.0f;
+			static constexpr f32 keyframeOrigin = keyframeSize / 2.0f;
+
 			ImDrawList* drawList = Gui::GetWindowDrawList();
 			const ImGuiStyle& style = Gui::GetStyle();
 
@@ -542,27 +565,86 @@ namespace Starshine
 			const f32 propCenter_y = style.FontSizeBase / 2.0f + doublePadding_y;
 
 			const f32 keyframePosX = static_cast<f32>(time) * frameLineDistance;
-			const ImVec2 keyframeAbsPos(position.x + keyframePosX, position.y + propCenter_y - 3.0f);
+			const ImVec2 keyframePos(position.x + keyframePosX, position.y + propCenter_y - keyframeOrigin);
 
-			const ImRect keyframeRect(keyframeAbsPos.x, keyframeAbsPos.y, keyframeAbsPos.x + 6.0f, keyframeAbsPos.y + 6.0f);
+			const ImRect keyframeRect(keyframePos.x - keyframeSize, keyframePos.y - keyframeSize,
+				keyframePos.x + keyframeSize, keyframePos.y + keyframeSize);
 
-			const ImGuiID keyframeNameID = Gui::GetID(strID.data());
-			Gui::PushID(keyframeNameID);
+			const ImGuiID keyframeID = Gui::GetID(index);
+			Gui::PushID(keyframeID);
 
-			drawList->AddCircleFilled(keyframeAbsPos, 6.0f, IM_COL32(255, 0, 0, 255), 4);
+			Gui::ItemAdd(keyframeRect, keyframeID);
 
-			Gui::PopID(); // keyframeNameID
+			bool hovered = false;
+			bool held = false;
+			Gui::ButtonBehavior(keyframeRect, keyframeID, &hovered, &held);
+
+			if (held)
+			{
+				Gui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+			}
+
+			ImU32 keyframeColor = (hovered || held) ? Gui::GetColorU32(style.Colors[ImGuiCol_PlotHistogramHovered])
+				: Gui::GetColorU32(style.Colors[ImGuiCol_PlotHistogram]);
+
+			drawList->AddCircleFilled(keyframePos, keyframeSize, keyframeColor, 4);
+			//drawList->AddRectFilled(keyframeRect.GetTL(), keyframeRect.GetBR(), IM_COL32(255, 0, 255, 255));
+
+			Gui::PopID(); // keyframeID
+			return held;
 		}
 
 		template <typename T>
-		void DrawTimelineKeyframes(const std::vector<Keyframe<T>>& frames, const vec2& pos, std::string_view strID)
+		void DrawLayerKeyframes(std::vector<Keyframe<T>>& frames, const vec2& pos, const i32& layerIndex, const i32& propIndex)
 		{
 			const ImGuiStyle& style = Gui::GetStyle();
+			DragStateData& dragState = parent->DragState;
 
-			for (auto& keyframe : frames)
+			Gui::PushID(layerIndex);
+			Gui::PushID(propIndex);
+
+			i32 keyframeIndex = 0;
+			bool sortKeyframesWhenDone = false;
+			for (auto it = frames.begin(); it != frames.end(); it++)
 			{
-				TimelineKeyframe(strID, keyframe.Frame, pos);
+				bool dragging = TimelineKeyframe(keyframeIndex++, it->Frame, pos);
+				ImGuiID keyframeID = Gui::GetItemID();
+
+				i32& draggingID = dragState.UserBaseValues.Intergers[3];
+
+				if (dragging)
+				{
+					i32& baseValue = dragState.UserBaseValues.Intergers[0];
+					if (!dragState.UserBaseValues.BaseValuesSet)
+					{
+						baseValue = it->Frame;
+						draggingID = keyframeID;
+						dragState.UserBaseValues.BaseValuesSet = true;
+					}
+
+					i32 dragAmount = static_cast<i32>(dragState.RelativeMousePosition.x / frameLineDistance);
+					it->Frame = baseValue + dragAmount;
+				}
+				else if (draggingID == keyframeID)
+				{
+					if (dragState.UserBaseValues.BaseValuesSet)
+						dragState.UserBaseValues.BaseValuesSet = false;
+
+					if (it != frames.begin() && it->Frame < (it - 1)->Frame)
+						sortKeyframesWhenDone = true;
+
+					if ((it + 1) != frames.end() && it->Frame > (it + 1)->Frame)
+						sortKeyframesWhenDone = true;
+				}
+
+				it->Frame = MathExtensions::Clamp<u32>(it->Frame, 0, animLength);
 			}
+
+			Gui::PopID(); // propIndex
+			Gui::PopID(); // layerIndex
+
+			if (sortKeyframesWhenDone)
+				SortKeyframes(frames);
 		}
 
 		const f32 resizeGripRange = 5.0f;
@@ -748,6 +830,7 @@ namespace Starshine
 					const f32 rangeSize = style.FontSizeBase + verticalPadding;
 					const f32 heightDelta = rangeSize + itemSpacing.y;
 
+					i32 layerIndex = 0;
 					for (auto& layer : layers)
 					{
 						const vec2 rangePos = keyframePos;
@@ -760,26 +843,28 @@ namespace Starshine
 						{
 							keyframePos.y += heightDelta;
 
-							DrawTimelineKeyframes<vec2>(layer.Origin, keyframePos, "Origin");
+							DrawLayerKeyframes<vec2>(layer.Origin, keyframePos, 0, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawTimelineKeyframes<vec2>(layer.Position, keyframePos, "Position");
+							DrawLayerKeyframes<vec2>(layer.Position, keyframePos, 1, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawTimelineKeyframes<vec2>(layer.Size, keyframePos, "Size");
+							DrawLayerKeyframes<vec2>(layer.Size, keyframePos, 2, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawTimelineKeyframes<f32>(layer.Rotation, keyframePos, "Rotation");
+							DrawLayerKeyframes<f32>(layer.Rotation, keyframePos, 3, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawTimelineKeyframes<Color>(layer.Color, keyframePos, "Color");
+							DrawLayerKeyframes<Color>(layer.Color, keyframePos, 4, layerIndex);
 							keyframePos.y += heightDelta;
+
 						}
 						else
 						{
 							keyframePos.y += heightDelta;
 						}
 
+						layerIndex++;
 						keyframePos.x = keyframesRegion.Min.x + horizontalPadding - timelineScroll;
 					}
 
@@ -1282,6 +1367,7 @@ namespace Starshine
 				{
 					Gui::MenuItem("Metrics Window", nullptr, &showMetricsWindow);
 					Gui::MenuItem("ID Stack Window", nullptr, &showIDStackWindow);
+					Gui::MenuItem("Keyframe List Window", nullptr, &showKeyframeListWindow);
 					Gui::EndMenu();
 				}
 			}
@@ -1371,6 +1457,163 @@ namespace Starshine
 			}
 		}
 
+		Layer* layerToDisplay = nullptr;
+		void ShowKeyframeListWindow()
+		{
+			if (Gui::Begin("Keyframe List", &showKeyframeListWindow))
+			{
+				Gui::Text("Layer");
+				Gui::SameLine();
+				if (Gui::BeginCombo("##LayerList", layerToDisplay != nullptr ? layerToDisplay->Name.c_str() : "[None]"))
+				{
+					for (Layer& layer : layers)
+					{
+						const bool isSelected = layerToDisplay == &layer;
+						if (Gui::Selectable(layer.Name.c_str(), isSelected))
+							layerToDisplay = &layer;
+					}
+
+					Gui::EndCombo();
+				}
+				if (Gui::BeginTabBar("##AnimProps_TabBar"))
+				{
+					if (Gui::BeginTabItem("Origin"))
+					{
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Origin); }
+						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
+						{
+							Gui::TableSetupColumn("Frame");
+							Gui::TableSetupColumn("Value");
+							Gui::TableHeadersRow();
+							if (layerToDisplay != nullptr)
+							{
+								for (const auto& keyframe : layerToDisplay->Origin)
+								{
+									Gui::TableNextRow();
+
+									Gui::TableSetColumnIndex(0);
+									Gui::Text("%d", keyframe.Frame);
+
+									Gui::TableSetColumnIndex(1);
+									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
+								}
+							}
+
+							Gui::EndTable();
+						}
+						Gui::EndTabItem();
+					}
+					if (Gui::BeginTabItem("Position"))
+					{
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Position); }
+						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
+						{
+							Gui::TableSetupColumn("Frame");
+							Gui::TableSetupColumn("Value");
+							Gui::TableHeadersRow();
+							if (layerToDisplay != nullptr)
+							{
+								for (const auto& keyframe : layerToDisplay->Position)
+								{
+									Gui::TableNextRow();
+
+									Gui::TableSetColumnIndex(0);
+									Gui::Text("%d", keyframe.Frame);
+
+									Gui::TableSetColumnIndex(1);
+									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
+								}
+							}
+
+							Gui::EndTable();
+						}
+						Gui::EndTabItem();
+					}
+					if (Gui::BeginTabItem("Size"))
+					{
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Size); }
+						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
+						{
+							Gui::TableSetupColumn("Frame");
+							Gui::TableSetupColumn("Value");
+							Gui::TableHeadersRow();
+							if (layerToDisplay != nullptr)
+							{
+								for (const auto& keyframe : layerToDisplay->Size)
+								{
+									Gui::TableNextRow();
+
+									Gui::TableSetColumnIndex(0);
+									Gui::Text("%d", keyframe.Frame);
+
+									Gui::TableSetColumnIndex(1);
+									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
+								}
+							}
+
+							Gui::EndTable();
+						}
+						Gui::EndTabItem();
+					}
+					if (Gui::BeginTabItem("Rotation"))
+					{
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Rotation); }
+						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
+						{
+							Gui::TableSetupColumn("Frame");
+							Gui::TableSetupColumn("Value");
+							Gui::TableHeadersRow();
+							if (layerToDisplay != nullptr)
+							{
+								for (const auto& keyframe : layerToDisplay->Rotation)
+								{
+									Gui::TableNextRow();
+
+									Gui::TableSetColumnIndex(0);
+									Gui::Text("%d", keyframe.Frame);
+
+									Gui::TableSetColumnIndex(1);
+									Gui::Text("%.3f", keyframe.Value);
+								}
+							}
+
+							Gui::EndTable();
+						}
+						Gui::EndTabItem();
+					}
+					if (Gui::BeginTabItem("Color"))
+					{
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Color); }
+						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
+						{
+							Gui::TableSetupColumn("Frame");
+							Gui::TableSetupColumn("Value");
+							Gui::TableHeadersRow();
+							if (layerToDisplay != nullptr)
+							{
+								for (const auto& keyframe : layerToDisplay->Color)
+								{
+									Gui::TableNextRow();
+
+									Gui::TableSetColumnIndex(0);
+									Gui::Text("%d", keyframe.Frame);
+
+									Gui::TableSetColumnIndex(1);
+									Gui::Text("%d %d %d %d", keyframe.Value.R, keyframe.Value.G, keyframe.Value.B, keyframe.Value.A);
+								}
+							}
+
+							Gui::EndTable();
+						}
+						Gui::EndTabItem();
+					}
+					Gui::EndTabBar();
+				}
+
+				Gui::End();
+			}
+		}
+
 		void OnGUI()
 		{
 			DrawTimeline();
@@ -1391,6 +1634,8 @@ namespace Starshine
 				Gui::ShowMetricsWindow(&showMetricsWindow);
 			if (showIDStackWindow)
 				Gui::ShowIDStackToolWindow(&showIDStackWindow);
+			if (showKeyframeListWindow)
+				ShowKeyframeListWindow();
 		}
 
 		ivec2 baseViewPan{};
