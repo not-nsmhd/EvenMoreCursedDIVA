@@ -61,8 +61,10 @@ namespace Starshine
 				bool BaseValuesSet{ false };
 			} UserBaseValues;
 
+			// TODO: Test both this assert and the assert below it with different (gcc and/or clang) compilers
 			static_assert(alignof(UserBaseValuesData) == 4);
-			static_assert(sizeof(UserBaseValuesData) == 36); // NOTE: Extra 3 bytes are needed due to struct alignment (4 bytes)
+			// NOTE: Extra 3 bytes are needed due to struct alignment (4 bytes)
+			static_assert(sizeof(UserBaseValuesData) == 36);
 		} DragState;
 
 		void ResetDragState();

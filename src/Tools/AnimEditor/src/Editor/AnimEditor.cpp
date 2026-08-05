@@ -94,6 +94,16 @@ namespace Starshine
 		bool Expanded{};
 	};
 
+	struct Animation
+	{
+		std::string Name;
+
+		u32 StartTime{};
+		u32 EndTime{};
+
+		std::vector<Layer> Layers;
+	};
+
 	template <typename T>
 	bool InterpolateKeyframes(const std::vector<Keyframe<T>>& keyframes, const f32& frame, T& value)
 	{
@@ -180,11 +190,11 @@ namespace Starshine
 		GFX::SpritePacker sprPacker{};
 		SpriteSheet spriteSheet{};
 
-		std::vector<Layer> layers{};
+		std::vector<Animation> animations;
+		Animation* currentAnim{ nullptr };
 		Layer* selectedLayer{ nullptr };
 
 		f32 timelineFrame{};
-		u32 animLength{ 60 };
 
 		ivec2 canvasSize{ 1280, 720 };
 		Color canvasColor = DefaultColors::White;
@@ -201,7 +211,7 @@ namespace Starshine
 		bool renameLayer = false;
 		bool changeLayerSprite = false;
 
-		std::vector<Layer>::iterator layerToDelete{ layers.begin() };
+		std::vector<Layer>::iterator layerToDelete{};
 		bool layerToDeleteIsSet = false;
 
 		Impl(AnimEditor* parent) : parent{ parent }
@@ -218,6 +228,9 @@ namespace Starshine
 
 			viewPan.x = viewportSize.Width / 2.0f - canvasSize.x / 2.0f;
 			viewPan.y = viewportSize.Height / 2.0f - canvasSize.y / 2.0f;
+
+			currentAnim = &animations.emplace_back();
+			currentAnim->Name = "Animation 0";
 
 			return true;
 		}
@@ -282,10 +295,10 @@ namespace Starshine
 			Gui::Text("Frame");
 			Gui::SameLine();
 			Gui::SetNextItemWidth(56.0f);
-			Gui::DragFloat("##Timeline_FrameDrag", &timelineFrame, 1.0f, 0.0f, animLength - 1.0f, "%.0f", playing ? ImGuiSliderFlags_ReadOnly : 0);
+			Gui::DragFloat("##Timeline_FrameDrag", &timelineFrame, 1.0f, currentAnim->StartTime, currentAnim->EndTime, "%.0f", playing ? ImGuiSliderFlags_ReadOnly : 0);
 			if (Gui::IsItemEdited() && !playing)
 			{
-				for (auto& layer : layers)
+				for (auto& layer : currentAnim->Layers)
 					layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
 			}
 
@@ -295,7 +308,7 @@ namespace Starshine
 				playing = !playing;
 				if (!playing)
 				{
-					for (auto& layer : layers)
+					for (auto& layer : currentAnim->Layers)
 						layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
 				}
 			}
@@ -364,9 +377,9 @@ namespace Starshine
 
 		void LayerContextMenu(size_t layerIndex)
 		{
+			auto layer = currentAnim->Layers.begin() + layerIndex;
 			if (Gui::BeginPopupContextItem())
 			{
-				auto layer = layers.begin() + layerIndex;
 				if (Gui::Selectable("Rename"))
 				{
 					layerToModify = &*layer;
@@ -385,7 +398,7 @@ namespace Starshine
 					ImGuiSelectableFlags selectableFlags = (layerIndex == 0) ? ImGuiSelectableFlags_Disabled : 0;
 					if (Gui::Selectable("Move upwards", false, selectableFlags))
 					{
-						auto layer1 = layers.begin() + layerIndex;
+						auto layer1 = currentAnim->Layers.begin() + layerIndex;
 						auto layer2 = layer1 - 1;
 						std::iter_swap(layer1, layer2);
 
@@ -395,10 +408,10 @@ namespace Starshine
 						}
 					}
 
-					selectableFlags = (layerIndex == layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
+					selectableFlags = (layerIndex == currentAnim->Layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
 					if (Gui::Selectable("Move downwards", false, selectableFlags))
 					{
-						auto layer1 = layers.begin() + layerIndex;
+						auto layer1 = currentAnim->Layers.begin() + layerIndex;
 						auto layer2 = layer1 + 1;
 						std::iter_swap(layer1, layer2);
 
@@ -448,6 +461,26 @@ namespace Starshine
 
 		f32 layerListScroll{};
 
+		void LayerTreeNodeProperties(i32 layerIndex, std::vector<Layer>::iterator layer)
+		{
+			LayerContextMenu(layerIndex);
+
+			const char* blendModeName_layer = BlendModeNames[static_cast<size_t>(layer->BlendMode)].data();
+
+			Gui::SameLine();
+			if (Gui::BeginCombo("##Layer_BlendMode", blendModeName_layer))
+			{
+				for (size_t i = 0; i < EnumCount<BlendMode>(); i++)
+				{
+					const char* blendModeName = BlendModeNames[i].data();
+					if (Gui::Selectable(blendModeName))
+						layer->BlendMode = static_cast<BlendMode>(i);
+				}
+
+				Gui::EndCombo();
+			}
+		}
+
 		void LayerList()
 		{
 			const ImRect dopeSheetRegion = GetRelativeContentRegion();
@@ -463,16 +496,16 @@ namespace Starshine
 				{
 					if (Gui::MenuItem("+L"))
 					{
-						size_t layerCount = layers.size();
+						size_t layerCount = currentAnim->Layers.size();
 						char layerName[64]{};
 						SDL_snprintf(layerName, sizeof(layerName) - 1, "Layer %llu", layerCount);
 
 						const Sprite& defaultSprite = spriteSheet.GetSprite(0);
-						Layer& newLayer = layers.emplace_back();
+						Layer& newLayer = currentAnim->Layers.emplace_back();
 						newLayer.Name = layerName;
 						newLayer.BlendMode = BlendMode::Normal;
 						newLayer.StartTime = timelineFrame;
-						newLayer.EndTime = animLength;
+						newLayer.EndTime = currentAnim->EndTime;
 						newLayer.Sprite = &defaultSprite;
 						newLayer.CurrentEditTransform.Size = vec2(defaultSprite.SourceRectangle.Width, defaultSprite.SourceRectangle.Height);
 						newLayer.CurrentEditTransform.Origin = defaultSprite.Origin;
@@ -488,7 +521,7 @@ namespace Starshine
 
 				i32 layerIndex = 0;
 
-				for (auto layer = layers.begin(); layer != layers.end(); layer++)
+				for (auto layer = currentAnim->Layers.begin(); layer != currentAnim->Layers.end(); layer++)
 				{
 					Gui::PushID(layerIndex);
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
@@ -500,12 +533,14 @@ namespace Starshine
 					if (Gui::TreeNodeEx(layer->Name.c_str(), nodeFlags))
 					{
 						layer->Expanded = true;
+						LayerTreeNodeProperties(layerIndex, layer);
 
 						LayerPropertyField(layerIndex, 0, "Origin", layer->CurrentEditTransform.Origin, layer->Origin);
 						LayerPropertyField(layerIndex, 1, "Position", layer->CurrentEditTransform.Position, layer->Position);
 						LayerPropertyField(layerIndex, 2, "Size", layer->CurrentEditTransform.Size, layer->Size);
 						LayerPropertyField(layerIndex, 3, "Rotation", layer->CurrentEditTransform.Rotation, layer->Rotation);
 						LayerPropertyField(layerIndex, 4, "Color", layer->CurrentEditTransform.Color, layer->Color);
+
 						Gui::TreePop();
 					}
 					else
@@ -513,25 +548,14 @@ namespace Starshine
 						layer->Expanded = false;
 					}
 
-					Gui::SameLine();
-
-					const char* blendModeName_layer = BlendModeNames[static_cast<size_t>(layer->BlendMode)].data();
-					if (Gui::BeginCombo("", blendModeName_layer))
-					{
-						for (size_t i = 0; i < EnumCount<BlendMode>(); i++)
-						{
-							const char* blendModeName = BlendModeNames[i].data();
-							if (Gui::Selectable(blendModeName))
-								layer->BlendMode = static_cast<BlendMode>(i);
-						}
-
-						Gui::EndCombo();
-					}
-
 					if (Gui::IsItemClicked())
 						selectedLayer = &*layer;
 
-					LayerContextMenu(layerIndex);
+					if (!layer->Expanded)
+					{
+						LayerTreeNodeProperties(layerIndex, layer);
+					}
+
 					Gui::PopID();
 					layerIndex++;
 				}
@@ -637,7 +661,7 @@ namespace Starshine
 						sortKeyframesWhenDone = true;
 				}
 
-				it->Frame = MathExtensions::Clamp<u32>(it->Frame, 0, animLength);
+				it->Frame = MathExtensions::Clamp<u32>(it->Frame, currentAnim->StartTime, currentAnim->EndTime);
 			}
 
 			Gui::PopID(); // propIndex
@@ -765,7 +789,13 @@ namespace Starshine
 
 		void DrawTimeline()
 		{
-			if (Gui::Begin("Timeline"))
+			char windowTitle[128]{};
+			if (currentAnim)
+				SDL_snprintf(windowTitle, sizeof(windowTitle), "Timeline - \"%s\"###Timeline", currentAnim->Name.c_str());
+			else
+				SDL_snprintf(windowTitle, sizeof(windowTitle), "Timeline - No Animation###Timeline");
+
+			if (Gui::Begin(windowTitle))
 			{
 				ImGuiIO& io = Gui::GetIO();
 				const ImGuiStyle& style = Gui::GetStyle();
@@ -793,6 +823,8 @@ namespace Starshine
 					drawList->PushClipRect(timelineRegion.GetTL(), timelineRegion.GetBR());
 
 					f32 timelineScroll = Gui::GetScrollX();
+					const i32 animStart = currentAnim->StartTime;
+					const i32 animLength = currentAnim->EndTime - currentAnim->StartTime;
 
 					const ImRect frameNumbersRegion = ImRect{ timelineRegion.Min.x, timelineRegion.Min.y, timelineRegion.Max.x, timelineRegion.Min.y + menuBarHeight };
 					const ImRect keyframesRegion = ImRect{ timelineRegion.Min.x, timelineRegion.Min.y + menuBarHeight, timelineRegion.Max.x,
@@ -811,7 +843,7 @@ namespace Starshine
 						if (i % 5 == 0)
 						{
 							char frameText[8]{};
-							SDL_snprintf(frameText, sizeof(frameText) - 1, "%d", i);
+							SDL_snprintf(frameText, sizeof(frameText) - 1, "%d", i + currentAnim->StartTime);
 
 							const ImVec2 frameTextPos{ lineStart.x, frameNumbersRegion.Min.y };
 							drawList->AddText(frameTextPos, IM_COL32_WHITE, frameText);
@@ -831,13 +863,19 @@ namespace Starshine
 					const f32 heightDelta = rangeSize + itemSpacing.y;
 
 					i32 layerIndex = 0;
+					auto& layers = currentAnim->Layers;
 					for (auto& layer : layers)
 					{
 						const vec2 rangePos = keyframePos;
-						TimelineRange(layer.Name.c_str(), layer.StartTime, layer.EndTime, rangePos, rangeSize);
 
-						layer.StartTime = MathExtensions::Clamp<i32>(layer.StartTime, 0, animLength - 1);
-						layer.EndTime = MathExtensions::Clamp<i32>(layer.EndTime, layer.StartTime + 1, animLength);
+						u32 layerStart = layer.StartTime - animStart;
+						u32 layerEnd = layer.EndTime - animStart;
+						TimelineRange(layer.Name.c_str(), layerStart, layerEnd, rangePos, rangeSize);
+						layer.StartTime = layerStart + animStart;
+						layer.EndTime = layerEnd + animStart;
+
+						layer.StartTime = MathExtensions::Clamp<i32>(layer.StartTime, currentAnim->StartTime, currentAnim->EndTime - 1);
+						layer.EndTime = MathExtensions::Clamp<i32>(layer.EndTime, layer.StartTime + 1, currentAnim->EndTime);
 
 						if (layer.Expanded)
 						{
@@ -889,26 +927,38 @@ namespace Starshine
 
 		void ResourcesWindow()
 		{
-#if 0
 			if (Gui::Begin("Resources"))
 			{
 				if (Gui::BeginTabBar("##Resources_TabBar"))
 				{
+					if (Gui::BeginTabItem("Animations"))
+					{
+						Gui::Button("+A");
+
+						const ImVec2 contentRegion = Gui::GetContentRegionAvail();
+						if (Gui::BeginListBox("##Resources_AnimationList", ImVec2(-FLT_MIN, contentRegion.y)))
+						{
+							for (auto& anim : animations)
+							{
+								const bool selected = &anim == currentAnim;
+
+								if (Gui::Selectable(anim.Name.c_str(), &selected))
+									currentAnim = &anim;
+							}
+
+							Gui::EndListBox();
+						}
+						Gui::EndTabItem();
+					}
 					if (Gui::BeginTabItem("Sprites"))
 					{
 						Gui::Text("fjiofjeoiwfjwoejfoewijoew sprites tab\njfiorjfew");
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Animations"))
-					{
-						Gui::Text("fjiofjeoiwfjwoejfoewijoew anims tab\njfiorjfew");
 						Gui::EndTabItem();
 					}
 					Gui::EndTabBar();
 				}
 			}
 			Gui::End();
-#endif
 		}
 
 		std::array<char, 64> newLayerName{};
@@ -1013,7 +1063,7 @@ namespace Starshine
 				if (Gui::Button("Yes"))
 				{
 					if (&*layerToDelete == selectedLayer) { selectedLayer = nullptr; }
-					layers.erase(layerToDelete);
+					currentAnim->Layers.erase(layerToDelete);
 					layerToDeleteIsSet = false;
 				};
 				Gui::SameLine();
@@ -1096,6 +1146,7 @@ namespace Starshine
 			DragStateData& dragState = parent->DragState;
 
 			Layer* hoveredLayer = nullptr;
+			auto& layers = currentAnim->Layers;
 			for (auto& layer : layers)
 			{
 				const vec2 origin = layer.CurrentEditTransform.Origin;
@@ -1227,28 +1278,32 @@ namespace Starshine
 			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, canvasColor);
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, "sprites/devtest");
 
-			Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
-			animElement->SetAttribute(XmlElementNames::Common_Name, "Testing00");
-			animElement->SetAttribute(XmlElementNames::Common_End, animLength);
-
-			for (const auto& layer : layers)
+			for (const auto& anim : animations)
 			{
-				Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
-				layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
-				layerElement->SetAttribute(XmlElementNames::AnimationLayer_Sprite, layer.Sprite->Name.c_str());
+				Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
+				animElement->SetAttribute(XmlElementNames::Common_Name, anim.Name.c_str());
+				animElement->SetAttribute(XmlElementNames::Common_Start, anim.StartTime);
+				animElement->SetAttribute(XmlElementNames::Common_End, anim.EndTime);
 
-				size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
-				layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
+				for (const auto& layer : anim.Layers)
+				{
+					Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
+					layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
+					layerElement->SetAttribute(XmlElementNames::AnimationLayer_Sprite, layer.Sprite->Name.c_str());
 
-				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
-				layerElement->SetAttribute(XmlElementNames::Common_End, static_cast<i32>(layer.EndTime));
+					size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
+					layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
 
-				// Oh boy, I can't wait to start abusing the C++ type system!
-				WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
-				WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
-				WriteKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
-				WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
-				WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
+					layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
+					layerElement->SetAttribute(XmlElementNames::Common_End, static_cast<i32>(layer.EndTime));
+
+					// Oh boy, I can't wait to start abusing the C++ type system!
+					WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
+					WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
+					WriteKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
+					WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
+					WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
+				}
 			}
 
 			animSetDoc.InsertFirstChild(rootElement);
@@ -1263,7 +1318,8 @@ namespace Starshine
 			if (!openFileDialog.OpenRead())
 				return;
 
-			layers.clear();
+			currentAnim = nullptr;
+			animations.clear();
 
 			Xml::Document animSetDoc;
 			if (!Xml::ParseFromFile(animSetDoc, openFileDialog.OutputFilePath));
@@ -1278,11 +1334,22 @@ namespace Starshine
 				animElement;
 				animElement = animElement->NextSiblingElement(XmlElementNames::Animation))
 			{
+				auto& anim = animations.emplace_back();
+				if (currentAnim == nullptr)
+					currentAnim = &anim;
+
+				const char* animName{};
+				if (animElement->QueryAttribute(XmlElementNames::Common_Name, &animName) == 0)
+					anim.Name = animName;
+
+				animElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &anim.StartTime);
+				animElement->QueryUnsignedAttribute(XmlElementNames::Common_End, &anim.EndTime);
+
 				for (const Xml::Element* layerElement = animElement->FirstChildElement(XmlElementNames::AnimationLayer);
 					layerElement;
 					layerElement = layerElement->NextSiblingElement(XmlElementNames::AnimationLayer))
 				{
-					Layer& layer = layers.emplace_back();
+					Layer& layer = anim.Layers.emplace_back();
 
 					const char* elementName = layerElement->Attribute(XmlElementNames::Common_Name);
 					layer.Name = std::string(elementName);
@@ -1329,7 +1396,8 @@ namespace Starshine
 				{
 					if (Gui::MenuItem("New"))
 					{
-						layers.clear();
+						currentAnim->Layers.clear();
+						selectedLayer = nullptr;
 						timelineFrame = 0.0f;
 					}
 					if (Gui::MenuItem("Open"))
@@ -1466,7 +1534,7 @@ namespace Starshine
 				Gui::SameLine();
 				if (Gui::BeginCombo("##LayerList", layerToDisplay != nullptr ? layerToDisplay->Name.c_str() : "[None]"))
 				{
-					for (Layer& layer : layers)
+					for (Layer& layer : currentAnim->Layers)
 					{
 						const bool isSelected = layerToDisplay == &layer;
 						if (Gui::Selectable(layer.Name.c_str(), isSelected))
@@ -1662,7 +1730,7 @@ namespace Starshine
 		void DrawAnimation(SpriteRenderer* sprRenderer)
 		{
 			BlendMode prevBlendMode{};
-			for (const auto& layer : layers)
+			for (const auto& layer : currentAnim->Layers)
 			{
 				if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
 					continue;
@@ -1718,14 +1786,14 @@ namespace Starshine
 				DrawAnimation(sprRenderer);
 
 				timelineFrame += 1.0f;
-				timelineFrame = std::fmodf(timelineFrame, animLength);
+				timelineFrame = std::fmodf(timelineFrame, currentAnim->EndTime) + currentAnim->StartTime;
 			}
 			else
 			{
 				DragStateData& dragState = parent->DragState;
 
 				BlendMode prevBlendMode{};
-				for (const auto& layer : layers)
+				for (const auto& layer : currentAnim->Layers)
 				{
 					if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
 						continue;
