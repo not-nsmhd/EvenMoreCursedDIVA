@@ -461,7 +461,7 @@ namespace Starshine
 
 		f32 layerListScroll{};
 
-		void LayerTreeNodeProperties(i32 layerIndex, std::vector<Layer>::iterator layer)
+		void LayerTreeNodeProperties(i32 layerIndex, std::vector<Layer>::reverse_iterator layer)
 		{
 			LayerContextMenu(layerIndex);
 
@@ -521,7 +521,7 @@ namespace Starshine
 
 				i32 layerIndex = 0;
 
-				for (auto layer = currentAnim->Layers.begin(); layer != currentAnim->Layers.end(); layer++)
+				for (auto layer = currentAnim->Layers.rbegin(); layer != currentAnim->Layers.rend(); layer++)
 				{
 					Gui::PushID(layerIndex);
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
