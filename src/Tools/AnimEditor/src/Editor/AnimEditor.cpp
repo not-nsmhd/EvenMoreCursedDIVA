@@ -944,6 +944,47 @@ namespace Starshine
 			Gui::End();
 		}
 
+		char newAnimName[128]{};
+		i32 newAnimTimings[2]{ 0, 60 };
+
+		void NewAnimationModalWindow()
+		{
+			const ImVec2 center = Gui::GetMainViewport()->GetCenter();
+			Gui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+			if (Gui::BeginPopupModal("New Animation", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				Gui::Text("Name");
+				Gui::SameLine();
+				Gui::InputText("##NewAnimation_Name", newAnimName, sizeof(newAnimName) - 1);
+
+				Gui::Text("Start and End Timings");
+				Gui::SameLine();
+				Gui::InputInt2("##NewAnimation_Timings", newAnimTimings);
+
+				Gui::Separator();
+
+				if (Gui::Button("Add", ImVec2(120.0f, 0.0f)))
+				{
+					Animation& newAnim = animations.emplace_back();
+
+					newAnim.Name = newAnimName;
+					newAnim.StartTime = newAnimTimings[0];
+					newAnim.EndTime = newAnimTimings[1];
+
+					currentAnim = &newAnim;
+					Gui::CloseCurrentPopup();
+				}
+
+				Gui::SameLine();
+					
+				if (Gui::Button("Cancel", ImVec2(120.0f, 0.0f)))
+					Gui::CloseCurrentPopup();
+
+				Gui::EndPopup();
+			}
+		}
+
 		void ResourcesWindow()
 		{
 			if (Gui::Begin("Resources"))
@@ -952,7 +993,15 @@ namespace Starshine
 				{
 					if (Gui::BeginTabItem("Animations"))
 					{
-						Gui::Button("+A");
+						if (Gui::Button("+A"))
+						{
+							SDL_memset(newAnimName, 0, sizeof(newAnimName));
+							newAnimTimings[0] = 0;
+							newAnimTimings[1] = 60;
+							Gui::OpenPopup("New Animation");
+						}
+
+						NewAnimationModalWindow();
 
 						const ImVec2 contentRegion = Gui::GetContentRegionAvail();
 						if (Gui::BeginListBox("##Resources_AnimationList", ImVec2(-FLT_MIN, contentRegion.y)))
