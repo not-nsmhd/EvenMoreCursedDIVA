@@ -231,6 +231,7 @@ namespace Starshine
 
 			currentAnim = &animations.emplace_back();
 			currentAnim->Name = "Animation 0";
+			currentAnim->EndTime = 60;
 
 			return true;
 		}
@@ -395,11 +396,11 @@ namespace Starshine
 
 				if (Gui::BeginMenu("Change order"))
 				{
-					ImGuiSelectableFlags selectableFlags = (layerIndex == 0) ? ImGuiSelectableFlags_Disabled : 0;
-					if (Gui::Selectable("Move upwards", false, selectableFlags))
+					ImGuiSelectableFlags selectableFlags = (layerIndex == currentAnim->Layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
+					if (Gui::Selectable("Move to the front", false, selectableFlags))
 					{
 						auto layer1 = currentAnim->Layers.begin() + layerIndex;
-						auto layer2 = layer1 - 1;
+						auto layer2 = layer1 + 1;
 						std::iter_swap(layer1, layer2);
 
 						if (selectedLayer == &*layer1)
@@ -408,11 +409,11 @@ namespace Starshine
 						}
 					}
 
-					selectableFlags = (layerIndex == currentAnim->Layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
-					if (Gui::Selectable("Move downwards", false, selectableFlags))
+					selectableFlags = (layerIndex == 0) ? ImGuiSelectableFlags_Disabled : 0;
+					if (Gui::Selectable("Move to the back", false, selectableFlags))
 					{
 						auto layer1 = currentAnim->Layers.begin() + layerIndex;
-						auto layer2 = layer1 + 1;
+						auto layer2 = layer1 - 1;
 						std::iter_swap(layer1, layer2);
 
 						if (selectedLayer == &*layer1)
@@ -519,8 +520,7 @@ namespace Starshine
 				}
 				Gui::EndMenuBar();
 
-				i32 layerIndex = 0;
-
+				i32 layerIndex = currentAnim->Layers.size() - 1;
 				for (auto layer = currentAnim->Layers.rbegin(); layer != currentAnim->Layers.rend(); layer++)
 				{
 					Gui::PushID(layerIndex);
@@ -557,7 +557,7 @@ namespace Starshine
 					}
 
 					Gui::PopID();
-					layerIndex++;
+					layerIndex--;
 				}
 
 				layerListScroll = Gui::GetScrollY();
@@ -576,6 +576,18 @@ namespace Starshine
 		}
 
 		static constexpr f32 frameLineDistance = 20.0f;
+
+		void TimelineKeyframeContextMenu(const i32& index, i32& removeIndex)
+		{
+			if (Gui::BeginPopupContextItem())
+			{
+				if (Gui::Selectable("Delete"))
+				{
+					removeIndex = index;
+				}
+				Gui::EndPopup();
+			}
+		}
 
 		bool TimelineKeyframe(const i32& index, const u32& time, const vec2& position)
 		{
@@ -629,9 +641,13 @@ namespace Starshine
 
 			i32 keyframeIndex = 0;
 			bool sortKeyframesWhenDone = false;
+
+			i32 keyframeToRemove = -1;
 			for (auto it = frames.begin(); it != frames.end(); it++)
 			{
-				bool dragging = TimelineKeyframe(keyframeIndex++, it->Frame, pos);
+				bool dragging = TimelineKeyframe(keyframeIndex, it->Frame, pos);
+				TimelineKeyframeContextMenu(keyframeIndex++, keyframeToRemove);
+
 				ImGuiID keyframeID = Gui::GetItemID();
 
 				i32& draggingID = dragState.UserBaseValues.Intergers[3];
@@ -666,6 +682,9 @@ namespace Starshine
 
 			Gui::PopID(); // propIndex
 			Gui::PopID(); // layerIndex
+
+			if (keyframeToRemove != -1)
+				frames.erase(frames.begin() + keyframeToRemove);
 
 			if (sortKeyframesWhenDone)
 				SortKeyframes(frames);
@@ -1165,7 +1184,7 @@ namespace Starshine
 				selectedLayer = hoveredLayer;
 			}
 
-			if ((dragState.HeldMouseButtonsMask && (1 << ImGuiMouseButton_Left)) && selectedLayer != nullptr)
+			if ((dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Left)) && selectedLayer != nullptr)
 			{
 				if (dragState.FavorOneAxis)
 				{
