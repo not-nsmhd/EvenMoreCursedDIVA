@@ -45,5 +45,7 @@ namespace Starshine::IO
 
 		// NOTE: "newExtension" must contain a '.' at the beginning
 		std::string ChangeExtension(std::string_view filePath, std::string_view newExtension);
+
+		std::string GetNormalizedPath(std::string_view path);
 	}
 }

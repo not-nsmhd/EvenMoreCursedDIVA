@@ -15,5 +15,18 @@ namespace Starshine::IO
 
 			return newPath;
 		}
+
+		std::string GetNormalizedPath(std::string_view path)
+		{
+			std::string result(path.data());
+
+			for (auto& c : result)
+			{
+				if (c == '\\')
+					c = '/';
+			}
+
+			return result;
+		}
 	}
 }

@@ -11,6 +11,8 @@
 
 #include "FileDialog.h"
 #include <IO/Xml.h>
+#include <IO/Path/Path.h>
+#include <IO/Path/Directory.h>
 #include <Common/Logging/Logging.h>
 #include <algorithm>
 
@@ -188,6 +190,7 @@ namespace Starshine
 		AnimEditor* parent{};
 
 		GFX::SpritePacker sprPacker{};
+		std::string spriteSheetPath{};
 		SpriteSheet spriteSheet{};
 
 		std::vector<Animation> animations;
@@ -238,12 +241,6 @@ namespace Starshine
 
 		bool LoadContent()
 		{
-			sprPacker.AddFromDirectory("AnimEditor/sprites/devtest");
-			sprPacker.Pack();
-
-			spriteSheet.CreateFromSpritePacker(sprPacker);
-
-			sprPacker.Clear();
 			return true;
 		}
 
@@ -883,36 +880,36 @@ namespace Starshine
 
 					i32 layerIndex = 0;
 					auto& layers = currentAnim->Layers;
-					for (auto& layer : layers)
+					for (auto layer = currentAnim->Layers.rbegin(); layer != currentAnim->Layers.rend(); layer++)
 					{
 						const vec2 rangePos = keyframePos;
 
-						u32 layerStart = layer.StartTime - animStart;
-						u32 layerEnd = layer.EndTime - animStart;
-						TimelineRange(layer.Name.c_str(), layerStart, layerEnd, rangePos, rangeSize);
-						layer.StartTime = layerStart + animStart;
-						layer.EndTime = layerEnd + animStart;
+						u32 layerStart = layer->StartTime - animStart;
+						u32 layerEnd = layer->EndTime - animStart;
+						TimelineRange(layer->Name.c_str(), layerStart, layerEnd, rangePos, rangeSize);
+						layer->StartTime = layerStart + animStart;
+						layer->EndTime = layerEnd + animStart;
 
-						layer.StartTime = MathExtensions::Clamp<i32>(layer.StartTime, currentAnim->StartTime, currentAnim->EndTime - 1);
-						layer.EndTime = MathExtensions::Clamp<i32>(layer.EndTime, layer.StartTime + 1, currentAnim->EndTime);
+						layer->StartTime = MathExtensions::Clamp<i32>(layer->StartTime, currentAnim->StartTime, currentAnim->EndTime - 1);
+						layer->EndTime = MathExtensions::Clamp<i32>(layer->EndTime, layer->StartTime + 1, currentAnim->EndTime);
 
-						if (layer.Expanded)
+						if (layer->Expanded)
 						{
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer.Origin, keyframePos, 0, layerIndex);
+							DrawLayerKeyframes<vec2>(layer->Origin, keyframePos, 0, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer.Position, keyframePos, 1, layerIndex);
+							DrawLayerKeyframes<vec2>(layer->Position, keyframePos, 1, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer.Size, keyframePos, 2, layerIndex);
+							DrawLayerKeyframes<vec2>(layer->Size, keyframePos, 2, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<f32>(layer.Rotation, keyframePos, 3, layerIndex);
+							DrawLayerKeyframes<f32>(layer->Rotation, keyframePos, 3, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<Color>(layer.Color, keyframePos, 4, layerIndex);
+							DrawLayerKeyframes<Color>(layer->Color, keyframePos, 4, layerIndex);
 							keyframePos.y += heightDelta;
 
 						}
@@ -1344,7 +1341,7 @@ namespace Starshine
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_Height, canvasSize.y);
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, baseFPS);
 			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, canvasColor);
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, "sprites/devtest");
+			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, spriteSheetPath.c_str());
 
 			for (const auto& anim : animations)
 			{
@@ -1397,6 +1394,10 @@ namespace Starshine
 			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Height, &canvasSize.y);
 			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_FPS, &baseFPS);
 			Xml::TryGetValue(canvasColor, rootElement->FindAttribute(XmlElementNames::AnimationSet_StageColor));
+
+			const char* sprSheetPath{};
+			if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath))
+				ImportSpritesFromFolder(sprSheetPath);
 
 			for (const Xml::Element* animElement = rootElement->FirstChildElement(XmlElementNames::Animation);
 				animElement;
@@ -1456,6 +1457,32 @@ namespace Starshine
 			}
 		}
 
+		void ImportSpritesFromFolder(std::string_view path)
+		{
+			if (!IO::Directory::Exists(path))
+				return;
+
+			spriteSheet.Destroy();
+
+			sprPacker.AddFromDirectory(spriteSheetPath);
+			sprPacker.Pack();
+
+			spriteSheet.CreateFromSpritePacker(sprPacker);
+			sprPacker.Clear();
+		}
+
+		void ImportSpritesFromFolderDialog()
+		{
+			FileDialog dialog;
+			dialog.Title = "Import sprites from folder";
+
+			if (!dialog.OpenDirectory())
+				return;
+
+			spriteSheetPath = IO::Path::GetNormalizedPath(dialog.OutputFilePath);
+			ImportSpritesFromFolder(spriteSheetPath);
+		}
+
 		void MainMenu()
 		{
 			if (Gui::BeginMainMenuBar())
@@ -1479,7 +1506,9 @@ namespace Starshine
 
 					if (Gui::BeginMenu("Import sprites..."))
 					{
-						Gui::MenuItem("From folder");
+						if (Gui::MenuItem("From folder"))
+							ImportSpritesFromFolderDialog();
+
 						Gui::MenuItem("From file");
 						Gui::EndMenu();
 					}

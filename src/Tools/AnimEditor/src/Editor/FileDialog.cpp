@@ -10,18 +10,34 @@ namespace Starshine
 {
 	bool FileDialog::OpenRead()
 	{
-		return InternalOpenDialog(false);
+		return InternalOpenDialog(false, false);
 	}
 
 	bool FileDialog::OpenSave()
 	{
-		return InternalOpenDialog(true);
+		return InternalOpenDialog(true, false);
 	}
 
-	bool FileDialog::InternalOpenDialog(bool save)
+	bool FileDialog::OpenDirectory()
+	{
+		return InternalOpenDialog(false, true);
+	}
+
+	bool FileDialog::InternalOpenDialog(bool save, bool dir)
 	{
 		HRESULT result = S_OK;
 		ComPtr<IFileDialog> fileDialog = nullptr;
+
+		FILEOPENDIALOGOPTIONS options{};
+
+		if (dir && !save)
+		{
+			options |= FOS_PICKFOLDERS;
+		}
+		else if (save)
+		{
+			options |= FOS_OVERWRITEPROMPT;
+		}
 
 		const IID dialogClassID = save ? CLSID_FileSaveDialog : CLSID_FileOpenDialog;
 		const IID dialogInterfaceID = save ? IID_IFileSaveDialog : IID_IFileOpenDialog;
@@ -37,6 +53,8 @@ namespace Starshine
 			result = fileDialog->SetTitle(titleBuffer.data());
 		}
 
+		fileDialog->SetOptions(options);
+			
 		if (result = fileDialog->Show(NULL), result == S_OK)
 		{
 			ComPtr<IShellItem> shellItem = nullptr;

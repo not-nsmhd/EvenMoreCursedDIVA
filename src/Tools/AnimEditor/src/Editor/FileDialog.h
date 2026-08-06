@@ -13,8 +13,9 @@ namespace Starshine
 	public:
 		bool OpenRead();
 		bool OpenSave();
+		bool OpenDirectory();
 
 	private:
-		bool InternalOpenDialog(bool save);
+		bool InternalOpenDialog(bool save, bool dir);
 	};
 }
