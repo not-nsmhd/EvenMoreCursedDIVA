@@ -184,6 +184,12 @@
     <ClInclude Include="src\TimeSpan.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\AnimationSet.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Render2D\Common.h">
+      <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -292,6 +298,9 @@
     </ClCompile>
     <ClCompile Include="src\TimeSpan.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Render2D\AnimationSet.cpp">
+      <Filter>Source Files\Rendering\Render2D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

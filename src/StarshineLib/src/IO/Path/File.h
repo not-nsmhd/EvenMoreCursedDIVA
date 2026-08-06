@@ -15,5 +15,8 @@ namespace Starshine::IO
 
 		size_t ReadAllBytes(std::string_view filePath, std::unique_ptr<u8[]>& destData);
 		bool WriteAllBytes(std::string_view filePath, const void* data, size_t size);
+
+		size_t ReadAllText(std::string_view filePath, std::unique_ptr<char[]>& destData);
+		bool WriteAllText(std::string_view filePath, const char* data, size_t size);
 	}
 }

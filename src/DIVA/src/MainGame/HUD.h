@@ -2,7 +2,6 @@
 #include "Common/Types.h"
 #include "MainGame.h"
 #include "HitEvaluation.h"
-#include "GFX/SpritePacker.h"
 
 namespace DIVA::MainGame
 {

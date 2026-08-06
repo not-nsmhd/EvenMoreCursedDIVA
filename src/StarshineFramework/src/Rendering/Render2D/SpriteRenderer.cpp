@@ -72,8 +72,7 @@ namespace Starshine::Rendering::Render2D
 		{ { BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add } },
 		{ { BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
 		{ { BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
-		{ { BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
-		{ { BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } }
+		{ { BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } }
 	};
 
 	struct SpriteRenderer::Impl
@@ -212,10 +211,10 @@ namespace Starshine::Rendering::Render2D
 		{
 			static constexpr std::array<std::string_view, EnumCount<BlendMode>()> debugBlendStateNames
 			{
+				"[Starshine] SpriteRenderer::BlendState_Disabled",
 				"[Starshine] SpriteRenderer::BlendState_Normal",
 				"[Starshine] SpriteRenderer::BlendState_Add",
-				"[Starshine] SpriteRenderer::BlendState_Multiply",
-				"[Starshine] SpriteRenderer::BlendState_Overlay"
+				"[Starshine] SpriteRenderer::BlendState_Multiply"
 			};
 
 			size_t i = 0;

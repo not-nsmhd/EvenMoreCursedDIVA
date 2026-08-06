@@ -31,18 +31,22 @@ namespace Starshine
 		static constexpr const char* AnimationSet_StageColor = "StageColor";
 		static constexpr const char* AnimationSet_SpriteSheet = "SpriteSheet";
 
+		static constexpr const char* SpriteDefs = "SpriteDefinitions";
+		static constexpr const char* SpriteDefs_Sprite = "SpriteDefinition";
+
 		static constexpr const char* Common_Name = "Name";
 		static constexpr const char* Common_Start = "Start";
 		static constexpr const char* Common_End = "End";
+		static constexpr const char* Common_Sprite = "Sprite";
+		static constexpr const char* Common_Size = "Size";
 
 		static constexpr const char* Animation = "Animation";
 		static constexpr const char* AnimationLayer = "Layer";
-		static constexpr const char* AnimationLayer_Sprite = "Sprite";
 		static constexpr const char* AnimationLayer_BlendMode = "BlendMode";
 
 		static constexpr std::string_view Keyframes_Origin = "Origin";
 		static constexpr std::string_view Keyframes_Position = "Position";
-		static constexpr std::string_view Keyframes_Size = "Size";
+		static constexpr std::string_view Keyframes_Scale = "Scale";
 		static constexpr std::string_view Keyframes_Rotation = "Rotation";
 		static constexpr std::string_view Keyframes_Color = "Color";
 
@@ -61,7 +65,7 @@ namespace Starshine
 	{
 		vec2 Origin{};
 		vec2 Position{};
-		vec2 Size{};
+		vec2 Scale{};
 		f32 Rotation{};
 		Color Color{};
 	};
@@ -87,7 +91,7 @@ namespace Starshine
 
 		std::vector<Keyframe<vec2>> Origin;
 		std::vector<Keyframe<vec2>> Position;
-		std::vector<Keyframe<vec2>> Size;
+		std::vector<Keyframe<vec2>> Scale;
 		std::vector<Keyframe<f32>> Rotation;
 		std::vector<Keyframe<Color>> Color;
 		const Sprite* Sprite{};
@@ -156,8 +160,8 @@ namespace Starshine
 	Transform2D GetTransformAtFrame(const Layer& layer, const f32& frame)
 	{
 		Transform2D result{};
-		result.Origin = layer.Sprite->Origin;
-		result.Size = layer.Sprite->SourceRectangle.Size();
+		result.Origin = { 0.5f, 0.5f };
+		result.Scale = { 1.0f, 1.0f };
 		result.Color = DefaultColors::White;
 
 		vec2 tempVec2{};
@@ -167,8 +171,8 @@ namespace Starshine
 			result.Origin = tempVec2;
 		if (InterpolateKeyframes(layer.Position, frame, tempVec2))
 			result.Position = tempVec2;
-		if (InterpolateKeyframes(layer.Size, frame, tempVec2))
-			result.Size = tempVec2;
+		if (InterpolateKeyframes(layer.Scale, frame, tempVec2))
+			result.Scale = tempVec2;
 		if (InterpolateKeyframes(layer.Rotation, frame, tempVec2.x))
 			result.Rotation = tempVec2.x;
 		if (InterpolateKeyframes(layer.Color, frame, tempColor))
@@ -441,7 +445,7 @@ namespace Starshine
 					}
 					if (Gui::Selectable("at layer's center"))
 					{
-						layer->CurrentEditTransform.Origin = layer->CurrentEditTransform.Size / 2.0f;
+						layer->CurrentEditTransform.Origin = layer->CurrentEditTransform.Scale / 2.0f;
 					}
 					Gui::EndMenu();
 				}
@@ -505,8 +509,8 @@ namespace Starshine
 						newLayer.StartTime = timelineFrame;
 						newLayer.EndTime = currentAnim->EndTime;
 						newLayer.Sprite = &defaultSprite;
-						newLayer.CurrentEditTransform.Size = vec2(defaultSprite.SourceRectangle.Width, defaultSprite.SourceRectangle.Height);
-						newLayer.CurrentEditTransform.Origin = defaultSprite.Origin;
+						newLayer.CurrentEditTransform.Scale = { 1.0f, 1.0f };
+						newLayer.CurrentEditTransform.Origin = { 0.5f, 0.5f };
 						newLayer.CurrentEditTransform.Color = DefaultColors::White;
 					}
 					if (Gui::BeginItemTooltip())
@@ -534,7 +538,7 @@ namespace Starshine
 
 						LayerPropertyField(layerIndex, 0, "Origin", layer->CurrentEditTransform.Origin, layer->Origin);
 						LayerPropertyField(layerIndex, 1, "Position", layer->CurrentEditTransform.Position, layer->Position);
-						LayerPropertyField(layerIndex, 2, "Size", layer->CurrentEditTransform.Size, layer->Size);
+						LayerPropertyField(layerIndex, 2, "Scale", layer->CurrentEditTransform.Scale, layer->Scale);
 						LayerPropertyField(layerIndex, 3, "Rotation", layer->CurrentEditTransform.Rotation, layer->Rotation);
 						LayerPropertyField(layerIndex, 4, "Color", layer->CurrentEditTransform.Color, layer->Color);
 
@@ -825,6 +829,7 @@ namespace Starshine
 				const f32 verticalPadding = padding.y * 2.0f;
 				const f32 verticalSpacing = itemSpacing.y * 2.0f;
 				const f32 menuBarHeight = style.FontSizeBase + verticalPadding;
+				const ImVec2 scrollbarHeight = { 0.0f, style.ScrollbarSize };
 
 				TimelineHeader();
 				LayerList();
@@ -903,7 +908,7 @@ namespace Starshine
 							DrawLayerKeyframes<vec2>(layer->Position, keyframePos, 1, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer->Size, keyframePos, 2, layerIndex);
+							DrawLayerKeyframes<vec2>(layer->Scale, keyframePos, 2, layerIndex);
 							keyframePos.y += heightDelta;
 
 							DrawLayerKeyframes<f32>(layer->Rotation, keyframePos, 3, layerIndex);
@@ -1214,9 +1219,9 @@ namespace Starshine
 			auto& layers = currentAnim->Layers;
 			for (auto& layer : layers)
 			{
-				const vec2 origin = layer.CurrentEditTransform.Origin;
+				const vec2 origin = layer.CurrentEditTransform.Origin * layer.Sprite->SourceRectangle.Size();
 				const vec2 pos = layer.CurrentEditTransform.Position;
-				const vec2 size = layer.CurrentEditTransform.Size;
+				const vec2 size = layer.CurrentEditTransform.Scale * layer.Sprite->SourceRectangle.Size();
 				const RectangleF layerRect(viewPan.x + pos.x - origin.x, viewPan.y + pos.y - origin.y, size.x, size.y);
 
 				if (layerRect.Contains(io.MousePos.x, io.MousePos.y))
@@ -1343,6 +1348,14 @@ namespace Starshine
 			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, canvasColor);
 			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, spriteSheetPath.c_str());
 
+			Xml::Element* spriteDefsElement = rootElement->InsertNewChildElement(XmlElementNames::SpriteDefs);
+			for (const auto& spr : spriteSheet.GetSprites())
+			{
+				Xml::Element* spriteDefElement = spriteDefsElement->InsertNewChildElement(XmlElementNames::SpriteDefs_Sprite);
+				spriteDefElement->SetAttribute(XmlElementNames::Common_Name, spr.Name.c_str());
+				Xml::SetAttribute(spriteDefElement, XmlElementNames::Common_Size, spr.SourceRectangle.Size());
+			}
+
 			for (const auto& anim : animations)
 			{
 				Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
@@ -1354,7 +1367,7 @@ namespace Starshine
 				{
 					Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
 					layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
-					layerElement->SetAttribute(XmlElementNames::AnimationLayer_Sprite, layer.Sprite->Name.c_str());
+					layerElement->SetAttribute(XmlElementNames::Common_Sprite, layer.Sprite->Name.c_str());
 
 					size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
 					layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
@@ -1365,7 +1378,7 @@ namespace Starshine
 					// Oh boy, I can't wait to start abusing the C++ type system!
 					WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
 					WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
-					WriteKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
+					WriteKeyframes_Xml(layer.Scale, XmlElementNames::Keyframes_Scale, layerElement);
 					WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
 					WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
 				}
@@ -1396,16 +1409,17 @@ namespace Starshine
 			Xml::TryGetValue(canvasColor, rootElement->FindAttribute(XmlElementNames::AnimationSet_StageColor));
 
 			const char* sprSheetPath{};
-			if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath))
+			if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath) == 0)
+			{
+				spriteSheetPath = sprSheetPath;
 				ImportSpritesFromFolder(sprSheetPath);
+			}
 
 			for (const Xml::Element* animElement = rootElement->FirstChildElement(XmlElementNames::Animation);
 				animElement;
 				animElement = animElement->NextSiblingElement(XmlElementNames::Animation))
 			{
 				auto& anim = animations.emplace_back();
-				if (currentAnim == nullptr)
-					currentAnim = &anim;
 
 				const char* animName{};
 				if (animElement->QueryAttribute(XmlElementNames::Common_Name, &animName) == 0)
@@ -1424,7 +1438,7 @@ namespace Starshine
 					layer.Name = std::string(elementName);
 
 					const char* refName{};
-					if (layerElement->QueryAttribute(XmlElementNames::AnimationLayer_Sprite, &refName) == 0)
+					if (layerElement->QueryAttribute(XmlElementNames::Common_Sprite, &refName) == 0)
 						layer.Sprite = &spriteSheet.GetSprite(refName);
 
 					// TODO: Implement animation referencing
@@ -1447,7 +1461,7 @@ namespace Starshine
 
 					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
 					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
-					ReadKeyframes_Xml(layer.Size, XmlElementNames::Keyframes_Size, layerElement);
+					ReadKeyframes_Xml(layer.Scale, XmlElementNames::Keyframes_Scale, layerElement);
 					ReadKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
 					ReadKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
 
@@ -1455,6 +1469,8 @@ namespace Starshine
 					layer.CurrentEditTransform = GetTransformAtFrame(layer, 0.0f);
 				}
 			}
+
+			currentAnim = &animations.front();
 		}
 
 		void ImportSpritesFromFolder(std::string_view path)
@@ -1464,7 +1480,7 @@ namespace Starshine
 
 			spriteSheet.Destroy();
 
-			sprPacker.AddFromDirectory(spriteSheetPath);
+			sprPacker.AddFromDirectory(path);
 			sprPacker.Pack();
 
 			spriteSheet.CreateFromSpritePacker(sprPacker);
@@ -1696,7 +1712,7 @@ namespace Starshine
 					}
 					if (Gui::BeginTabItem("Size"))
 					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Size); }
+						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Scale); }
 						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
 						{
 							Gui::TableSetupColumn("Frame");
@@ -1704,7 +1720,7 @@ namespace Starshine
 							Gui::TableHeadersRow();
 							if (layerToDisplay != nullptr)
 							{
-								for (const auto& keyframe : layerToDisplay->Size)
+								for (const auto& keyframe : layerToDisplay->Scale)
 								{
 									Gui::TableNextRow();
 
@@ -1833,6 +1849,9 @@ namespace Starshine
 					continue;
 
 				const Transform2D transform = GetTransformAtFrame(layer, timelineFrame);
+				const Sprite& sprite = *layer.Sprite;
+				const vec2& spriteSize = sprite.SourceRectangle.Size();
+				const vec2& spriteLayerSize = spriteSize * transform.Scale;
 
 				if (prevBlendMode != layer.BlendMode)
 				{
@@ -1842,10 +1861,10 @@ namespace Starshine
 
 				i32 texIndex{};
 
-				sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, *layer.Sprite, {}, &texIndex);
-				sprRenderer->SetSpriteOrigin(transform.Origin);
+				sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, sprite, {}, &texIndex);
+				sprRenderer->SetSpriteOrigin(transform.Origin * spriteLayerSize);
 				sprRenderer->SetSpritePosition(transform.Position + viewPan);
-				sprRenderer->SetSpriteSize(transform.Size);
+				sprRenderer->SetSpriteSize(transform.Scale * spriteSize);
 				sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
 				sprRenderer->SetSpriteColor(transform.Color);
 				sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
@@ -1896,6 +1915,9 @@ namespace Starshine
 						continue;
 
 					const Transform2D& currentTransform = layer.CurrentEditTransform;
+					const Sprite& sprite = *layer.Sprite;
+					const vec2& spriteSize = sprite.SourceRectangle.Size();
+					const vec2& spriteLayerSize = spriteSize * currentTransform.Scale;
 
 					if (prevBlendMode != layer.BlendMode)
 					{
@@ -1904,10 +1926,10 @@ namespace Starshine
 					}
 
 					i32 texIndex{};
-					sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, *layer.Sprite, {}, &texIndex);
-					sprRenderer->SetSpriteOrigin(currentTransform.Origin);
+					sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, sprite, {}, &texIndex);
+					sprRenderer->SetSpriteOrigin(currentTransform.Origin * spriteLayerSize);
 					sprRenderer->SetSpritePosition(currentTransform.Position + viewPan);
-					sprRenderer->SetSpriteSize(currentTransform.Size);
+					sprRenderer->SetSpriteSize(currentTransform.Scale * spriteSize);
 					sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentTransform.Rotation));
 					sprRenderer->SetSpriteColor(currentTransform.Color);
 					sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
@@ -1927,20 +1949,20 @@ namespace Starshine
 					// Bounding box
 					sprRenderer->SetSpriteOrigin(transform.Origin);
 					sprRenderer->SetSpritePosition(transform.Position + viewPan);
-					sprRenderer->SetSpriteSize(transform.Size);
+					sprRenderer->SetSpriteSize(transform.Scale);
 					sprRenderer->SetSpriteColor(boxColor);
 					sprRenderer->PushSprite(nullptr);
 
-					sprRenderer->PushOutlineRect(transform.Position + viewPan, transform.Size, transform.Origin, borderColor);
+					sprRenderer->PushOutlineRect(transform.Position + viewPan, transform.Scale, transform.Origin, borderColor);
 
 					// Origin axes
 					sprRenderer->SetSpritePosition(vec2{ transform.Position.x, transform.Position.y - transform.Origin.y } + viewPan); // X axis
-					sprRenderer->SetSpriteSize(vec2{ 1.0f, transform.Size.y });
+					sprRenderer->SetSpriteSize(vec2{ 1.0f, transform.Scale.y });
 					sprRenderer->SetSpriteColor(DefaultColors::Red);
 					sprRenderer->PushSprite(nullptr);
 
 					sprRenderer->SetSpritePosition(vec2{ transform.Position.x - transform.Origin.x, transform.Position.y } + viewPan); // Y axis
-					sprRenderer->SetSpriteSize(vec2{ transform.Size.x, 1.0f });
+					sprRenderer->SetSpriteSize(vec2{ transform.Scale.x, 1.0f });
 					sprRenderer->SetSpriteColor(DefaultColors::Red);
 					sprRenderer->PushSprite(nullptr);
 

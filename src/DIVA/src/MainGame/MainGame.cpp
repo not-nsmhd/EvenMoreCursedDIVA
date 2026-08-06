@@ -182,19 +182,20 @@ namespace DIVA::MainGame
 			sprPacker.AddFromDirectory("diva/sprites/iconset_dev");
 			sprPacker.Pack();
 
-			MainGameContext.IconSetSprites.SpriteSheet.CreateFromSpritePacker(sprPacker);
+			MainGameContext.IconSetSprites.SpriteSheet = std::make_shared<SpriteSheet>();
+			MainGameContext.IconSetSprites.SpriteSheet->CreateFromSpritePacker(sprPacker);
 			sprPacker.Clear();
 
 			auto& spriteCache = MainGameContext.IconSetSprites;
 			auto& iconSet = MainGameContext.IconSetSprites.SpriteSheet;
 
-			spriteCache.NoteTargetHand = &iconSet.GetSprite("TargetHand_Normal");
-			spriteCache.Trail_Normal = &iconSet.GetSprite("Trail_Normal");
-			spriteCache.Trail_CT = &iconSet.GetSprite("Trail_CT");
+			spriteCache.NoteTargetHand = &iconSet->GetSprite("TargetHand_Normal");
+			spriteCache.Trail_Normal = &iconSet->GetSprite("Trail_Normal");
+			spriteCache.Trail_CT = &iconSet->GetSprite("Trail_CT");
 
 			auto fetchNoteShapeSpecificSprite = [&](NoteShape shape, std::string_view name, const Sprite* spriteArray[])
 			{
-				spriteArray[static_cast<size_t>(shape)] = &iconSet.GetSprite(name);
+				spriteArray[static_cast<size_t>(shape)] = &iconSet->GetSprite(name);
 			};
 
 			fetchNoteShapeSpecificSprite(NoteShape::Circle, "Target_Circle", spriteCache.NoteTargets);
@@ -247,6 +248,25 @@ namespace DIVA::MainGame
 			return true;
 		}
 
+		bool LoadAnimations()
+		{
+			MainGameContext.IconSetAnimations.Animations = std::make_unique<AnimationSet>();
+			MainGameContext.IconSetAnimations.Animations->LoadXml("diva/sprites/iconset.xml");
+			MainGameContext.IconSetAnimations.Animations->LinkToSpriteSheet(MainGameContext.IconSetSprites.SpriteSheet);
+
+			auto getAnimationLayer = [&](std::string_view animName, std::string_view layerName)
+			{
+				auto& anim = MainGameContext.IconSetAnimations.Animations->GetAnimation(animName);
+				return &anim.GetLayer(layerName);
+			};
+
+			MainGameContext.IconSetAnimations.NoteAppearLayer = getAnimationLayer("Note_Appear", "Target");
+			MainGameContext.IconSetAnimations.NoteDisappearLayer = getAnimationLayer("Note_Disappear", "Target");
+			MainGameContext.IconSetAnimations.NoteAppearEffect = &MainGameContext.IconSetAnimations.Animations->GetAnimation("Note_AppearEffect");
+
+			return true;
+		}
+
 		bool LoadContent()
 		{
 			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
@@ -257,6 +277,8 @@ namespace DIVA::MainGame
 
 			sprPacker.Initialize();
 			CreateIconSetSpriteSheet();
+			LoadAnimations();
+
 			hud.LoadSprites(sprPacker);
 			
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
@@ -324,7 +346,6 @@ namespace DIVA::MainGame
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_Loop);
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_LoopEnd);
 
-			MainGameContext.IconSetSprites.SpriteSheet.Destroy();
 			hud.Destroy();
 
 			ActiveNotes.clear();

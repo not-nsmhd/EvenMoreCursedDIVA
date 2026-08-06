@@ -1,6 +1,8 @@
 #include "HUD.h"
+#include "GFX/SpritePacker.h"
 #include <Common/Color.h>
 #include <Common/MathExt.h>
+#include <Rendering/Render2D/AnimationSet.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include "../GameContext.h"
 
@@ -17,7 +19,7 @@ namespace DIVA::MainGame
 
 		struct SpriteCache
 		{
-			SpriteSheet hudSprites;
+			std::shared_ptr<SpriteSheet> hudSprites;
 
 			const Sprite* HitEvaluations[EnumCount<HitEvaluation>()]{};
 			const Sprite* HitEvaluations_Wrong[EnumCount<HitEvaluation>()]{};
@@ -28,6 +30,16 @@ namespace DIVA::MainGame
 			const Sprite* ScoreBonusNumbers[10]{};
 			const Sprite* ScoreBonus_Plus{};
 		} spriteCache;
+
+		struct AnimationCache
+		{
+			std::unique_ptr<AnimationSet> hudAnimSet;
+
+			const Animation* HitValu_Normal{};
+			const Animation* HitValu_Miss{};
+
+			const Animation* ScoreBonus{};
+		} animCache;
 
 		struct ComboDisplayData
 		{
@@ -55,7 +67,7 @@ namespace DIVA::MainGame
 			float IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
 
-		std::array<char, 128> LyricsTextBuffer{};
+		std::array<char, 256> LyricsTextBuffer{};
 		Color LyricsColor{};
 		vec2 LyricsTextDisplaySize{};
 
@@ -89,17 +101,18 @@ namespace DIVA::MainGame
 			sprPacker.AddFromDirectory("diva/sprites/mg_hud");
 			sprPacker.Pack();
 
-			spriteCache.hudSprites.CreateFromSpritePacker(sprPacker);
+			spriteCache.hudSprites = std::make_shared<SpriteSheet>();
+			spriteCache.hudSprites->CreateFromSpritePacker(sprPacker);
 			sprPacker.Clear();
 
 			auto fetchHitValueSprite = [&](HitEvaluation valu, std::string_view name, const Sprite* spriteArray[])
 			{
-				spriteArray[static_cast<size_t>(valu)] = &spriteCache.hudSprites.GetSprite(name);
+				spriteArray[static_cast<size_t>(valu)] = &spriteCache.hudSprites->GetSprite(name);
 			};
 
 			auto fetchSprite = [&](std::string_view name)
 			{
-				return &spriteCache.hudSprites.GetSprite(name);
+				return &spriteCache.hudSprites->GetSprite(name);
 			};
 
 			fetchHitValueSprite(HitEvaluation::Cool, "HitValu_Cool", spriteCache.HitEvaluations);
@@ -150,8 +163,21 @@ namespace DIVA::MainGame
 
 			return true;
 		}
+		
+		bool LoadAnimations()
+		{
+			animCache.hudAnimSet = std::make_unique<AnimationSet>();
+			animCache.hudAnimSet->LoadXml("diva/sprites/mg_hud.xml");
+			animCache.hudAnimSet->LinkToSpriteSheet(spriteCache.hudSprites);
 
-		void UpdateScoreDisplay(float deltaTime_ms)
+			animCache.HitValu_Normal = &animCache.hudAnimSet->GetAnimation("HitValu_Normal");
+			animCache.HitValu_Miss = &animCache.hudAnimSet->GetAnimation("HitValu_Miss");
+			animCache.ScoreBonus = &animCache.hudAnimSet->GetAnimation("ScoreBonus");
+
+			return true;
+		}
+
+		void UpdateScoreDisplay(const f32& frameTimeScale)
 		{
 			i32 scoreDiff = mainGameContext->Score.Score - ScoreDisplay.DisplayValue;
 
@@ -168,29 +194,33 @@ namespace DIVA::MainGame
 			}
 			else
 			{
-				float incrementSpeed = (deltaTime_ms / 16.6667f) * ScoreDisplay.IncrementSpeed;
+				float incrementSpeed = frameTimeScale * ScoreDisplay.IncrementSpeed;
 				ScoreDisplay.DisplayValue += static_cast<u32>((incrementSpeed * static_cast<float>((scoreDiff * 10))));
 			}
 		}
 
-		void UpdateComboDisplay(float deltaTime_ms)
+		void UpdateComboDisplay(const f32& deltaTime)
 		{
-			if (ComboDisplayState.ElapsedDisplayTime <= 2.0f)
+			const Animation* valuAnim = animCache.HitValu_Normal;
+
+			if (ComboDisplayState.ElapsedDisplayTime <= valuAnim->EndTime)
 			{
-				ComboDisplayState.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
+				ComboDisplayState.ElapsedDisplayTime += animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
 			}
 		}
 
-		void UpdateScoreBonusDisplay(float deltaTime_ms)
+		void UpdateScoreBonusDisplay(const f32& deltaTime)
 		{
-			if (ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f && !ScoreBonusDisplay.Held)
+			const Animation* scoreBonusAnim = animCache.ScoreBonus;
+
+			if (ScoreBonusDisplay.ElapsedDisplayTime <= scoreBonusAnim->EndTime && !ScoreBonusDisplay.Held)
 			{
-				ScoreBonusDisplay.ElapsedDisplayTime += deltaTime_ms / 1000.0f;
+				ScoreBonusDisplay.ElapsedDisplayTime += animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
 			}
 		}
 		
 		// NOTE: Value text is displayed from right to left
-		float DrawSpriteNumericValue(u32 value, const Sprite* spriteArray[], const vec2& position, const vec2& scale, float spacing, int length = -1)
+		float DrawSpriteNumericValue(u32 value, const Sprite* spriteArray[], const vec2& position, const vec2& scale, float spacing, const Color& color, int length = -1)
 		{
 			SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 			vec2 displayOffset{ 0.0f, 0.0f };
@@ -205,7 +235,7 @@ namespace DIVA::MainGame
 				int sprIndex = remainingNumbers % 10;
 				const Sprite* numSprite = spriteArray[sprIndex];
 
-				sprRenderer.PushSprite(spriteCache.hudSprites, *numSprite, position + displayOffset, scale, DefaultColors::White);
+				sprRenderer.PushSprite(*spriteCache.hudSprites, *numSprite, position + displayOffset, scale, color);
 
 				displayOffset.x -= spacing * scale.x;
 				remainingNumbers /= 10;
@@ -234,13 +264,18 @@ namespace DIVA::MainGame
 
 		void DrawScoreDisplay()
 		{
-			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(1.0f), 25.0f, -1);
+			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(1.0f), 25.0f, DefaultColors::White, -1);
 		}
 
-		void DrawComboDisplay(float deltaTime_ms)
+		void DrawComboDisplay()
 		{
-			if (ComboDisplayState.HitEvaluation != HitEvaluation::None && ComboDisplayState.ElapsedDisplayTime <= 2.0f)
+			const Animation* valuAnim = ComboDisplayState.HitEvaluation == HitEvaluation::Miss ? 
+				animCache.HitValu_Miss : animCache.HitValu_Normal;
+
+			if (ComboDisplayState.HitEvaluation != HitEvaluation::None && ComboDisplayState.ElapsedDisplayTime <= valuAnim->EndTime)
 			{
+				const Transform2D animTransform = valuAnim->GetLayer(0).GetTransform(ComboDisplayState.ElapsedDisplayTime);
+
 				SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 
 				size_t valuIndex = static_cast<size_t>(ComboDisplayState.HitEvaluation);
@@ -248,11 +283,15 @@ namespace DIVA::MainGame
 				const Sprite* valuSprite = ComboDisplayState.IsWrong ? spriteCache.HitEvaluations_Wrong[valuIndex] : 
 					spriteCache.HitEvaluations[valuIndex];
 
-				vec2 valuTextPos = { ComboDisplayState.Position.x, ComboDisplayState.Position.y - 35.0f };
+				vec2 valuTextPos
+				{ 
+					ComboDisplayState.Position.x + animTransform.Position.x,
+					ComboDisplayState.Position.y - 35.0f + animTransform.Position.y
+				};
 
 				if (ComboDisplayState.Combo <= 1)
 				{
-					sprRenderer.PushSprite(spriteCache.hudSprites, *valuSprite, valuTextPos, vec2(1.0f), DefaultColors::White);
+					sprRenderer.PushSprite(*spriteCache.hudSprites, *valuSprite, valuTextPos, animTransform.Scale, animTransform.Color);
 				}
 				else
 				{
@@ -260,31 +299,37 @@ namespace DIVA::MainGame
 
 					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, 17.0f);
 
-					vec2 comboTextPos = { valuTextPos.x + valuComboSpacing + (comboTextWidth / 2.0f), valuTextPos.y };
-					valuTextPos.x -= (comboTextWidth / 2.0f) + valuComboSpacing;
+					vec2 comboTextPos = { valuTextPos.x + (valuComboSpacing + (comboTextWidth / 2.0f)) * animTransform.Scale.x, valuTextPos.y };
+					valuTextPos.x -= ((comboTextWidth / 2.0f) + valuComboSpacing) * animTransform.Scale.x;
 
-					sprRenderer.PushSprite(spriteCache.hudSprites, *valuSprite, valuTextPos, vec2(1.0f), DefaultColors::White);
-					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, vec2(1.0f), 17.0f);
+					sprRenderer.PushSprite(*spriteCache.hudSprites, *valuSprite, valuTextPos, animTransform.Scale, animTransform.Color);
+					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, animTransform.Scale, 17.0f, animTransform.Color);
 				}
 			}
 		}
 
-		void DrawScoreBonusDisplay(float deltaTime_ms)
+		void DrawScoreBonusDisplay()
 		{
-			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= 1.0f)
+			const Animation* scoreBonusAnim = animCache.ScoreBonus;
+
+			if (ScoreBonusDisplay.Value > 0 && ScoreBonusDisplay.ElapsedDisplayTime <= scoreBonusAnim->EndTime)
 			{
+				const Transform2D animTransform = scoreBonusAnim->GetLayer(0).GetTransform(ScoreBonusDisplay.ElapsedDisplayTime);
+
 				SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 
 				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, 15.0f);
 				float plusWidth = spriteCache.ScoreBonus_Plus->SourceRectangle.Width;
 
-				float textPosY = MathExtensions::ConvertRange(0.0f, 1.0f, 0.0f, 30.0f, ScoreBonusDisplay.ElapsedDisplayTime);
-
-				vec2 textPos = { ScoreBonusDisplay.Position.x, ScoreBonusDisplay.Position.y - textPosY - 70.0f };
-				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, vec2(1.0f), 15.0f);
+				vec2 textPos
+				{ 
+					ScoreBonusDisplay.Position.x + animTransform.Position.x,
+					ScoreBonusDisplay.Position.y - 70.0f + animTransform.Position.y
+				};
+				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, animTransform.Scale, 15.0f, animTransform.Color);
 
 				textPos.x -= textWidth - plusWidth - 5.0f;
-				sprRenderer.PushSprite(spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, vec2(1.0f), DefaultColors::White);
+				sprRenderer.PushSprite(*spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, animTransform.Scale, animTransform.Color);
 			}
 		}
 
@@ -353,7 +398,13 @@ namespace DIVA::MainGame
 
 	bool HUD::LoadSprites(Starshine::GFX::SpritePacker& sprPacker)
 	{
-		return impl->LoadSprites(sprPacker);
+		if (!impl->LoadSprites(sprPacker))
+			return false;
+
+		if (!impl->LoadAnimations())
+			return false;
+
+		return true;
 	}
 
 	void HUD::Destroy()
@@ -362,19 +413,17 @@ namespace DIVA::MainGame
 
 	void HUD::Update(Starshine::GameTime& gameTime)
 	{
-		f32 deltaTime = gameTime.ElapsedFrameTime.GetMilliseconds();
+		f32 deltaTime = gameTime.ElapsedFrameTime.GetSeconds();
 
-		impl->UpdateScoreDisplay(deltaTime);
+		impl->UpdateScoreDisplay(deltaTime / gameTime.TargetFrameTime.GetSeconds());
 		impl->UpdateComboDisplay(deltaTime);
 		impl->UpdateScoreBonusDisplay(deltaTime);
 	}
 
 	void HUD::Draw(Starshine::GameTime& gameTime)
 	{
-		f32 deltaTime = gameTime.ElapsedFrameTime.GetMilliseconds();
-
-		impl->DrawComboDisplay(deltaTime);
-		impl->DrawScoreBonusDisplay(deltaTime);
+		impl->DrawComboDisplay();
+		impl->DrawScoreBonusDisplay();
 		impl->DrawScoreDisplay();
 		impl->DrawLyricsText();
 	}

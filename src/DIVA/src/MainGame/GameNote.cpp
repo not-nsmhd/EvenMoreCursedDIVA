@@ -96,7 +96,7 @@ namespace DIVA::MainGame
 
 		const RectangleF& spriteRect = trailSprite->SourceRectangle;
 
-		Texture* trailTexture = iconSet.SpriteSheet.GetTexture(trailSprite->TextureIndex);
+		Texture* trailTexture = iconSet.SpriteSheet->GetTexture(trailSprite->TextureIndex);
 		const f32 texWidth = trailTexture->GetWidth();
 		const f32 texHeight = trailTexture->GetHeight();
 
@@ -293,27 +293,25 @@ namespace DIVA::MainGame
 
 		if (!HasBeenHit)
 		{
-			sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
+			sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 
 			sprRenderer->SetSpriteRotation(!HasBeenHit ? (GetNormalizedElapsedTime() * MathExtensions::TwoPi) : 0.0f);
-			sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetHandSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
+			sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *targetHandSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 		}
 
 		if (Type == NoteType::HoldStart && NextNote != nullptr)
 		{
-			//DrawTrail();
-
 			if (HasBeenHit && NextNote->ElapsedTime.Microseconds < 0)
 			{
-				sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
+				sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *targetSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 				sprRenderer->SetSpriteRotation(0.0f);
-				sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *targetHandSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
+				sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *targetHandSprite, TargetPosition, vec2(1.0f), DefaultColors::White);
 			}
 		}
 
 		if (!HasBeenHit)
 		{
-			sprRenderer->SpriteSheet().PushSprite(iconSet.SpriteSheet, *iconSprite, IconPosition, vec2(1.0f), DefaultColors::White);
+			sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *iconSprite, IconPosition, vec2(1.0f), DefaultColors::White);
 		}
 	}
 

@@ -2,31 +2,12 @@
 #include "Common/Rect.h"
 #include "Common/Color.h"
 #include "Rendering/Device.h"
+#include "Common.h"
 #include "SpriteSheetRenderer.h"
 #include "FontRenderer.h"
 
 namespace Starshine::Rendering::Render2D
 {
-	enum class BlendMode : u8
-	{
-		Disabled,
-		Normal,
-		Add,
-		Mulitply,
-		Overlay,
-
-		Count
-	};
-
-	constexpr std::array<std::string_view, EnumCount<BlendMode>()> BlendModeNames
-	{
-		"Disabled",
-		"Normal",
-		"Add",
-		"Multiply",
-		"Overlay"
-	};
-
 	struct SpriteVertex
 	{
 		vec2 Position{};

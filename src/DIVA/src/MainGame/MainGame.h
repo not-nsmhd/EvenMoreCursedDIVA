@@ -3,6 +3,7 @@
 #include "Chart.h"
 #include <GameInstance.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
+#include <Rendering/Render2D/AnimationSet.h>
 
 namespace DIVA::MainGame
 {
@@ -20,7 +21,7 @@ namespace DIVA::MainGame
 
 		struct IconSetSpritesCache
 		{
-			Starshine::Rendering::Render2D::SpriteSheet SpriteSheet{};
+			std::shared_ptr<Starshine::Rendering::Render2D::SpriteSheet> SpriteSheet{};
 
 			const Starshine::Rendering::Render2D::Sprite* NoteTargets[Starshine::EnumCount<NoteShape>()]{};
 			const Starshine::Rendering::Render2D::Sprite* NoteIcons[Starshine::EnumCount<NoteShape>()]{};
@@ -38,6 +39,16 @@ namespace DIVA::MainGame
 			const Starshine::Rendering::Render2D::Sprite* Trail_Normal{};
 			const Starshine::Rendering::Render2D::Sprite* Trail_CT{};
 		} IconSetSprites;
+
+		struct IconSetAnimationCache
+		{
+			std::unique_ptr<Starshine::Rendering::Render2D::AnimationSet> Animations{};
+
+			const Starshine::Rendering::Render2D::Layer* NoteAppearLayer{};
+			const Starshine::Rendering::Render2D::Layer* NoteDisappearLayer{};
+
+			const Starshine::Rendering::Render2D::Animation* NoteAppearEffect{};
+		} IconSetAnimations;
 
 		MainGameContext() {}
 	};
