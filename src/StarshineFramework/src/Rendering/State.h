@@ -1,6 +1,6 @@
 #pragma once
 #include "Common/Types.h"
-#include "GFX/GPUResource.h"
+#include "Graphics/GPUResource.h"
 #include "Types.h"
 
 namespace Starshine::Rendering
@@ -25,7 +25,7 @@ namespace Starshine::Rendering
 		BlendOperation AlphaOp{};
 	};
 
-	struct BlendState : public GFX::GPUResource, NonCopyable
+	struct BlendState : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		BlendState() = default;

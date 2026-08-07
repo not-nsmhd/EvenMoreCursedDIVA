@@ -1,6 +1,9 @@
 #include "SpriteSheetRenderer.h"
 #include "SpriteRenderer.h"
 
+using namespace Starshine::Graphics;
+using StarshineTex = Starshine::Graphics::Texture;
+
 namespace Starshine::Rendering::Render2D
 {
 	SpriteSheetRenderer::SpriteSheetRenderer(SpriteRenderer& renderer) : sprRenderer(renderer)
@@ -9,15 +12,13 @@ namespace Starshine::Rendering::Render2D
 
 	void SpriteSheetRenderer::SetSpriteState(const SpriteSheet& sheet, const Sprite& sprite, const vec2& scale, i32* texIndex)
 	{
-		Texture* tex = sheet.GetTexture(sprite.TextureIndex);
+		StarshineTex* tex = sheet.GetTexture(sprite.TextureIndex);
 		sprRenderer.SetSpriteOrigin(sprite.Origin * scale);
-		sprRenderer.SetSpriteSize(vec2{ sprite.SourceRectangle.Width * scale.x, sprite.SourceRectangle.Height * scale.y });
+		sprRenderer.SetSpriteSize({ sprite.SourceRectangle.Width * scale.x, sprite.SourceRectangle.Height * scale.y });
 		sprRenderer.SetSpriteSource(tex, sprite.SourceRectangle);
 
 		if (texIndex != nullptr)
-		{
 			*texIndex = sprite.TextureIndex;
-		}
 	}
 
 	void SpriteSheetRenderer::SetSpriteState(const SpriteSheet& sheet, i32 spriteIndex, const vec2& scale, i32* texIndex)

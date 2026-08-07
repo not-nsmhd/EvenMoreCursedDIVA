@@ -14,9 +14,6 @@
     <Filter Include="Source Files\Misc">
       <UniqueIdentifier>{72ac6bfb-d4d1-48e4-8c58-a4d6df70ffa1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GFX">
-      <UniqueIdentifier>{ad413135-77d1-462b-bbd1-05c587831afd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\IO\Path">
       <UniqueIdentifier>{b252de57-498e-422a-81b8-3c93e8297c12}</UniqueIdentifier>
     </Filter>
@@ -25,6 +22,9 @@
     </Filter>
     <Filter Include="Source Files\Common\Logging">
       <UniqueIdentifier>{2323e95e-cee7-46b6-bb3d-86f1a62b4a4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{ad413135-77d1-462b-bbd1-05c587831afd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +61,6 @@
     <ClInclude Include="src\Misc\EndianHelper.h">
       <Filter>Source Files\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="src\GFX\RectanglePacker.h">
-      <Filter>Source Files\GFX</Filter>
-    </ClInclude>
     <ClInclude Include="src\IO\Path\Directory.h">
       <Filter>Source Files\IO\Path</Filter>
     </ClInclude>
@@ -73,17 +70,11 @@
     <ClInclude Include="src\IO\Xml.h">
       <Filter>Source Files\IO</Filter>
     </ClInclude>
-    <ClInclude Include="src\GFX\SpritePacker.h">
-      <Filter>Source Files\GFX</Filter>
-    </ClInclude>
     <ClInclude Include="src\Misc\ImageHelper.h">
       <Filter>Source Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="src\IO\Path\File.h">
       <Filter>Source Files\IO\Path</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GFX\GPUResource.h">
-      <Filter>Source Files\GFX</Filter>
     </ClInclude>
     <ClInclude Include="src\Common\Logging\Logging.h">
       <Filter>Source Files\Common\Logging</Filter>
@@ -91,8 +82,29 @@
     <ClInclude Include="src\BuildInfo.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GFX\Types.h">
-      <Filter>Source Files\GFX</Filter>
+    <ClInclude Include="src\Graphics\SpritePacker.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\Types.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\GPUResource.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\RectanglePacker.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\Texture.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\Font.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\SpriteSheet.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\AnimationSet.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,17 +122,11 @@
     <ClCompile Include="src\IO\StreamReader.cpp">
       <Filter>Source Files\IO</Filter>
     </ClCompile>
-    <ClCompile Include="src\GFX\RectanglePacker.cpp">
-      <Filter>Source Files\GFX</Filter>
-    </ClCompile>
     <ClCompile Include="src\IO\Path\Directory.cpp">
       <Filter>Source Files\IO\Path</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\tinyxml2\src\tinyxml2.cpp">
       <Filter>Source Files\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GFX\SpritePacker.cpp">
-      <Filter>Source Files\GFX</Filter>
     </ClCompile>
     <ClCompile Include="src\Misc\ImageHelper.cpp">
       <Filter>Source Files\Misc</Filter>
@@ -133,6 +139,24 @@
     </ClCompile>
     <ClCompile Include="src\Common\Logging\Logging.cpp">
       <Filter>Source Files\Common\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\SpritePacker.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\RectanglePacker.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Texture.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Font.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\SpriteSheet.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\AnimationSet.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

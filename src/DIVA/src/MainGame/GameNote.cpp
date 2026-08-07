@@ -4,6 +4,7 @@
 namespace DIVA::MainGame
 {
 	using namespace Starshine;
+	using namespace Starshine::Graphics;
 	using namespace Starshine::Rendering;
 	using namespace Starshine::Rendering::Render2D;
 
@@ -96,9 +97,8 @@ namespace DIVA::MainGame
 
 		const RectangleF& spriteRect = trailSprite->SourceRectangle;
 
-		Texture* trailTexture = iconSet.SpriteSheet->GetTexture(trailSprite->TextureIndex);
-		const f32 texWidth = trailTexture->GetWidth();
-		const f32 texHeight = trailTexture->GetHeight();
+		Graphics::Texture* trailTexture = iconSet.SpriteSheet->GetTexture(trailSprite->TextureIndex);
+		const ivec2 texSize = trailTexture->GetSize();
 
 		static constexpr std::array<u8, trailSegmentCount> trailAlphaValues
 		{
@@ -184,22 +184,22 @@ namespace DIVA::MainGame
 			{
 				const f32 index = static_cast<f32>(i);
 				trailVertices[v + 0].TexCoord = vec2(
-					(spriteRect.X + index * segmentDistance + Trail.Scroll) / texWidth,
-					spriteRect.Y / texHeight);
+					(spriteRect.X + index * segmentDistance + Trail.Scroll) / static_cast<f32>(texSize.x),
+					spriteRect.Y / static_cast<f32>(texSize.y));
 
 				trailVertices[v + 1].TexCoord = vec2(
-					(spriteRect.X + (index + 1.0f) * segmentDistance + Trail.Scroll) / texWidth,
-					(spriteRect.Y + spriteRect.Height) / texHeight);
+					(spriteRect.X + (index + 1.0f) * segmentDistance + Trail.Scroll) / static_cast<f32>(texSize.x),
+					(spriteRect.Y + spriteRect.Height) / static_cast<f32>(texSize.y));
 			}
 			else
 			{
 				trailVertices[v + 0].TexCoord = vec2(
-					spriteRect.X / texWidth,
-					spriteRect.Y / texHeight);
+					spriteRect.X / static_cast<f32>(texSize.x),
+					spriteRect.Y / static_cast<f32>(texSize.y));
 
 				trailVertices[v + 1].TexCoord = vec2(
-					(spriteRect.X + spriteRect.Width) / texWidth,
-					(spriteRect.Y + spriteRect.Height) / texHeight);
+					(spriteRect.X + spriteRect.Width) / static_cast<f32>(texSize.x),
+					(spriteRect.Y + spriteRect.Height) / static_cast<f32>(texSize.y));
 			}
 		}
 

@@ -8,8 +8,8 @@
 #include "D3D11VertexDesc.h"
 #include "D3D11Buffers.h"
 #include "D3D11Texture.h"
-#include "D3D11Framebuffer.h"
 #include "D3D11State.h"
+#include <list>
 
 using namespace Microsoft::WRL;
 
@@ -80,12 +80,15 @@ namespace Starshine::Rendering::D3D11
 			UINT CurrentVertexStride{ 0 };
 		} DrawCheckFlags;
 
+		std::list<ComPtr<ID3D11DeviceChild>> objectsToDelete;
+
 		Impl()
 		{
 		}
 
 		~Impl() 
 		{
+			LogMessage(__FUNCTION__);
 		}
 
 		bool Initialize(SDL_Window* window)
@@ -236,6 +239,17 @@ namespace Starshine::Rendering::D3D11
 		void SwapBuffers()
 		{
 			SwapChain.DXGISwapChain->Present(1, 0);
+			if (!objectsToDelete.empty())
+				objectsToDelete.clear();
+
+			D3D11.DeviceContext->RSSetViewports(1, &CurrentViewport);
+			D3D11.DeviceContext->RSSetScissorRects(1, &CurrentScissorRect);
+
+			D3D11.DeviceContext->OMSetDepthStencilState(D3D11.DisabledDSState.Get(), 0);
+			D3D11.DeviceContext->RSSetState(D3D11.NoCullRSState.Get());
+
+			D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
+			CurrentRTView = SwapChainResources.RTView.Get();
 		}
 
 		void OnWindowResize(i32 width, i32 height)
@@ -393,20 +407,6 @@ namespace Starshine::Rendering::D3D11
 			D3D11.DeviceContext->PSSetSamplers(slot, 1, sampler);
 		}
 
-		void SetFramebuffer(D3D11Framebuffer* framebuffer)
-		{
-			if (framebuffer == nullptr)
-			{
-				D3D11.DeviceContext->OMSetRenderTargets(1, SwapChainResources.RTView.GetAddressOf(), nullptr);
-				CurrentRTView = SwapChainResources.RTView.Get();
-			}
-			else
-			{
-				D3D11.DeviceContext->OMSetRenderTargets(1, framebuffer->RenderTargetView.GetAddressOf(), nullptr);
-				CurrentRTView = framebuffer->RenderTargetView.Get();
-			}
-		}
-
 		void SetBlendState(const D3D11BlendState* state)
 		{
 			static constexpr UINT sampleMask = 0xFFFFFFFF;
@@ -427,6 +427,7 @@ namespace Starshine::Rendering::D3D11
 
 	D3D11Device::~D3D11Device()
 	{
+		LogMessage(__FUNCTION__);
 	}
 
 	ID3D11Device* D3D11Device::GetBaseDevice()
@@ -533,17 +534,13 @@ namespace Starshine::Rendering::D3D11
 		return true;
 	}
 
-	bool D3D11Device::CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture)
+	bool D3D11Device::UploadTexture(Graphics::Texture* texture)
 	{
-		if (initialData == nullptr) { return false; }
-		texture = std::make_unique<D3D11Texture>(GetBaseDevice(), width, height, format, initialData, false);
+		assert(texture != nullptr);
+		assert(texture->GetData() != nullptr);
 
-		return true;
-	}
+		texture->GPUTexture.Resource = std::make_unique<D3D11Texture>(*this, texture);
 
-	bool D3D11Device::CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer)
-	{
-		framebuffer = std::make_unique<D3D11Framebuffer>(GetBaseDevice(), width, height, format);
 		return true;
 	}
 
@@ -606,7 +603,7 @@ namespace Starshine::Rendering::D3D11
 		}
 	}
 
-	void D3D11Device::SetTexture(const Texture* texture, u32 slot)
+	void D3D11Device::SetTexture(Graphics::Texture* texture, u32 slot)
 	{
 		if (texture == nullptr)
 		{
@@ -614,34 +611,11 @@ namespace Starshine::Rendering::D3D11
 		}
 		else
 		{
-			const D3D11Texture* d3dTexture = static_cast<const D3D11Texture*>(texture);
+			if (texture->GPUTexture.Resource == nullptr)
+				UploadTexture(texture);
+
+			const D3D11Texture* d3dTexture = static_cast<const D3D11Texture*>(texture->GPUTexture.Resource.get());
 			impl->SetTexture(d3dTexture, slot);
-		}
-	}
-
-	void D3D11Device::SetTexture(const Framebuffer* framebuffer, u32 slot)
-	{
-		if (framebuffer != nullptr)
-		{
-			const D3D11Framebuffer* d3dFramebuffer = static_cast<const D3D11Framebuffer*>(framebuffer);
-			impl->SetD3DTexture(d3dFramebuffer->ShaderResourceView.GetAddressOf(), d3dFramebuffer->Sampler.GetAddressOf(), slot);
-		}
-		else
-		{
-			impl->SetTexture(nullptr, slot);
-		}
-	}
-
-	void D3D11Device::SetFramebuffer(Framebuffer* framebuffer)
-	{
-		if (framebuffer == nullptr)
-		{
-			impl->SetFramebuffer(nullptr);
-		}
-		else
-		{
-			D3D11Framebuffer* d3dFramebuffer = static_cast<D3D11Framebuffer*>(framebuffer);
-			impl->SetFramebuffer(d3dFramebuffer);
 		}
 	}
 
@@ -656,5 +630,11 @@ namespace Starshine::Rendering::D3D11
 			const D3D11BlendState* d3dState = static_cast<const D3D11BlendState*>(state);
 			impl->SetBlendState(d3dState);
 		}
+	}
+
+	void D3D11Device::QueueObjectForDeletion(ComPtr<ID3D11DeviceChild> object)
+	{
+		if (object != nullptr)
+			impl->objectsToDelete.push_back(std::move(object));
 	}
 }

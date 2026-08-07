@@ -64,13 +64,7 @@
     <ClInclude Include="src\Rendering\Device.h">
       <Filter>Source Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\Render2D\SpriteSheet.h">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\Render2D\SpriteSheetRenderer.h">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\Render2D\Font.h">
       <Filter>Source Files\Rendering\Render2D</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Render2D\FontRenderer.h">
@@ -142,12 +136,6 @@
     <ClInclude Include="src\Rendering\D3D11\D3D11State.h">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\Framebuffer.h">
-      <Filter>Source Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\D3D11\D3D11Framebuffer.h">
-      <Filter>Source Files\Rendering\D3D11</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\D3D11\D3D11Common.h">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClInclude>
@@ -184,12 +172,6 @@
     <ClInclude Include="src\TimeSpan.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\Render2D\AnimationSet.h">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\Render2D\Common.h">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -203,13 +185,7 @@
     <ClCompile Include="src\Rendering\Device.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="src\Rendering\Render2D\SpriteSheet.cpp">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClCompile>
     <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp">
-      <Filter>Source Files\Rendering\Render2D</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\Render2D\Font.cpp">
       <Filter>Source Files\Rendering\Render2D</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp">
@@ -269,9 +245,6 @@
     <ClCompile Include="src\Rendering\D3D11\D3D11State.cpp">
       <Filter>Source Files\Rendering\D3D11</Filter>
     </ClCompile>
-    <ClCompile Include="src\Rendering\D3D11\D3D11Framebuffer.cpp">
-      <Filter>Source Files\Rendering\D3D11</Filter>
-    </ClCompile>
     <ClCompile Include="src\ImGui\Core\imgui_demo.cpp">
       <Filter>Source Files\ImGui\Core</Filter>
     </ClCompile>
@@ -298,9 +271,6 @@
     </ClCompile>
     <ClCompile Include="src\TimeSpan.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Rendering\Render2D\AnimationSet.cpp">
-      <Filter>Source Files\Rendering\Render2D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -4,9 +4,8 @@
 #include <vector>
 #include "Common/Types.h"
 #include "SpriteSheet.h"
-#include "Common.h"
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
 	template <typename T>
 	struct Keyframe

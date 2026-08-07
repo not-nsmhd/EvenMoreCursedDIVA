@@ -12,7 +12,7 @@ namespace DIVA::Menu
 {
 	using namespace Starshine;
 	using namespace Starshine::IO;
-	using namespace Starshine::GFX;
+	using namespace Starshine::Graphics;
 	using namespace Starshine::Rendering::Render2D;
 	using namespace Starshine::Input;
 	using namespace DIVA::Formats;

@@ -84,9 +84,7 @@ namespace Starshine::MathExtensions
 	constexpr f32 CalculateBarDuration_Seconds(f32 bpm, int beatsPerBar)
 	{
 		if (bpm <= 0.0f || beatsPerBar <= 0)
-		{
 			return 0.0f;
-		}
 
 		return (60.0f / bpm * static_cast<f32>(beatsPerBar));
 	}
@@ -110,8 +108,8 @@ namespace Starshine::MathExtensions
 	}
 
 	template <typename T>
-	constexpr T Lerp(T start, T end, T value)
+	constexpr T Lerp(T start, T end, f32 factor)
 	{
-		return start + (end - start) * value;
+		return (1.0f - factor) * start + factor * end;
 	}
 };

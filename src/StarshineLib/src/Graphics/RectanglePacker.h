@@ -3,7 +3,7 @@
 #include "Common/Rect.h"
 #include <vector>
 
-namespace Starshine::GFX
+namespace Starshine::Graphics
 {
 	class RectanglePacker : NonCopyable
 	{

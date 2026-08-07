@@ -13,7 +13,7 @@ int SDL_main(int argc, char* argv[])
 {
 	GameInstance game;
 	
-	if (game.Initialize())
+	if (game.Initialize(false))
 	{
 		game.GetWindow()->SetTitle("Even More Cursed DIVA");
 		//game.GetWindow()->SetResizing(true);
@@ -26,6 +26,9 @@ int SDL_main(int argc, char* argv[])
 		if (!game.SetState(GameState_ChartSelect)) { return 1; }
 
 		game.EnterLoop();
+
+		GameContext::GetInstance()->Unload();
+		game.Destroy();
 		return 0;
 	}
 

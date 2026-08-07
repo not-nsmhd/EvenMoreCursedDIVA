@@ -42,8 +42,9 @@ namespace Starshine
 		Window* const GetWindow();
 
 	public:
-		bool Initialize();
+		bool Initialize(bool initImGui);
 		void EnterLoop();
+		void Destroy();
 
 	public:
 		template<typename T>

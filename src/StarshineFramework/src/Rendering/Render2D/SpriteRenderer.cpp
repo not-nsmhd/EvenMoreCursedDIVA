@@ -9,7 +9,8 @@ namespace Starshine::Rendering::Render2D
 {
 	using std::array;
 	using std::vector;
-	using namespace GFX;
+	using namespace Graphics;
+	using StarshineTex = Graphics::Texture;
 
 	constexpr size_t MaxSprites = 4096;
 	constexpr size_t MaxLists = 2048;
@@ -50,7 +51,7 @@ namespace Starshine::Rendering::Render2D
 		u32 ShapeVertexCount = 0;
 
 		PrimitiveType PrimitiveType = PrimitiveType::Triangles;
-		Texture* Texture = nullptr;
+		StarshineTex* Texture = nullptr;
 	};
 
 	constexpr array<VertexAttrib, 3> SpriteVertexAttribs
@@ -101,7 +102,7 @@ namespace Starshine::Rendering::Render2D
 		struct
 		{
 			std::unique_ptr<Shader> DefaultShader = nullptr;
-			std::unique_ptr<Texture> DefaultTexture = nullptr;
+			std::unique_ptr<Graphics::Texture> DefaultTexture = nullptr;
 		} DefaultSpriteResources;
 
 		vector<SpriteState> Sprites;
@@ -165,9 +166,9 @@ namespace Starshine::Rendering::Render2D
 				DefaultSpriteResources.DefaultShader.get(), GraphicsResources.VertexDesc);
 
 #if defined(_DEBUG)
-			GraphicsResources.SpriteVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::SpriteVertexBuffer");
-			GraphicsResources.ShapeVertexBuffer->SetDebugName("[Starshine] SpriteRenderer::ShapeVertexBuffer");
-			GraphicsResources.VertexDesc->SetDebugName("[Starshine] SpriteRenderer::SpriteVertexDesc");
+			GraphicsResources.SpriteVertexBuffer->SetDebugName("SpriteRenderer::SpriteVertexBuffer");
+			GraphicsResources.ShapeVertexBuffer->SetDebugName("SpriteRenderer::ShapeVertexBuffer");
+			GraphicsResources.VertexDesc->SetDebugName("SpriteRenderer::SpriteVertexDesc");
 #endif
 		}
 
@@ -202,43 +203,48 @@ namespace Starshine::Rendering::Render2D
 			GFXDevice->CreateIndexBuffer(indexBufferSize, IndexFormat::Index16bit, indexData.get(), false, GraphicsResources.SpriteIndexBuffer);
 			
 #if defined (_DEBUG)
-			GraphicsResources.SpriteIndexBuffer->SetDebugName("[Starshine] SpriteRenderer::SpriteIndexBuffer");
+			GraphicsResources.SpriteIndexBuffer->SetDebugName("SpriteRenderer::SpriteIndexBuffer");
 #endif
 
 		}
 	
 		void Internal_CreateBlendStates()
 		{
+#if defined (_DEBUG)
 			static constexpr std::array<std::string_view, EnumCount<BlendMode>()> debugBlendStateNames
 			{
-				"[Starshine] SpriteRenderer::BlendState_Disabled",
-				"[Starshine] SpriteRenderer::BlendState_Normal",
-				"[Starshine] SpriteRenderer::BlendState_Add",
-				"[Starshine] SpriteRenderer::BlendState_Multiply"
+				"SpriteRenderer::BlendState_Disabled",
+				"SpriteRenderer::BlendState_Normal",
+				"SpriteRenderer::BlendState_Add",
+				"SpriteRenderer::BlendState_Multiply"
 			};
+#endif
 
 			size_t i = 0;
 			for (auto& mode : BlendModes)
 			{
 				GFXDevice->CreateBlendState(mode.Desc, mode.StateObject);
+#if defined (_DEBUG)
 				mode.StateObject->SetDebugName(debugBlendStateNames[i++]);
+#endif
 			}
 		}
 
 		void Internal_CreateDefaultSpriteResources()
 		{
 			Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
-			DefaultSpriteResources.DefaultShader->SetDebugName("[Starshine] SpriteRenderer::DefaultShader");
+			DefaultSpriteResources.DefaultShader->SetDebugName("SpriteRenderer::DefaultShader");
 
-			static constexpr array<u8, 4> defaultTexData { 0xFF, 0xFF, 0xFF, 0xFF };
-			GFXDevice->CreateTexture(1, 1, TextureFormat::RGBA8, defaultTexData.data(), DefaultSpriteResources.DefaultTexture);
-			DefaultSpriteResources.DefaultTexture->SetDebugName("[Starshine] SpriteRenderer::DefaultTexture");
+			static constexpr u8 defaultTexData[4] { 0xFF, 0xFF, 0xFF, 0xFF };
+			DefaultSpriteResources.DefaultTexture = std::make_unique<Graphics::Texture>(vec2{ 1, 1 }, TextureFormat::RGBA8, TextureFlags{}, defaultTexData);
+			GFXDevice->UploadTexture(DefaultSpriteResources.DefaultTexture.get());
+			DefaultSpriteResources.DefaultTexture->SetName("SpriteRenderer::DefaultTexture");
 		}
 
 		void Internal_CreateShaderUniformBuffer()
 		{
 			GFXDevice->CreateUniformBuffer(sizeof(ShaderUniformsBufferData), nullptr, false, GraphicsResources.ShaderUniformBuffer);
-			GraphicsResources.ShaderUniformBuffer->SetDebugName("[Starshine] SpriteRenderer::ShaderUniformBuffer");
+			GraphicsResources.ShaderUniformBuffer->SetDebugName("SpriteRenderer::ShaderUniformBuffer");
 		}
 
 		void ResetSprite()
@@ -261,7 +267,7 @@ namespace Starshine::Rendering::Render2D
 			CurrentList = {};
 		}
 
-		void PushSprite(Texture* texture)
+		void PushSprite(StarshineTex* texture)
 		{
 			if (PushedSprites >= MaxSprites)
 			{
@@ -273,7 +279,7 @@ namespace Starshine::Rendering::Render2D
 
 			ResetSprite();
 
-			Texture* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
+			StarshineTex* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
 			if (CurrentList.Texture != listTex || CurrentList.ShapeVertexCount != 0)
 			{
@@ -414,11 +420,11 @@ namespace Starshine::Rendering::Render2D
 			ResetList();
 		}
 
-		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Texture* texture)
+		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
 		{
 			if (PushedDrawCommands + 1 >= MaxLists || PushedShapeVertices + vertexCount >= MaxShapeVertices) { RenderSprites(nullptr); }
 
-			Texture* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
+			StarshineTex* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
 			if (CurrentList.SpriteCount != 0 || CurrentList.PrimitiveType != primType || CurrentList.Texture != listTex)
 			{
@@ -524,13 +530,12 @@ namespace Starshine::Rendering::Render2D
 		impl->CurrentSprite.SourceRect_TexSpace = texSpaceSource;
 	}
 
-	void SpriteRenderer::SetSpriteSource(const Texture* texture, const RectangleF& absSource)
+	void SpriteRenderer::SetSpriteSource(const StarshineTex* texture, const RectangleF& absSource)
 	{
-		u32 width = texture->GetWidth();
-		u32 height = texture->GetHeight();
+		const ivec2 texSize = texture->GetSize();
 
-		float w = (width > 0) ? static_cast<float>(width) : 1.0f;
-		float h = (height > 0) ? static_cast<float>(height) : 1.0f;
+		f32 w = (texSize.x > 0) ? static_cast<f32>(texSize.x) : 1.0f;
+		f32 h = (texSize.y > 0) ? static_cast<f32>(texSize.y) : 1.0f;
 
 		impl->CurrentSprite.SourceRect_TexSpace.X = absSource.X / w;
 		impl->CurrentSprite.SourceRect_TexSpace.Width = (absSource.X + absSource.Width) / w;
@@ -557,7 +562,7 @@ namespace Starshine::Rendering::Render2D
 		impl->SetBlendMode(mode);
 	}
 
-	void SpriteRenderer::PushSprite(Texture* texture)
+	void SpriteRenderer::PushSprite(StarshineTex* texture)
 	{
 		impl->PushSprite(texture);
 	}
@@ -567,7 +572,7 @@ namespace Starshine::Rendering::Render2D
 		impl->RenderSprites(shader);
 	}
 
-	void SpriteRenderer::PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Texture* texture)
+	void SpriteRenderer::PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
 	{
 		impl->PushShape(vertices, vertexCount, primType, texture);
 	}

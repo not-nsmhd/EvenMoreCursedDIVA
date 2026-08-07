@@ -9,7 +9,7 @@
 #include "HUD.h"
 #include <Input/Keyboard.h>
 #include <Input/Gamepad.h>
-#include "GFX/SpritePacker.h"
+#include "Graphics/SpritePacker.h"
 #include "GameContext.h"
 #include "IO/Path/Directory.h"
 #include "IO/Path/File.h"
@@ -21,7 +21,7 @@
 namespace DIVA::MainGame
 {
 	using namespace Starshine;
-	using namespace Starshine::GFX;
+	using namespace Starshine::Graphics;
 	using namespace Starshine::Rendering;
 	using namespace Starshine::Rendering::Render2D;
 	using namespace Starshine::Audio;
@@ -104,7 +104,7 @@ namespace DIVA::MainGame
 			};
 		} GamepadBinds;
 
-		HUD hud = HUD(MainGameContext);
+		HUD* hud = nullptr;
 
 		SourceHandle HitSound_Normal{};
 		SourceHandle HitSound_Double{};
@@ -166,13 +166,14 @@ namespace DIVA::MainGame
 			CurrentSubState = SubState::MainGame;
 			resultsSaved = false;
 
-			hud.Reset();
+			hud->Reset();
 		}
 
 		void Initialize()
 		{
 			GFXDevice = Rendering::GetDevice();
-			hud.Initialize();
+			hud = new HUD(MainGameContext);
+			hud->Initialize();
 
 			Reset();
 		}
@@ -279,7 +280,7 @@ namespace DIVA::MainGame
 			CreateIconSetSpriteSheet();
 			LoadAnimations();
 
-			hud.LoadSprites(sprPacker);
+			hud->LoadSprites(sprPacker);
 			
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
@@ -346,7 +347,11 @@ namespace DIVA::MainGame
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_Loop);
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_LoopEnd);
 
-			hud.Destroy();
+			MainGameContext.IconSetAnimations.Animations = nullptr;
+			MainGameContext.IconSetSprites.SpriteSheet = nullptr;
+
+			hud->Destroy();
+			delete hud;
 
 			ActiveNotes.clear();
 			songChart.Clear();
@@ -435,7 +440,7 @@ namespace DIVA::MainGame
 				{
 					note->Expired = true;
 					MainGameContext.Score.Combo = 0;
-					hud.SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
+					hud->SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
 				}
 
 				if (note->ShouldBeRemoved)
@@ -448,7 +453,7 @@ namespace DIVA::MainGame
 				{
 					if (!note->NextNote->HasBeenHit)
 					{
-						hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+						hud->SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
 					}
 					else
 					{
@@ -567,7 +572,7 @@ namespace DIVA::MainGame
 				if ((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good) && note->DoubleTap.GiveBonus)
 				{
 					MainGameContext.Score.Score += 200;
-					hud.SetScoreBonusDisplayState(200 + (IsChanceTime ? noteScore : 0), note->TargetPosition);
+					hud->SetScoreBonusDisplayState(200 + (IsChanceTime ? noteScore : 0), note->TargetPosition);
 				}
 				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.125f);
 			}
@@ -575,8 +580,8 @@ namespace DIVA::MainGame
 			{
 				if (IsChanceTime) { note->Hold.BonusBaseValue = noteScore; }
 
-				hud.HoldScoreBonus();
-				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+				hud->HoldScoreBonus();
+				hud->SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
 
 				HitSound_Hold_LoopVoice.SetSource(shape == NoteShape::Star ? HitSound_StarHold_Loop : HitSound_Hold_Loop);
 				HitSound_Hold_LoopVoice.SetFramePosition(0);
@@ -586,7 +591,7 @@ namespace DIVA::MainGame
 			else if (note->Type == NoteType::HoldEnd)
 			{
 				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
-				hud.ReleaseScoreBonus(drop);
+				hud->ReleaseScoreBonus(drop);
 
 				HitSound_Hold_LoopVoice.SetPlaying(false);
 				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd, 0.135f);
@@ -596,12 +601,12 @@ namespace DIVA::MainGame
 				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
 				if (IsChanceTime)
 				{
-					hud.SetScoreBonusDisplayState(noteScore, note->TargetPosition);
+					hud->SetScoreBonusDisplayState(noteScore, note->TargetPosition);
 				}
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
-			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
+			hud->SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
 		}
 
 		void UpdateInputGamepadBinding(NoteShape shape, const GamepadBind& binding)
@@ -703,21 +708,21 @@ namespace DIVA::MainGame
 				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
 			{
 				MainGameContext.Score.Score += 200;
-				hud.SetScoreBonusDisplayState(200, note->TargetPosition);
+				hud->SetScoreBonusDisplayState(200, note->TargetPosition);
 			}
 			else if (note->Type == NoteType::HoldStart)
 			{
-				hud.HoldScoreBonus();
-				hud.SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+				hud->HoldScoreBonus();
+				hud->SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
 			}
 			else if (note->Type == NoteType::HoldEnd)
 			{
 				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
-				hud.ReleaseScoreBonus(drop);
+				hud->ReleaseScoreBonus(drop);
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
-			hud.SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
+			hud->SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
 		}
 
 		void UpdateLyrics()
@@ -728,11 +733,11 @@ namespace DIVA::MainGame
 				{
 					if (lyric->EndTime <= ElapsedTime.GetSeconds())
 					{
-						hud.SetLyricsText("", DefaultColors::Transparent);
+						hud->SetLyricsText("", DefaultColors::Transparent);
 						songLyricsOffset++;
 						continue;
 					}
-					hud.SetLyricsText(lyric->Text, lyric->Color);
+					hud->SetLyricsText(lyric->Text, lyric->Color);
 				}
 			}
 		}
@@ -770,7 +775,7 @@ namespace DIVA::MainGame
 				{
 					UpdateInputBinding(KeyboardBinds.Notes[i].EnumValue, KeyboardBinds.Notes[i].MappedValue);
 				}
-				hud.Update(gameTime);
+				hud->Update(gameTime);
 			}
 			else
 			{
@@ -895,7 +900,7 @@ namespace DIVA::MainGame
 				note.Draw(gameTime);
 			}
 
-			hud.Draw(gameTime);
+			hud->Draw(gameTime);
 
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 

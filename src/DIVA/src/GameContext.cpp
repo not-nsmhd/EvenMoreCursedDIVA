@@ -3,6 +3,7 @@
 
 using namespace Starshine;
 using namespace Starshine::IO;
+using namespace Starshine::Graphics;
 using namespace Starshine::Rendering;
 using namespace DIVA::Formats;
 
@@ -29,6 +30,9 @@ namespace DIVA
 	void GameContext::Unload()
 	{
 		SongList.clear();
+		DebugFont = nullptr;
+		TestCJKFont = nullptr;
+		SpriteRenderer = nullptr;
 	}
 
 	bool GameContext::CreateInstance()
@@ -56,10 +60,10 @@ namespace DIVA
 
 		SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
 
-		DebugFont = std::make_unique<Render2D::Font>();
+		DebugFont = std::make_unique<Font>();
 		if (!DebugFont->ReadBMFont("diva/fonts/debug.fnt")) { return false; }
 
-		TestCJKFont = std::make_unique<Render2D::Font>();
+		TestCJKFont = std::make_unique<Font>();
 		if (!TestCJKFont->ReadBMFont("diva/fonts/test_cjk.fnt")) { return false; }
 
 		return true;

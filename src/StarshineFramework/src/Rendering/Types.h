@@ -1,5 +1,5 @@
 #pragma once
-#include "GFX/Types.h"
+#include "Graphics/Types.h"
 
 namespace Starshine::Rendering
 {

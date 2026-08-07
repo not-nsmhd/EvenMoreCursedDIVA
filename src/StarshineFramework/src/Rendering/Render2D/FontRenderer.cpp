@@ -2,6 +2,8 @@
 #include "SpriteRenderer.h"
 #include <utf8.h>
 
+using namespace Starshine::Graphics;
+
 namespace Starshine::Rendering::Render2D
 {
 	FontRenderer::FontRenderer(SpriteRenderer& renderer) : sprRenderer(renderer)

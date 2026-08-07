@@ -16,7 +16,7 @@ namespace Starshine::Rendering
 		switch (type)
 		{
 		case DeviceType::OpenGL:
-			assert(false && "OpenGL rendering device is not implemented yet");
+			assert(false);
 			break;
 		case DeviceType::D3D11:
 			GlobalDevice = std::make_unique<D3D11::D3D11Device>();

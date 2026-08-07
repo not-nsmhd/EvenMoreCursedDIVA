@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-namespace Starshine::GFX
+namespace Starshine::Graphics
 {
 	struct SpriteInfo
 	{

@@ -1,6 +1,6 @@
 #pragma once
 #include "Common/Types.h"
-#include "GFX/GPUResource.h"
+#include "Graphics/GPUResource.h"
 
 namespace Starshine::Rendering
 {
@@ -12,7 +12,7 @@ namespace Starshine::Rendering
 		Count
 	};
 
-	struct Shader : public GFX::GPUResource, NonCopyable
+	struct Shader : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		Shader() = default;

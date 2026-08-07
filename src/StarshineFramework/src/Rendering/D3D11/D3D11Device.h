@@ -1,6 +1,7 @@
 #pragma once
 #include "Rendering/Device.h"
 #include <d3d11.h>
+#include <wrl.h>
 
 namespace Starshine::Rendering::D3D11
 {
@@ -25,7 +26,7 @@ namespace Starshine::Rendering::D3D11
 		void SetViewportSize(const RectangleF& newSize);
 
 	public:
-		void Clear(ClearFlags flags, const Color & color, f32 depth, u8 stencil);
+		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil);
 		void SwapBuffers();
 
 	public:
@@ -40,9 +41,7 @@ namespace Starshine::Rendering::D3D11
 		bool CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader);
 		bool CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc);
 
-		bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture);
-
-		bool CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer);
+		bool UploadTexture(Graphics::Texture* texture);
 
 		bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state);
 
@@ -51,11 +50,12 @@ namespace Starshine::Rendering::D3D11
 		void SetIndexBuffer(const IndexBuffer* buffer);
 		void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex);
 		void SetShader(const Shader* shader);
-		void SetTexture(const Texture* texture, u32 slot);
-		void SetTexture(const Framebuffer* framebuffer, u32 slot);
-		void SetFramebuffer(Framebuffer* framebuffer);
+		void SetTexture(Graphics::Texture* texture, u32 slot);
 
 		void SetBlendState(const BlendState* state);
+
+	public:
+		void QueueObjectForDeletion(Microsoft::WRL::ComPtr<ID3D11DeviceChild> object);
 
 	private:
 		struct Impl;

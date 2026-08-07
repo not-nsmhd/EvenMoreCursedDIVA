@@ -4,10 +4,10 @@
 #include <vector>
 #include "Common/Types.h"
 #include "Common/Rect.h"
-#include "Rendering/Device.h"
-#include "GFX/SpritePacker.h"
+#include "Texture.h"
+#include "SpritePacker.h"
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
 	struct Sprite
 	{
@@ -17,11 +17,10 @@ namespace Starshine::Rendering::Render2D
 		vec2 Origin;
 	};
 
-	class SpriteSheet
+	class SpriteSheet : NonCopyable
 	{
 	public:
 		SpriteSheet() = default;
-		SpriteSheet(const SpriteSheet& other) = delete;
 		~SpriteSheet() = default;
 
 	public:
@@ -39,8 +38,8 @@ namespace Starshine::Rendering::Render2D
 	public:
 		// NOTE: Sprites are intended to be packed ahead of time, hence a separate function
 		// (TODO: Write an external tool for packing sprites)
-		void CreateFromSpritePacker(const GFX::SpritePacker& spritePacker);
-		void Destroy();
+		void CreateFromSpritePacker(const SpritePacker& spritePacker);
+		void Clear();
 
 	public:
 		static constexpr i32 InvalidSpriteIndex = -1;

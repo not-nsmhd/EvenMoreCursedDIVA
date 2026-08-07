@@ -6,7 +6,7 @@
 #include "Common/MathExt.h"
 #include <algorithm>
 
-namespace Starshine::GFX
+namespace Starshine::Graphics
 {
 	using namespace IO;
 	using namespace Misc;

@@ -1,8 +1,10 @@
 #pragma once
-#include "Rendering/Device.h"
+#include "Common/Types.h"
+#include "Texture.h"
 #include <vector>
+#include <memory>
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
 	struct FontGlyph
 	{
@@ -18,11 +20,11 @@ namespace Starshine::Rendering::Render2D
 		u16 XAdvance;
 	};
 
-	class Font : public NonCopyable
+	class Font : NonCopyable
 	{
 	public:
 		Font() = default;
-		~Font();
+		~Font() = default;
 
 	public:
 		std::unique_ptr<Texture> Texture{};

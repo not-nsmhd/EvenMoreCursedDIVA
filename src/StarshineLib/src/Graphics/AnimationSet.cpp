@@ -3,7 +3,7 @@
 #include "IO/Xml.h"
 #include "IO/Path/File.h"
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
 	namespace XmlElementNames
 	{
@@ -27,11 +27,11 @@ namespace Starshine::Rendering::Render2D
 		static constexpr const char* AnimationLayer = "Layer";
 		static constexpr const char* AnimationLayer_BlendMode = "BlendMode";
 
-		static constexpr std::string_view Keyframes_Origin = "Origin";
-		static constexpr std::string_view Keyframes_Position = "Position";
-		static constexpr std::string_view Keyframes_Scale = "Scale";
-		static constexpr std::string_view Keyframes_Rotation = "Rotation";
-		static constexpr std::string_view Keyframes_Color = "Color";
+		static constexpr const char* Keyframes_Origin = "Origin";
+		static constexpr const char* Keyframes_Position = "Position";
+		static constexpr const char* Keyframes_Scale = "Scale";
+		static constexpr const char* Keyframes_Rotation = "Rotation";
+		static constexpr const char* Keyframes_Color = "Color";
 
 		static constexpr const char* Keyframe = "Keyframe";
 		static constexpr const char* Keyframe_Frame = "Frame";

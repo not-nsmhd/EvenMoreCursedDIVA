@@ -26,21 +26,5 @@ namespace Starshine::Rendering
 
 			return Rendering::GetDevice()->CreateShader(vsData.get(), vsSize, fsData.get(), fsSize, shader);
 		}
-
-		bool LoadImage(std::string_view filePath, std::unique_ptr<Texture>& texture)
-		{
-			if (!File::Exists(filePath)) { return false; }
-
-			std::unique_ptr<u8[]> imagePixels{};
-			ivec2 imageSize{};
-			i32 imageChannels{};
-
-			if (ImageHelper::ReadImageFile(filePath, imageSize, imageChannels, imagePixels))
-			{
-				return Rendering::GetDevice()->CreateTexture(imageSize.x, imageSize.y, GFX::TextureFormat::RGBA8, imagePixels.get(), texture);
-			}
-
-			return false;
-		}
 	}
 }

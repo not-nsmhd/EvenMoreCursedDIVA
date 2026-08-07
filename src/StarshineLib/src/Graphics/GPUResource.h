@@ -1,7 +1,8 @@
 #pragma once
 #include "Common/Types.h"
+#include <memory>
 
-namespace Starshine::GFX
+namespace Starshine::Graphics
 {
 	class GPUResource
 	{
@@ -9,5 +10,12 @@ namespace Starshine::GFX
 		virtual ~GPUResource() = default;
 
 		virtual void SetDebugName(std::string_view name) {};
+	};
+
+	struct ManagedGPUResource
+	{
+		std::unique_ptr<GPUResource> Resource;
+		bool Dynamic{};
+		bool Reupload{};
 	};
 }

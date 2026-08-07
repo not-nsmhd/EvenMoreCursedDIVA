@@ -7,8 +7,8 @@
 #include "Rendering/VertexDesc.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Texture.h"
-#include "Rendering/Framebuffer.h"
 #include "Rendering/State.h"
+#include "Graphics/Texture.h"
 #include <memory>
 #include <SDL2/SDL_video.h>
 
@@ -47,9 +47,7 @@ namespace Starshine::Rendering
 		virtual bool CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader) = 0;
 		virtual bool CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc) = 0;
 		 
-		virtual bool CreateTexture(i32 width, i32 height, GFX::TextureFormat format, const void* initialData, std::unique_ptr<Texture>& texture) = 0;
-
-		virtual bool CreateFramebuffer(i32 width, i32 height, GFX::TextureFormat format, std::unique_ptr<Framebuffer>& framebuffer) = 0;
+		virtual bool UploadTexture(Graphics::Texture* texture) = 0;
 
 		virtual bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state) = 0;
 
@@ -58,9 +56,7 @@ namespace Starshine::Rendering
 		virtual void SetIndexBuffer(const IndexBuffer* buffer) = 0;
 		virtual void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex) = 0;
 		virtual void SetShader(const Shader* shader) = 0;
-		virtual void SetTexture(const Texture* texture, u32 slot) = 0;
-		virtual void SetTexture(const Framebuffer* framebuffer, u32 slot) = 0;
-		virtual void SetFramebuffer(Framebuffer* framebuffer) = 0;
+		virtual void SetTexture(Graphics::Texture* texture, u32 slot) = 0;
 
 		virtual void SetBlendState(const BlendState* state) = 0;
 

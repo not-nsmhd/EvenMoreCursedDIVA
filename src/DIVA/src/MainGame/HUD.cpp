@@ -1,14 +1,15 @@
 #include "HUD.h"
-#include "GFX/SpritePacker.h"
+#include <Graphics/SpritePacker.h>
 #include <Common/Color.h>
 #include <Common/MathExt.h>
-#include <Rendering/Render2D/AnimationSet.h>
+#include <Graphics/AnimationSet.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include "../GameContext.h"
 
 namespace DIVA::MainGame
 {
 	using namespace Starshine;
+	using namespace Starshine::Graphics;
 	using namespace Starshine::Rendering::Render2D;
 	using std::string_view;
 
@@ -93,7 +94,7 @@ namespace DIVA::MainGame
 			LyricsTextDisplaySize = {};
 		}
 
-		bool LoadSprites(GFX::SpritePacker& sprPacker)
+		bool LoadSprites(Graphics::SpritePacker& sprPacker)
 		{
 			sprPacker.Clear();
 			sprPacker.Initialize();
@@ -383,7 +384,6 @@ namespace DIVA::MainGame
 
 	HUD::~HUD()
 	{
-		delete impl;
 	}
 
 	void HUD::Initialize()
@@ -396,7 +396,7 @@ namespace DIVA::MainGame
 		impl->Reset();
 	}
 
-	bool HUD::LoadSprites(Starshine::GFX::SpritePacker& sprPacker)
+	bool HUD::LoadSprites(Graphics::SpritePacker& sprPacker)
 	{
 		if (!impl->LoadSprites(sprPacker))
 			return false;
@@ -409,6 +409,8 @@ namespace DIVA::MainGame
 
 	void HUD::Destroy()
 	{
+		delete impl;
+		impl = nullptr;
 	}
 
 	void HUD::Update(Starshine::GameTime& gameTime)

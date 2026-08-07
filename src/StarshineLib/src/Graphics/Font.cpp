@@ -5,24 +5,16 @@
 #include "Common/Logging/Logging.h"
 #include "Misc/ImageHelper.h"
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
 	using namespace IO;
-
-	Font::~Font()
-	{
-		Glyphs.clear();
-		//Texture = nullptr;
-	}
 
 	const FontGlyph* Font::GetGlyph(i32 code) const
 	{
 		for (auto& glyph : Glyphs)
 		{
 			if (glyph.CharacterCode == code)
-			{
 				return &glyph;
-			}
 		}
 
 		return &Glyphs.at(0);
@@ -57,19 +49,10 @@ namespace Starshine::Rendering::Render2D
 		texturePath.append("/");
 		texturePath.append(texturePathAttrib->Value());
 
-		ivec2 texSize{};
-		i32 channels{};
-		std::unique_ptr<u8[]> texData{};
-		if (!Misc::ImageHelper::ReadImageFile(texturePath, texSize, channels, texData))
+		if (!Misc::ImageHelper::ReadImageFile(texturePath, Texture))
 		{
 			LogMessage("Failed to load font texture");
 			document.Clear();
-			return false;
-		}
-
-		if (!Rendering::GetDevice()->CreateTexture(texSize.x, texSize.y, GFX::TextureFormat::RGBA8, texData.get(), Texture))
-		{
-			LogMessage("Failed to create font texture");
 			return false;
 		}
 
@@ -138,9 +121,7 @@ namespace Starshine::Rendering::Render2D
 		size_t xmlSize = File::ReadAllBytes(filePath, xmlData);
 
 		if (xmlData == nullptr || xmlSize == 0)
-		{
 			return false;
-		}
 
 		bool result = ReadBMFont(basePath, xmlData, xmlSize);
 		return result;

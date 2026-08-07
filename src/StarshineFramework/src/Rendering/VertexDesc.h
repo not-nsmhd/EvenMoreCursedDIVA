@@ -1,6 +1,6 @@
 #pragma once
 #include "Rendering/Types.h"
-#include "GFX/GPUResource.h"
+#include "Graphics/GPUResource.h"
 
 namespace Starshine::Rendering
 {
@@ -37,7 +37,7 @@ namespace Starshine::Rendering
 		u32 Offset{};
 	};
 
-	struct VertexDesc : public GFX::GPUResource, NonCopyable
+	struct VertexDesc : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		VertexDesc() = default;

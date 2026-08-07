@@ -1,10 +1,10 @@
 #pragma once
 #include "Common/Types.h"
-#include "GFX/GPUResource.h"
+#include "Graphics/GPUResource.h"
 
 namespace Starshine::Rendering
 {
-	struct VertexBuffer : public GFX::GPUResource, NonCopyable
+	struct VertexBuffer : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		VertexBuffer() = default;
@@ -13,7 +13,7 @@ namespace Starshine::Rendering
 		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
 	};
 
-	struct IndexBuffer : public GFX::GPUResource, NonCopyable
+	struct IndexBuffer : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		IndexBuffer() = default;
@@ -22,7 +22,7 @@ namespace Starshine::Rendering
 		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
 	};
 
-	struct UniformBuffer : public GFX::GPUResource, NonCopyable
+	struct UniformBuffer : public Graphics::GPUResource, NonCopyable
 	{
 	public:
 		UniformBuffer() = default;

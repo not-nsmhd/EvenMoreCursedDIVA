@@ -13,7 +13,7 @@ namespace DIVA::MainGame
 
 		void Initialize();
 		void Reset();
-		bool LoadSprites(Starshine::GFX::SpritePacker& sprPacker);
+		bool LoadSprites(Starshine::Graphics::SpritePacker& sprPacker);
 
 		void Destroy();
 		void Update(Starshine::GameTime& gameTime);

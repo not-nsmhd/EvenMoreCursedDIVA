@@ -3,19 +3,18 @@
 #include "IO/Path/File.h"
 #include "Common/Logging/Logging.h"
 
-namespace Starshine::Rendering::Render2D
+namespace Starshine::Graphics
 {
-	using namespace GFX;
 	using std::vector;
 	using std::string_view;
 
-	void SpriteSheet::Destroy()
+	void SpriteSheet::Clear()
 	{
 		textures.clear();
 		sprites.clear();	
 	}
 
-	void SpriteSheet::CreateFromSpritePacker(const GFX::SpritePacker& spritePacker)
+	void SpriteSheet::CreateFromSpritePacker(const SpritePacker& spritePacker)
 	{
 		sprites.reserve(spritePacker.GetSpriteCount());
 		for (size_t i = 0; i < spritePacker.GetSpriteCount(); i++)
@@ -37,18 +36,19 @@ namespace Starshine::Rendering::Render2D
 				});
 		}
 
-		Device* device = Rendering::GetDevice();
 		textures.reserve(spritePacker.GetTextureCount());
 		for (size_t i = 0; i < spritePacker.GetTextureCount(); i++)
 		{
 			const SheetTextureInfo* texInfo = spritePacker.GetTextureInfo(static_cast<i32>(i));
 			if (texInfo != nullptr)
 			{
-				std::unique_ptr<Texture> gpuTex{};
+				/*std::unique_ptr<Texture> tex{};
 				if (device->CreateTexture(texInfo->Size.x, texInfo->Size.y, TextureFormat::RGBA8, texInfo->Data.get(), gpuTex))
 				{
 					textures.push_back(std::move(gpuTex));
-				}
+				}*/
+
+				textures.push_back(std::make_unique<Texture>(texInfo->Size, TextureFormat::RGBA8, TextureFlags{}, texInfo->Data.get()));
 			}
 		}
 	}
@@ -70,9 +70,7 @@ namespace Starshine::Rendering::Render2D
 		for (size_t i = 0; i < sprites.size(); i++)
 		{
 			if (sprites[i].Name == name)
-			{
 				return static_cast<i32>(i);
-			}
 		}
 
 		return 0;

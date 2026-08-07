@@ -2,7 +2,6 @@
 #include "Common/Rect.h"
 #include "Common/Color.h"
 #include "Rendering/Device.h"
-#include "Common.h"
 #include "SpriteSheetRenderer.h"
 #include "FontRenderer.h"
 
@@ -36,19 +35,19 @@ namespace Starshine::Rendering::Render2D
 		// NOTE: Source must be specified in texture space
 		// (texture's point at its width and height is represented as a (1.0, 1.0) coordinate)
 		void SetSpriteSource(const RectangleF& texSpaceSource);
-		void SetSpriteSource(const Texture* texture, const RectangleF& absSource);
+		void SetSpriteSource(const Graphics::Texture* texture, const RectangleF& absSource);
 
 		void SetSpriteFlip(bool flipHorizontal, bool flipVertical);
 		void SetSpriteColor(const Color& color);
 
-		void SetBlendMode(BlendMode mode);
+		void SetBlendMode(Graphics::BlendMode mode);
 
-		void PushSprite(Texture* texture);
+		void PushSprite(Graphics::Texture* texture);
 
 		void RenderSprites(Shader* shader);
 
 	public:
-		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Texture* texture);
+		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Graphics::Texture* texture);
 
 	public:
 		void PushLine(const vec2& position, float angle, float length, const Color& color, float thickness = 1.0f);

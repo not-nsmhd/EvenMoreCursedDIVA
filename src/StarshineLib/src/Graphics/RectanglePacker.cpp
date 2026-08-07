@@ -2,7 +2,7 @@
 
 // NOTE: Original algorithm developed by Javier Arevalo (https://www.flipcode.com/archives/Rectangle_Placement.shtml)
 
-namespace Starshine::GFX
+namespace Starshine::Graphics
 {
 	static constexpr ivec2 InitialTestedAreaSize{ 64, 64 };
 

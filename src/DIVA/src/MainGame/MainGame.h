@@ -3,14 +3,14 @@
 #include "Chart.h"
 #include <GameInstance.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
-#include <Rendering/Render2D/AnimationSet.h>
+#include <Graphics/AnimationSet.h>
 
 namespace DIVA::MainGame
 {
 	struct MainGameContext
 	{
 		Starshine::Rendering::Render2D::SpriteRenderer* SpriteRenderer{};
-		Starshine::Rendering::Render2D::Font* DebugFont{};
+		Starshine::Graphics::Font* DebugFont{};
 
 		struct ScoreData
 		{
@@ -21,33 +21,33 @@ namespace DIVA::MainGame
 
 		struct IconSetSpritesCache
 		{
-			std::shared_ptr<Starshine::Rendering::Render2D::SpriteSheet> SpriteSheet{};
+			std::shared_ptr<Starshine::Graphics::SpriteSheet> SpriteSheet{};
 
-			const Starshine::Rendering::Render2D::Sprite* NoteTargets[Starshine::EnumCount<NoteShape>()]{};
-			const Starshine::Rendering::Render2D::Sprite* NoteIcons[Starshine::EnumCount<NoteShape>()]{};
-			const Starshine::Rendering::Render2D::Sprite* NoteTargetHand{};
+			const Starshine::Graphics::Sprite* NoteTargets[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* NoteIcons[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* NoteTargetHand{};
 
-			const Starshine::Rendering::Render2D::Sprite* DoubleNoteTargets[Starshine::EnumCount<NoteShape>()]{};
-			const Starshine::Rendering::Render2D::Sprite* DoubleNoteIcons[Starshine::EnumCount<NoteShape>()]{};
-			const Starshine::Rendering::Render2D::Sprite* DoubleNoteTargetHands[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* DoubleNoteTargets[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* DoubleNoteIcons[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* DoubleNoteTargetHands[Starshine::EnumCount<NoteShape>()]{};
 
-			const Starshine::Rendering::Render2D::Sprite* HoldNoteTargets[Starshine::EnumCount<NoteShape>()]{};
-			const Starshine::Rendering::Render2D::Sprite* HoldNoteIcons[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* HoldNoteTargets[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* HoldNoteIcons[Starshine::EnumCount<NoteShape>()]{};
 
-			const Starshine::Rendering::Render2D::Sprite* HoldNoteTrails[Starshine::EnumCount<NoteShape>()]{};
+			const Starshine::Graphics::Sprite* HoldNoteTrails[Starshine::EnumCount<NoteShape>()]{};
 
-			const Starshine::Rendering::Render2D::Sprite* Trail_Normal{};
-			const Starshine::Rendering::Render2D::Sprite* Trail_CT{};
+			const Starshine::Graphics::Sprite* Trail_Normal{};
+			const Starshine::Graphics::Sprite* Trail_CT{};
 		} IconSetSprites;
 
 		struct IconSetAnimationCache
 		{
-			std::unique_ptr<Starshine::Rendering::Render2D::AnimationSet> Animations{};
+			std::unique_ptr<Starshine::Graphics::AnimationSet> Animations{};
 
-			const Starshine::Rendering::Render2D::Layer* NoteAppearLayer{};
-			const Starshine::Rendering::Render2D::Layer* NoteDisappearLayer{};
+			const Starshine::Graphics::Layer* NoteAppearLayer{};
+			const Starshine::Graphics::Layer* NoteDisappearLayer{};
 
-			const Starshine::Rendering::Render2D::Animation* NoteAppearEffect{};
+			const Starshine::Graphics::Animation* NoteAppearEffect{};
 		} IconSetAnimations;
 
 		MainGameContext() {}
