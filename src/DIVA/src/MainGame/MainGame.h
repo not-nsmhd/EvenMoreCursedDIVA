@@ -1,6 +1,7 @@
 #pragma once
 #include "Common/Types.h"
 #include "Chart.h"
+#include "../Formats/SongInfo.h"
 #include <GameInstance.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include <Graphics/AnimationSet.h>
@@ -11,6 +12,9 @@ namespace DIVA::MainGame
 	{
 		Starshine::Rendering::Render2D::SpriteRenderer* SpriteRenderer{};
 		Starshine::Graphics::Font* DebugFont{};
+
+		std::string SongName;
+		Formats::ChartDifficulty Difficulty{};
 
 		struct ScoreData
 		{
@@ -77,6 +81,9 @@ namespace DIVA::MainGame
 			std::string ChartPath;
 			std::string LyricsPath;
 			std::string MusicPath;
+
+			std::string SongName;
+			Formats::ChartDifficulty Difficulty{};
 		} LoadSettings;
 
 	private:

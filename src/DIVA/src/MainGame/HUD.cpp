@@ -42,10 +42,12 @@ namespace DIVA::MainGame
 			const Animation* ScoreBonus{};
 
 			Animation* FrameTop{};
+			Animation* FrameBottom{};
 			Layer* FrameTop_Difficulty{};
 
 			vec2 SongNameTextPosition{};
 			vec2 ScoreTextPosition{};
+			vec2 LyricsTextPosition{};
 		} animCache;
 
 		struct ComboDisplayData
@@ -172,6 +174,14 @@ namespace DIVA::MainGame
 		
 		bool LoadAnimations()
 		{
+			static constexpr std::string_view DifficultyLayerNames[EnumCount<Formats::ChartDifficulty>()]
+			{
+				"Difficulty_Easy",
+				"Difficulty_Normal",
+				"Difficulty_Hard",
+				"Difficulty_Extreme"
+			};
+
 			animCache.hudAnimSet = std::make_unique<AnimationSet>();
 			animCache.hudAnimSet->LoadXml("diva/sprites/mg_hud.xml");
 			animCache.hudAnimSet->LinkToSpriteSheet(spriteCache.hudSprites);
@@ -181,8 +191,12 @@ namespace DIVA::MainGame
 			animCache.ScoreBonus = &animCache.hudAnimSet->GetAnimation("ScoreBonus");
 
 			animCache.FrameTop = &animCache.hudAnimSet->GetAnimation("Frame_Top");
+			animCache.FrameBottom = &animCache.hudAnimSet->GetAnimation("Frame_Bottom");
+
 			animCache.FrameTop_Difficulty = &animCache.FrameTop->GetLayer("Difficulty");
-			animCache.FrameTop_Difficulty->SpriteDefinition = &animCache.hudAnimSet->GetSpriteDefinition("Difficulty_Normal");
+
+			size_t difficultyIndex = static_cast<size_t>(mainGameContext->Difficulty);
+			animCache.FrameTop_Difficulty->SpriteDefinition = &animCache.hudAnimSet->GetSpriteDefinition(DifficultyLayerNames[difficultyIndex]);
 
 			Layer& songNameRef = animCache.FrameTop->GetLayer("SongName_Ref");
 			songNameRef.Visible = false;
@@ -191,6 +205,10 @@ namespace DIVA::MainGame
 			Layer& scoreRef = animCache.FrameTop->GetLayer("Score_Ref");
 			scoreRef.Visible = false;
 			animCache.ScoreTextPosition = scoreRef.GetTransform(0.0f).Position;
+
+			Layer& lyricsTextRef = animCache.FrameBottom->GetLayer("LyricsText_Ref");
+			lyricsTextRef.Visible = false;
+			animCache.LyricsTextPosition = lyricsTextRef.GetTransform(0.0f).Position;
 
 			return true;
 		}
@@ -384,8 +402,7 @@ namespace DIVA::MainGame
 				FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
 				auto font = GameContext::GetInstance()->TestCJKFont.get();
 
-				vec2 pos{ 640.0f - LyricsTextDisplaySize.x / 2.0f, 640.0f - LyricsTextDisplaySize.y / 2.0f };
-				fontRenderer.PushString(font, LyricsTextBuffer.data(), pos, vec2(1.0f), LyricsColor);
+				fontRenderer.PushString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, vec2(1.0f), LyricsColor);
 			}
 		}
 
@@ -396,7 +413,11 @@ namespace DIVA::MainGame
 			auto font = GameContext::GetInstance()->TestCJKFont.get();
 
 			animSetRenderer.DrawAnimation(*animCache.hudAnimSet, *animCache.FrameTop, 0.0f);
-			fontRenderer.PushString(font, "ABCDE song name", animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+			animSetRenderer.DrawAnimation(*animCache.hudAnimSet, *animCache.FrameBottom, 0.0f);
+			DrawScoreDisplay();
+
+			fontRenderer.PushString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+			DrawLyricsText();
 		}
 	};
 
@@ -450,8 +471,6 @@ namespace DIVA::MainGame
 		impl->DrawComboDisplay();
 		impl->DrawScoreBonusDisplay();
 		impl->DrawFrame();
-		impl->DrawScoreDisplay();
-		impl->DrawLyricsText();
 	}
 
 	void HUD::SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, bool wrong, vec2& position)

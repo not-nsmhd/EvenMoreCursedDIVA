@@ -172,6 +172,7 @@ namespace DIVA::MainGame
 		void Initialize()
 		{
 			GFXDevice = Rendering::GetDevice();
+
 			hud = std::make_unique<HUD>(MainGameContext);
 			hud->Initialize();
 
@@ -331,7 +332,7 @@ namespace DIVA::MainGame
 
 		void UnloadContent()
 		{
-			//AudioEngine::GetInstance()->FreeVoice(MusicVoice);
+			AudioEngine::GetInstance()->FreeVoice(MusicVoice);
 			AudioEngine::GetInstance()->FreeVoice(HitSound_Hold_LoopVoice);
 
 			AudioEngine::GetInstance()->UnloadSource(MusicSource);
@@ -947,6 +948,9 @@ namespace DIVA::MainGame
 	
 	bool MainGameState::Initialize()
 	{
+		impl->MainGameContext.SongName = LoadSettings.SongName;
+		impl->MainGameContext.Difficulty = LoadSettings.Difficulty;
+
 		impl->GameInstance = GameInstance;
 		impl->Initialize();
 		return true;

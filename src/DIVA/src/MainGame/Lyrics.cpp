@@ -30,7 +30,11 @@ namespace DIVA::MainGame
 			while (child != nullptr)
 			{
 				const char* text = child->GetText();
-				if (text == nullptr) { continue; }
+				if (text == nullptr)
+				{
+					child = child->NextSiblingElement("Lyric");
+					continue;
+				}
 
 				Lyric newLyric{};
 

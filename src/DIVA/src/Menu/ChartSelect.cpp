@@ -89,6 +89,8 @@ namespace DIVA::Menu
 					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
 					mgState->LoadSettings.LyricsPath = info.LyricsFilePath;
 					mgState->LoadSettings.MusicPath = info.MusicFilePath;
+					mgState->LoadSettings.SongName = info.Name;
+					mgState->LoadSettings.Difficulty = static_cast<ChartDifficulty>(currentDifficultyIndex);
 					GameInstance->SetState(mgState);
 				}
 			}
