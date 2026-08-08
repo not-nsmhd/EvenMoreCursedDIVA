@@ -79,6 +79,7 @@ namespace Starshine::Graphics
 
 	public:
 		std::string Name;
+		bool Visible{ true };
 
 		u32 StartTime{};
 		u32 EndTime{};
@@ -97,7 +98,10 @@ namespace Starshine::Graphics
 	struct Animation
 	{
 	public:
+		Layer& GetLayer(std::string_view name);
 		const Layer& GetLayer(std::string_view name) const;
+
+		Layer& GetLayer(const size_t& index);
 		const Layer& GetLayer(const size_t& index) const;
 
 	public:
@@ -124,9 +128,11 @@ namespace Starshine::Graphics
 	public:
 		const Animation& GetAnimation(const size_t& index) const;
 		const Animation& GetAnimation(std::string_view name) const;
+		Animation& GetAnimation(std::string_view name);
 		i32 GetAnimationIndex(std::string_view name) const;
 
 		const SpriteDefinition& GetSpriteDefinition(std::string_view name) const;
+		SpriteSheet* GetSpriteSheet();
 
 	public:
 		ivec2 GetResolution() const;

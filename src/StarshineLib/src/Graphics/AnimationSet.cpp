@@ -111,6 +111,21 @@ namespace Starshine::Graphics
 		return result;
 	};
 
+	Layer& Animation::GetLayer(std::string_view name)
+	{
+		for (auto& layer : Layers)
+		{
+			if (layer.Name == name)
+				return layer;
+		}
+		return Layers[0];
+	};
+
+	Layer& Animation::GetLayer(const size_t& index)
+	{
+		return Layers.at(index);
+	};
+
 	const Layer& Animation::GetLayer(std::string_view name) const
 	{
 		for (const auto& layer : Layers)
@@ -284,6 +299,16 @@ namespace Starshine::Graphics
 		return animations[0];
 	}
 
+	Animation& AnimationSet::GetAnimation(std::string_view name)
+	{
+		for (auto& anim : animations)
+		{
+			if (anim.Name == name)
+				return anim;
+		}
+		return animations[0];
+	}
+
 	i32 AnimationSet::GetAnimationIndex(std::string_view name) const
 	{
 		i32 index = 0;
@@ -305,5 +330,10 @@ namespace Starshine::Graphics
 				return sprDef;
 		}
 		return spriteDefinitions[0];
+	}
+
+	SpriteSheet* AnimationSet::GetSpriteSheet()
+	{
+		return linkedSpriteSheet.get();
 	}
 }

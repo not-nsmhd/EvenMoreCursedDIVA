@@ -152,6 +152,7 @@
     <ClInclude Include="src\Rendering\D3D11\D3D11Texture.h" />
     <ClInclude Include="src\Rendering\D3D11\D3D11VertexDesc.h" />
     <ClInclude Include="src\Rendering\Device.h" />
+    <ClInclude Include="src\Rendering\Render2D\AnimationSetRenderer.h" />
     <ClInclude Include="src\Rendering\Render2D\FontRenderer.h" />
     <ClInclude Include="src\Rendering\Render2D\SpriteRenderer.h" />
     <ClInclude Include="src\Rendering\Render2D\SpriteSheetRenderer.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="src\Rendering\D3D11\D3D11Texture.cpp" />
     <ClCompile Include="src\Rendering\D3D11\D3D11VertexDesc.cpp" />
     <ClCompile Include="src\Rendering\Device.cpp" />
+    <ClCompile Include="src\Rendering\Render2D\AnimationSetRenderer.cpp" />
     <ClCompile Include="src\Rendering\Render2D\FontRenderer.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteRenderer.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp" />

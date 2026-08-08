@@ -4,6 +4,7 @@
 #include "Rendering/Device.h"
 #include "SpriteSheetRenderer.h"
 #include "FontRenderer.h"
+#include "AnimationSetRenderer.h"
 
 namespace Starshine::Rendering::Render2D
 {
@@ -54,6 +55,7 @@ namespace Starshine::Rendering::Render2D
 	public:
 		SpriteSheetRenderer& SpriteSheet();
 		FontRenderer& Font();
+		AnimationSetRenderer& AnimationSet();
 
 	private:
 		struct Impl;

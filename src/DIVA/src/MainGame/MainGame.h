@@ -69,7 +69,7 @@ namespace DIVA::MainGame
 		void Update(Starshine::GameTime& gameTime);
 		void Draw(Starshine::GameTime& gameTime);
 
-		inline static std::string_view GetStateName() { return "MainGameState"; };
+		inline std::string_view GetStateName() { return "MainGameState"; };
 
 	public:
 		struct LoadSetttingsData

@@ -331,7 +331,7 @@ namespace DIVA::MainGame
 
 		void UnloadContent()
 		{
-			AudioEngine::GetInstance()->FreeVoice(MusicVoice);
+			//AudioEngine::GetInstance()->FreeVoice(MusicVoice);
 			AudioEngine::GetInstance()->FreeVoice(HitSound_Hold_LoopVoice);
 
 			AudioEngine::GetInstance()->UnloadSource(MusicSource);
@@ -355,14 +355,13 @@ namespace DIVA::MainGame
 
 			hud->Destroy();
 			hud = nullptr;
-
-			ActiveNotes.clear();
-			songChart.Clear();
-			songLyrics.clear();
 		}
 
 		void Destroy()
 		{
+			ActiveNotes.clear();
+			songChart.Clear();
+			songLyrics.clear();
 		}
 
 		GameNote* FindNoteToEvaluate()
@@ -489,9 +488,7 @@ namespace DIVA::MainGame
 			if (note == nullptr)
 			{
 				if (tapped)
-				{
 					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
-				}
 				return;
 			}
 
@@ -530,10 +527,8 @@ namespace DIVA::MainGame
 			bool evaluated = note->Evaluate(shape);
 			if (!evaluated)
 			{
-				if (tapped)
-				{
+				if (tapped) 
 					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
-				}
 				return;
 			}
 
@@ -762,13 +757,11 @@ namespace DIVA::MainGame
 			if (!Paused)
 			{	
 				if (MusicSource != SourceHandle::Invalid)
-				{
 					ElapsedTime = TimeSpanConversion::FromSeconds(static_cast<f64>(MusicVoice.GetFramePosition() / 44100.0));
-				}
 				else
-				{
 					ElapsedTime += gameTime.ElapsedFrameTime;
-				}
+
+				//ElapsedTime += gameTime.ElapsedFrameTime;
 
 				UpdateChart();
 				UpdateLyrics();
@@ -789,9 +782,7 @@ namespace DIVA::MainGame
 			{
 				Paused = !Paused;
 				if (MusicSource != SourceHandle::Invalid)
-				{
 					MusicVoice.SetPlaying(!Paused);
-				}
 			}
 
 			SDL_memset(debugText, 0, sizeof(debugText));

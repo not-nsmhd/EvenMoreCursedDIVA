@@ -40,6 +40,12 @@ namespace DIVA::MainGame
 			const Animation* HitValu_Miss{};
 
 			const Animation* ScoreBonus{};
+
+			Animation* FrameTop{};
+			Layer* FrameTop_Difficulty{};
+
+			vec2 SongNameTextPosition{};
+			vec2 ScoreTextPosition{};
 		} animCache;
 
 		struct ComboDisplayData
@@ -49,7 +55,7 @@ namespace DIVA::MainGame
 			bool IsWrong{};
 			u32 Combo{};
 
-			float ElapsedDisplayTime{};
+			f32 ElapsedDisplayTime{};
 		} ComboDisplayState;
 
 		struct ScoreBonusDisplayData
@@ -58,14 +64,13 @@ namespace DIVA::MainGame
 			u32 Value{};
 			bool Held{};
 
-			float ElapsedDisplayTime{};
+			f32 ElapsedDisplayTime{};
 		} ScoreBonusDisplay;
 
 		struct ScoreDisplayData
 		{
-			vec2 Position{ 1250.0f, 30.0f };
 			u32 DisplayValue{};
-			float IncrementSpeed{ 0.02f };
+			f32 IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
 
 		std::array<char, 256> LyricsTextBuffer{};
@@ -175,6 +180,18 @@ namespace DIVA::MainGame
 			animCache.HitValu_Miss = &animCache.hudAnimSet->GetAnimation("HitValu_Miss");
 			animCache.ScoreBonus = &animCache.hudAnimSet->GetAnimation("ScoreBonus");
 
+			animCache.FrameTop = &animCache.hudAnimSet->GetAnimation("Frame_Top");
+			animCache.FrameTop_Difficulty = &animCache.FrameTop->GetLayer("Difficulty");
+			animCache.FrameTop_Difficulty->SpriteDefinition = &animCache.hudAnimSet->GetSpriteDefinition("Difficulty_Normal");
+
+			Layer& songNameRef = animCache.FrameTop->GetLayer("SongName_Ref");
+			songNameRef.Visible = false;
+			animCache.SongNameTextPosition = songNameRef.GetTransform(0.0f).Position;
+
+			Layer& scoreRef = animCache.FrameTop->GetLayer("Score_Ref");
+			scoreRef.Visible = false;
+			animCache.ScoreTextPosition = scoreRef.GetTransform(0.0f).Position;
+
 			return true;
 		}
 
@@ -185,18 +202,14 @@ namespace DIVA::MainGame
 			if (scoreDiff < 61)
 			{
 				if (scoreDiff < 21)
-				{
 					ScoreDisplay.DisplayValue = mainGameContext->Score.Score;
-				}
 				else
-				{
 					ScoreDisplay.DisplayValue += 7;
-				}
 			}
 			else
 			{
-				float incrementSpeed = frameTimeScale * ScoreDisplay.IncrementSpeed;
-				ScoreDisplay.DisplayValue += static_cast<u32>((incrementSpeed * static_cast<float>((scoreDiff * 10))));
+				f32 incrementSpeed = frameTimeScale * ScoreDisplay.IncrementSpeed;
+				ScoreDisplay.DisplayValue += static_cast<u32>((incrementSpeed * static_cast<f32>((scoreDiff * 10))));
 			}
 		}
 
@@ -265,7 +278,7 @@ namespace DIVA::MainGame
 
 		void DrawScoreDisplay()
 		{
-			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, ScoreDisplay.Position, vec2(1.0f), 25.0f, DefaultColors::White, -1);
+			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, animCache.ScoreTextPosition, vec2(1.0f), 25.0f, DefaultColors::White, -1);
 		}
 
 		void DrawComboDisplay()
@@ -375,6 +388,16 @@ namespace DIVA::MainGame
 				fontRenderer.PushString(font, LyricsTextBuffer.data(), pos, vec2(1.0f), LyricsColor);
 			}
 		}
+
+		void DrawFrame()
+		{
+			AnimationSetRenderer& animSetRenderer = mainGameContext->SpriteRenderer->AnimationSet();
+			FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
+			auto font = GameContext::GetInstance()->TestCJKFont.get();
+
+			animSetRenderer.DrawAnimation(*animCache.hudAnimSet, *animCache.FrameTop, 0.0f);
+			fontRenderer.PushString(font, "ABCDE song name", animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+		}
 	};
 
 	HUD::HUD(MainGameContext& context) : mainGameContext(context)
@@ -426,6 +449,7 @@ namespace DIVA::MainGame
 	{
 		impl->DrawComboDisplay();
 		impl->DrawScoreBonusDisplay();
+		impl->DrawFrame();
 		impl->DrawScoreDisplay();
 		impl->DrawLyricsText();
 	}

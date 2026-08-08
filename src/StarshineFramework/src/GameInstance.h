@@ -26,7 +26,7 @@ namespace Starshine
 		virtual void Update(GameTime& gameTime) = 0;
 		virtual void Draw(GameTime& gameTime) = 0;
 
-		static std::string_view GetStateName() { return ""; };
+		virtual std::string_view GetStateName() = 0;
 
 	public:
 		GameInstance* GameInstance{};

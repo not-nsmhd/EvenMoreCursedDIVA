@@ -78,6 +78,7 @@ namespace Starshine::Rendering::Render2D
 
 		SpriteSheetRenderer SpriteSheetRenderer;
 		FontRenderer FontRenderer;
+		AnimationSetRenderer AnimationSetRenderer;
 
 		struct ShaderUniformsBufferData
 		{
@@ -115,7 +116,7 @@ namespace Starshine::Rendering::Render2D
 		DrawCommand CurrentList{};
 
 	public:
-		Impl(SpriteRenderer& parent) : SpriteSheetRenderer(parent), FontRenderer(parent)
+		Impl(SpriteRenderer& parent) : SpriteSheetRenderer(parent), FontRenderer(parent), AnimationSetRenderer(parent)
 		{
 			GFXDevice = Rendering::GetDevice();
 
@@ -612,5 +613,10 @@ namespace Starshine::Rendering::Render2D
 	FontRenderer& SpriteRenderer::Font()
 	{
 		return impl->FontRenderer;
+	}
+
+	AnimationSetRenderer& SpriteRenderer::AnimationSet()
+	{
+		return impl->AnimationSetRenderer;
 	}
 };
