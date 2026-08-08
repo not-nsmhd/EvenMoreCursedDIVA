@@ -110,6 +110,24 @@ namespace Starshine::IO
 			return fileSize;
 		}
 
+		std::string ReadAllText(std::string_view filePath)
+		{
+			FileStream fileStream = OpenRead(filePath);
+			if (!fileStream.IsReadable() || !fileStream.IsOpen())
+			{
+				fileStream.Close();
+				return "";
+			}
+
+			size_t fileSize = fileStream.GetSize();
+			std::string text(fileSize, 0);
+
+			fileStream.ReadBuffer(text.data(), fileSize);
+
+			fileStream.Close();
+			return text;
+		}
+
 		bool WriteAllText(std::string_view filePath, const char* data, size_t size)
 		{
 			if (data == nullptr || size == 0) { return false; }

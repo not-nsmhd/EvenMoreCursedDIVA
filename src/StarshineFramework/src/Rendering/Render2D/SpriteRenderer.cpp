@@ -78,7 +78,7 @@ namespace Starshine::Rendering::Render2D
 
 	struct SpriteRenderer::Impl
 	{
-		Device* GFXDevice = nullptr;
+		Device* GFXDevice{};
 
 		SpriteSheetRenderer SpriteSheetRenderer;
 		FontRenderer FontRenderer;
@@ -90,19 +90,19 @@ namespace Starshine::Rendering::Render2D
 
 		struct
 		{
-			std::unique_ptr<VertexBuffer> SpriteVertexBuffer = nullptr;
-			std::unique_ptr<IndexBuffer> SpriteIndexBuffer = nullptr;
-			std::unique_ptr<VertexDesc> VertexDesc = nullptr;
+			std::unique_ptr<Buffer> SpriteVertexBuffer{};
+			std::unique_ptr<Buffer> SpriteIndexBuffer{};
+			std::unique_ptr<VertexDesc> VertexDesc{};
 
-			std::unique_ptr<VertexBuffer> ShapeVertexBuffer = nullptr;
+			std::unique_ptr<Buffer> ShapeVertexBuffer{};
 
-			std::unique_ptr<UniformBuffer> ShaderUniformBuffer = nullptr;
+			std::unique_ptr<Buffer> ShaderUniformBuffer{};
 		} GraphicsResources;
 
 		struct
 		{
-			std::unique_ptr<Shader> DefaultShader = nullptr;
-			std::unique_ptr<Graphics::Texture> DefaultTexture = nullptr;
+			std::unique_ptr<Shader> DefaultShader{};
+			std::unique_ptr<Graphics::Texture> DefaultTexture{};
 		} DefaultSpriteResources;
 
 		vector<SpriteState> Sprites;
@@ -135,32 +135,19 @@ namespace Starshine::Rendering::Render2D
 
 		~Impl()
 		{
-			Destroy();
-		}
-
-		void Destroy()
-		{
-#if 0
-			GraphicsResources.SpriteVertexBuffer = nullptr;
-			GraphicsResources.SpriteIndexBuffer = nullptr;
-			GraphicsResources.ShapeVertexBuffer = nullptr;
-			GraphicsResources.VertexDesc = nullptr;
-			DefaultSpriteResources.DefaultShader = nullptr;
-			DefaultSpriteResources.DefaultTexture = nullptr;
-#endif
-
-			Sprites.clear();
-			SpriteVertices.clear();
-			ShapeVertices.clear();
 		}
 
 		void Internal_CreateVertexBuffer()
 		{
-			size_t vertexBufferSize = MaxVertices * sizeof(SpriteVertex);
-			GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true, GraphicsResources.SpriteVertexBuffer);
+			BufferCreationData bufferInfo{};
+			bufferInfo.Type = BufferType::Vertex;
+			bufferInfo.Size = MaxVertices * sizeof(SpriteVertex);
+			bufferInfo.Dynamic = true;
 
-			vertexBufferSize = MaxShapeVertices * sizeof(SpriteVertex);
-			GFXDevice->CreateVertexBuffer(vertexBufferSize, nullptr, true, GraphicsResources.ShapeVertexBuffer);
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.SpriteVertexBuffer);
+
+			bufferInfo.Size = MaxShapeVertices * sizeof(SpriteVertex);
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.ShapeVertexBuffer);
 
 			GFXDevice->CreateVertexDesc(SpriteVertexAttribs.data(), SpriteVertexAttribs.size(), 
 				DefaultSpriteResources.DefaultShader.get(), GraphicsResources.VertexDesc);
@@ -181,14 +168,14 @@ namespace Starshine::Rendering::Render2D
 			//		 [2] - Top right, [3] - Bottom left
 			// 
 			//		 Index order:
-			//		 [0] - Top left(0),     [1] - Top right(2),
-			//		 [2] - Bottom right(1), [3] - Bottom left(3)
+			//		 [0] - Top left(0),     [1] - Top right(2),     [2] - Bottom right(1)   (First triangle)
+			//		 [3] - Bottom right(1), [4] - Bottom left(3)    [5] - Top left(0)       (Second triangle)
 
 			u16 baseVertex = 0;
 			for (size_t i = 0; i < MaxIndices; i += 6)
 			{
 				// NOTE: Indices are always arranged in clockwise order regardless of backend
-				// (OpenGL is switchted to clockwise order on initialization, D3D9 uses clockwise order by default)
+				// (OpenGL is switchted to clockwise order on initialization, D3D uses clockwise order by default)
 				indexData[i + 0] = baseVertex + 0;
 				indexData[i + 1] = baseVertex + 2;
 				indexData[i + 2] = baseVertex + 1;
@@ -199,8 +186,13 @@ namespace Starshine::Rendering::Render2D
 				baseVertex += 4;
 			}
 
-			size_t indexBufferSize = MaxIndices * sizeof(u16);
-			GFXDevice->CreateIndexBuffer(indexBufferSize, IndexFormat::Index16bit, indexData.get(), false, GraphicsResources.SpriteIndexBuffer);
+			BufferCreationData bufferInfo{};
+			bufferInfo.Type = BufferType::Index;
+			bufferInfo.IndexFormat = IndexFormat::Index16bit;
+			bufferInfo.Size = MaxIndices * sizeof(u16);
+			bufferInfo.InitialData = indexData.get();
+
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.SpriteIndexBuffer);
 			
 #if defined (_DEBUG)
 			GraphicsResources.SpriteIndexBuffer->SetDebugName("SpriteRenderer::SpriteIndexBuffer");
@@ -224,7 +216,7 @@ namespace Starshine::Rendering::Render2D
 			for (auto& mode : BlendModes)
 			{
 				GFXDevice->CreateBlendState(mode.Desc, mode.StateObject);
-#if defined (_DEBUG)
+#ifdef _DEBUG
 				mode.StateObject->SetDebugName(debugBlendStateNames[i++]);
 #endif
 			}
@@ -233,18 +225,28 @@ namespace Starshine::Rendering::Render2D
 		void Internal_CreateDefaultSpriteResources()
 		{
 			Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
-			DefaultSpriteResources.DefaultShader->SetDebugName("SpriteRenderer::DefaultShader");
 
 			static constexpr u8 defaultTexData[4] { 0xFF, 0xFF, 0xFF, 0xFF };
 			DefaultSpriteResources.DefaultTexture = std::make_unique<Graphics::Texture>(vec2{ 1, 1 }, TextureFormat::RGBA8, TextureFlags{}, defaultTexData);
 			GFXDevice->UploadTexture(DefaultSpriteResources.DefaultTexture.get());
+
+#ifdef _DEBUG
 			DefaultSpriteResources.DefaultTexture->SetName("SpriteRenderer::DefaultTexture");
+			DefaultSpriteResources.DefaultShader->SetDebugName("SpriteRenderer::DefaultShader");
+#endif
 		}
 
 		void Internal_CreateShaderUniformBuffer()
 		{
-			GFXDevice->CreateUniformBuffer(sizeof(ShaderUniformsBufferData), nullptr, false, GraphicsResources.ShaderUniformBuffer);
+			BufferCreationData bufferInfo{};
+			bufferInfo.Type = BufferType::Uniform;
+			bufferInfo.Size = sizeof(ShaderUniformsBufferData);
+			bufferInfo.Dynamic = true;
+
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.ShaderUniformBuffer);
+#ifdef _DEBUG
 			GraphicsResources.ShaderUniformBuffer->SetDebugName("SpriteRenderer::ShaderUniformBuffer");
+#endif
 		}
 
 		void ResetSprite()
@@ -491,7 +493,6 @@ namespace Starshine::Rendering::Render2D
 
 	void SpriteRenderer::Destroy()
 	{
-		impl->Destroy();
 	}
 
 	Device* SpriteRenderer::GetRenderingDevice()

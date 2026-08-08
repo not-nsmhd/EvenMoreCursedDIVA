@@ -81,7 +81,7 @@
       <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copying D3D9 shader objects...</Message>
+      <Message>Copying compiled shader objects...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -116,7 +116,7 @@
       <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copying D3D9 shader objects...</Message>
+      <Message>Copying compiled shader objects...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

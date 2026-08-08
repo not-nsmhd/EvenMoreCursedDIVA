@@ -10,7 +10,7 @@ namespace Starshine::Rendering::D3D11
 	struct D3D11VertexDesc : public VertexDesc
 	{
 	public:
-		D3D11VertexDesc(ID3D11Device* device, const VertexAttrib* attribs, size_t attribCount, const D3D11ShaderBytecode& vsBytecode);
+		D3D11VertexDesc(D3D11Device& device, const VertexAttrib* attribs, size_t attribCount, const D3D11ShaderBytecode& vsBytecode);
 		~D3D11VertexDesc() override;
 
 		void SetDebugName(std::string_view name);
@@ -18,5 +18,7 @@ namespace Starshine::Rendering::D3D11
 	public:
 		UINT VertexStride{};
 		Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout{};
+
+		D3D11Device& deviceRef;
 	};
 }

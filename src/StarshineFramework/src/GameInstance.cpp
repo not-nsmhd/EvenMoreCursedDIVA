@@ -138,7 +138,6 @@ namespace Starshine
 
 			Gamepad::Destroy();
 			Keyboard::Destroy();
-			Rendering::DestroyDevice();
 
 			Parent->GameWindow = nullptr;
 			SDL_Quit();

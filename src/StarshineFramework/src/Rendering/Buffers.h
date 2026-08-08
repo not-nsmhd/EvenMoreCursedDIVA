@@ -1,32 +1,25 @@
 #pragma once
 #include "Common/Types.h"
+#include "Types.h"
 #include "Graphics/GPUResource.h"
 
 namespace Starshine::Rendering
 {
-	struct VertexBuffer : public Graphics::GPUResource, NonCopyable
+	struct BufferCreationData
 	{
-	public:
-		VertexBuffer() = default;
-		~VertexBuffer() = default;
+		BufferType Type{};
+		bool Dynamic{};
 
-		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
+		IndexFormat IndexFormat{}; // Used only for index buffers
+		size_t Size{};
+		const void* InitialData{};
 	};
 
-	struct IndexBuffer : public Graphics::GPUResource, NonCopyable
+	struct Buffer : public Graphics::GPUResource, NonCopyable
 	{
 	public:
-		IndexBuffer() = default;
-		~IndexBuffer() = default;
-
-		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
-	};
-
-	struct UniformBuffer : public Graphics::GPUResource, NonCopyable
-	{
-	public:
-		UniformBuffer() = default;
-		~UniformBuffer() = default;
+		Buffer() = default;
+		~Buffer() = default;
 
 		virtual void SetData(const void* source, size_t offset, size_t size) = 0;
 	};

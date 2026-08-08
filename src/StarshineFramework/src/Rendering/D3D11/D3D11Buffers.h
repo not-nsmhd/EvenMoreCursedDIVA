@@ -6,11 +6,11 @@
 
 namespace Starshine::Rendering::D3D11
 {
-	struct D3D11VertexBuffer : public VertexBuffer
+	struct D3D11Buffer : public Buffer
 	{
 	public:
-		D3D11VertexBuffer(ID3D11Device* device, size_t size, bool dynamic, const void* initialData);
-		~D3D11VertexBuffer() override;
+		D3D11Buffer(D3D11Device& device, const BufferCreationData& props);
+		~D3D11Buffer() override;
 
 	public:
 		void SetData(const void* source, size_t offset, size_t size);
@@ -20,44 +20,8 @@ namespace Starshine::Rendering::D3D11
 		Microsoft::WRL::ComPtr<ID3D11Buffer> BaseBuffer{};
 		ID3D11DeviceContext* DeviceContext{};
 
-		bool Dynamic{ false };
-		size_t Size{ 0 };
-	};
+		BufferCreationData Properties{};
 
-	struct D3D11IndexBuffer : public IndexBuffer
-	{
-	public:
-		D3D11IndexBuffer(ID3D11Device* device, IndexFormat format, size_t size, bool dynamic, const void* initialData);
-		~D3D11IndexBuffer() override;
-
-	public:
-		void SetData(const void* source, size_t offset, size_t size);
-		void SetDebugName(std::string_view name);
-
-	public:
-		Microsoft::WRL::ComPtr<ID3D11Buffer> BaseBuffer{};
-		ID3D11DeviceContext* DeviceContext{};
-
-		bool Dynamic{ false };
-		size_t Size{ 0 };
-		IndexFormat Format{};
-	};
-
-	struct D3D11UniformBuffer : public UniformBuffer
-	{
-	public:
-		D3D11UniformBuffer(ID3D11Device* device, size_t size, bool dynamic, const void* initialData);
-		~D3D11UniformBuffer() override;
-
-	public:
-		void SetData(const void* source, size_t offset, size_t size);
-		void SetDebugName(std::string_view name);
-
-	public:
-		Microsoft::WRL::ComPtr<ID3D11Buffer> BaseBuffer{};
-		ID3D11DeviceContext* DeviceContext{};
-
-		bool Dynamic{ false };
-		size_t Size{ 0 };
+		D3D11Device& deviceRef;
 	};
 }

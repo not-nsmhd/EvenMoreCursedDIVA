@@ -30,7 +30,7 @@ namespace Starshine::Rendering::D3D11
 		};
 	}
 
-	D3D11BlendState::D3D11BlendState(ID3D11Device* device, const BlendStateDesc& desc) : BlendState{ desc }
+	D3D11BlendState::D3D11BlendState(D3D11Device& device, const BlendStateDesc& desc) : deviceRef(device), BlendState(desc)
 	{
 		D3D11_BLEND_DESC blendDesc{};
 		blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -44,12 +44,12 @@ namespace Starshine::Rendering::D3D11
 		blendDesc.RenderTarget[0].BlendOpAlpha = ConversionTables::D3D11BlendOperation[static_cast<size_t>(Desc.AlphaOp)];
 		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-		device->CreateBlendState(&blendDesc, &BlendStateObject);
+		device.GetBaseDevice()->CreateBlendState(&blendDesc, &BlendStateObject);
 	}
 
 	D3D11BlendState::~D3D11BlendState()
 	{
-		BlendStateObject.Reset();
+		deviceRef.QueueObjectForDeletion(BlendStateObject);
 	}
 
 	void D3D11BlendState::SetDebugName(std::string_view name)

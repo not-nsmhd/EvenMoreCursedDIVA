@@ -50,7 +50,6 @@ namespace Starshine::Rendering::D3D11
 
 	D3D11Texture::~D3D11Texture()
 	{
-		LogMessage(__FUNCTION__);
 		deviceRef.QueueObjectForDeletion(ShaderResourceView);
 	}
 

@@ -307,7 +307,7 @@ namespace Starshine::Rendering::D3D11
 			}
 		}
 
-		void SetVertexBuffer(const D3D11VertexBuffer* buffer, const D3D11VertexDesc* desc)
+		void SetVertexBuffer(const D3D11Buffer* buffer, const D3D11VertexDesc* desc)
 		{
 			if (buffer == nullptr || desc == nullptr)
 			{
@@ -328,7 +328,7 @@ namespace Starshine::Rendering::D3D11
 			DrawCheckFlags.VertexDescSet = (desc != nullptr);
 		}
 
-		void SetIndexBuffer(const D3D11IndexBuffer* buffer)
+		void SetIndexBuffer(const D3D11Buffer* buffer)
 		{
 			if (buffer == nullptr)
 			{
@@ -336,14 +336,14 @@ namespace Starshine::Rendering::D3D11
 			}
 			else
 			{
-				DXGI_FORMAT indexFormat = DXGIIndexFormats[static_cast<size_t>(buffer->Format)];
+				DXGI_FORMAT indexFormat = DXGIIndexFormats[static_cast<size_t>(buffer->Properties.IndexFormat)];
 				D3D11.DeviceContext->IASetIndexBuffer(buffer->BaseBuffer.Get(), indexFormat, 0);
 			}
 
 			DrawCheckFlags.IndexBufferSet = (buffer != nullptr);
 		}
 
-		void SetUniformBuffer(const D3D11UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex)
+		void SetUniformBuffer(const D3D11Buffer* buffer, ShaderStage stage, u32 bufferIndex)
 		{
 			if (buffer == nullptr)
 			{
@@ -427,7 +427,6 @@ namespace Starshine::Rendering::D3D11
 
 	D3D11Device::~D3D11Device()
 	{
-		LogMessage(__FUNCTION__);
 	}
 
 	ID3D11Device* D3D11Device::GetBaseDevice()
@@ -490,27 +489,9 @@ namespace Starshine::Rendering::D3D11
 		impl->DrawIndexed(type, firstIndex, baseVertexIndex, indexCount);
 	}
 
-	bool D3D11Device::CreateVertexBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<VertexBuffer>& buffer)
+	bool D3D11Device::CreateBuffer(const BufferCreationData& props, std::unique_ptr<Buffer>& buffer)
 	{
-		if ((!dynamic && initialData == nullptr) || (size == 0)) { return false; }
-
-		buffer = std::make_unique<D3D11VertexBuffer>(GetBaseDevice(), size, dynamic, initialData);
-		return true;
-	}
-
-	bool D3D11Device::CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic, std::unique_ptr<IndexBuffer>& buffer)
-	{
-		if ((!dynamic && initialData == nullptr) || (size == 0)) { return false; }
-
-		buffer = std::make_unique<D3D11IndexBuffer>(GetBaseDevice(), format, size, dynamic, initialData);
-		return true;
-	}
-
-	bool D3D11Device::CreateUniformBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<UniformBuffer>& buffer)
-	{
-		if (size == 0) { return false; }
-
-		buffer = std::make_unique<D3D11UniformBuffer>(GetBaseDevice(), size, dynamic, initialData);
+		buffer = std::make_unique<D3D11Buffer>(*this, props);
 		return true;
 	}
 
@@ -518,7 +499,7 @@ namespace Starshine::Rendering::D3D11
 	{
 		if (vsData == nullptr || fsData == nullptr || vsSize == 0 || fsSize == 0) { return false; }
 
-		shader = std::make_unique<D3D11Shader>(GetBaseDevice(),
+		shader = std::make_unique<D3D11Shader>(*this,
 			D3D11ShaderConstBytecode{ reinterpret_cast<const u8*>(vsData), vsSize }, D3D11ShaderConstBytecode{ reinterpret_cast<const u8*>(fsData), fsSize });
 
 		return true;
@@ -529,7 +510,7 @@ namespace Starshine::Rendering::D3D11
 		if (shader == nullptr || attribs == nullptr || attribCount == 0 || attribCount > 8) { return false; }
 
 		const D3D11Shader* d3dShader = static_cast<const D3D11Shader*>(shader);
-		desc = std::make_unique<D3D11VertexDesc>(GetBaseDevice(), attribs, attribCount, d3dShader->VertexShaderBytecode);
+		desc = std::make_unique<D3D11VertexDesc>(*this, attribs, attribCount, d3dShader->VertexShaderBytecode);
 
 		return true;
 	}
@@ -546,11 +527,11 @@ namespace Starshine::Rendering::D3D11
 
 	bool D3D11Device::CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state)
 	{
-		state = std::make_unique<D3D11BlendState>(GetBaseDevice(), desc);
+		state = std::make_unique<D3D11BlendState>(*this, desc);
 		return true;
 	}
 
-	void D3D11Device::SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc)
+	void D3D11Device::SetVertexBuffer(const Buffer* buffer, const VertexDesc* desc)
 	{
 		if (buffer == nullptr || desc == nullptr)
 		{
@@ -558,13 +539,15 @@ namespace Starshine::Rendering::D3D11
 		}
 		else
 		{
-			const D3D11VertexBuffer* d3dBuffer = static_cast<const D3D11VertexBuffer*>(buffer);
+			const D3D11Buffer* d3dBuffer = static_cast<const D3D11Buffer*>(buffer);
+			assert(d3dBuffer->Properties.Type == BufferType::Vertex);
+
 			const D3D11VertexDesc* d3dVtxDesc = static_cast<const D3D11VertexDesc*>(desc);
 			impl->SetVertexBuffer(d3dBuffer, d3dVtxDesc);
 		}
 	}
 
-	void D3D11Device::SetIndexBuffer(const IndexBuffer* buffer)
+	void D3D11Device::SetIndexBuffer(const Buffer* buffer)
 	{
 		if (buffer == nullptr)
 		{
@@ -572,12 +555,14 @@ namespace Starshine::Rendering::D3D11
 		}
 		else
 		{
-			const D3D11IndexBuffer* d3dBuffer = static_cast<const D3D11IndexBuffer*>(buffer);
+			const D3D11Buffer* d3dBuffer = static_cast<const D3D11Buffer*>(buffer);
+			assert(d3dBuffer->Properties.Type == BufferType::Index);
+
 			impl->SetIndexBuffer(d3dBuffer);
 		}
 	}
 
-	void D3D11Device::SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex)
+	void D3D11Device::SetUniformBuffer(const Buffer* buffer, ShaderStage stage, u32 bufferIndex)
 	{
 		if (buffer == nullptr)
 		{
@@ -585,7 +570,9 @@ namespace Starshine::Rendering::D3D11
 		}
 		else
 		{
-			const D3D11UniformBuffer* d3dBuffer = static_cast<const D3D11UniformBuffer*>(buffer);
+			const D3D11Buffer* d3dBuffer = static_cast<const D3D11Buffer*>(buffer);
+			assert(d3dBuffer->Properties.Type == BufferType::Uniform);
+
 			impl->SetUniformBuffer(d3dBuffer, stage, bufferIndex);
 		}
 	}

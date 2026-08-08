@@ -21,7 +21,7 @@ namespace Starshine::Rendering::D3D11
 	struct D3D11Shader : public Shader
 	{
 	public:
-		D3D11Shader(ID3D11Device* device, D3D11ShaderConstBytecode vsBytecode, D3D11ShaderConstBytecode fsBytecode);
+		D3D11Shader(D3D11Device& device, D3D11ShaderConstBytecode vsBytecode, D3D11ShaderConstBytecode fsBytecode);
 		~D3D11Shader() override;
 
 	public:
@@ -33,5 +33,7 @@ namespace Starshine::Rendering::D3D11
 
 		Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader{};
 		Microsoft::WRL::ComPtr<ID3D11PixelShader> FragmentShader{};
+
+		D3D11Device& deviceRef;
 	};
 }

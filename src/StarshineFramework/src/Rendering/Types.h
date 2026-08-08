@@ -29,6 +29,15 @@ namespace Starshine::Rendering
 		Count
 	};
 
+	enum class BufferType : u8
+	{
+		Vertex,
+		Index,
+		Uniform,
+
+		Count
+	};
+	
 	enum class IndexFormat : u8
 	{
 		Index16bit,

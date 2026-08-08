@@ -34,9 +34,7 @@ namespace Starshine::Rendering::D3D11
 		void DrawIndexed(PrimitiveType type, u32 firstIndex, u32 baseVertexIndex, u32 indexCount);
 
 	public:
-		bool CreateVertexBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<VertexBuffer>& buffer);
-		bool CreateIndexBuffer(size_t size, IndexFormat format, const void* initialData, bool dynamic, std::unique_ptr<IndexBuffer>& buffer);
-		bool CreateUniformBuffer(size_t size, const void* initialData, bool dynamic, std::unique_ptr<UniformBuffer>& buffer);
+		bool CreateBuffer(const BufferCreationData& props, std::unique_ptr<Buffer>& buffer);
 
 		bool CreateShader(const void* vsData, size_t vsSize, const void* fsData, size_t fsSize, std::unique_ptr<Shader>& shader);
 		bool CreateVertexDesc(const VertexAttrib* attribs, size_t attribCount, const Shader* shader, std::unique_ptr<VertexDesc>& desc);
@@ -46,9 +44,9 @@ namespace Starshine::Rendering::D3D11
 		bool CreateBlendState(const BlendStateDesc& desc, std::unique_ptr<BlendState>& state);
 
 	public:
-		void SetVertexBuffer(const VertexBuffer* buffer, const VertexDesc* desc);
-		void SetIndexBuffer(const IndexBuffer* buffer);
-		void SetUniformBuffer(const UniformBuffer* buffer, ShaderStage stage, u32 bufferIndex);
+		void SetVertexBuffer(const Buffer* buffer, const VertexDesc* desc);
+		void SetIndexBuffer(const Buffer* buffer);
+		void SetUniformBuffer(const Buffer* buffer, ShaderStage stage, u32 bufferIndex);
 		void SetShader(const Shader* shader);
 		void SetTexture(Graphics::Texture* texture, u32 slot);
 

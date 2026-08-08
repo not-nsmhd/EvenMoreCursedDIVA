@@ -2,30 +2,45 @@
 
 namespace Starshine::Rendering::D3D11
 {
-	D3D11VertexBuffer::D3D11VertexBuffer(ID3D11Device* device, size_t size, bool dynamic, const void* initialData)
-		: Dynamic(dynamic), Size(size)
+	D3D11Buffer::D3D11Buffer(D3D11Device& device, const BufferCreationData& props)
+		: deviceRef(device), Properties(props)
 	{
+		if (!props.Dynamic) assert(props.InitialData != nullptr);
+
 		D3D11_BUFFER_DESC bufferDesc{};
-		bufferDesc.ByteWidth = static_cast<UINT>(size);
-		bufferDesc.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE;
-		bufferDesc.CPUAccessFlags = dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.ByteWidth = static_cast<UINT>(props.Size);
+		bufferDesc.Usage = props.Dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE;
+		bufferDesc.CPUAccessFlags = props.Dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
+		
+		switch (props.Type)
+		{
+		case BufferType::Vertex:
+			bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			break;
+		case BufferType::Index:
+			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+			break;
+		case BufferType::Uniform:
+			bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			break;
+		}
 
 		D3D11_SUBRESOURCE_DATA subresData{};
-		if (initialData != nullptr) { subresData.pSysMem = initialData; }
+		if (props.InitialData != nullptr) { subresData.pSysMem = props.InitialData; }
 
-		device->CreateBuffer(&bufferDesc, initialData != nullptr ? &subresData : nullptr, &BaseBuffer);
-		device->GetImmediateContext(&DeviceContext);
+		ID3D11Device* d3dDev = device.GetBaseDevice();
+		d3dDev->CreateBuffer(&bufferDesc, props.InitialData != nullptr ? &subresData : nullptr, &BaseBuffer);
+		d3dDev->GetImmediateContext(&DeviceContext);
 	}
 
-	D3D11VertexBuffer::~D3D11VertexBuffer()
+	D3D11Buffer::~D3D11Buffer()
 	{
-		BaseBuffer.Reset();
+		deviceRef.QueueObjectForDeletion(BaseBuffer);
 	}
 
-	void D3D11VertexBuffer::SetData(const void* source, size_t offset, size_t size)
+	void D3D11Buffer::SetData(const void* source, size_t offset, size_t size)
 	{
-		if (Dynamic && (offset + size) <= Size)
+		if (Properties.Dynamic && (offset + size) <= Properties.Size)
 		{
 			D3D11_MAPPED_SUBRESOURCE mappedSubres{};
 			HRESULT result = DeviceContext->Map(BaseBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubres);
@@ -39,102 +54,7 @@ namespace Starshine::Rendering::D3D11
 		}
 	}
 
-	void D3D11VertexBuffer::SetDebugName(std::string_view name)
-	{
-#if defined (_DEBUG)
-		BaseBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
-#endif
-	}
-
-	D3D11IndexBuffer::D3D11IndexBuffer(ID3D11Device* device, IndexFormat format, size_t size, bool dynamic, const void* initialData)
-		: Dynamic(dynamic), Size(size), Format(format)
-	{
-		D3D11_BUFFER_DESC bufferDesc{};
-		bufferDesc.ByteWidth = static_cast<UINT>(size);
-		bufferDesc.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE;
-		bufferDesc.CPUAccessFlags = dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
-		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-		D3D11_SUBRESOURCE_DATA subresData{};
-		if (initialData != nullptr) { subresData.pSysMem = initialData; }
-
-		device->CreateBuffer(&bufferDesc, initialData != nullptr ? &subresData : nullptr, &BaseBuffer);
-		device->GetImmediateContext(&DeviceContext);
-	}
-
-	D3D11IndexBuffer::~D3D11IndexBuffer()
-	{
-		BaseBuffer.Reset();
-	}
-
-	void D3D11IndexBuffer::SetData(const void* source, size_t offset, size_t size)
-	{
-		if (Dynamic && (offset + size) <= Size)
-		{
-			D3D11_MAPPED_SUBRESOURCE mappedSubres{};
-			HRESULT result = DeviceContext->Map(BaseBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubres);
-
-			if (result == S_OK)
-			{
-				::memcpy(&(reinterpret_cast<u8*>(mappedSubres.pData))[offset], source, size);
-			}
-
-			DeviceContext->Unmap(BaseBuffer.Get(), 0);
-		}
-	}
-
-	void D3D11IndexBuffer::SetDebugName(std::string_view name)
-	{
-#if defined (_DEBUG)
-		BaseBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
-#endif
-	}
-
-	D3D11UniformBuffer::D3D11UniformBuffer(ID3D11Device* device, size_t size, bool dynamic, const void* initialData)
-		: Dynamic(dynamic), Size(size)
-	{
-		D3D11_BUFFER_DESC bufferDesc{};
-		bufferDesc.ByteWidth = static_cast<UINT>(size);
-		bufferDesc.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
-		bufferDesc.CPUAccessFlags = dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
-		bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-		D3D11_SUBRESOURCE_DATA subresData{};
-		if (initialData != nullptr) { subresData.pSysMem = initialData; }
-
-		device->CreateBuffer(&bufferDesc, initialData != nullptr ? &subresData : nullptr, &BaseBuffer);
-		device->GetImmediateContext(&DeviceContext);
-	}
-
-	D3D11UniformBuffer::~D3D11UniformBuffer()
-	{
-		BaseBuffer.Reset();
-	}
-
-	void D3D11UniformBuffer::SetData(const void* source, size_t offset, size_t size)
-	{
-		if ((offset + size) <= Size)
-		{
-			if (Dynamic)
-			{
-				D3D11_MAPPED_SUBRESOURCE mappedSubres{};
-				HRESULT result = DeviceContext->Map(BaseBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubres);
-
-				if (result == S_OK)
-				{
-					::memcpy(&(reinterpret_cast<u8*>(mappedSubres.pData))[offset], source, size);
-				}
-
-				DeviceContext->Unmap(BaseBuffer.Get(), 0);
-			}
-			else if (offset == 0 && size == Size)
-			{
-				DeviceContext->UpdateSubresource(BaseBuffer.Get(), 0, NULL, source, 0, 0);
-			}
-		}
-	}
-
-	void D3D11UniformBuffer::SetDebugName(std::string_view name)
+	void D3D11Buffer::SetDebugName(std::string_view name)
 	{
 #if defined (_DEBUG)
 		BaseBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());

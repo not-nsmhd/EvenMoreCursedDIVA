@@ -2,17 +2,20 @@
 
 namespace Starshine::Rendering::D3D11
 {
-	D3D11Shader::D3D11Shader(ID3D11Device* device, D3D11ShaderConstBytecode vsBytecode, D3D11ShaderConstBytecode fsBytecode)
+	D3D11Shader::D3D11Shader(D3D11Device& device, D3D11ShaderConstBytecode vsBytecode, D3D11ShaderConstBytecode fsBytecode)
+		: deviceRef(device)
 	{
+		ID3D11Device* d3dDev = device.GetBaseDevice();
+
 		HRESULT result{ S_OK };
-		if ((result = device->CreateVertexShader(vsBytecode.Bytecode, vsBytecode.Size, nullptr, &VertexShader)) != S_OK)
+		if ((result = d3dDev->CreateVertexShader(vsBytecode.Bytecode, vsBytecode.Size, nullptr, &VertexShader)) != S_OK)
 		{
 			VertexShader.Reset();
 			VertexShader = nullptr;
 			return;
 		}
 
-		if ((result = device->CreatePixelShader(fsBytecode.Bytecode, fsBytecode.Size, nullptr, &FragmentShader)) != S_OK)
+		if ((result = d3dDev->CreatePixelShader(fsBytecode.Bytecode, fsBytecode.Size, nullptr, &FragmentShader)) != S_OK)
 		{
 			VertexShader.Reset();
 			VertexShader = nullptr;
@@ -30,6 +33,8 @@ namespace Starshine::Rendering::D3D11
 	D3D11Shader::~D3D11Shader()
 	{
 		delete[] VertexShaderBytecode.Bytecode;
+		deviceRef.QueueObjectForDeletion(VertexShader);
+		deviceRef.QueueObjectForDeletion(FragmentShader);
 	}
 
 	bool D3D11Shader::IsUsable()

@@ -25,7 +25,8 @@ namespace Starshine::Rendering::D3D11
 		};
 	}
 
-	D3D11VertexDesc::D3D11VertexDesc(ID3D11Device* device, const VertexAttrib* attribs, size_t attribCount, const D3D11ShaderBytecode& vsBytecode)
+	D3D11VertexDesc::D3D11VertexDesc(D3D11Device& device, const VertexAttrib* attribs, size_t attribCount, const D3D11ShaderBytecode& vsBytecode)
+		: deviceRef(device)
 	{
 		std::array<D3D11_INPUT_ELEMENT_DESC, 8> inputElements_temp;
 
@@ -44,12 +45,12 @@ namespace Starshine::Rendering::D3D11
 			VertexStride = MathExtensions::Max(VertexStride, stAttrib->VertexSize);
 		}
 
-		device->CreateInputLayout(inputElements_temp.data(), attribCount, vsBytecode.Bytecode, vsBytecode.Size, &InputLayout);
+		device.GetBaseDevice()->CreateInputLayout(inputElements_temp.data(), attribCount, vsBytecode.Bytecode, vsBytecode.Size, &InputLayout);
 	}
 
 	D3D11VertexDesc::~D3D11VertexDesc()
 	{
-		InputLayout.Reset();
+		deviceRef.QueueObjectForDeletion(InputLayout);
 	}
 
 	void D3D11VertexDesc::SetDebugName(std::string_view name)
