@@ -17,7 +17,6 @@ namespace DIVA
 
 	GameContext::~GameContext()
 	{
-		Unload();
 	}
 
 	bool GameContext::Load()

@@ -1,15 +1,33 @@
 #pragma once
 #include "Common/Types.h"
+#include <GameInstance.h>
+
+#include "Menu/ChartSelect.h"
+#include "MainGame/MainGame.h"
 
 namespace DIVA
 {
-	enum GameStateID : i64
+	enum class StateID : i32
 	{
-		GameState_Invalid = -1,
+		NotSet = -1,
 
-		GameState_None = 0,
+		ChartSelect,
+		MainGame,
 
-		GameState_ChartSelect = 1,
-		GameState_MainGame = 2
+		Count
 	};
+
+	static std::unique_ptr<Starshine::GameState> StateInstances[Starshine::EnumCount<StateID>()]
+	{
+		std::make_unique<Menu::ChartSelect>(),
+		std::make_unique<MainGame::MainGameState>()
+	};
+
+	inline Starshine::GameState* GetStatePointer(StateID id)
+	{
+		if (id == StateID::NotSet)
+			return nullptr;
+
+		return StateInstances[static_cast<size_t>(id)].get();
+	}
 }

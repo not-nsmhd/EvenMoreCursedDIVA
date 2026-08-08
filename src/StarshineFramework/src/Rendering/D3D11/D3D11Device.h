@@ -17,6 +17,7 @@ namespace Starshine::Rendering::D3D11
 	public:
 		bool Initialize(SDL_Window* gameWindow);
 		void Destroy();
+		void ReportExistingObjects();
 
 	public:
 		void OnWindowResize(i32 width, i32 height);

@@ -10,7 +10,7 @@ namespace Starshine
 {
 	class GameInstance;
 
-	class GameState : public NonCopyable
+	class GameState : NonCopyable
 	{
 	public:
 		GameState() = default;
@@ -26,7 +26,7 @@ namespace Starshine
 		virtual void Update(GameTime& gameTime) = 0;
 		virtual void Draw(GameTime& gameTime) = 0;
 
-		virtual i64 GetStateID() const = 0;
+		static std::string_view GetStateName() { return ""; };
 
 	public:
 		GameInstance* GameInstance{};
@@ -47,25 +47,12 @@ namespace Starshine
 		void Destroy();
 
 	public:
-		template<typename T>
-		void RegisterState();
-
-		GameState* GetStateInstance(i64 stateID);
-		bool SetState(i64 stateID);
+		bool SetState(GameState* state);
 
 	private:
 		std::unique_ptr<Window> GameWindow{ nullptr };
 
 		struct Impl;
 		std::unique_ptr<Impl> impl{ nullptr };
-
-		std::vector<std::unique_ptr<GameState>> GameStates;
 	};
-
-	template<typename T>
-	inline void Starshine::GameInstance::RegisterState()
-	{
-		static_assert(std::is_base_of_v<GameState, T>, "T must be inherited from GameState");
-		GameStates.push_back(std::make_unique<T>());
-	}
 }

@@ -31,11 +31,8 @@ namespace Starshine::Rendering
 
 	void DestroyDevice()
 	{
-		if (GlobalDevice != nullptr)
-		{
-			GlobalDevice->Destroy();
-			GlobalDevice = nullptr;
-		}
+		GlobalDevice->Destroy();
+		GlobalDevice = nullptr;
 	}
 
 	Device* GetDevice()

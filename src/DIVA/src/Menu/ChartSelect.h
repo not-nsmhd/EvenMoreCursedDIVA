@@ -20,7 +20,7 @@ namespace DIVA::Menu
 		void Update(Starshine::GameTime& gameTime);
 		void Draw(Starshine::GameTime& gameTime);
 
-		i64 GetStateID() const;
+		inline static std::string_view GetStateName() { return "ChartSelect"; };
 
 	private:
 		struct Impl;

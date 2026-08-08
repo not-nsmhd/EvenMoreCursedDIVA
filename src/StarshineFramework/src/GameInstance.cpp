@@ -125,6 +125,7 @@ namespace Starshine
 			{
 				CurrentState->UnloadContent();
 				CurrentState->Destroy();
+				CurrentState = nullptr;
 			}
 
 			if (ImGuiLoaded)
@@ -134,10 +135,14 @@ namespace Starshine
 				ImGui::DestroyContext();
 			}
 
+			if (Rendering::GetDevice() != nullptr)
+				Rendering::GetDevice()->ReportExistingObjects();
+
 			AudioEngine::DestroyInstance();
 
 			Gamepad::Destroy();
 			Keyboard::Destroy();
+			Rendering::DestroyDevice();
 
 			Parent->GameWindow = nullptr;
 			SDL_Quit();
@@ -260,35 +265,14 @@ namespace Starshine
 			}
 		}
 
-		bool SetState(i64 stateID)
+		bool SetState(GameState* state)
 		{
-			if (Parent->GameStates.empty())
-			{
-				LogMessage("No game states have been registered. Have you called \"GameInstance->RegisterState<T>()\"?");
-				return false;
-			}
-
-			GameState* newState = nullptr;
-
-			for (auto& state : Parent->GameStates)
-			{
-				if (state->GetStateID() == stateID)
-				{
-					newState = state.get();
-					break;
-				}
-			}
-
-			if (newState == nullptr)
-			{
-				LogMessage("No state with ID %d has been registered", stateID);
-				return false;
-			}
+			if (state == nullptr) { return false; }
 
 			if (CurrentState != nullptr)
 			{
-				LogMessage("Changing state: [%d] -> [%d]",
-					CurrentState->GetStateID(), stateID);
+				LogMessage("Changing state: [%s] -> [%s]",
+					CurrentState->GetStateName().data(), state->GetStateName().data());
 
 				CurrentState->UnloadContent();
 				CurrentState->Destroy();
@@ -296,33 +280,19 @@ namespace Starshine
 			}
 			else
 			{
-				LogMessage("Setting initial state: [%d]", stateID);
+				LogMessage("Setting initial state: [%s]", state->GetStateName().data());
 			}
 
-			newState->GameInstance = Parent;
+			state->GameInstance = Parent;
 
-			if (!newState->Initialize()) { return false; }
+			if (!state->Initialize()) { return false; }
 			LogMessage("Initialized new state");
 
-			if (!newState->LoadContent()) { return false; }
+			if (!state->LoadContent()) { return false; }
 			LogMessage("Loaded content of the new state");
 
-			CurrentState = newState;
+			CurrentState = state;
 			return true;
-		}
-
-		GameState* GetStateInstance(i64 stateID)
-		{
-			for (auto& state : Parent->GameStates)
-			{
-				if (state->GetStateID() == stateID)
-				{
-					return state.get();
-					break;
-				}
-			}
-
-			return nullptr;
 		}
 	};
 
@@ -355,15 +325,8 @@ namespace Starshine
 		impl->Destroy();
 	}
 
-	bool GameInstance::SetState(i64 stateID)
+	bool GameInstance::SetState(GameState* state)
 	{
-		if (stateID == -1) { return false; }
-		return impl->SetState(stateID);
-	}
-
-	GameState* Starshine::GameInstance::GetStateInstance(i64 stateID)
-	{
-		if (stateID == -1) { return nullptr; }
-		return impl->GetStateInstance(stateID);
+		return impl->SetState(state);
 	}
 }

@@ -85,11 +85,11 @@ namespace DIVA::Menu
 
 				if (!info.ChartFilePaths[currentDifficultyIndex].empty())
 				{
-					auto mgState = static_cast<MainGame::MainGameState*>(GameInstance->GetStateInstance(GameState_MainGame));
+					auto mgState = static_cast<MainGame::MainGameState*>(GetStatePointer(StateID::MainGame));
 					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
 					mgState->LoadSettings.LyricsPath = info.LyricsFilePath;
 					mgState->LoadSettings.MusicPath = info.MusicFilePath;
-					GameInstance->SetState(GameState_MainGame);
+					GameInstance->SetState(mgState);
 				}
 			}
 		}
@@ -174,10 +174,5 @@ namespace DIVA::Menu
 	void ChartSelect::Draw(GameTime& gameTime)
 	{
 		impl->Draw();
-	}
-
-	i64 ChartSelect::GetStateID() const
-	{
-		return GameState_ChartSelect;
 	}
 }

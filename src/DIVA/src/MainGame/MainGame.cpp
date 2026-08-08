@@ -104,7 +104,7 @@ namespace DIVA::MainGame
 			};
 		} GamepadBinds;
 
-		HUD* hud = nullptr;
+		std::unique_ptr<HUD> hud{};
 
 		SourceHandle HitSound_Normal{};
 		SourceHandle HitSound_Double{};
@@ -127,7 +127,7 @@ namespace DIVA::MainGame
 		size_t PreviousMusicPosition{};
 		f64 ChartDeltaTime{};
 
-		SpritePacker sprPacker;
+		std::unique_ptr<SpritePacker> sprPacker;
 
 		char debugText[512] = {};
 
@@ -172,7 +172,7 @@ namespace DIVA::MainGame
 		void Initialize()
 		{
 			GFXDevice = Rendering::GetDevice();
-			hud = new HUD(MainGameContext);
+			hud = std::make_unique<HUD>(MainGameContext);
 			hud->Initialize();
 
 			Reset();
@@ -180,12 +180,14 @@ namespace DIVA::MainGame
 
 		bool CreateIconSetSpriteSheet()
 		{
-			sprPacker.AddFromDirectory("diva/sprites/iconset_dev");
-			sprPacker.Pack();
+			sprPacker = std::make_unique<SpritePacker>();
+			sprPacker->Initialize();
+			sprPacker->AddFromDirectory("diva/sprites/iconset_dev");
+			sprPacker->Pack();
 
 			MainGameContext.IconSetSprites.SpriteSheet = std::make_shared<SpriteSheet>();
-			MainGameContext.IconSetSprites.SpriteSheet->CreateFromSpritePacker(sprPacker);
-			sprPacker.Clear();
+			MainGameContext.IconSetSprites.SpriteSheet->CreateFromSpritePacker(*sprPacker);
+			sprPacker->Clear();
 
 			auto& spriteCache = MainGameContext.IconSetSprites;
 			auto& iconSet = MainGameContext.IconSetSprites.SpriteSheet;
@@ -276,11 +278,10 @@ namespace DIVA::MainGame
 			debugFont = GameContext::GetInstance()->DebugFont.get();
 			MainGameContext.DebugFont = debugFont;
 
-			sprPacker.Initialize();
 			CreateIconSetSpriteSheet();
 			LoadAnimations();
 
-			hud->LoadSprites(sprPacker);
+			hud->LoadSprites(*sprPacker);
 			
 			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
 			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
@@ -349,9 +350,11 @@ namespace DIVA::MainGame
 
 			MainGameContext.IconSetAnimations.Animations = nullptr;
 			MainGameContext.IconSetSprites.SpriteSheet = nullptr;
+			sprPacker->Clear();
+			sprPacker = nullptr;
 
 			hud->Destroy();
-			delete hud;
+			hud = nullptr;
 
 			ActiveNotes.clear();
 			songChart.Clear();
@@ -819,7 +822,7 @@ namespace DIVA::MainGame
 					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
 					break;
 				case 2:
-					GameInstance->SetState(GameState_ChartSelect);
+					GameInstance->SetState(GetStatePointer(StateID::ChartSelect));
 					return;
 				}
 
@@ -862,7 +865,7 @@ namespace DIVA::MainGame
 					Reset();
 					break;
 				case 1:
-					GameInstance->SetState(GameState_ChartSelect);
+					GameInstance->SetState(GetStatePointer(StateID::ChartSelect));
 					return;
 				}
 
@@ -984,10 +987,5 @@ namespace DIVA::MainGame
 	void MainGameState::Draw(GameTime& gameTime)
 	{
 		impl->Draw(gameTime);
-	}
-
-	i64 MainGameState::GetStateID() const
-	{
-		return GameState_MainGame;
 	}
 }

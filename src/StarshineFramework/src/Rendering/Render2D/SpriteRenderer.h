@@ -20,8 +20,6 @@ namespace Starshine::Rendering::Render2D
 		SpriteRenderer();
 		~SpriteRenderer();
 
-		void Destroy();
-
 	public:
 		Device* GetRenderingDevice();
 

@@ -86,9 +86,8 @@ namespace Starshine::Rendering::D3D11
 		{
 		}
 
-		~Impl() 
+		~Impl()
 		{
-			LogMessage(__FUNCTION__);
 		}
 
 		bool Initialize(SDL_Window* window)
@@ -121,8 +120,6 @@ namespace Starshine::Rendering::D3D11
 				LogError(LogName, "Failed to get device's debug layer. Error: 0x%08X", result);
 				return false;
 			}
-
-			
 #endif
 
 			SDL_SysWMinfo wmInfo{};
@@ -198,18 +195,30 @@ namespace Starshine::Rendering::D3D11
 
 		void Destroy()
 		{
-			SwapChainResources.ColorTexture.Reset();
-			SwapChainResources.RTView.Reset();
+			D3D11.DeviceContext->ClearState();
+			D3D11.DeviceContext->Flush();
 
-			D3D11.DisabledDSState.Reset();
-			D3D11.DeviceContext.Reset();
+			objectsToDelete.clear();
 
-#if defined (_DEBUG)
-			D3D11.Debug->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL);
-			D3D11.Debug.Reset();
+#ifdef _DEBUG
+			D3D11.Debug = nullptr;
 #endif
 
-			D3D11.Device.Reset();
+			SwapChain.DXGISwapChain = nullptr;
+
+			D3D11.DisabledDSState = nullptr;
+			D3D11.NoCullRSState = nullptr;
+
+			D3D11.DeviceContext = nullptr;
+			D3D11.Device = nullptr;
+			D3D11.DXGIFactory = nullptr;
+		}
+
+		void ReportExistingObjects()
+		{
+#ifdef _DEBUG
+			D3D11.Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL);
+#endif
 		}
 
 		void Clear(ClearFlags flags, const Color& color, f32 depth, u8 stencil)
@@ -256,8 +265,8 @@ namespace Starshine::Rendering::D3D11
 		{
 			D3D11.DeviceContext->Flush();
 
-			SwapChainResources.ColorTexture.Reset();
-			SwapChainResources.RTView.Reset();
+			SwapChainResources.ColorTexture = nullptr;
+			SwapChainResources.RTView = nullptr;
 
 			SwapChain.DXGISwapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 			SwapChain.DXGISwapChain->GetBuffer(0, IID_PPV_ARGS(&SwapChainResources.ColorTexture));
@@ -441,6 +450,12 @@ namespace Starshine::Rendering::D3D11
 
 	void D3D11Device::Destroy()
 	{
+		impl->Destroy();
+	}
+
+	void D3D11Device::ReportExistingObjects()
+	{
+		impl->ReportExistingObjects();
 	}
 
 	void D3D11Device::OnWindowResize(i32 width, i32 height)

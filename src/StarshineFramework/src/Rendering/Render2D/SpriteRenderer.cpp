@@ -61,20 +61,16 @@ namespace Starshine::Rendering::Render2D
 		VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte4Norm, sizeof(SpriteVertex), offsetof(SpriteVertex, Color) }
 	};
 
-	struct BlendModeState
+	constexpr std::array<BlendStateDesc, EnumCount<BlendMode>()> BlendModeDescs
 	{
-		BlendStateDesc Desc{};
-		std::unique_ptr<BlendState> StateObject{ nullptr };
+		BlendStateDesc
+		{ BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add },
+		{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+		{ BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+		{ BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add }
 	};
 
-	array<BlendModeState, EnumCount<BlendMode>()> BlendModes
-	{
-		BlendModeState
-		{ { BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add } },
-		{ { BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
-		{ { BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } },
-		{ { BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add } }
-	};
+	std::vector<std::unique_ptr<BlendState>> BlendStates; // RAII moment
 
 	struct SpriteRenderer::Impl
 	{
@@ -135,6 +131,7 @@ namespace Starshine::Rendering::Render2D
 
 		~Impl()
 		{
+			BlendStates.clear();
 		}
 
 		void Internal_CreateVertexBuffer()
@@ -212,13 +209,16 @@ namespace Starshine::Rendering::Render2D
 			};
 #endif
 
+			BlendStates.resize(BlendModeDescs.size());
+
 			size_t i = 0;
-			for (auto& mode : BlendModes)
+			for (auto& desc : BlendModeDescs)
 			{
-				GFXDevice->CreateBlendState(mode.Desc, mode.StateObject);
+				GFXDevice->CreateBlendState(desc, BlendStates[i]);
 #ifdef _DEBUG
-				mode.StateObject->SetDebugName(debugBlendStateNames[i++]);
+				BlendStates[i]->SetDebugName(debugBlendStateNames[i]);
 #endif
+				i++;
 			}
 		}
 
@@ -476,8 +476,7 @@ namespace Starshine::Rendering::Render2D
 			}
 			else
 			{
-				const BlendModeState& blendState = BlendModes[static_cast<size_t>(mode)];
-				GFXDevice->SetBlendState(blendState.StateObject.get());
+				GFXDevice->SetBlendState(BlendStates[static_cast<size_t>(mode)].get());
 			}
 		}
 	};
@@ -487,11 +486,6 @@ namespace Starshine::Rendering::Render2D
 	}
 
 	SpriteRenderer::~SpriteRenderer()
-	{
-		Destroy();
-	}
-
-	void SpriteRenderer::Destroy()
 	{
 	}
 

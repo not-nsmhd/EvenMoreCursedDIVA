@@ -23,6 +23,7 @@ namespace Starshine::Rendering
 	public:
 		virtual bool Initialize(SDL_Window* gameWindow) = 0;
 		virtual void Destroy() = 0;
+		virtual void ReportExistingObjects() = 0;
 
 	public:
 		virtual void OnWindowResize(i32 width, i32 height) = 0;
