@@ -99,6 +99,8 @@ namespace DIVA::Menu
 			{
 				if (selectionIndex != static_cast<i32>(SubMenuID::Exit))
 					SetSubMenu(static_cast<SubMenuID>(selectionIndex));
+				else
+					GameInstance->Quit();
 			}
 		}
 

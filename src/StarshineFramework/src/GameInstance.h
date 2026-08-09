@@ -48,6 +48,7 @@ namespace Starshine
 
 	public:
 		bool SetState(GameState* state);
+		void Quit();
 
 	private:
 		std::unique_ptr<Window> GameWindow{ nullptr };

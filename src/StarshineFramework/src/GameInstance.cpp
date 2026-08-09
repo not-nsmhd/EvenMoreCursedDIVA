@@ -325,6 +325,11 @@ namespace Starshine
 		impl->Destroy();
 	}
 
+	void GameInstance::Quit()
+	{
+		impl->Running = false;
+	}
+
 	bool GameInstance::SetState(GameState* state)
 	{
 		return impl->SetState(state);
