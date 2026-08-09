@@ -2,10 +2,37 @@
 
 namespace Starshine
 {
+	static std::vector<DisplayMode> supportedDisplayModes;
+	DisplayMode* currentDisplayMode{};
+	DisplayMode* nativeDisplayMode{};
+
+	void InitDisplayModeList()
+	{
+		i32 dispModeNum = SDL_GetNumDisplayModes(0);
+		for (i32 i = dispModeNum - 1; i >= 0; i--)
+		{
+			SDL_DisplayMode sdlDispMode{};
+
+			SDL_GetDisplayMode(0, i, &sdlDispMode);
+
+			if ((sdlDispMode.w / 16) != (sdlDispMode.h / 9))
+				continue;
+
+			DisplayMode& dispMode = supportedDisplayModes.emplace_back();
+
+			dispMode.Resolution = { sdlDispMode.w, sdlDispMode.h };
+			dispMode.RefreshRate = sdlDispMode.refresh_rate;
+			dispMode.SDLDisplayMode = sdlDispMode;
+		}
+
+		nativeDisplayMode = &supportedDisplayModes.back();
+	}
+
 	Window::Window(std::string_view title, i32 width, i32 height, SDL_WindowFlags flags)
 		: windowTitle(title)
 	{
 		baseWindow = SDL_CreateWindow(title.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+		InitDisplayModeList();
 	}
 
 	Window::~Window()
@@ -47,6 +74,16 @@ namespace Starshine
 		return (windowFlags & SDL_WINDOW_RESIZABLE) != 0;
 	}
 
+	void Window::SetFullscreen(bool fullscreen)
+	{
+		SDL_SetWindowFullscreen(baseWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	}
+
+	bool Window::GetFullscreen() const
+	{
+		return SDL_GetWindowFlags(baseWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+	}
+
 	void Window::SetTitle(std::string_view title)
 	{
 		SDL_SetWindowTitle(baseWindow, title.data());
@@ -61,5 +98,33 @@ namespace Starshine
 	SDL_Window* Window::GetBaseWindow()
 	{
 		return baseWindow;
+	}
+
+	const std::vector<DisplayMode>& Window::GetDisplayModes() const
+	{
+		return supportedDisplayModes;
+	}
+
+	DisplayMode Window::GetCurrentDisplayMode() const
+	{
+		return DisplayMode();
+	}
+
+	const DisplayMode* Window::GetNativeDisplayMode() const
+	{
+		return nativeDisplayMode;
+	}
+
+	void Window::SetDisplayMode(const DisplayMode& mode)
+	{
+		if (SDL_GetWindowFlags(baseWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP)
+		{
+			SDL_SetWindowDisplayMode(baseWindow, &mode.SDLDisplayMode);
+		}
+		else
+		{
+			SDL_SetWindowSize(baseWindow, mode.Resolution.x, mode.Resolution.y);
+			SDL_SetWindowPosition(baseWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		}
 	}
 }

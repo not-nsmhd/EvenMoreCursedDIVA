@@ -17,14 +17,35 @@ namespace DIVA::Menu
 	using namespace Starshine::Input;
 	using namespace DIVA::Formats;
 
+	enum class SubMenuID : i32
+	{
+		Main,
+		ChartSelect,
+		Options,
+		Exit, /* NOTE: Technically not a menu, but it is a hacky way to
+			   make sure that the "Exit" option is displayed in the main menu */
+
+		Count
+	};
+
+	static constexpr std::array<std::string_view, EnumCount<SubMenuID>()> SubMenuNames
+	{
+		"Main Menu",
+		"Chart Select",
+		"Options",
+		"Exit"
+	};
+
 	struct ChartSelect::Impl
 	{
 		Starshine::GameInstance* GameInstance{};
 
 		SpriteRenderer* spriteRenderer{};
-		Font* debugFont;
+		Font* debugFont{};
 
-		i32 selectionIndex = 0;
+		SubMenuID currentSubmenu{};
+
+		i32 selectionIndex = 1;
 		i32 currentDifficultyIndex{};
 
 		Impl()
@@ -37,8 +58,6 @@ namespace DIVA::Menu
 
 		void Reset()
 		{
-			selectionIndex = 0;
-			currentDifficultyIndex = 0;
 		}
 
 		void LoadContent()
@@ -51,7 +70,39 @@ namespace DIVA::Menu
 		{
 		}
 
-		void Update()
+		// NOTE: Convinience function that automatically resets the selection index
+		void SetSubMenu(SubMenuID id)
+		{
+			selectionIndex = 0;
+			currentDifficultyIndex = 0;
+			currentSubmenu = id;
+
+			if (currentSubmenu == SubMenuID::Main)
+				selectionIndex = 1;
+		}
+
+		void UpdateMain()
+		{
+			if (Keyboard::IsKeyTapped(SDLK_DOWN))
+			{
+				selectionIndex++;
+				if (selectionIndex >= EnumCount<SubMenuID>()) { selectionIndex = static_cast<i32>(SubMenuID::ChartSelect); }
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_UP))
+			{
+				selectionIndex--;
+				if (selectionIndex < 0) { selectionIndex = EnumCount<SubMenuID>() - 1; }
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_RETURN))
+			{
+				if (selectionIndex != static_cast<i32>(SubMenuID::Exit))
+					SetSubMenu(static_cast<SubMenuID>(selectionIndex));
+			}
+		}
+
+		void UpdateChartSelect()
 		{
 			auto songList = GameContext::GetInstance()->SongList;
 
@@ -94,15 +145,83 @@ namespace DIVA::Menu
 					GameInstance->SetState(mgState);
 				}
 			}
+
+			if (Keyboard::IsKeyTapped(SDLK_ESCAPE))
+				SetSubMenu(SubMenuID::Main);
 		}
 
-		void Draw()
+		void UpdateDisplayModeList()
 		{
-			auto gfxDevice = spriteRenderer->GetRenderingDevice();
-			auto songList = GameContext::GetInstance()->SongList;
+			auto window = GameInstance->GetWindow();
+			auto dispModeList = window->GetDisplayModes();
 
-			gfxDevice->Clear(Rendering::ClearFlags_Color, DefaultColors::ClearColor_Menus, 1.0f, 0);
-			spriteRenderer->SetBlendMode(BlendMode::Normal);
+			if (Keyboard::IsKeyTapped(SDLK_DOWN))
+			{
+				selectionIndex++;
+				if (selectionIndex >= dispModeList.size() + 1) { selectionIndex = 0; }
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_UP))
+			{
+				selectionIndex--;
+				if (selectionIndex < 0) { selectionIndex = dispModeList.size(); } // Last index is the return button
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_F11))
+			{
+				window->SetFullscreen(!window->GetFullscreen());
+			}
+
+			if (Keyboard::IsKeyTapped(SDLK_RETURN))
+			{
+				if (selectionIndex != dispModeList.size())
+				{
+					const DisplayMode& dispMode = dispModeList[selectionIndex];
+					window->SetDisplayMode(dispMode);
+				}
+				else
+					SetSubMenu(SubMenuID::Main);
+			}
+		}
+
+		void Update()
+		{
+			switch (currentSubmenu)
+			{
+			case SubMenuID::Main:
+				UpdateMain();
+				break;
+			case SubMenuID::ChartSelect:
+				UpdateChartSelect();
+				break;
+			case SubMenuID::Options:
+				UpdateDisplayModeList();
+				break;
+			case SubMenuID::Exit:
+				// NOTE/HACK: A failsafe to make sure the menu still works correctly if I mess something up when switching submenus
+				SetSubMenu(SubMenuID::Main);
+				break;
+			}
+		}
+
+		void DrawMain()
+		{
+			spriteRenderer->Font().PushString(debugFont, "Main Menu", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+
+			float yOffset = 0.0f;
+			for (size_t i = 1; i < EnumCount<SubMenuID>(); i++)
+			{
+				const Color selectionBaseColor = i == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
+
+				spriteRenderer->Font().PushString(debugFont, SubMenuNames[i], vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+
+				yOffset += debugFont->LineHeight;
+			}
+		}
+
+		void DrawChartSelect()
+		{
+			auto songList = GameContext::GetInstance()->SongList;
 
 			spriteRenderer->Font().PushString(debugFont, "Song Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
 
@@ -132,6 +251,62 @@ namespace DIVA::Menu
 
 				yOffset += debugFont->LineHeight;
 				curIndex++;
+			}
+		}
+
+		void DrawDisplayModeList()
+		{
+			auto window = GameInstance->GetWindow();
+			auto dispModeList = window->GetDisplayModes();
+
+			spriteRenderer->Font().PushString(debugFont, "Display Modes", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+
+			f32 yOffset = 0.0f;
+			i32 curIndex = 0;
+
+			char dispModeString[64]{};
+
+			for (const auto& dispMode : dispModeList)
+			{
+				bool native = (dispMode == *window->GetNativeDisplayMode());
+				const Color selectionBaseColor = curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
+
+				SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "%dx%d (%dHz) %s",
+					dispMode.Resolution.x, dispMode.Resolution.y, dispMode.RefreshRate, native ? "(native)" : "");
+
+				spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+
+				yOffset += debugFont->LineHeight;
+				curIndex++;
+			}
+
+			yOffset += debugFont->LineHeight;
+			spriteRenderer->Font().PushString(debugFont, "Return", vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
+				curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
+
+			SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "Window Mode (F11): %s",
+				window->GetFullscreen() ? "Borderless Fullscreen" : "Windowed");
+			spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
+		}
+
+		void Draw()
+		{
+			auto gfxDevice = spriteRenderer->GetRenderingDevice();
+
+			gfxDevice->Clear(Rendering::ClearFlags_Color, DefaultColors::ClearColor_Menus, 1.0f, 0);
+			spriteRenderer->SetBlendMode(BlendMode::Normal);
+
+			switch (currentSubmenu)
+			{
+			case SubMenuID::Main:
+				DrawMain();
+				break;
+			case SubMenuID::ChartSelect:
+				DrawChartSelect();
+				break;
+			case SubMenuID::Options:
+				DrawDisplayModeList();
+				break;
 			}
 
 			spriteRenderer->RenderSprites(nullptr);
