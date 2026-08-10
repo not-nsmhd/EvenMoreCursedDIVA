@@ -16,6 +16,7 @@
 #include "IO/Xml.h"
 #include "audio/AudioEngine.h"
 #include "Menu/ChartSelect.h"
+#include "../Settings.h"
 #include <deque>
 
 namespace DIVA::MainGame
@@ -177,6 +178,16 @@ namespace DIVA::MainGame
 			hud->Initialize();
 
 			Reset();
+			SetKeybinds();
+		}
+
+		void SetKeybinds()
+		{
+			KeyboardBinds.Notes[0].MappedValue = SettingsData.Input.MainGame_Circle;
+			KeyboardBinds.Notes[1].MappedValue = SettingsData.Input.MainGame_Cross;
+			KeyboardBinds.Notes[2].MappedValue = SettingsData.Input.MainGame_Square;
+			KeyboardBinds.Notes[3].MappedValue = SettingsData.Input.MainGame_Triangle;
+			KeyboardBinds.Notes[4].MappedValue = SettingsData.Input.MainGame_Star;
 		}
 
 		bool CreateIconSetSpriteSheet()
@@ -466,7 +477,53 @@ namespace DIVA::MainGame
 				}
 
 				note->Update(gameTime);
+				UpdateNoteAutoplay(note);
+
 				noteIndex++;
+			}
+		}
+
+		void UpdateNoteAutoplay(GameNote* note)
+		{
+			if (note->ElapsedTime >= note->FlyTime && !note->HasBeenEvaluated())
+			{
+				switch (note->Type)
+				{
+				case NoteType::Normal:
+					AudioEngine::GetInstance()->PlaySound(note->Shape == NoteShape::Star ? HitSound_Star_Normal : HitSound_Normal, 0.125f);
+					break;
+				case NoteType::Double:
+					note->DoubleTap.Primary = true;
+					note->DoubleTap.Alternative = true;
+					AudioEngine::GetInstance()->PlaySound(note->Shape == NoteShape::Star ? HitSound_Star_Double : HitSound_Double, 0.125f);
+					break;
+				case NoteType::HoldStart:
+					note->Hold.PrimaryHeld = true;
+					note->Hold.BonusBaseValue = IsChanceTime ? ScoreValues::Cool * 2 : 0;
+					hud->HoldScoreBonus();
+					hud->SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
+
+					HitSound_Hold_LoopVoice.SetSource(note->Shape == NoteShape::Star ? HitSound_StarHold_Loop : HitSound_Hold_Loop);
+					HitSound_Hold_LoopVoice.SetFramePosition(0);
+					HitSound_Hold_LoopVoice.SetLoopState(true);
+					HitSound_Hold_LoopVoice.SetPlaying(true);
+					break;
+				case NoteType::HoldEnd:
+					note->Hold.PrimaryHeld = false;
+					hud->ReleaseScoreBonus(false);
+					HitSound_Hold_LoopVoice.SetPlaying(false);
+					AudioEngine::GetInstance()->PlaySound(note->Shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd, 0.135f);
+					break;
+				}
+
+				note->Evaluate(note->Shape);
+
+				MainGameContext.Score.Score += ScoreValues::Cool * (IsChanceTime ? 2 : 1);
+				MainGameContext.Score.Combo++;
+
+				hud->SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
+				if (IsChanceTime)
+					hud->SetScoreBonusDisplayState(ScoreValues::Cool * 2, note->TargetPosition);
 			}
 		}
 

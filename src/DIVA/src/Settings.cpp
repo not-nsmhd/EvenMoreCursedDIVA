@@ -128,7 +128,7 @@ namespace DIVA
 		writeKeybindElement(inputElement, "MainGame_Circle", Input.MainGame_Circle);
 		writeKeybindElement(inputElement, "MainGame_Cross", Input.MainGame_Cross);
 		writeKeybindElement(inputElement, "MainGame_Square", Input.MainGame_Square);
-		writeKeybindElement(inputElement, "MainGame_Star", Input.MainGame_Triangle);
+		writeKeybindElement(inputElement, "MainGame_Star", Input.MainGame_Star);
 
 		document.InsertFirstChild(rootElement);
 		document.SaveFile(filePath.data());

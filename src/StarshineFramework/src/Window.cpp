@@ -58,7 +58,10 @@ namespace Starshine
 
 	void Window::SetPosition(const ivec2& position)
 	{
-		SDL_SetWindowPosition(baseWindow, position.x, position.y);
+		if (position == CenteredWindowPos)
+			SDL_SetWindowPosition(baseWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		else
+			SDL_SetWindowPosition(baseWindow, position.x, position.y);
 	}
 
 	ivec2 Window::GetPosition() const
