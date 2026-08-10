@@ -92,7 +92,7 @@ namespace DIVA::Menu
 			if (Keyboard::IsKeyTapped(SDLK_UP))
 			{
 				selectionIndex--;
-				if (selectionIndex < 0) { selectionIndex = EnumCount<SubMenuID>() - 1; }
+				if (selectionIndex <= 0) { selectionIndex = EnumCount<SubMenuID>() - 1; }
 			}
 
 			if (Keyboard::IsKeyTapped(SDLK_RETURN))
@@ -171,14 +171,15 @@ namespace DIVA::Menu
 
 			if (Keyboard::IsKeyTapped(SDLK_F11))
 			{
-				window->SetFullscreen(!window->GetFullscreen());
+				WindowMode mode = window->GetMode();
+				window->SetMode(mode == WindowMode::Window ? WindowMode::Fullscreen : WindowMode::Window);
 			}
 
 			if (Keyboard::IsKeyTapped(SDLK_RETURN))
 			{
 				if (selectionIndex != dispModeList.size())
 				{
-					const DisplayMode& dispMode = dispModeList[selectionIndex];
+					const SDL_DisplayMode& dispMode = dispModeList[selectionIndex];
 					window->SetDisplayMode(dispMode);
 				}
 				else
@@ -261,20 +262,21 @@ namespace DIVA::Menu
 			auto window = GameInstance->GetWindow();
 			auto dispModeList = window->GetDisplayModes();
 
-			spriteRenderer->Font().PushString(debugFont, "Display Modes", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(debugFont, "Options", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
 
 			f32 yOffset = 0.0f;
 			i32 curIndex = 0;
 
 			char dispModeString[64]{};
+			const SDL_DisplayMode& nativeDisplayMode = window->GetNativeDisplayMode();
 
 			for (const auto& dispMode : dispModeList)
 			{
-				bool native = (dispMode == *window->GetNativeDisplayMode());
+				bool native = (dispMode.w == nativeDisplayMode.w && dispMode.h == nativeDisplayMode.h);
 				const Color selectionBaseColor = curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
 
 				SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "%dx%d (%dHz) %s",
-					dispMode.Resolution.x, dispMode.Resolution.y, dispMode.RefreshRate, native ? "(native)" : "");
+					dispMode.w, dispMode.h, dispMode.refresh_rate, native ? "(native)" : "");
 
 				spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
 
@@ -286,8 +288,8 @@ namespace DIVA::Menu
 			spriteRenderer->Font().PushString(debugFont, "Return", vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
 				curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
 
-			SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "Window Mode (F11): %s",
-				window->GetFullscreen() ? "Borderless Fullscreen" : "Windowed");
+			const size_t modeIndex = static_cast<size_t>(window->GetMode());
+			SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "Window Mode (F11): %s", WindowModeNames[modeIndex]);
 			spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
 		}
 

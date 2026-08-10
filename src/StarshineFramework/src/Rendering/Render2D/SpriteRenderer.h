@@ -43,6 +43,9 @@ namespace Starshine::Rendering::Render2D
 
 		void PushSprite(Graphics::Texture* texture);
 
+		void SetBasePositionAndScale(const vec2& pos, const vec2& scale);
+		void GetBasePositionAndScale(vec2& pos, vec2& scale);
+
 		void RenderSprites(Shader* shader);
 
 	public:

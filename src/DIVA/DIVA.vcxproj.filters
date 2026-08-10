@@ -47,6 +47,9 @@
     <ClCompile Include="src\MainGame\Lyrics.cpp">
       <Filter>Source Files\MainGame</Filter>
     </ClCompile>
+    <ClCompile Include="src\Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -85,6 +88,9 @@
       <Filter>Source Files\MainGame</Filter>
     </ClInclude>
     <ClInclude Include="src\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,5 @@
 #include "GameContext.h"
+#include <Common/Logging/Logging.h>
 #include <IO/Path/Directory.h>
 
 using namespace Starshine;
@@ -23,11 +24,12 @@ namespace DIVA
 	{
 		if (!LoadGraphics()) { return false; }
 		if (!LoadSongList()) { return false; }
+
 		return true;
 	}
 
 	void GameContext::Unload()
-	{
+	{		
 		SongList.clear();
 		DebugFont = nullptr;
 		TestCJKFont = nullptr;

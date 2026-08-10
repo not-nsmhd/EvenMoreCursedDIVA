@@ -53,8 +53,9 @@ namespace Starshine::Xml
 	inline size_t GetValueLength(Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 	inline size_t GetValueLength(const Attribute* attrib) { return SDL_strlen(attrib->Value()); }
 
-	static constexpr std::string_view DefaultColorFormat = "%02x%02x%02x%02x";
-	static constexpr std::string_view DefaultVec2Format = "%f %f";
+	static constexpr const char* DefaultColorFormat = "%02x%02x%02x%02x";
+	static constexpr const char* DefaultVec2Format = "%f %f";
+	static constexpr const char* DefaultIVec2Format = "%d %d";
 
 	inline bool TryGetValue(Color& value, const Attribute* attrib)
 	{
@@ -63,7 +64,7 @@ namespace Starshine::Xml
 			const char* attribText = attrib->Value();
 
 			u32 r = 0, g = 0, b = 0, a = 0;
-			sscanf_s(attribText, DefaultColorFormat.data(), &r, &g, &b, &a);
+			sscanf_s(attribText, DefaultColorFormat, &r, &g, &b, &a);
 			value = Color{ static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b), static_cast<u8>(a) };
 			return true;
 		}
@@ -78,9 +79,51 @@ namespace Starshine::Xml
 			const char* attribText = attrib->Value();
 			vec2 temp{};
 
-			sscanf_s(attribText, DefaultVec2Format.data(), &temp.x, &temp.y);
+			sscanf_s(attribText, DefaultVec2Format, &temp.x, &temp.y);
 			value = temp;
 			return true;
+		}
+
+		return false;
+	}
+
+	inline bool TryGetValue(ivec2& value, const Attribute* attrib)
+	{
+		if (attrib != nullptr && GetValueLength(attrib) > 1)
+		{
+			const char* attribText = attrib->Value();
+			ivec2 temp{};
+
+			sscanf_s(attribText, DefaultIVec2Format, &temp.x, &temp.y);
+			value = temp;
+			return true;
+		}
+
+		return false;
+	}
+
+	inline bool TryGetValue(i32& value, const Attribute* attrib)
+	{
+		if (attrib != nullptr && GetValueLength(attrib) > 1)
+		{
+			const char* attribText = attrib->Value();
+			i32 temp{};
+
+			sscanf_s(attribText, "%d", &temp);
+			value = temp;
+			return true;
+		}
+
+		return false;
+	}
+
+	inline bool TryGetValue(bool& value, const Attribute* attrib)
+	{
+		if (attrib != nullptr && GetValueLength(attrib) > 1)
+		{
+			const char* attribText = attrib->Value();
+			if (SDL_strncmp(attribText, "true", 5) == 0)
+				return true;
 		}
 
 		return false;
@@ -109,9 +152,25 @@ namespace Starshine::Xml
 		if (!name.empty())
 		{
 			char valueString[32]{};
-			SDL_snprintf(valueString, sizeof(valueString) - 1, DefaultVec2Format.data(), value.x, value.y);
+			SDL_snprintf(valueString, sizeof(valueString) - 1, DefaultVec2Format, value.x, value.y);
 			element->SetAttribute(name.data(), valueString);
 		}
+	}
+
+	inline void SetAttribute(Element* element, std::string_view name, const ivec2& value)
+	{
+		if (!name.empty())
+		{
+			char valueString[32]{};
+			SDL_snprintf(valueString, sizeof(valueString) - 1, DefaultIVec2Format, value.x, value.y);
+			element->SetAttribute(name.data(), valueString);
+		}
+	}
+
+	inline void SetAttribute(Element* element, std::string_view name, bool value)
+	{
+		if (!name.empty())
+			element->SetAttribute(name.data(), value ? "true" : "false");
 	}
 
 	inline void SetAttribute(Element* element, std::string_view name, const Color& value)
@@ -119,7 +178,7 @@ namespace Starshine::Xml
 		if (!name.empty())
 		{
 			char hexColorString[32]{};
-			SDL_snprintf(hexColorString, sizeof(hexColorString) - 1, DefaultColorFormat.data(), value.R, value.G, value.B, value.A);
+			SDL_snprintf(hexColorString, sizeof(hexColorString) - 1, DefaultColorFormat, value.R, value.G, value.B, value.A);
 			element->SetAttribute(name.data(), hexColorString);
 		}
 	}

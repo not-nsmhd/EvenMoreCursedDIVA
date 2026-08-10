@@ -11,6 +11,10 @@ namespace Starshine::Input
 	{
 		SDL_Keycode Primary{ UnboundKey };
 		SDL_Keycode Secondary{ UnboundKey };
+
+		inline KeyBind() {};
+		inline KeyBind(SDL_Keycode primary, SDL_Keycode secondary = UnboundKey)
+			: Primary(primary), Secondary(secondary) {};
 	};
 
 	class Keyboard : public NonCopyable

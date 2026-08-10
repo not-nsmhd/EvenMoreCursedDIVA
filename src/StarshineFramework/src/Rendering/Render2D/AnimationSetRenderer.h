@@ -14,7 +14,7 @@ namespace Starshine::Rendering::Render2D
 		~AnimationSetRenderer() = default;
 
 	public:
-		void DrawAnimation(Graphics::AnimationSet& animSet, const Graphics::Animation& anim, f32 frame);
+		void PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame);
 
 	private:
 		SpriteRenderer& sprRenderer;

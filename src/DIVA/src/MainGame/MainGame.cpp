@@ -757,12 +757,10 @@ namespace DIVA::MainGame
 
 			if (!Paused)
 			{	
-				if (MusicSource != SourceHandle::Invalid)
+				if (MusicSource != SourceHandle::Invalid && MusicVoice.IsPlaying())
 					ElapsedTime = TimeSpanConversion::FromSeconds(static_cast<f64>(MusicVoice.GetFramePosition() / 44100.0));
 				else
 					ElapsedTime += gameTime.ElapsedFrameTime;
-
-				//ElapsedTime += gameTime.ElapsedFrameTime;
 
 				UpdateChart();
 				UpdateLyrics();
@@ -880,14 +878,17 @@ namespace DIVA::MainGame
 				return;
 			}
 
+			const RectangleF viewportSize = GFXDevice->GetViewportSize();
+			const vec2 baseScale = vec2(viewportSize.Width / 1280.0f, viewportSize.Height / 720.0f);
+
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
+			spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			for (auto& note : ActiveNotes)
 			{
 				note.UpdateTrail();
 				note.DrawTrail();
-				//spriteRenderer->RenderSprites(nullptr);
 			}
 
 			for (auto& note : ActiveNotes)
@@ -897,26 +898,31 @@ namespace DIVA::MainGame
 
 			hud->Draw(gameTime);
 
+			spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			spriteRenderer->RenderSprites(nullptr);
+
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			if (Paused)
-			{
 				DrawPauseMenu();
-			}
 
 			spriteRenderer->RenderSprites(nullptr);
 		}
 
 		void DrawPauseMenu()
 		{
+			const RectangleF viewportSize = GFXDevice->GetViewportSize();
+			const vec2 menuPosition = { viewportSize.Width / 2.0f, (viewportSize.Height / 2.0f) - debugFont->LineHeight * 3.0f };
+
 			spriteRenderer->SetSpriteColor({ 0, 0, 0, 128 });
-			spriteRenderer->SetSpritePosition({ 0.0f, 0.0f });
-			spriteRenderer->SetSpriteSize({ 1280.0f, 720.0f });
+			spriteRenderer->SetSpritePosition(viewportSize.Position());
+			spriteRenderer->SetSpriteSize(viewportSize.Size());
 			spriteRenderer->PushSprite(nullptr);
 
 			for (i32 i = 0; i < pauseMenu_OptionLabels.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i], vec2(640.0f, 320.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i],
+					vec2(menuPosition.x, menuPosition.y + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == pause_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 		}

@@ -1,21 +1,28 @@
 #pragma once
 #include "Common/Types.h"
 #include <SDL2/SDL_video.h>
+#include <array>
 #include <vector>
 
 namespace Starshine
 {
-	struct DisplayMode
+	enum class WindowMode : i8
 	{
-		ivec2 Resolution{};
-		i32 RefreshRate{};
-		SDL_DisplayMode SDLDisplayMode{};
+		Window,
+		Fullscreen,
+		FullscreenWindow,
+
+		Count
 	};
 
-	inline bool operator==(const DisplayMode& a, const DisplayMode& b)
+	constexpr std::array<const char*, EnumCount<WindowMode>()> WindowModeNames =
 	{
-		return SDL_memcmp(&a, &b, sizeof(DisplayMode)) == 0;
-	}
+		"Window",
+		"Fullscreen",
+		"FullscreenWindow"
+	};
+
+	constexpr ivec2 CenteredWindowPos = ivec2(-1);
 
 	class Window : public NonCopyable
 	{
@@ -28,13 +35,16 @@ namespace Starshine
 
 		void SetSize(const ivec2& newSize);
 		ivec2 GetSize() const;
+
+		void SetPosition(const ivec2& position);
+		ivec2 GetPosition() const;
 		void CenterWindow();
 
 		void SetResizing(bool allow);
 		bool CanBeResized() const;
 
-		void SetFullscreen(bool fullscreen);
-		bool GetFullscreen() const;
+		void SetMode(WindowMode mode);
+		WindowMode GetMode() const;
 
 		void SetTitle(std::string_view title);
 		std::string_view GetTitle() const;
@@ -42,10 +52,10 @@ namespace Starshine
 		SDL_Window* GetBaseWindow();
 
 	public:
-		const std::vector<DisplayMode>& GetDisplayModes() const;
-		DisplayMode GetCurrentDisplayMode() const;
-		const DisplayMode* GetNativeDisplayMode() const;
-		void SetDisplayMode(const DisplayMode& mode);
+		const std::vector<SDL_DisplayMode>& GetDisplayModes() const;
+		SDL_DisplayMode GetCurrentDisplayMode() const;
+		const SDL_DisplayMode& GetNativeDisplayMode() const;
+		void SetDisplayMode(const SDL_DisplayMode& mode);
 
 	private:
 		SDL_Window* baseWindow{};

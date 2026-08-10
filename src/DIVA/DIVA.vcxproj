@@ -102,6 +102,7 @@
     <ClCompile Include="src\MainGame\Lyrics.cpp" />
     <ClCompile Include="src\MainGame\MainGame.cpp" />
     <ClCompile Include="src\Menu\ChartSelect.cpp" />
+    <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
@@ -118,6 +119,7 @@
     <ClInclude Include="src\MainGame\Lyrics.h" />
     <ClInclude Include="src\MainGame\MainGame.h" />
     <ClInclude Include="src\Menu\ChartSelect.h" />
+    <ClInclude Include="src\Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StarshineFramework\StarshineFramework.vcxproj">

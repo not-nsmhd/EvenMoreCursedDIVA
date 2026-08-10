@@ -412,8 +412,8 @@ namespace DIVA::MainGame
 			FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
 			auto font = GameContext::GetInstance()->TestCJKFont.get();
 
-			animSetRenderer.DrawAnimation(*animCache.hudAnimSet, *animCache.FrameTop, 0.0f);
-			animSetRenderer.DrawAnimation(*animCache.hudAnimSet, *animCache.FrameBottom, 0.0f);
+			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameTop, 0.0f);
+			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameBottom, 0.0f);
 			DrawScoreDisplay();
 
 			fontRenderer.PushString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);

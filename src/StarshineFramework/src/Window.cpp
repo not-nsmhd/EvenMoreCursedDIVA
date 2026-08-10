@@ -1,31 +1,27 @@
 #include "Window.h"
+#include "Rendering/Device.h"
 
 namespace Starshine
 {
-	static std::vector<DisplayMode> supportedDisplayModes;
-	DisplayMode* currentDisplayMode{};
-	DisplayMode* nativeDisplayMode{};
+	static std::vector<SDL_DisplayMode> supportedDisplayModes;
+	SDL_DisplayMode nativeDisplayMode;
 
 	void InitDisplayModeList()
 	{
 		i32 dispModeNum = SDL_GetNumDisplayModes(0);
 		for (i32 i = dispModeNum - 1; i >= 0; i--)
 		{
-			SDL_DisplayMode sdlDispMode{};
+			SDL_DisplayMode dispMode{};
 
-			SDL_GetDisplayMode(0, i, &sdlDispMode);
+			SDL_GetDisplayMode(0, i, &dispMode);
 
-			if ((sdlDispMode.w / 16) != (sdlDispMode.h / 9))
+			if ((dispMode.w / 16) != (dispMode.h / 9))
 				continue;
 
-			DisplayMode& dispMode = supportedDisplayModes.emplace_back();
-
-			dispMode.Resolution = { sdlDispMode.w, sdlDispMode.h };
-			dispMode.RefreshRate = sdlDispMode.refresh_rate;
-			dispMode.SDLDisplayMode = sdlDispMode;
+			supportedDisplayModes.push_back(dispMode);
 		}
 
-		nativeDisplayMode = &supportedDisplayModes.back();
+		SDL_GetDesktopDisplayMode(0, &nativeDisplayMode);
 	}
 
 	Window::Window(std::string_view title, i32 width, i32 height, SDL_WindowFlags flags)
@@ -49,12 +45,26 @@ namespace Starshine
 	{
 		if (newSize.x <= 0 || newSize.y <= 0) { return; }
 		SDL_SetWindowSize(baseWindow, newSize.x, newSize.y);
+		SDL_SetWindowPosition(baseWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		Rendering::GetDevice()->OnWindowResize(newSize.x, newSize.y);
 	}
 
 	ivec2 Window::GetSize() const
 	{
 		ivec2 result{};
 		SDL_GetWindowSizeInPixels(baseWindow, &result.x, &result.y);
+		return result;
+	}
+
+	void Window::SetPosition(const ivec2& position)
+	{
+		SDL_SetWindowPosition(baseWindow, position.x, position.y);
+	}
+
+	ivec2 Window::GetPosition() const
+	{
+		ivec2 result{};
+		SDL_GetWindowPosition(baseWindow, &result.x, &result.y);
 		return result;
 	}
 
@@ -74,14 +84,28 @@ namespace Starshine
 		return (windowFlags & SDL_WINDOW_RESIZABLE) != 0;
 	}
 
-	void Window::SetFullscreen(bool fullscreen)
+	void Window::SetMode(WindowMode mode)
 	{
-		SDL_SetWindowFullscreen(baseWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		switch (mode)
+		{
+		case WindowMode::Window:
+			SDL_SetWindowFullscreen(baseWindow, 0);
+			break;
+		case WindowMode::Fullscreen:
+			SDL_SetWindowFullscreen(baseWindow, SDL_WINDOW_FULLSCREEN);
+			break;
+		case WindowMode::FullscreenWindow:
+			SDL_SetWindowFullscreen(baseWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			break;
+		}
 	}
 
-	bool Window::GetFullscreen() const
+	WindowMode Window::GetMode() const
 	{
-		return SDL_GetWindowFlags(baseWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+		u32 flags = SDL_GetWindowFlags(baseWindow);
+		if (flags & SDL_WINDOW_FULLSCREEN) return WindowMode::Fullscreen;
+		else if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) return WindowMode::FullscreenWindow;
+		return WindowMode::Window;
 	}
 
 	void Window::SetTitle(std::string_view title)
@@ -100,31 +124,25 @@ namespace Starshine
 		return baseWindow;
 	}
 
-	const std::vector<DisplayMode>& Window::GetDisplayModes() const
+	const std::vector<SDL_DisplayMode>& Window::GetDisplayModes() const
 	{
 		return supportedDisplayModes;
 	}
 
-	DisplayMode Window::GetCurrentDisplayMode() const
+	SDL_DisplayMode Window::GetCurrentDisplayMode() const
 	{
-		return DisplayMode();
+		SDL_DisplayMode result{};
+		SDL_GetCurrentDisplayMode(0, &result);
+		return result;
 	}
 
-	const DisplayMode* Window::GetNativeDisplayMode() const
+	const SDL_DisplayMode& Window::GetNativeDisplayMode() const
 	{
 		return nativeDisplayMode;
 	}
 
-	void Window::SetDisplayMode(const DisplayMode& mode)
+	void Window::SetDisplayMode(const SDL_DisplayMode& mode)
 	{
-		if (SDL_GetWindowFlags(baseWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP)
-		{
-			SDL_SetWindowDisplayMode(baseWindow, &mode.SDLDisplayMode);
-		}
-		else
-		{
-			SDL_SetWindowSize(baseWindow, mode.Resolution.x, mode.Resolution.y);
-			SDL_SetWindowPosition(baseWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-		}
+		SetSize(vec2(mode.w, mode.h));
 	}
 }

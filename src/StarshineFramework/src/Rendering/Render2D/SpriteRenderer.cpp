@@ -85,6 +85,9 @@ namespace Starshine::Rendering::Render2D
 			mat4 TransformMatrix;
 		} ShaderUniforms;
 
+		vec2 BasePosition{};
+		vec2 BaseScale{ 1.0f, 1.0f };
+
 		struct
 		{
 			std::unique_ptr<Buffer> SpriteVertexBuffer{};
@@ -195,7 +198,6 @@ namespace Starshine::Rendering::Render2D
 #if defined (_DEBUG)
 			GraphicsResources.SpriteIndexBuffer->SetDebugName("SpriteRenderer::SpriteIndexBuffer");
 #endif
-
 		}
 	
 		void Internal_CreateBlendStates()
@@ -274,7 +276,7 @@ namespace Starshine::Rendering::Render2D
 		{
 			if (PushedSprites >= MaxSprites)
 			{
-				RenderSprites(nullptr);
+				RenderSprites(nullptr, true);
 			}
 
 			PushedSprites++;
@@ -315,7 +317,7 @@ namespace Starshine::Rendering::Render2D
 			}
 		}
 
-		void RenderSprites(Shader* shader)
+		void RenderSprites(Shader* shader, bool doNotResetBaseValues)
 		{
 			if (PushedSprites == 0 && PushedShapeVertices == 0)
 			{
@@ -381,6 +383,10 @@ namespace Starshine::Rendering::Render2D
 			Shader* spriteShader = (shader != nullptr) ? shader : DefaultSpriteResources.DefaultShader.get();
 
 			RectangleF viewportSize = GFXDevice->GetViewportSize();
+			viewportSize.X += BasePosition.x;
+			viewportSize.Y += BasePosition.y;
+			viewportSize.Width /= BaseScale.x;
+			viewportSize.Height /= BaseScale.y;
 			ShaderUniforms.TransformMatrix = glm::transpose(glm::orthoRH_ZO(viewportSize.X, viewportSize.Width, viewportSize.Height, viewportSize.Y, 0.0f, 1.0f));
 
 			GraphicsResources.ShaderUniformBuffer->SetData(&ShaderUniforms, 0, sizeof(ShaderUniformsBufferData));
@@ -421,11 +427,18 @@ namespace Starshine::Rendering::Render2D
 
 			ResetSprite();
 			ResetList();
+
+			if (!doNotResetBaseValues)
+			{
+				BasePosition = {};
+				BaseScale = vec2(1.0f);
+			}
 		}
 
 		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
 		{
-			if (PushedDrawCommands + 1 >= MaxLists || PushedShapeVertices + vertexCount >= MaxShapeVertices) { RenderSprites(nullptr); }
+			if (PushedDrawCommands + 1 >= MaxLists || PushedShapeVertices + vertexCount >= MaxShapeVertices)
+				RenderSprites(nullptr, true);
 
 			StarshineTex* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
@@ -563,9 +576,21 @@ namespace Starshine::Rendering::Render2D
 		impl->PushSprite(texture);
 	}
 
+	void SpriteRenderer::SetBasePositionAndScale(const vec2& pos, const vec2& scale)
+	{
+		impl->BasePosition = pos;
+		impl->BaseScale = scale;
+	}
+
+	void SpriteRenderer::GetBasePositionAndScale(vec2& pos, vec2& scale)
+	{
+		pos = impl->BasePosition;
+		scale = impl->BaseScale;
+	}
+
 	void SpriteRenderer::RenderSprites(Shader* shader)
 	{
-		impl->RenderSprites(shader);
+		impl->RenderSprites(shader, false);
 	}
 
 	void SpriteRenderer::PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
