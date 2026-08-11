@@ -3,6 +3,8 @@
 #include "Common/Types.h"
 #include "Types.h"
 #include "GPUResource.h"
+#include "IO/StreamReader.h"
+#include "IO/StreamWriter.h"
 
 namespace Starshine::Graphics
 {
@@ -11,6 +13,8 @@ namespace Starshine::Graphics
 	class Texture
 	{
 	public:
+		// NOTE: Meant to be used if the texture is created by reading a file
+		Texture();
 		Texture(ivec2 size, TextureFormat format, TextureFlags flags, const void* data, bool dynamic = false);
 		Texture(ivec2 size, TextureFormat format, TextureFlags flags);
 		~Texture() = default;
@@ -28,6 +32,10 @@ namespace Starshine::Graphics
 
 		std::string_view GetName() const;
 		void SetName(std::string_view name);
+
+	public:
+		bool ReadBinary(IO::StreamReader& writer);
+		void WriteBinary(IO::StreamWriter& writer);
 
 	public:
 		ManagedGPUResource GPUTexture{};
