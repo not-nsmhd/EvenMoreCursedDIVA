@@ -1,19 +1,23 @@
 #include "MemorySampleProvider.h"
+#include "Common/Logging/Logging.h"
 #include <SDL2/SDL_stdinc.h>
 
 namespace Starshine::Audio
 {
-	MemorySampleProvider::MemorySampleProvider()
+	MemorySampleProvider::MemorySampleProvider(const i16* sampleData, size_t sampleCount) : sampleCount(sampleCount)
 	{
+		samples = std::make_unique<u16[]>(sampleCount);
+		std::copy(&sampleData[0], &sampleData[sampleCount - 1], samples.get());
 	}
 
 	MemorySampleProvider::~MemorySampleProvider()
 	{
+		Destroy();
 	}
 
 	void MemorySampleProvider::Destroy()
 	{
-		delete[] samples;
+		samples = nullptr;
 	}
 
 	bool MemorySampleProvider::IsStreamingOnly() const

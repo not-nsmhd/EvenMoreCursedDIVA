@@ -130,7 +130,7 @@ namespace Starshine::Audio
 			output.ChannelCount = info->channels;
 			output.SampleRate = info->rate;
 			output.SampleCount = ov_pcm_total(&ovFile, -1) * info->channels;
-			output.SampleData = new i16[output.SampleCount];
+			output.SampleData = std::make_unique<i16[]>(output.SampleCount);
 
 			constexpr size_t vorbisfileBufferSize = 4096;
 
@@ -149,7 +149,7 @@ namespace Starshine::Audio
 				// HACK: The casting from i16 to u8 array is needed since the
 				//		 readSize is the amount of BYTES read and its value may not be divisible by 2
 				//		 (it's also the same reason why the SampleCount variable is multiplied by 2 in the while loop condition)
-				SDL_memcpy(&(reinterpret_cast<u8*>(output.SampleData))[copyOffset], &buffer[0], readSize);
+				SDL_memcpy(&(reinterpret_cast<u8*>(output.SampleData.get()))[copyOffset], &buffer[0], readSize);
 				copyOffset += readSize;
 			}
 

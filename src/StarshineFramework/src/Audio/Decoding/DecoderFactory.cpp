@@ -19,9 +19,8 @@ namespace Starshine::Audio
 	DecoderFactory::~DecoderFactory()
 	{
 		for (size_t i = 0; i < decoders.size(); i++)
-		{
 			delete decoders[i];
-		}
+
 		decoders.clear();
 	}
 
@@ -32,24 +31,20 @@ namespace Starshine::Audio
 
 	void DecoderFactory::DestoryInstance()
 	{
-		delete[] Instance;
+		delete Instance;
 	}
 
 	ISampleProvider* DecoderFactory::DecodeFileData(std::string_view filename, const void* fileData, size_t fileSize)
 	{
 		if (fileData == nullptr || fileSize == 0)
-		{
 			return nullptr;
-		}
 
 		for (auto& decoder : decoders)
 		{
 			DecoderOutput output{};
 			if (decoder->ParseEncodedData(fileData, fileSize, output))
 			{
-				MemorySampleProvider* sampleProvider = new MemorySampleProvider();
-				sampleProvider->samples = new i16[output.SampleCount];
-				SDL_memcpy(sampleProvider->samples, output.SampleData, output.SampleCount * sizeof(i16));
+				MemorySampleProvider* sampleProvider = new MemorySampleProvider(output.SampleData.get(), output.SampleCount);
 
 				sampleProvider->sampleCount = output.SampleCount;
 				sampleProvider->sampleRate = output.SampleRate;

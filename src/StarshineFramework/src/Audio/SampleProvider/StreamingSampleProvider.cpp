@@ -82,6 +82,9 @@ namespace Starshine::Audio
 	{
 		using DecoderState = Vorbisfile::DecoderState;
 
+		Impl() {}
+		~Impl() {}
+
 		u32 channels{};
 		u32 sampleRate{};
 

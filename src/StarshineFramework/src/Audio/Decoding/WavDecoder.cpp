@@ -146,9 +146,9 @@ __pragma (pack(pop))
 			output.ChannelCount = audioFormat.Channels;
 			output.SampleRate = audioFormat.SamplesPerSecond;
 			output.SampleCount = static_cast<size_t>(dataSegment.Size) / sizeof(i16);
-			output.SampleData = new i16[output.SampleCount];
+			output.SampleData = std::make_unique<i16[]>(output.SampleCount);
 
-			memStream->read(memStream, output.SampleData, output.SampleCount * sizeof(i16), 1);
+			memStream->read(memStream, output.SampleData.get(), output.SampleCount * sizeof(i16), 1);
 
 			// --- ID3 Metadata (used for looping, optional)
 

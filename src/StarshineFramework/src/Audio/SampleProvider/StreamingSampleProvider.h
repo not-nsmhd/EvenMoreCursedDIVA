@@ -11,7 +11,7 @@ namespace Starshine::Audio
 
 	public:
 		StreamingSampleProvider(const u8* encodedData, size_t encodedDataSize);
-		~StreamingSampleProvider();
+		~StreamingSampleProvider() override;
 
 		void Destroy();
 		bool IsStreamingOnly() const;

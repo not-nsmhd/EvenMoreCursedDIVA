@@ -314,21 +314,17 @@ namespace Starshine::Audio
 		SourceHandle RegisterSource(ISampleProvider* sampleProvider)
 		{
 			if (sampleProvider == nullptr)
-			{
 				return SourceHandle::Invalid;
-			}
 
 			for (size_t i = 0; i < registeredSources.size(); i++)
 			{
 				SourceData& source = registeredSources.at(i);
 
 				if (source.SampleProvider != nullptr)
-				{
 					continue;
-				}
 
 				source.SampleProvider = sampleProvider;
-				LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u, previously allocated)", sampleProvider->GetSampleAmount(), i);
+				LogInfo(LogName, "Audio source with %llu samples has been registered (handle: %u)", sampleProvider->GetSampleAmount(), i);
 
 				return static_cast<SourceHandle>(i);
 			}
@@ -386,9 +382,7 @@ namespace Starshine::Audio
 			{
 				StreamingSampleProvider* sampleProvider = new StreamingSampleProvider(reinterpret_cast<const u8*>(encodedData), encodedDataSize);
 				if (sampleProvider == nullptr)
-				{
 					return SourceHandle::Invalid;
-				}
 
 				SourceHandle handle = RegisterSource(sampleProvider);
 
@@ -409,23 +403,14 @@ namespace Starshine::Audio
 				SourceData& source = registeredSources.at(static_cast<size_t>(handle));
 				if (source.SampleProvider != nullptr)
 				{
-					source.SampleProvider->Destroy();
 					delete source.SampleProvider;
 					source.SampleProvider = nullptr;
-
-					LogInfo(LogName, "Audio source with handle %u has been unloaded", handle);
 
 					for (size_t i = 0; i < voiceContexts.size(); i++)
 					{
 						VoiceContext* voiceCtx = &voiceContexts[i];
 						if (voiceCtx->Source == handle)
-						{
 							voiceCtx->Source = SourceHandle::Invalid;
-							if (!voiceCtx->DeallocateOnEnd)
-							{
-								LogInfo(LogName, "The audio source of the voice with handle %llu has been invalidated", i);
-							}
-						}
 					}
 				}
 			}
@@ -505,12 +490,11 @@ namespace Starshine::Audio
 
 			if (handle != SourceHandle::Invalid)
 			{
-				LogInfo(LogName, "Loaded file \"%s\"", filePath.data());
 				return handle;
 			}
 			else
 			{
-				LogInfo(LogName, "Failed to load file \"%s\"", filePath.data());
+				LogError(LogName, "Failed to load file \"%s\"", filePath.data());
 				return SourceHandle::Invalid;
 			}
 		}
@@ -529,12 +513,11 @@ namespace Starshine::Audio
 
 			if (handle != SourceHandle::Invalid)
 			{
-				LogInfo(LogName, "Loaded file \"%s\" for streaming", filePath.data());
 				return handle;
 			}
 			else
 			{
-				LogInfo(LogName, "Failed to load file \"%s\" for streaming", filePath.data());
+				LogError(LogName, "Failed to load file \"%s\" for streaming", filePath.data());
 				return SourceHandle::Invalid;
 			}
 		}

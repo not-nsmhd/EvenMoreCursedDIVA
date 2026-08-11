@@ -1,5 +1,6 @@
 #pragma once
 #include "Common/Types.h"
+#include <memory>
 
 namespace Starshine::Audio
 {
@@ -9,7 +10,7 @@ namespace Starshine::Audio
 		u32 SampleRate{};
 
 		size_t SampleCount{};
-		i16* SampleData{};
+		std::unique_ptr<i16[]> SampleData{};
 
 		bool IsLooped{};
 		size_t LoopStart{};

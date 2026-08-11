@@ -1,5 +1,6 @@
 #pragma once
 #include "ISampleProvider.h"
+#include <memory>
 
 namespace Starshine::Audio
 {
@@ -9,8 +10,8 @@ namespace Starshine::Audio
 		friend class DecoderFactory;
 
 	public:
-		MemorySampleProvider();
-		~MemorySampleProvider();
+		MemorySampleProvider(const i16* sampleData, size_t sampleCount);
+		~MemorySampleProvider() override;
 
 		void Destroy();
 		bool IsStreamingOnly() const;
@@ -35,7 +36,7 @@ namespace Starshine::Audio
 		u32 sampleRate{};
 
 		size_t sampleCount{};
-		i16* samples{};
+		std::unique_ptr<u16[]> samples{};
 
 		size_t samplePosition{};
 		size_t loopStart_frames{};
