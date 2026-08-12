@@ -5,6 +5,7 @@
 #include <Graphics/AnimationSet.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include "../GameContext.h"
+#include "../Definitions.h"
 
 namespace DIVA::MainGame
 {
@@ -388,36 +389,49 @@ namespace DIVA::MainGame
 
 		void SetLyricsText(std::string_view text, const Color& color)
 		{
-			auto font = GameContext::GetInstance()->TestCJKFont.get();
+			auto font = GameContext::GetInstance()->DefaultFont.get();
 
 			::strncpy_s(LyricsTextBuffer.data(), LyricsTextBuffer.max_size(), text.data(), LyricsTextBuffer.size());
 			LyricsTextDisplaySize = mainGameContext->SpriteRenderer->Font().MeasureString(font, LyricsTextBuffer.data());
 			LyricsColor = color;
 		}
 
-		void DrawLyricsText()
+		void DrawLyricsText(const vec2 scale)
 		{
 			if (LyricsTextBuffer.size() > 0)
 			{
 				FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
-				auto font = GameContext::GetInstance()->TestCJKFont.get();
+				auto font = GameContext::GetInstance()->DefaultFont.get();
 
-				fontRenderer.DrawString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, vec2(1.0f), LyricsColor);
+				fontRenderer.DrawString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, scale, LyricsColor);
 			}
 		}
 
 		void DrawFrame()
 		{
 			AnimationSetRenderer& animSetRenderer = mainGameContext->SpriteRenderer->AnimationSet();
-			FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
-			auto font = GameContext::GetInstance()->TestCJKFont.get();
 
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameTop, 0.0f);
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameBottom, 0.0f);
 			DrawScoreDisplay();
+		}
 
-			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
-			DrawLyricsText();
+		void Draw()
+		{
+			FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
+			auto font = GameContext::GetInstance()->DefaultFont.get();
+
+			const vec2 viewportSize = mainGameContext->SpriteRenderer->GetRenderingDevice()->GetViewportSize().Size();
+			//const vec2 baseScale = vec2(viewportSize.x / 1280.0f, viewportSize.y / 720.0f);
+
+			DrawComboDisplay();
+			DrawScoreBonusDisplay();
+			DrawFrame();
+
+			const vec2 fontScale = viewportSize / BaseResolution;
+
+			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, fontScale, DefaultColors::White);
+			DrawLyricsText(fontScale);
 		}
 	};
 
@@ -468,9 +482,7 @@ namespace DIVA::MainGame
 
 	void HUD::Draw(Starshine::GameTime& gameTime)
 	{
-		impl->DrawComboDisplay();
-		impl->DrawScoreBonusDisplay();
-		impl->DrawFrame();
+		impl->Draw();
 	}
 
 	void HUD::SetComboDisplayState(HitEvaluation hitEvaluation, u32 combo, bool wrong, vec2& position)

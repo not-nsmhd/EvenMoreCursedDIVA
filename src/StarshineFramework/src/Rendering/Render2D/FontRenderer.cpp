@@ -32,7 +32,6 @@ namespace Starshine::Rendering::Render2D
 
 		sprRenderer.GetBasePositionAndScale(sprPos, sprScale);
 		sprRenderer.RenderSprites(nullptr);
-		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
 
 		vec2 basePos{};
 		vec2 glyphOffset{};
@@ -47,7 +46,7 @@ namespace Starshine::Rendering::Render2D
 			if (utfChar == '\n')
 			{
 				basePos.x = 0.0f;
-				basePos.y += font->LineHeight;
+				basePos.y += font->LineHeight * scale.y;
 				prevGlyph = nullptr;
 				continue;
 			}
@@ -56,12 +55,12 @@ namespace Starshine::Rendering::Render2D
 
 			if (utfChar == ' ')
 			{
-				basePos.x += glyph->XAdvance;
+				basePos.x += glyph->XAdvance * scale.x;
 				continue;
 			}
 
-			glyphOffset.x = glyph->XOffset;
-			glyphOffset.y = glyph->YOffset;
+			glyphOffset.x = glyph->XOffset * scale.x;
+			glyphOffset.y = glyph->YOffset * scale.y;
 
 			if (prevGlyph != nullptr && prevGlyph->KerningList != nullptr)
 			{
@@ -74,7 +73,7 @@ namespace Starshine::Rendering::Render2D
 
 			PushGlyph(font, glyph, position + basePos + glyphOffset, scale, fillColor);
 
-			basePos.x += glyph->XAdvance;
+			basePos.x += glyph->XAdvance * scale.x;
 			prevGlyph = glyph;
 		}
 
@@ -85,6 +84,8 @@ namespace Starshine::Rendering::Render2D
 		auto device = sprRenderer.GetRenderingDevice();
 		device->SetUniformBuffer(fontUniformBuffer.get(), ShaderStage::Fragment, 0);
 		sprRenderer.RenderSprites(fontShader.get());
+
+		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
 	}
 
 	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)

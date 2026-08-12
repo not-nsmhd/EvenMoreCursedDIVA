@@ -47,7 +47,7 @@ namespace DIVA
 	{		
 		SongList.clear();
 		DebugFont = nullptr;
-		TestCJKFont = nullptr;
+		DefaultFont = nullptr;
 		SpriteRenderer = nullptr;
 	}
 
@@ -79,8 +79,8 @@ namespace DIVA
 		DebugFont = std::make_unique<Font>();
 		if (!Detail::ReadFont(DebugFont.get(), "diva/fonts/debug.dat")) { return false; }
 
-		TestCJKFont = std::make_unique<Font>();
-		if (!Detail::ReadFont(TestCJKFont.get(), "diva/fonts/test_cjk.dat")) { return false; }
+		DefaultFont = std::make_unique<Font>();
+		if (!Detail::ReadFont(DefaultFont.get(), "diva/fonts/sourcesans3.dat")) { return false; }
 
 		return true;
 	}

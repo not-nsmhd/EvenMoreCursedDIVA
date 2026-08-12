@@ -936,11 +936,11 @@ namespace DIVA::MainGame
 			}
 
 			const RectangleF viewportSize = GFXDevice->GetViewportSize();
-			const vec2 baseScale = vec2(viewportSize.Width / 1280.0f, viewportSize.Height / 720.0f);
+			//const vec2 baseScale = vec2(viewportSize.Width / 1280.0f, viewportSize.Height / 720.0f);
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			for (auto& note : ActiveNotes)
 			{
@@ -953,10 +953,9 @@ namespace DIVA::MainGame
 				note.Draw(gameTime);
 			}
 
-			hud->Draw(gameTime);
-
-			spriteRenderer->SetBasePositionAndScale({}, baseScale);
 			spriteRenderer->RenderSprites(nullptr);
+
+			hud->Draw(gameTime);
 
 			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 

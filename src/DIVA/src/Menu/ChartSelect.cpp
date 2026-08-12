@@ -42,7 +42,9 @@ namespace DIVA::Menu
 		Starshine::GameInstance* GameInstance{};
 
 		SpriteRenderer* spriteRenderer{};
-		Font* debugFont{};
+
+		Font* defaultFont{};
+		vec2 fontScale{ 1.0f, 1.0f };
 
 		SubMenuID currentSubmenu{};
 
@@ -60,7 +62,7 @@ namespace DIVA::Menu
 		void LoadContent()
 		{
 			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
-			debugFont = GameContext::GetInstance()->DebugFont.get();
+			defaultFont = GameContext::GetInstance()->DefaultFont.get();
 		}
 
 		void Destroy()
@@ -206,16 +208,16 @@ namespace DIVA::Menu
 
 		void DrawMain()
 		{
-			spriteRenderer->Font().DrawString(debugFont, "Main Menu", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(defaultFont, "Main Menu", vec2(16.0f, 16.0f), fontScale, DefaultColors::White);
 
 			float yOffset = 0.0f;
 			for (size_t i = 1; i < EnumCount<SubMenuID>(); i++)
 			{
 				const Color selectionBaseColor = i == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
 
-				spriteRenderer->Font().DrawString(debugFont, SubMenuNames[i], vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+				spriteRenderer->Font().DrawString(defaultFont, SubMenuNames[i], vec2(16.0f, 64.0f + yOffset), fontScale, selectionBaseColor);
 
-				yOffset += debugFont->LineHeight;
+				yOffset += defaultFont->LineHeight * fontScale.y;
 			}
 		}
 
@@ -223,7 +225,7 @@ namespace DIVA::Menu
 		{
 			auto songList = GameContext::GetInstance()->SongList;
 
-			spriteRenderer->Font().DrawString(debugFont, "Song Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(defaultFont, "Song Select", vec2(16.0f, 16.0f), fontScale, DefaultColors::White);
 
 			static constexpr std::array<Color, EnumCount<ChartDifficulty>()> difficultyColors
 			{
@@ -235,8 +237,8 @@ namespace DIVA::Menu
 
 			for (size_t i = 0; i < EnumCount<ChartDifficulty>(); i++)
 			{
-				spriteRenderer->Font().DrawString(debugFont, ChartDifficultyNames[i],
-					vec2(16.0f + (92.0f * i), 36.0f), vec2(1.0f), i == currentDifficultyIndex ? difficultyColors[i] : DefaultColors::White);
+				spriteRenderer->Font().DrawString(defaultFont, ChartDifficultyNames[i],
+					vec2(16.0f + (92.0f * i), 36.0f), fontScale, i == currentDifficultyIndex ? difficultyColors[i] : DefaultColors::White);
 			}
 
 			float yOffset = 0.0f;
@@ -246,10 +248,10 @@ namespace DIVA::Menu
 				const Color selectionBaseColor = curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
 				const u8 selectionAlpha = info.ChartFilePaths[currentDifficultyIndex].empty() ? 128 : 255;
 
-				spriteRenderer->Font().DrawString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
+				spriteRenderer->Font().DrawString(defaultFont, info.Name, vec2(16.0f, 64.0f + yOffset), fontScale,
 					Color{ selectionBaseColor.R, selectionBaseColor.G, selectionBaseColor.B, selectionAlpha });
 
-				yOffset += debugFont->LineHeight;
+				yOffset += defaultFont->LineHeight * fontScale.y;
 				curIndex++;
 			}
 		}
@@ -259,7 +261,7 @@ namespace DIVA::Menu
 			auto window = GameInstance->GetWindow();
 			auto dispModeList = window->GetDisplayModes();
 
-			spriteRenderer->Font().DrawString(debugFont, "Options", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(defaultFont, "Options", vec2(16.0f, 16.0f), fontScale, DefaultColors::White);
 
 			f32 yOffset = 0.0f;
 			i32 curIndex = 0;
@@ -275,24 +277,27 @@ namespace DIVA::Menu
 				SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "%dx%d (%dHz) %s",
 					dispMode.w, dispMode.h, dispMode.refresh_rate, native ? "(native)" : "");
 
-				spriteRenderer->Font().DrawString(debugFont, dispModeString, vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+				spriteRenderer->Font().DrawString(defaultFont, dispModeString, vec2(16.0f, 64.0f + yOffset), fontScale, selectionBaseColor);
 
-				yOffset += debugFont->LineHeight;
+				yOffset += defaultFont->LineHeight * fontScale.y;
 				curIndex++;
 			}
 
-			yOffset += debugFont->LineHeight;
-			spriteRenderer->Font().DrawString(debugFont, "Return", vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
+			yOffset += defaultFont->LineHeight * fontScale.y;
+			spriteRenderer->Font().DrawString(defaultFont, "Return", vec2(16.0f, 64.0f + yOffset), fontScale,
 				curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
 
 			const size_t modeIndex = static_cast<size_t>(window->GetMode());
 			SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "Window Mode (F11): %s", WindowModeNames[modeIndex]);
-			spriteRenderer->Font().DrawString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(defaultFont, dispModeString, vec2(512.0f, 64.0f), fontScale, DefaultColors::White);
 		}
 
 		void Draw()
 		{
 			auto gfxDevice = spriteRenderer->GetRenderingDevice();
+			const vec2 viewportSize = gfxDevice->GetViewportSize().Size();
+
+			fontScale = viewportSize / BaseResolution;
 
 			gfxDevice->Clear(Rendering::ClearFlags_Color, DefaultColors::ClearColor_Menus, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);

@@ -30,4 +30,6 @@ namespace DIVA
 
 		return StateInstances[static_cast<size_t>(id)].get();
 	}
+
+	constexpr vec2 BaseResolution = vec2(1920.0f, 1080.0f);
 }
