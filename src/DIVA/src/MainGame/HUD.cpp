@@ -402,7 +402,7 @@ namespace DIVA::MainGame
 				FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
 				auto font = GameContext::GetInstance()->TestCJKFont.get();
 
-				fontRenderer.PushString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, vec2(1.0f), LyricsColor);
+				fontRenderer.DrawString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, vec2(1.0f), LyricsColor);
 			}
 		}
 
@@ -416,7 +416,7 @@ namespace DIVA::MainGame
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameBottom, 0.0f);
 			DrawScoreDisplay();
 
-			fontRenderer.PushString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
 			DrawLyricsText();
 		}
 	};

@@ -100,7 +100,7 @@ namespace Starshine
 			return *this;
 		}
 
-		constexpr vec4 ToVector4()
+		constexpr vec4 ToVector4() const
 		{
 			return vec4(
 				static_cast<f32>(R) * ColorNormFactor,

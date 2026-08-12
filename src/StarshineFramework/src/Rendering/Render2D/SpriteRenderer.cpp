@@ -130,6 +130,8 @@ namespace Starshine::Rendering::Render2D
 			Internal_CreateIndexBuffer();
 			Internal_CreateBlendStates();
 
+			FontRenderer.LoadResources(GFXDevice);
+
 			SetBlendMode(BlendMode::Normal);
 		}
 

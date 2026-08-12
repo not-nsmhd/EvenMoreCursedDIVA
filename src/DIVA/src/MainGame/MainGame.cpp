@@ -958,7 +958,7 @@ namespace DIVA::MainGame
 			spriteRenderer->SetBasePositionAndScale({}, baseScale);
 			spriteRenderer->RenderSprites(nullptr);
 
-			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			if (Paused)
 				DrawPauseMenu();
@@ -978,7 +978,7 @@ namespace DIVA::MainGame
 
 			for (i32 i = 0; i < pauseMenu_OptionLabels.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i],
+				spriteRenderer->Font().DrawString(debugFont, pauseMenu_OptionLabels[i],
 					vec2(menuPosition.x, menuPosition.y + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == pause_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
@@ -989,11 +989,11 @@ namespace DIVA::MainGame
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
-			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().DrawString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 

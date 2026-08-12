@@ -44,8 +44,6 @@ namespace DIVA::Menu
 		SpriteRenderer* spriteRenderer{};
 		Font* debugFont{};
 
-		std::unique_ptr<Font> fontRG8{};
-
 		SubMenuID currentSubmenu{};
 
 		i32 selectionIndex = 1;
@@ -63,20 +61,10 @@ namespace DIVA::Menu
 		{
 			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			debugFont = GameContext::GetInstance()->DebugFont.get();
-
-			if (fontRG8 == nullptr)
-			{
-				fontRG8 = std::make_unique<Font>();
-				
-				FileStream fileStream = File::OpenRead("diva/fonts/sourcesans3.dat");
-				StreamReader reader = StreamReader(fileStream);
-				fontRG8->ReadBinary(reader);
-			}
 		}
 
 		void Destroy()
 		{
-			fontRG8 = nullptr;
 		}
 
 		// NOTE: Convinience function that automatically resets the selection index
@@ -196,7 +184,7 @@ namespace DIVA::Menu
 			}
 		}
 
-		void Update()
+		void Update(GameTime& gameTime)
 		{
 			switch (currentSubmenu)
 			{
@@ -218,14 +206,14 @@ namespace DIVA::Menu
 
 		void DrawMain()
 		{
-			spriteRenderer->Font().PushString(debugFont, "Main Menu", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, "Main Menu", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
 
 			float yOffset = 0.0f;
 			for (size_t i = 1; i < EnumCount<SubMenuID>(); i++)
 			{
 				const Color selectionBaseColor = i == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
 
-				spriteRenderer->Font().PushString(debugFont, SubMenuNames[i], vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+				spriteRenderer->Font().DrawString(debugFont, SubMenuNames[i], vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
 
 				yOffset += debugFont->LineHeight;
 			}
@@ -235,7 +223,7 @@ namespace DIVA::Menu
 		{
 			auto songList = GameContext::GetInstance()->SongList;
 
-			spriteRenderer->Font().PushString(debugFont, "Song Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, "Song Select", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
 
 			static constexpr std::array<Color, EnumCount<ChartDifficulty>()> difficultyColors
 			{
@@ -247,7 +235,7 @@ namespace DIVA::Menu
 
 			for (size_t i = 0; i < EnumCount<ChartDifficulty>(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, ChartDifficultyNames[i],
+				spriteRenderer->Font().DrawString(debugFont, ChartDifficultyNames[i],
 					vec2(16.0f + (92.0f * i), 36.0f), vec2(1.0f), i == currentDifficultyIndex ? difficultyColors[i] : DefaultColors::White);
 			}
 
@@ -258,7 +246,7 @@ namespace DIVA::Menu
 				const Color selectionBaseColor = curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White;
 				const u8 selectionAlpha = info.ChartFilePaths[currentDifficultyIndex].empty() ? 128 : 255;
 
-				spriteRenderer->Font().PushString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
+				spriteRenderer->Font().DrawString(debugFont, info.Name, vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
 					Color{ selectionBaseColor.R, selectionBaseColor.G, selectionBaseColor.B, selectionAlpha });
 
 				yOffset += debugFont->LineHeight;
@@ -271,7 +259,7 @@ namespace DIVA::Menu
 			auto window = GameInstance->GetWindow();
 			auto dispModeList = window->GetDisplayModes();
 
-			spriteRenderer->Font().PushString(debugFont, "Options", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, "Options", vec2(16.0f, 16.0f), vec2(1.0f), DefaultColors::White);
 
 			f32 yOffset = 0.0f;
 			i32 curIndex = 0;
@@ -287,25 +275,20 @@ namespace DIVA::Menu
 				SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "%dx%d (%dHz) %s",
 					dispMode.w, dispMode.h, dispMode.refresh_rate, native ? "(native)" : "");
 
-				spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
+				spriteRenderer->Font().DrawString(debugFont, dispModeString, vec2(16.0f, 64.0f + yOffset), vec2(1.0f), selectionBaseColor);
 
 				yOffset += debugFont->LineHeight;
 				curIndex++;
 			}
 
 			yOffset += debugFont->LineHeight;
-			spriteRenderer->Font().PushString(debugFont, "Return", vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
+			spriteRenderer->Font().DrawString(debugFont, "Return", vec2(16.0f, 64.0f + yOffset), vec2(1.0f),
 				curIndex == selectionIndex ? DefaultColors::Yellow : DefaultColors::White);
 
 			const size_t modeIndex = static_cast<size_t>(window->GetMode());
 			SDL_snprintf(dispModeString, sizeof(dispModeString) - 1, "Window Mode (F11): %s", WindowModeNames[modeIndex]);
-			spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().DrawString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
 		}
-
-		static constexpr std::string_view testTextData =
-			"\x30\x31\x32\x33\x34\x36\x35\x37\x38\x39\x20\x41\x42\x43\x44\x45" \
-			"\x46\x20\x61\x62\x63\x64\x65\x66\x0A\xD0\x90\xD0\x91\xD0\x92\xD0" \
-			"\x93\xD0\x94\x20\xD0\xB0\xD0\xB1\xD0\xB2\xD0\xB3\xD0\xB4";
 
 		void Draw()
 		{
@@ -327,7 +310,6 @@ namespace DIVA::Menu
 				break;
 			}
 
-			spriteRenderer->Font().PushString(fontRG8.get(), testTextData, vec2(640.0f, 64.0f), vec2(1.0f), DefaultColors::White);
 			spriteRenderer->RenderSprites(nullptr);
 		}
 	};
@@ -363,7 +345,7 @@ namespace DIVA::Menu
 
 	void ChartSelect::Update(GameTime& gameTime)
 	{
-		impl->Update();
+		impl->Update(gameTime);
 	}
 
 	void ChartSelect::Draw(GameTime& gameTime)

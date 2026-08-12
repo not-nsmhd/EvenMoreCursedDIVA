@@ -112,4 +112,9 @@ namespace Starshine::MathExtensions
 	{
 		return (1.0f - factor) * start + factor * end;
 	}
+
+	constexpr size_t GetAlignedSize(size_t size, size_t alignment)
+	{
+		return (size + (alignment - 1)) & ~(alignment - 1);
+	}
 };

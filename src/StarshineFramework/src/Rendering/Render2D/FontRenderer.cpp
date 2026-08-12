@@ -1,5 +1,6 @@
 #include "FontRenderer.h"
 #include "SpriteRenderer.h"
+#include "Rendering/Utilities.h"
 #include <utf8.h>
 
 using namespace Starshine::Graphics;
@@ -10,12 +11,35 @@ namespace Starshine::Rendering::Render2D
 	{
 	}
 
-	void FontRenderer::PushString(const Font* font, std::string_view text, const vec2& position, const vec2& scale, const Color& color)
+	void FontRenderer::LoadResources(Device* device)
 	{
+		Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_Font.cso", fontShader);
+
+		BufferCreationData creationData{};
+		creationData.Type = BufferType::Uniform;
+		creationData.Size = sizeof(FontUniforms);
+		creationData.Dynamic = true;
+		device->CreateBuffer(creationData, fontUniformBuffer);
+
+		fontUniformBuffer->SetDebugName("FontRenderer::FontUniforms");
+	}
+
+	void FontRenderer::DrawString(const Font* font, std::string_view text, const vec2& position, const vec2& scale,
+		const Color& fillColor, const Color& outlineColor)
+	{
+		vec2 sprPos{};
+		vec2 sprScale{};
+
+		sprRenderer.GetBasePositionAndScale(sprPos, sprScale);
+		sprRenderer.RenderSprites(nullptr);
+		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
+
 		vec2 basePos{};
 		vec2 glyphOffset{};
 
 		auto c = text.cbegin();
+		const FontGlyph* prevGlyph{};
+
 		while (c != text.cend())
 		{
 			i32 utfChar = utf8::next(c, text.cend());
@@ -24,6 +48,7 @@ namespace Starshine::Rendering::Render2D
 			{
 				basePos.x = 0.0f;
 				basePos.y += font->LineHeight;
+				prevGlyph = nullptr;
 				continue;
 			}
 
@@ -37,38 +62,29 @@ namespace Starshine::Rendering::Render2D
 
 			glyphOffset.x = glyph->XOffset;
 			glyphOffset.y = glyph->YOffset;
-			PushGlyph(font, glyph, position + basePos + glyphOffset, scale, color);
 
-			basePos.x += glyph->XAdvance;
-		}
-
-#if 0
-		for (size_t i = 0; i < text.length(); i++)
-		{
-			char c = text.at(i);
-
-			if (c == '\n')
+			if (prevGlyph != nullptr && prevGlyph->KerningList != nullptr)
 			{
-				basePos.x = 0.0f;
-				basePos.y += font->LineHeight;
-				continue;
+				for (const auto& kern : prevGlyph->KerningList->KerningList)
+				{
+					if (kern.SecondCharCode == utfChar)
+						basePos.x += kern.Amount;
+				}
 			}
 
-			const FontGlyph* glyph = font->GetGlyph(c);
-
-			if (c == ' ')
-			{
-				basePos.x += glyph->XAdvance;
-				continue;
-			}
-
-			glyphOffset.x = glyph->XOffset;
-			glyphOffset.y = glyph->YOffset;
-			PushGlyph(font, glyph, position + basePos + glyphOffset, scale, color);
+			PushGlyph(font, glyph, position + basePos + glyphOffset, scale, fillColor);
 
 			basePos.x += glyph->XAdvance;
+			prevGlyph = glyph;
 		}
-#endif
+
+		FontUniforms.FontType = static_cast<i32>(font->GetType());
+		FontUniforms.OutlineColor_Vec4 = outlineColor.ToVector4();
+		fontUniformBuffer->SetData(&FontUniforms, 0, sizeof(FontUniforms));
+
+		auto device = sprRenderer.GetRenderingDevice();
+		device->SetUniformBuffer(fontUniformBuffer.get(), ShaderStage::Fragment, 0);
+		sprRenderer.RenderSprites(fontShader.get());
 	}
 
 	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)
@@ -76,6 +92,8 @@ namespace Starshine::Rendering::Render2D
 		vec2 basePos{};
 
 		auto c = text.cbegin();
+		const FontGlyph* prevGlyph{};
+
 		while (c != text.cend())
 		{
 			i32 utfChar = utf8::next(c, text.cend());
@@ -95,32 +113,17 @@ namespace Starshine::Rendering::Render2D
 				continue;
 			}
 
-			basePos.x += glyph->XAdvance;
-		}
-
-#if 0
-		for (size_t i = 0; i < text.length(); i++)
-		{
-			char c = text.at(i);
-
-			if (c == '\n')
+			if (prevGlyph != nullptr && prevGlyph->KerningList != nullptr)
 			{
-				basePos.x = 0.0f;
-				basePos.y += font->LineHeight;
-				continue;
-			}
-
-			const FontGlyph* glyph = font->GetGlyph(c);
-
-			if (c == ' ')
-			{
-				basePos.x += glyph->XAdvance;
-				continue;
+				for (const auto& kern : prevGlyph->KerningList->KerningList)
+				{
+					if (kern.SecondCharCode == utfChar)
+						basePos.x += kern.Amount;
+				}
 			}
 
 			basePos.x += glyph->XAdvance;
 		}
-#endif
 
 		return basePos;
 	}
@@ -136,11 +139,11 @@ namespace Starshine::Rendering::Render2D
 		sprRenderer.SetSpriteSize(vec2{ srcWidth, srcHeight } *scale);
 		sprRenderer.SetSpriteColor(color);
 
-		sprRenderer.SetSpriteSource(font->Texture.get(), RectangleF{ srcX, srcY, srcWidth, srcHeight });
+		sprRenderer.SetSpriteSource(font->TextureImage.get(), RectangleF{ srcX, srcY, srcWidth, srcHeight });
 
 		sprRenderer.SetSpriteRotation(0.0f);
 		sprRenderer.SetSpriteOrigin(vec2{ 0.0f, 0.0f });
 
-		sprRenderer.PushSprite(font->Texture.get());
+		sprRenderer.PushSprite(font->TextureImage.get());
 	}
 }

@@ -1,4 +1,5 @@
 #include "D3D11Buffers.h"
+#include "Common/MathExt.h"
 
 namespace Starshine::Rendering::D3D11
 {
@@ -22,6 +23,9 @@ namespace Starshine::Rendering::D3D11
 			break;
 		case BufferType::Uniform:
 			bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			// NOTE: Buffer size for constant buffers must be set to a multiple of 16
+			// (https://learn.microsoft.com/en-us/windows/win32/api/D3D11/nf-d3d11-id3d11device-createbuffer#remarks)
+			bufferDesc.ByteWidth = static_cast<UINT>(MathExtensions::GetAlignedSize(props.Size, 16));
 			break;
 		}
 
@@ -29,7 +33,7 @@ namespace Starshine::Rendering::D3D11
 		if (props.InitialData != nullptr) { subresData.pSysMem = props.InitialData; }
 
 		ID3D11Device* d3dDev = device.GetBaseDevice();
-		d3dDev->CreateBuffer(&bufferDesc, props.InitialData != nullptr ? &subresData : nullptr, &BaseBuffer);
+		HRESULT result = d3dDev->CreateBuffer(&bufferDesc, props.InitialData != nullptr ? &subresData : nullptr, BaseBuffer.GetAddressOf());
 		d3dDev->GetImmediateContext(&DeviceContext);
 	}
 

@@ -295,5 +295,11 @@
     <FxCompile Include="d3d11shaders\src\FS_SpriteDefault.hlsl">
       <Filter>Direct3D 11 Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="d3d11shaders\src\Font.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="d3d11shaders\src\FS_Font.hlsl">
+      <Filter>Direct3D 11 Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
