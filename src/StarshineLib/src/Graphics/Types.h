@@ -15,6 +15,13 @@ namespace Starshine::Graphics
 		Count
 	};
 
+	constexpr std::array<std::string_view, EnumCount<TextureFormat>()> TextureFormatNames
+	{
+		"RGBA8",
+		"RG8",
+		"R8"
+	};
+
 	constexpr std::array<size_t, EnumCount<Graphics::TextureFormat>()> TexturePixelSizes
 	{
 		4,

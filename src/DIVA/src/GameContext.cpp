@@ -1,6 +1,7 @@
 #include "GameContext.h"
 #include <Common/Logging/Logging.h>
 #include <IO/Path/Directory.h>
+#include <IO/Path/File.h>
 
 using namespace Starshine;
 using namespace Starshine::IO;
@@ -10,6 +11,20 @@ using namespace DIVA::Formats;
 
 namespace DIVA
 {
+	namespace Detail
+	{
+		bool ReadFont(Font* font, std::string_view filePath)
+		{
+			if (!File::Exists(filePath))
+				return false;
+
+			FileStream fileStream = File::OpenRead(filePath);
+			StreamReader reader(fileStream);
+
+			return font->ReadBinary(reader);
+		}
+	}
+
 	std::unique_ptr<GameContext> GlobalInstance{};
 
 	GameContext::GameContext()
@@ -62,10 +77,10 @@ namespace DIVA
 		SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
 
 		DebugFont = std::make_unique<Font>();
-		if (!DebugFont->ReadBMFont("diva/fonts/debug.fnt")) { return false; }
+		if (!Detail::ReadFont(DebugFont.get(), "diva/fonts/debug.dat")) { return false; }
 
 		TestCJKFont = std::make_unique<Font>();
-		if (!TestCJKFont->ReadBMFont("diva/fonts/test_cjk.fnt")) { return false; }
+		if (!Detail::ReadFont(TestCJKFont.get(), "diva/fonts/test_cjk.dat")) { return false; }
 
 		return true;
 	}

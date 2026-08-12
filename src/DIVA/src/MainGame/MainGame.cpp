@@ -477,7 +477,7 @@ namespace DIVA::MainGame
 				}
 
 				note->Update(gameTime);
-				UpdateNoteAutoplay(note);
+				//UpdateNoteAutoplay(note);
 
 				noteIndex++;
 			}

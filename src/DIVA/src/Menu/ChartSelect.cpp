@@ -2,6 +2,7 @@
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include "GameContext.h"
 #include "IO/Path/Directory.h"
+#include "IO/Path/File.h"
 #include "input/Keyboard.h"
 #include "MainGame/MainGame.h"
 #include <vector>
@@ -43,6 +44,8 @@ namespace DIVA::Menu
 		SpriteRenderer* spriteRenderer{};
 		Font* debugFont{};
 
+		std::unique_ptr<Font> fontRG8{};
+
 		SubMenuID currentSubmenu{};
 
 		i32 selectionIndex = 1;
@@ -56,18 +59,24 @@ namespace DIVA::Menu
 		{
 		}
 
-		void Reset()
-		{
-		}
-
 		void LoadContent()
 		{
 			spriteRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			debugFont = GameContext::GetInstance()->DebugFont.get();
+
+			if (fontRG8 == nullptr)
+			{
+				fontRG8 = std::make_unique<Font>();
+				
+				FileStream fileStream = File::OpenRead("diva/fonts/sourcesans3.dat");
+				StreamReader reader = StreamReader(fileStream);
+				fontRG8->ReadBinary(reader);
+			}
 		}
 
 		void Destroy()
 		{
+			fontRG8 = nullptr;
 		}
 
 		// NOTE: Convinience function that automatically resets the selection index
@@ -293,6 +302,11 @@ namespace DIVA::Menu
 			spriteRenderer->Font().PushString(debugFont, dispModeString, vec2(512.0f, 64.0f), vec2(1.0f), DefaultColors::White);
 		}
 
+		static constexpr std::string_view testTextData =
+			"\x30\x31\x32\x33\x34\x36\x35\x37\x38\x39\x20\x41\x42\x43\x44\x45" \
+			"\x46\x20\x61\x62\x63\x64\x65\x66\x0A\xD0\x90\xD0\x91\xD0\x92\xD0" \
+			"\x93\xD0\x94\x20\xD0\xB0\xD0\xB1\xD0\xB2\xD0\xB3\xD0\xB4";
+
 		void Draw()
 		{
 			auto gfxDevice = spriteRenderer->GetRenderingDevice();
@@ -313,6 +327,7 @@ namespace DIVA::Menu
 				break;
 			}
 
+			spriteRenderer->Font().PushString(fontRG8.get(), testTextData, vec2(640.0f, 64.0f), vec2(1.0f), DefaultColors::White);
 			spriteRenderer->RenderSprites(nullptr);
 		}
 	};
@@ -328,7 +343,6 @@ namespace DIVA::Menu
 	bool ChartSelect::Initialize()
 	{
 		impl->GameInstance = GameInstance;
-		impl->Reset();
 		return true;
 	}
 

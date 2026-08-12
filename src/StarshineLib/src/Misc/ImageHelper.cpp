@@ -47,6 +47,36 @@ namespace Starshine::Misc
 			}
 
 			constexpr stbi_io_callbacks STBICallbacks_IStream{ STBIRead_IStream, STBISkip_IStream, STBIEndOfFile_IStream };
+
+			size_t ConvertRGBAData(const u8* rgbaData, size_t rgbaDataSize, u8* outputData, Graphics::TextureFormat targetFormat)
+			{
+				if (targetFormat == TextureFormat::RGBA8)
+				{
+					SDL_memcpy(outputData, rgbaData, rgbaDataSize);
+					return rgbaDataSize;
+				}
+
+				const size_t pixelCount = rgbaDataSize / 4;
+				size_t resultDataSize = 0;
+
+				for (size_t i = 0; i < pixelCount; i++)
+				{
+					switch (targetFormat)
+					{
+					case TextureFormat::R8:
+						outputData[i] = rgbaData[i * 4 + 0];
+						resultDataSize++;
+						break;
+					case TextureFormat::RG8:
+						outputData[i * 2 + 0] = rgbaData[i * 4 + 0];
+						outputData[i * 2 + 1] = rgbaData[i * 4 + 1];
+						resultDataSize += 2;
+						break;
+					}
+				}
+
+				return resultDataSize;
+			}
 		}
 
 		bool GetImageInfo(std::string_view filePath, ivec2& size, i32* channels)
@@ -118,36 +148,66 @@ namespace Starshine::Misc
 			return true;
 		}
 
-		bool ReadImageFile(const void* fileData, size_t fileSize, std::unique_ptr<Texture>& outTexture)
+		bool ReadImageFile(const void* fileData, size_t fileSize, std::unique_ptr<Texture>& outTexture, Graphics::TextureFormat targetFormat)
 		{
 			ivec2 texSize{};
 			i32 channels{};
-			std::unique_ptr<u8[]> texData{};
+			std::unique_ptr<u8[]> imageData{};
 
-			if (!ReadImageFile(fileData, fileSize, texSize, channels, texData))
+			if (!ReadImageFile(fileData, fileSize, texSize, channels, imageData))
 				return false;
 
+			if (targetFormat != TextureFormat::RGBA8)
+			{
+				size_t texDataSize = GetTextureDataSize(texSize, targetFormat);
+				std::unique_ptr<u8[]> texData = std::make_unique<u8[]>(texDataSize);
+
+				Detail::ConvertRGBAData(imageData.get(), GetTextureDataSize(texSize, TextureFormat::RGBA8), texData.get(), targetFormat);
+
+				if (outTexture == nullptr)
+					outTexture = std::make_unique<Texture>(texSize, targetFormat, TextureFlags{}, texData.get(), false);
+				else
+					outTexture->SetData({}, texSize, imageData.get());
+
+				return true;
+			}
+
 			if (outTexture == nullptr)
-				outTexture = std::make_unique<Texture>(texSize, TextureFormat::RGBA8, TextureFlags{}, texData.get(), false);
+				outTexture = std::make_unique<Texture>(texSize, TextureFormat::RGBA8, TextureFlags{}, imageData.get(), false);
 			else
-				outTexture->SetData({}, texSize, texData.get());
+				outTexture->SetData({}, texSize, imageData.get());
 
 			return true;
 		}
 
-		bool ReadImageFile(std::string_view filePath, std::unique_ptr<Texture>& outTexture)
+		bool ReadImageFile(std::string_view filePath, std::unique_ptr<Texture>& outTexture, Graphics::TextureFormat targetFormat)
 		{
 			ivec2 texSize{};
 			i32 channels{};
-			std::unique_ptr<u8[]> texData{};
+			std::unique_ptr<u8[]> imageData{};
 
-			if (!ReadImageFile(filePath, texSize, channels, texData))
+			if (!ReadImageFile(filePath, texSize, channels, imageData))
 				return false;
 
+			if (targetFormat != TextureFormat::RGBA8)
+			{
+				size_t texDataSize = GetTextureDataSize(texSize, targetFormat);
+				std::unique_ptr<u8[]> texData = std::make_unique<u8[]>(texDataSize);
+
+				Detail::ConvertRGBAData(imageData.get(), GetTextureDataSize(texSize, TextureFormat::RGBA8), texData.get(), targetFormat);
+
+				if (outTexture == nullptr)
+					outTexture = std::make_unique<Texture>(texSize, targetFormat, TextureFlags{}, texData.get(), false);
+				else
+					outTexture->SetData({}, texSize, texData.get());
+
+				return true;
+			}
+
 			if (outTexture == nullptr)
-				outTexture = std::make_unique<Texture>(texSize, TextureFormat::RGBA8, TextureFlags{}, texData.get(), false);
+				outTexture = std::make_unique<Texture>(texSize, TextureFormat::RGBA8, TextureFlags{}, imageData.get(), false);
 			else
-				outTexture->SetData({}, texSize, texData.get());
+				outTexture->SetData({}, texSize, imageData.get());
 
 			return true;
 		}
