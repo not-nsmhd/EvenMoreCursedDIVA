@@ -67,7 +67,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;mf.lib;mfplat.lib;mfplay.lib;mfreadwrite.lib;mfuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -88,17 +88,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;mf.lib;mfplat.lib;mfplay.lib;mfreadwrite.lib;mfuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Animations\AnimationUtil.cpp" />
     <ClCompile Include="src\GameContext.cpp" />
-    <ClCompile Include="src\Graphics\FontTest.cpp" />
-    <ClCompile Include="src\Graphics\GraphicsTest.cpp" />
-    <ClCompile Include="src\Graphics\SpriteRendererTest.cpp" />
-    <ClCompile Include="src\GUI\ImGuiTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\VideoTest\VideoTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
@@ -112,14 +108,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Animations\Animation.h" />
-    <ClInclude Include="src\Animations\AnimationUtil.h" />
     <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\GameContext.h" />
-    <ClInclude Include="src\Graphics\FontTest.h" />
-    <ClInclude Include="src\Graphics\GraphicsTest.h" />
-    <ClInclude Include="src\Graphics\SpriteRendererTest.h" />
-    <ClInclude Include="src\GUI\ImGuiTest.h" />
+    <ClInclude Include="src\VideoTest\VideoTestState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,7 @@
 #pragma once
 #include <Common/Types.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
-#include <Rendering/Render2D/Font.h>
+#include <Graphics/Font.h>
 #include <vector>
 
 namespace Sandbox
@@ -17,7 +17,7 @@ namespace Sandbox
 		void Unload();
 
 	public:
-		std::unique_ptr<Starshine::Rendering::Render2D::Font> DebugFont;
+		std::unique_ptr<Starshine::Graphics::Font> DebugFont;
 		std::unique_ptr<Starshine::Rendering::Render2D::SpriteRenderer> SpriteRenderer;
 
 	public:

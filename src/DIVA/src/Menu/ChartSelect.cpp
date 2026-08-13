@@ -1,4 +1,4 @@
-#include "ChartSelect.h"
+﻿#include "ChartSelect.h"
 #include <Rendering/Render2D/SpriteRenderer.h>
 #include "GameContext.h"
 #include "IO/Path/Directory.h"

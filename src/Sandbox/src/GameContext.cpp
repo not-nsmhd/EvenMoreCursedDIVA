@@ -52,7 +52,7 @@ namespace Sandbox
 		auto gfxDevice = Rendering::GetDevice();
 
 		SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
-		DebugFont = std::make_unique<Render2D::Font>();
+		DebugFont = std::make_unique<Graphics::Font>();
 		if (!DebugFont->ReadBMFont("diva/fonts/debug.fnt")) { return false; }
 
 		return true;

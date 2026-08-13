@@ -650,7 +650,8 @@ namespace DIVA::MainGame
 				hud->ReleaseScoreBonus(drop);
 
 				HitSound_Hold_LoopVoice.SetPlaying(false);
-				AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd, 0.135f);
+				if (!drop)
+					AudioEngine::GetInstance()->PlaySound(shape == NoteShape::Star ? HitSound_StarHold_LoopEnd : HitSound_Hold_LoopEnd, 0.135f);
 			}
 			else
 			{

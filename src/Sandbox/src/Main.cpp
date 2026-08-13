@@ -1,18 +1,17 @@
 #include <SDL2/SDL_main.h>
 #include "GameInstance.h"
 #include "GameContext.h"
-#include "GUI/ImGuiTest.h"
-#include "Graphics/FontTest.h"
 
 #include "Definitions.h"
 
 using namespace Starshine;
+using namespace Sandbox;
 
 int SDL_main(int argc, char* argv[])
 {
 	Starshine::GameInstance game;
 	
-	if (game.Initialize())
+	if (game.Initialize(false))
 	{
 		game.GetWindow()->SetTitle("Sandbox");
 		//game.GetWindow()->SetSize(ivec2(1600, 900));
@@ -21,10 +20,7 @@ int SDL_main(int argc, char* argv[])
 
 		Sandbox::GameContext::CreateInstance();
 
-		game.RegisterState<ImGuiTest>();
-		game.RegisterState<Sandbox::FontTest>();
-
-		game.SetState(Sandbox::GameState_FontTest);
+		game.SetState(GetStatePointer<GameState>(StateID::VideoTest));
 		game.EnterLoop();
 
 		Sandbox::GameContext::DestroyInstance();

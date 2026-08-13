@@ -5,37 +5,19 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\Graphics">
-      <UniqueIdentifier>{7c0b195c-299c-48d1-9a7c-d3f40ee6412a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GUI">
-      <UniqueIdentifier>{8c9ab83e-0993-4312-bef3-92ffa5b38fc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Animations">
-      <UniqueIdentifier>{118eb98d-f1af-47dd-a202-bf704ac13be2}</UniqueIdentifier>
+    <Filter Include="Source Files\VideoTest">
+      <UniqueIdentifier>{ee68b2cd-4407-4f6c-8dee-81d3014bc712}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GraphicsTest.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\SpriteRendererTest.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GUI\ImGuiTest.cpp">
-      <Filter>Source Files\GUI</Filter>
-    </ClCompile>
     <ClCompile Include="src\GameContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Animations\AnimationUtil.cpp">
-      <Filter>Source Files\Animations</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\FontTest.cpp">
-      <Filter>Source Files\Graphics</Filter>
+    <ClCompile Include="src\VideoTest\VideoTest.cpp">
+      <Filter>Source Files\VideoTest</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,29 +26,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Graphics\GraphicsTest.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Graphics\SpriteRendererTest.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GUI\ImGuiTest.h">
-      <Filter>Source Files\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="src\GameContext.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Animations\Animation.h">
-      <Filter>Source Files\Animations</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Animations\AnimationUtil.h">
-      <Filter>Source Files\Animations</Filter>
     </ClInclude>
     <ClInclude Include="src\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\FontTest.h">
-      <Filter>Source Files\Graphics</Filter>
+    <ClInclude Include="src\VideoTest\VideoTestState.h">
+      <Filter>Source Files\VideoTest</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
