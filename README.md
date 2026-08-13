@@ -25,8 +25,8 @@ This section doesn't have much purpose other than add even more things to the "S
 * `StarshineLib` - Base code used across the entire project
 * `StarshineFramework` - Functionality for audio, input, graphics, window management and so on (read "I've ran out of things to list"), built on top of StarshineLib and is named "Framework" instead of "Engine" because it sounds cooler<sup>[citation needed]</sup>
 * `DIVA` - **Even More Cursed DIVA** itself
-* `Tools/SpritePack` - An unfinished sprite packing tool used for... packing sprites
 * `Sandbox` - One of the many war crimes I have commited- I mean, a sandbox for testing various ideas I get before integrating them into StarshineLib/Framework.
+* `Tools` folder - Half-assed content creation tools
 
 ## ...That's it
 Your balls will explode on October 21st, 2043 at 5:36 am
