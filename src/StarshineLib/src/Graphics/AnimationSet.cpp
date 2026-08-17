@@ -85,6 +85,35 @@ namespace Starshine::Graphics
 				keyframes.emplace_back(Keyframe<f32>(frame, value));
 			}
 		}
+
+		template <typename T>
+		void WriteKeyframes_Xml(const std::vector<Keyframe<T>>& keyframes, std::string_view elementName, Xml::Element* layerElement)
+		{
+			if (keyframes.empty())
+				return;
+
+			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
+			for (const auto& frame : keyframes)
+			{
+				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
+				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Value, frame.Value);
+			}
+		}
+
+		void WriteKeyframes_Xml(const std::vector<Keyframe<f32>>& keyframes, std::string_view elementName, Xml::Element* layerElement)
+		{
+			if (keyframes.empty())
+				return;
+
+			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
+			for (const auto& frame : keyframes)
+			{
+				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
+				frameElement->SetAttribute(XmlElementNames::Keyframe_Value, frame.Value);
+			}
+		}
 	}
 
 	Transform2D Layer::GetTransform(const f32& frame) const
@@ -121,7 +150,7 @@ namespace Starshine::Graphics
 		return Layers[0];
 	};
 
-	Layer& Animation::GetLayer(const size_t& index)
+	Layer& Animation::GetLayer(size_t index)
 	{
 		return Layers.at(index);
 	};
@@ -136,7 +165,7 @@ namespace Starshine::Graphics
 		return Layers[0];
 	};
 
-	const Layer& Animation::GetLayer(const size_t& index) const
+	const Layer& Animation::GetLayer(size_t index) const
 	{
 		return Layers.at(index);
 	};
@@ -155,14 +184,12 @@ namespace Starshine::Graphics
 		rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Height, &resolution.y);
 		rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_FPS, &fps);
 
-#if 0
 		const char* sprSheetPath{};
 		if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath) == 0)
 		{
 			spriteSheetPath = sprSheetPath;
-			ImportSpritesFromFolder(sprSheetPath);
+			//ImportSpritesFromFolder(sprSheetPath);
 		}
-#endif
 
 		const Xml::Element* sprDefsElement = rootElement->FirstChildElement(XmlElementNames::SpriteDefs);
 
@@ -245,6 +272,66 @@ namespace Starshine::Graphics
 
 		bool result = ReadXml(std::string_view(xmlData.get(), xmlSize));
 		return result;
+	}
+
+	void AnimationSet::WriteXml(std::string_view filePath)
+	{
+		Xml::Document animSetDoc;
+		Xml::Element* rootElement = animSetDoc.NewElement(XmlElementNames::AnimationSet);
+
+		rootElement->SetAttribute(XmlElementNames::AnimationSet_Width, resolution.x);
+		rootElement->SetAttribute(XmlElementNames::AnimationSet_Height, resolution.y);
+		rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, fps);
+		rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, spriteSheetPath.c_str());
+
+		Xml::Element* spriteDefsElement = rootElement->InsertNewChildElement(XmlElementNames::SpriteDefs);
+		for (const auto& sprDef : spriteDefinitions)
+		{
+			Xml::Element* spriteDefElement = spriteDefsElement->InsertNewChildElement(XmlElementNames::SpriteDefs_Sprite);
+			spriteDefElement->SetAttribute(XmlElementNames::Common_Name, sprDef.Name.c_str());
+			Xml::SetAttribute(spriteDefElement, XmlElementNames::Common_Size, sprDef.Size);
+		}
+
+		for (const auto& anim : animations)
+		{
+			Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
+			animElement->SetAttribute(XmlElementNames::Common_Name, anim.Name.c_str());
+			animElement->SetAttribute(XmlElementNames::Common_Start, anim.StartTime);
+			animElement->SetAttribute(XmlElementNames::Common_End, anim.EndTime);
+
+			for (const auto& layer : anim.Layers)
+			{
+				Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
+				layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
+				layerElement->SetAttribute(XmlElementNames::Common_Sprite, layer.SpriteDefinition->Name.c_str());
+
+				size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
+				layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
+
+				layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
+				layerElement->SetAttribute(XmlElementNames::Common_End, static_cast<i32>(layer.EndTime));
+
+				// Oh boy, I can't wait to start abusing the C++ type system!
+				Detail::WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
+				Detail::WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
+				Detail::WriteKeyframes_Xml(layer.Scale, XmlElementNames::Keyframes_Scale, layerElement);
+				Detail::WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
+				Detail::WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
+			}
+		}
+
+		animSetDoc.InsertFirstChild(rootElement);
+		animSetDoc.SaveFile(filePath.data());
+	}
+
+	std::string_view AnimationSet::GetSpriteSheetPath() const
+	{
+		return spriteSheetPath;
+	}
+
+	void AnimationSet::SetSpriteSheetPath(std::string_view path)
+	{
+		spriteSheetPath = path;
 	}
 
 	void AnimationSet::LinkToSpriteSheet(std::shared_ptr<SpriteSheet> spriteSheet)
@@ -335,5 +422,43 @@ namespace Starshine::Graphics
 	SpriteSheet* AnimationSet::GetSpriteSheet()
 	{
 		return linkedSpriteSheet.get();
+	}
+
+	std::vector<Animation>& AnimationSet::GetAnimations()
+	{
+		return animations;
+	}
+
+	std::vector<SpriteDefinition>& AnimationSet::GetSpriteDefinitions()
+	{
+		return spriteDefinitions;
+	}
+
+	Animation& AnimationSet::NewAnimation(std::string_view name, u32 startTime, u32 endTime)
+	{
+		Animation& result = animations.emplace_back();
+		result.Name = name;
+		result.StartTime = startTime;
+		result.EndTime = endTime;
+		return result;
+	}
+
+	SpriteDefinition& AnimationSet::NewSpriteDefinition(std::string_view name, const vec2& size, const Sprite* realSprite)
+	{
+		SpriteDefinition& result = spriteDefinitions.emplace_back();
+		result.Name = name;
+		result.Size = size;
+		result.RealSprite = realSprite;
+		return result;
+	}
+
+	void AnimationSet::SetResolution(const ivec2& resolution)
+	{
+		this->resolution = resolution;
+	}
+
+	void AnimationSet::SetFPS(i32 fps)
+	{
+		this->fps = fps;
 	}
 }

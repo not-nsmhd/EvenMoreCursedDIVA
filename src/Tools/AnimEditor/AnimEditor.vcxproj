@@ -93,7 +93,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Editor\AnimEditor.cpp" />
+    <ClCompile Include="src\Editor\DebugKeyframeList.cpp" />
     <ClCompile Include="src\Editor\FileDialog.cpp" />
+    <ClCompile Include="src\Editor\LayerModalWindow.cpp" />
+    <ClCompile Include="src\Editor\ResourcesWindow.cpp" />
+    <ClCompile Include="src\Editor\SpriteEditorWindow.cpp" />
     <ClCompile Include="src\GameContext.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
@@ -108,7 +112,12 @@
   <ItemGroup>
     <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\Editor\AnimEditor.h" />
+    <ClInclude Include="src\Editor\DebugKeyframeList.h" />
+    <ClInclude Include="src\Editor\EditorContext.h" />
     <ClInclude Include="src\Editor\FileDialog.h" />
+    <ClInclude Include="src\Editor\LayerModalWindow.h" />
+    <ClInclude Include="src\Editor\ResourcesWindow.h" />
+    <ClInclude Include="src\Editor\SpriteEditorWindow.h" />
     <ClInclude Include="src\GameContext.h" />
   </ItemGroup>
   <ItemGroup>

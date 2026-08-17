@@ -5,11 +5,13 @@
 #include "Definitions.h"
 #include "Editor/AnimEditor.h"
 
+using namespace Starshine;
+
 int SDL_main(int argc, char* argv[])
 {
 	Starshine::GameInstance game;
 
-	if (game.Initialize())
+	if (game.Initialize(true))
 	{
 		game.GetWindow()->SetTitle("Animation Editor");
 		game.GetWindow()->SetSize(ivec2(1600, 900));
@@ -18,9 +20,7 @@ int SDL_main(int argc, char* argv[])
 
 		GameContext::CreateInstance();
 
-		game.RegisterState<Starshine::AnimEditor>();
-
-		game.SetState(GameState_Main);
+		if (!game.SetState(GetStatePointer(StateID::AnimEditor))) { return 1; }
 		game.EnterLoop();
 
 		GameContext::DestroyInstance();

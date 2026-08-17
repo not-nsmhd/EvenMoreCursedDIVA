@@ -1,7 +1,7 @@
 #pragma once
 #include <Common/Types.h>
 #include <Rendering/Render2D/SpriteRenderer.h>
-#include <Rendering/Render2D/Font.h>
+#include <Graphics/Font.h>
 #include <vector>
 
 class GameContext : public NonCopyable
@@ -15,7 +15,7 @@ public:
 	void Unload();
 
 public:
-	std::unique_ptr<Starshine::Rendering::Render2D::Font> DebugFont;
+	std::unique_ptr<Starshine::Graphics::Font> DebugFont;
 	std::unique_ptr<Starshine::Rendering::Render2D::SpriteRenderer> SpriteRenderer;
 
 public:

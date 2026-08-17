@@ -82,6 +82,11 @@ namespace Starshine::Graphics
 		return textures[index].get();
 	}
 
+	std::vector<Sprite>& SpriteSheet::GetSprites()
+	{
+		return sprites;
+	}
+
 	const std::vector<Sprite>& SpriteSheet::GetSprites() const
 	{
 		return sprites;

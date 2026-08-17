@@ -18,7 +18,7 @@ namespace Starshine
 		void Update(Starshine::GameTime& gameTime);
 		void Draw(Starshine::GameTime& gameTime);
 
-		i64 GetStateID() const;
+		inline std::string_view GetStateName() { return "AnimEditor"; };
 
 	private:
 		struct Impl;

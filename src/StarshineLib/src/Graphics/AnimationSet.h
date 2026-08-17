@@ -101,8 +101,8 @@ namespace Starshine::Graphics
 		Layer& GetLayer(std::string_view name);
 		const Layer& GetLayer(std::string_view name) const;
 
-		Layer& GetLayer(const size_t& index);
-		const Layer& GetLayer(const size_t& index) const;
+		Layer& GetLayer(size_t index);
+		const Layer& GetLayer(size_t index) const;
 
 	public:
 		std::string Name;
@@ -123,6 +123,11 @@ namespace Starshine::Graphics
 		bool ReadXml(std::string_view xmlData);
 		bool LoadXml(std::string_view filePath);
 
+		void WriteXml(std::string_view filePath);
+
+		std::string_view GetSpriteSheetPath() const;
+		void SetSpriteSheetPath(std::string_view path);
+
 		void LinkToSpriteSheet(std::shared_ptr<SpriteSheet> spriteSheet);
 
 	public:
@@ -135,10 +140,21 @@ namespace Starshine::Graphics
 		SpriteSheet* GetSpriteSheet();
 
 	public:
+		std::vector<Animation>& GetAnimations();
+		std::vector<SpriteDefinition>& GetSpriteDefinitions();
+
+	public:
+		Animation& NewAnimation(std::string_view name, u32 startTime, u32 endTime);
+		SpriteDefinition& NewSpriteDefinition(std::string_view name, const vec2& size, const Sprite* realSprite);
+
+	public:
 		ivec2 GetResolution() const;
 		i32 GetFPS() const;
 
-		f32 GetRelativeFrameTimeStep(const f32& frameTime) const;
+		void SetResolution(const ivec2& resolution);
+		void SetFPS(i32 fps);
+
+		f32 GetRelativeFrameTimeStep(const f32& frameTime_seconds) const;
 
 	private:
 		std::string name;

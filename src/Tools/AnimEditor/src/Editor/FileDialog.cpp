@@ -47,7 +47,7 @@ namespace Starshine
 
 		if (!Title.empty())
 		{
-			static std::array<WCHAR, 256> titleBuffer{};
+			std::array<WCHAR, 256> titleBuffer{};
 			utf8::utf8to16(Title.data(), Title.data() + Title.size(), titleBuffer.data());
 
 			result = fileDialog->SetTitle(titleBuffer.data());
@@ -63,7 +63,7 @@ namespace Starshine
 				WCHAR* fileName{};
 				if (result = shellItem->GetDisplayName(SIGDN_FILESYSPATH, &fileName), result == S_OK)
 				{
-					static std::array<char, 256> fileNameBuffer{};
+					std::array<char, 256> fileNameBuffer{};
 					offset_t length = static_cast<offset_t>(lstrlenW(fileName));
 
 					utf8::utf16to8(fileName, fileName + length, fileNameBuffer.data());

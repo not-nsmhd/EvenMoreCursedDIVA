@@ -1,16 +1,21 @@
 #include "AnimEditor.h"
 #include "Definitions.h"
+#include "EditorContext.h"
 #include <Rendering/Device.h>
-#include <Rendering/Render2D/SpriteSheet.h>
+#include <Graphics/SpriteSheet.h>
+#include <Graphics/AnimationSet.h>
 #include <GameContext.h>
 #include <Common/MathExt.h>
-#include <Input/Mouse.h>
+
+#include "ResourcesWindow.h"
+#include "SpriteEditorWindow.h"
+#include "LayerModalWindow.h"
+#include "DebugKeyframeList.h"
 
 #include <ImGui/Core/imgui.h>
 #include <ImGui/Core/imgui_internal.h>
 
 #include "FileDialog.h"
-#include <IO/Xml.h>
 #include <IO/Path/Path.h>
 #include <IO/Path/Directory.h>
 #include <Common/Logging/Logging.h>
@@ -18,167 +23,15 @@
 
 namespace Gui = ImGui;
 using namespace Starshine::Rendering::Render2D;
+using namespace Starshine::Graphics;
 using namespace Starshine;
 
 namespace Starshine
 {
-	namespace XmlElementNames
-	{
-		static constexpr const char* AnimationSet = "AnimationSet";
-		static constexpr const char* AnimationSet_Width = "Width";
-		static constexpr const char* AnimationSet_Height = "Height";
-		static constexpr const char* AnimationSet_FPS = "FPS";
-		static constexpr const char* AnimationSet_StageColor = "StageColor";
-		static constexpr const char* AnimationSet_SpriteSheet = "SpriteSheet";
-
-		static constexpr const char* SpriteDefs = "SpriteDefinitions";
-		static constexpr const char* SpriteDefs_Sprite = "SpriteDefinition";
-
-		static constexpr const char* Common_Name = "Name";
-		static constexpr const char* Common_Start = "Start";
-		static constexpr const char* Common_End = "End";
-		static constexpr const char* Common_Sprite = "Sprite";
-		static constexpr const char* Common_Size = "Size";
-
-		static constexpr const char* Animation = "Animation";
-		static constexpr const char* AnimationLayer = "Layer";
-		static constexpr const char* AnimationLayer_BlendMode = "BlendMode";
-
-		static constexpr std::string_view Keyframes_Origin = "Origin";
-		static constexpr std::string_view Keyframes_Position = "Position";
-		static constexpr std::string_view Keyframes_Scale = "Scale";
-		static constexpr std::string_view Keyframes_Rotation = "Rotation";
-		static constexpr std::string_view Keyframes_Color = "Color";
-
-		static constexpr const char* Keyframe = "Keyframe";
-		static constexpr const char* Keyframe_Frame = "Frame";
-		static constexpr const char* Keyframe_Value = "Value";
-	}
-
 	namespace ValueRanges
 	{
 		static constexpr vec2 MinResolution{ 480, 270 };
 		static constexpr vec2 MaxResolution{ 1920, 1080 };
-	}
-
-	struct Transform2D
-	{
-		vec2 Origin{};
-		vec2 Position{};
-		vec2 Scale{};
-		f32 Rotation{};
-		Color Color{};
-	};
-
-	template <typename T>
-	struct Keyframe
-	{
-		u32 Frame{};
-		T Value{};
-
-		Keyframe() {};
-		Keyframe(const u32& frame, const T& value) : Frame(frame), Value(value) {};
-	};
-
-	struct Layer
-	{
-		std::string Name;
-
-		u32 StartTime{};
-		u32 EndTime{};
-
-		BlendMode BlendMode{};
-
-		std::vector<Keyframe<vec2>> Origin;
-		std::vector<Keyframe<vec2>> Position;
-		std::vector<Keyframe<vec2>> Scale;
-		std::vector<Keyframe<f32>> Rotation;
-		std::vector<Keyframe<Color>> Color;
-		const Sprite* Sprite{};
-
-		Transform2D CurrentEditTransform{};
-		bool Expanded{};
-	};
-
-	struct Animation
-	{
-		std::string Name;
-
-		u32 StartTime{};
-		u32 EndTime{};
-
-		std::vector<Layer> Layers;
-	};
-
-	template <typename T>
-	bool InterpolateKeyframes(const std::vector<Keyframe<T>>& keyframes, const f32& frame, T& value)
-	{
-		if (keyframes.empty())
-			return false;
-
-		if (keyframes.size() == 1 || frame <= 0.0f)
-		{
-			value = keyframes[0].Value;
-			return true;
-		}
-
-		const Keyframe<T>& first = keyframes.front();
-		const Keyframe<T>& last = keyframes.back();
-
-		if (frame <= first.Frame)
-		{
-			value = first.Value;
-			return true;
-		}
-
-		if (frame >= last.Frame)
-		{
-			value = last.Value;
-			return true;
-		}
-
-		const Keyframe<T>* start = &keyframes[0];
-		const Keyframe<T>* end = start;
-
-		for (size_t i = 0; i < keyframes.size(); i++)
-		{
-			end = &keyframes[i];
-			if (end->Frame >= frame)
-				break;
-
-			start = end;
-		}
-
-		const f32 range = static_cast<f32>(end->Frame - start->Frame);
-		const f32 f = frame - static_cast<f32>(start->Frame);
-		const f32 frameFactor = MathExtensions::ConvertRange<f32>(0.0f, range, 0.0f, 1.0f, f);
-		value = start->Value * (1.0f - frameFactor) + end->Value * frameFactor;
-
-		return true;
-	}
-
-	Transform2D GetTransformAtFrame(const Layer& layer, const f32& frame)
-	{
-		Transform2D result{};
-		result.Origin = { 0.5f, 0.5f };
-		result.Scale = { 1.0f, 1.0f };
-		result.Color = DefaultColors::White;
-
-		vec2 tempVec2{};
-		Color tempColor{};
-
-		if (InterpolateKeyframes(layer.Origin, frame, tempVec2))
-			result.Origin = tempVec2;
-		if (InterpolateKeyframes(layer.Position, frame, tempVec2))
-			result.Position = tempVec2;
-		if (InterpolateKeyframes(layer.Scale, frame, tempVec2))
-			result.Scale = tempVec2;
-		if (InterpolateKeyframes(layer.Rotation, frame, tempVec2.x))
-			result.Rotation = tempVec2.x;
-		if (InterpolateKeyframes(layer.Color, frame, tempColor))
-			result.Color = tempColor;
-
-		return result;
 	}
 
 	ImRect GetRelativeContentRegion()
@@ -193,35 +46,24 @@ namespace Starshine
 	{
 		AnimEditor* parent{};
 
-		GFX::SpritePacker sprPacker{};
-		std::string spriteSheetPath{};
-		SpriteSheet spriteSheet{};
+		std::shared_ptr<SpriteSheet> spriteSheet{};
+		EditorContextData context;
 
-		std::vector<Animation> animations;
-		Animation* currentAnim{ nullptr };
-		Layer* selectedLayer{ nullptr };
+		Color stageColor{ DefaultColors::White };
 
-		f32 timelineFrame{};
-
-		ivec2 canvasSize{ 1280, 720 };
-		Color canvasColor = DefaultColors::White;
-		i32 baseFPS{ 60 };
 		vec2 viewPan{};
 		f32 viewZoom{ 1.0f };
 
 		bool playing = false;
 		bool showMetricsWindow = false;
 		bool showIDStackWindow = false;
-		bool showKeyframeListWindow = false;
 
-		Layer* layerToModify = nullptr;
-		bool renameLayer = false;
-		bool changeLayerSprite = false;
+		ResourcesWindow resourcesWindow;
+		SpriteEditorWindow spriteEditorWindow;
+		LayerModalWindow layerModalWindow;
+		DebugKeyframeList debugKeyframeListWindow;
 
-		std::vector<Layer>::iterator layerToDelete{};
-		bool layerToDeleteIsSet = false;
-
-		Impl(AnimEditor* parent) : parent{ parent }
+		Impl(AnimEditor* parent) : parent(parent), resourcesWindow(&context), layerModalWindow(&context)
 		{
 		}
 
@@ -232,13 +74,16 @@ namespace Starshine
 		bool Initialize()
 		{
 			const RectangleF viewportSize = Rendering::GetDevice()->GetViewportSize();
+			AnimationSet& animSet = context.AnimSet;
 
-			viewPan.x = viewportSize.Width / 2.0f - canvasSize.x / 2.0f;
-			viewPan.y = viewportSize.Height / 2.0f - canvasSize.y / 2.0f;
+			animSet.SetResolution(vec2(1280, 720));
+			animSet.SetFPS(60);
+			viewPan.x = viewportSize.Width / 2.0f - 640.0f;
+			viewPan.y = viewportSize.Height / 2.0f - 360.0f;
 
-			currentAnim = &animations.emplace_back();
-			currentAnim->Name = "Animation 0";
-			currentAnim->EndTime = 60;
+			context.CurrentAnimation = &animSet.NewAnimation("Animation 0", 0, 60);
+
+			debugKeyframeListWindow.SetAnimation(&animSet, context.CurrentAnimation);
 
 			return true;
 		}
@@ -294,14 +139,17 @@ namespace Starshine
 
 		void TimelineHeader()
 		{
+			Animation* currentAnim = context.CurrentAnimation;
+			auto& layers = context.Layers;
+
 			Gui::Text("Frame");
 			Gui::SameLine();
 			Gui::SetNextItemWidth(56.0f);
-			Gui::DragFloat("##Timeline_FrameDrag", &timelineFrame, 1.0f, currentAnim->StartTime, currentAnim->EndTime, "%.0f", playing ? ImGuiSliderFlags_ReadOnly : 0);
+			Gui::DragFloat("##Timeline_FrameDrag", &context.TimelineFrame, 1.0f, currentAnim->StartTime, currentAnim->EndTime, "%.0f", playing ? ImGuiSliderFlags_ReadOnly : 0);
 			if (Gui::IsItemEdited() && !playing)
 			{
-				for (auto& layer : currentAnim->Layers)
-					layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
+				for (auto& layer : layers)
+					layer.CurrentTransform = layer.BaseLayer->GetTransform(context.TimelineFrame);
 			}
 
 			Gui::SameLine();
@@ -310,8 +158,8 @@ namespace Starshine
 				playing = !playing;
 				if (!playing)
 				{
-					for (auto& layer : currentAnim->Layers)
-						layer.CurrentEditTransform = GetTransformAtFrame(layer, timelineFrame);
+					for (auto& layer : layers)
+						layer.CurrentTransform = layer.BaseLayer->GetTransform(context.TimelineFrame);
 				}
 			}
 		}
@@ -327,7 +175,7 @@ namespace Starshine
 		template <typename T>
 		void InsertKeyframeButton(std::vector<Keyframe<T>>& keyframes, const T& value)
 		{
-			InsertKeyframe(keyframes, static_cast<u32>(timelineFrame), value);
+			InsertKeyframe(keyframes, static_cast<u32>(context.TimelineFrame), value);
 		}
 
 		template <typename T>
@@ -379,48 +227,52 @@ namespace Starshine
 
 		void LayerContextMenu(size_t layerIndex)
 		{
-			auto layer = currentAnim->Layers.begin() + layerIndex;
+			auto editLayer = context.Layers.begin() + layerIndex;
+			auto realLayers = context.CurrentAnimation->Layers;
+
 			if (Gui::BeginPopupContextItem())
 			{
 				if (Gui::Selectable("Rename"))
 				{
-					layerToModify = &*layer;
-					renameLayer = true;
+					layerModalWindow.OpenRename(layerIndex);
 				}
 				if (Gui::Selectable("Change sprite"))
 				{
-					layerToModify = &*layer;
-					changeLayerSprite = true;
+					layerModalWindow.OpenChangeSprite(layerIndex);
 				}
 
 				Gui::Separator();
 
 				if (Gui::BeginMenu("Change order"))
 				{
-					ImGuiSelectableFlags selectableFlags = (layerIndex == currentAnim->Layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
+					ImGuiSelectableFlags selectableFlags = (layerIndex == context.Layers.size() - 1) ? ImGuiSelectableFlags_Disabled : 0;
 					if (Gui::Selectable("Move to the front", false, selectableFlags))
 					{
-						auto layer1 = currentAnim->Layers.begin() + layerIndex;
+						auto layer1 = realLayers.begin() + layerIndex;
 						auto layer2 = layer1 + 1;
 						std::iter_swap(layer1, layer2);
 
-						if (selectedLayer == &*layer1)
-						{
-							selectedLayer = &*layer2;
-						}
+						auto editLayer1 = context.Layers.begin() + layerIndex;
+						auto editLayer2 = editLayer1 + 1;
+						std::iter_swap(editLayer1, editLayer2);
+
+						if (context.CurrentLayer == &*editLayer1)
+							context.CurrentLayer = &*editLayer2;
 					}
 
 					selectableFlags = (layerIndex == 0) ? ImGuiSelectableFlags_Disabled : 0;
 					if (Gui::Selectable("Move to the back", false, selectableFlags))
 					{
-						auto layer1 = currentAnim->Layers.begin() + layerIndex;
+						auto layer1 = realLayers.begin() + layerIndex;
 						auto layer2 = layer1 - 1;
 						std::iter_swap(layer1, layer2);
 
-						if (selectedLayer == &*layer1)
-						{
-							selectedLayer = &*layer2;
-						}
+						auto editLayer1 = context.Layers.begin() + layerIndex;
+						auto editLayer2 = editLayer1 - 1;
+						std::iter_swap(editLayer1, editLayer2);
+
+						if (context.CurrentLayer == &*editLayer1)
+							context.CurrentLayer = &*editLayer2;
 					}
 					Gui::EndMenu();
 				}
@@ -429,45 +281,52 @@ namespace Starshine
 
 				if (Gui::Selectable("Position at center"))
 				{
-					layer->CurrentEditTransform.Position.x = canvasSize.x / 2.0f;
-					layer->CurrentEditTransform.Position.y = canvasSize.y / 2.0f;
+					const ivec2 stageSize = context.AnimSet.GetResolution();
+					editLayer->CurrentTransform.Position.x = stageSize.x / 2.0f;
+					editLayer->CurrentTransform.Position.y = stageSize.y / 2.0f;
 				}
 
 				if (Gui::BeginMenu("Set layer's origin..."))
 				{
+					const SpriteDefinition* spriteDef = editLayer->BaseLayer->SpriteDefinition;
 					if (Gui::Selectable("at sprite's origin"))
 					{
-						layer->CurrentEditTransform.Origin = layer->Sprite->Origin;
+						if (spriteDef->RealSprite != nullptr)
+						{
+							const vec2 size = spriteDef->RealSprite->SourceRectangle.Size();
+							const vec2 origin = spriteDef->RealSprite->Origin;
+							editLayer->CurrentTransform.Origin = origin / size;
+						}
 					}
 					if (Gui::Selectable("at sprite's center"))
 					{
-						layer->CurrentEditTransform.Origin = layer->Sprite->SourceRectangle.Center();
+						editLayer->CurrentTransform.Origin = spriteDef->Size / 2.0f;
 					}
 					if (Gui::Selectable("at layer's center"))
 					{
-						layer->CurrentEditTransform.Origin = layer->CurrentEditTransform.Scale / 2.0f;
+						editLayer->CurrentTransform.Origin = editLayer->CurrentTransform.Scale / 2.0f;
 					}
 					Gui::EndMenu();
 				}
 
 				Gui::Separator();
 
-				if (Gui::Selectable("Delete"))
+				if (Gui::Selectable("Remove"))
 				{
-					layerToDelete = layer;
-					layerToDeleteIsSet = true;
+					layerModalWindow.OpenRemoveLayer(layerIndex);
 				}
+
 				Gui::EndPopup();
 			}
 		}
 
 		f32 layerListScroll{};
 
-		void LayerTreeNodeProperties(i32 layerIndex, std::vector<Layer>::reverse_iterator layer)
+		void LayerTreeNodeProperties(i32 layerIndex, EditorLayer& layer)
 		{
 			LayerContextMenu(layerIndex);
 
-			const char* blendModeName_layer = BlendModeNames[static_cast<size_t>(layer->BlendMode)].data();
+			const char* blendModeName_layer = BlendModeNames[static_cast<size_t>(layer.BaseLayer->BlendMode)].data();
 
 			Gui::SameLine();
 			if (Gui::BeginCombo("##Layer_BlendMode", blendModeName_layer))
@@ -476,7 +335,7 @@ namespace Starshine
 				{
 					const char* blendModeName = BlendModeNames[i].data();
 					if (Gui::Selectable(blendModeName))
-						layer->BlendMode = static_cast<BlendMode>(i);
+						layer.BaseLayer->BlendMode = static_cast<BlendMode>(i);
 				}
 
 				Gui::EndCombo();
@@ -492,70 +351,43 @@ namespace Starshine
 			layersRegionSize.y = Gui::GetContentRegionAvail().y;
 
 			if (Gui::BeginChild("##Timeline_Layers", layersRegionSize,
-				ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX, ImGuiWindowFlags_MenuBar))
+				ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
 			{
-				if (Gui::BeginMenuBar())
-				{
-					if (Gui::MenuItem("+L"))
-					{
-						size_t layerCount = currentAnim->Layers.size();
-						char layerName[64]{};
-						SDL_snprintf(layerName, sizeof(layerName) - 1, "Layer %llu", layerCount);
+				auto& layers = context.Layers;
 
-						const Sprite& defaultSprite = spriteSheet.GetSprite(0);
-						Layer& newLayer = currentAnim->Layers.emplace_back();
-						newLayer.Name = layerName;
-						newLayer.BlendMode = BlendMode::Normal;
-						newLayer.StartTime = timelineFrame;
-						newLayer.EndTime = currentAnim->EndTime;
-						newLayer.Sprite = &defaultSprite;
-						newLayer.CurrentEditTransform.Scale = { 1.0f, 1.0f };
-						newLayer.CurrentEditTransform.Origin = { 0.5f, 0.5f };
-						newLayer.CurrentEditTransform.Color = DefaultColors::White;
-					}
-					if (Gui::BeginItemTooltip())
-					{
-						Gui::Text("Add a new layer");
-						Gui::EndTooltip();
-					}
-				}
-				Gui::EndMenuBar();
-
-				i32 layerIndex = currentAnim->Layers.size() - 1;
-				for (auto layer = currentAnim->Layers.rbegin(); layer != currentAnim->Layers.rend(); layer++)
+				i32 layerIndex = layers.size() - 1;
+				for (auto layer = layers.rbegin(); layer != layers.rend(); layer++)
 				{
+					Layer* baseLayer = layer->GetLayerPointer();
+
 					Gui::PushID(layerIndex);
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
 
-					if (selectedLayer == &*layer)
+					if (context.CurrentLayer == &*layer)
 						nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 					Gui::SetNextItemAllowOverlap();
-					if (Gui::TreeNodeEx(layer->Name.c_str(), nodeFlags))
+					if (Gui::TreeNodeEx(baseLayer->Name.c_str(), nodeFlags))
 					{
 						layer->Expanded = true;
-						LayerTreeNodeProperties(layerIndex, layer);
+						LayerTreeNodeProperties(layerIndex, *layer);
 
-						LayerPropertyField(layerIndex, 0, "Origin", layer->CurrentEditTransform.Origin, layer->Origin);
-						LayerPropertyField(layerIndex, 1, "Position", layer->CurrentEditTransform.Position, layer->Position);
-						LayerPropertyField(layerIndex, 2, "Scale", layer->CurrentEditTransform.Scale, layer->Scale);
-						LayerPropertyField(layerIndex, 3, "Rotation", layer->CurrentEditTransform.Rotation, layer->Rotation);
-						LayerPropertyField(layerIndex, 4, "Color", layer->CurrentEditTransform.Color, layer->Color);
+						LayerPropertyField(layerIndex, 0, "Origin", layer->CurrentTransform.Origin, baseLayer->Origin);
+						LayerPropertyField(layerIndex, 1, "Position", layer->CurrentTransform.Position, baseLayer->Position);
+						LayerPropertyField(layerIndex, 2, "Scale", layer->CurrentTransform.Scale, baseLayer->Scale);
+						LayerPropertyField(layerIndex, 3, "Rotation", layer->CurrentTransform.Rotation, baseLayer->Rotation);
+						LayerPropertyField(layerIndex, 4, "Color", layer->CurrentTransform.Color, baseLayer->Color);
 
 						Gui::TreePop();
 					}
 					else
-					{
 						layer->Expanded = false;
-					}
 
 					if (Gui::IsItemClicked())
-						selectedLayer = &*layer;
+						context.CurrentLayer = &*layer;
 
 					if (!layer->Expanded)
-					{
-						LayerTreeNodeProperties(layerIndex, layer);
-					}
+						LayerTreeNodeProperties(layerIndex, *layer);
 
 					Gui::PopID();
 					layerIndex--;
@@ -636,6 +468,7 @@ namespace Starshine
 		{
 			const ImGuiStyle& style = Gui::GetStyle();
 			DragStateData& dragState = parent->DragState;
+			Animation* currentAnim = context.CurrentAnimation;
 
 			Gui::PushID(layerIndex);
 			Gui::PushID(propIndex);
@@ -810,10 +643,12 @@ namespace Starshine
 		void DrawTimeline()
 		{
 			char windowTitle[128]{};
-			if (currentAnim)
-				SDL_snprintf(windowTitle, sizeof(windowTitle), "Timeline - \"%s\"###Timeline", currentAnim->Name.c_str());
+			if (context.CurrentAnimation)
+				SDL_snprintf(windowTitle, sizeof(windowTitle), "Timeline - \"%s\"###Timeline", context.CurrentAnimation->Name.c_str());
 			else
 				SDL_snprintf(windowTitle, sizeof(windowTitle), "Timeline - No Animation###Timeline");
+
+			Animation* currentAnim = context.CurrentAnimation;
 
 			if (Gui::Begin(windowTitle))
 			{
@@ -884,44 +719,42 @@ namespace Starshine
 					const f32 heightDelta = rangeSize + itemSpacing.y;
 
 					i32 layerIndex = 0;
-					auto& layers = currentAnim->Layers;
-					for (auto layer = currentAnim->Layers.rbegin(); layer != currentAnim->Layers.rend(); layer++)
+					auto& layers = context.Layers;
+					for (auto layer = layers.rbegin(); layer != layers.rend(); layer++)
 					{
 						const vec2 rangePos = keyframePos;
+						Layer* baseLayer = layer->GetLayerPointer();
 
-						u32 layerStart = layer->StartTime - animStart;
-						u32 layerEnd = layer->EndTime - animStart;
-						TimelineRange(layer->Name.c_str(), layerStart, layerEnd, rangePos, rangeSize);
-						layer->StartTime = layerStart + animStart;
-						layer->EndTime = layerEnd + animStart;
+						u32 layerStart = baseLayer->StartTime - animStart;
+						u32 layerEnd = baseLayer->EndTime - animStart;
+						TimelineRange(baseLayer->Name.c_str(), layerStart, layerEnd, rangePos, rangeSize);
+						baseLayer->StartTime = layerStart + animStart;
+						baseLayer->EndTime = layerEnd + animStart;
 
-						layer->StartTime = MathExtensions::Clamp<i32>(layer->StartTime, currentAnim->StartTime, currentAnim->EndTime - 1);
-						layer->EndTime = MathExtensions::Clamp<i32>(layer->EndTime, layer->StartTime + 1, currentAnim->EndTime);
+						baseLayer->StartTime = MathExtensions::Clamp<i32>(baseLayer->StartTime, currentAnim->StartTime, currentAnim->EndTime - 1);
+						baseLayer->EndTime = MathExtensions::Clamp<i32>(baseLayer->EndTime, baseLayer->StartTime + 1, currentAnim->EndTime);
 
 						if (layer->Expanded)
 						{
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer->Origin, keyframePos, 0, layerIndex);
+							DrawLayerKeyframes<vec2>(baseLayer->Origin, keyframePos, 0, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer->Position, keyframePos, 1, layerIndex);
+							DrawLayerKeyframes<vec2>(baseLayer->Position, keyframePos, 1, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<vec2>(layer->Scale, keyframePos, 2, layerIndex);
+							DrawLayerKeyframes<vec2>(baseLayer->Scale, keyframePos, 2, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<f32>(layer->Rotation, keyframePos, 3, layerIndex);
+							DrawLayerKeyframes<f32>(baseLayer->Rotation, keyframePos, 3, layerIndex);
 							keyframePos.y += heightDelta;
 
-							DrawLayerKeyframes<Color>(layer->Color, keyframePos, 4, layerIndex);
+							DrawLayerKeyframes<Color>(baseLayer->Color, keyframePos, 4, layerIndex);
 							keyframePos.y += heightDelta;
 
 						}
-						else
-						{
-							keyframePos.y += heightDelta;
-						}
+						keyframePos.y += heightDelta;
 
 						layerIndex++;
 						keyframePos.x = keyframesRegion.Min.x + horizontalPadding - timelineScroll;
@@ -932,7 +765,7 @@ namespace Starshine
 					ImGui::InvisibleButton("##Timeline_DopeSheet_KeyframeRegion", { frameLineDistance * animLength, 1.0f });
 
 					// --- Current frame line
-					const ImVec2 frameMarkerPos = ImVec2{ keyframesRegion.Min.x + timelineFrame * frameLineDistance + horizontalPadding - timelineScroll,
+					const ImVec2 frameMarkerPos = ImVec2{ keyframesRegion.Min.x + context.TimelineFrame * frameLineDistance + horizontalPadding - timelineScroll,
 						frameNumbersRegion.GetTL().y + menuBarHeight / 2.0f };
 
 					const ImVec2 lineStart = frameMarkerPos;
@@ -944,202 +777,6 @@ namespace Starshine
 				Gui::EndChild();
 			}
 			Gui::End();
-		}
-
-		char newAnimName[128]{};
-		i32 newAnimTimings[2]{ 0, 60 };
-
-		void NewAnimationModalWindow()
-		{
-			const ImVec2 center = Gui::GetMainViewport()->GetCenter();
-			Gui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-			if (Gui::BeginPopupModal("New Animation", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-			{
-				Gui::Text("Name");
-				Gui::SameLine();
-				Gui::InputText("##NewAnimation_Name", newAnimName, sizeof(newAnimName) - 1);
-
-				Gui::Text("Start and End Timings");
-				Gui::SameLine();
-				Gui::InputInt2("##NewAnimation_Timings", newAnimTimings);
-
-				Gui::Separator();
-
-				if (Gui::Button("Add", ImVec2(120.0f, 0.0f)))
-				{
-					Animation& newAnim = animations.emplace_back();
-
-					newAnim.Name = newAnimName;
-					newAnim.StartTime = newAnimTimings[0];
-					newAnim.EndTime = newAnimTimings[1];
-
-					currentAnim = &newAnim;
-					Gui::CloseCurrentPopup();
-				}
-
-				Gui::SameLine();
-					
-				if (Gui::Button("Cancel", ImVec2(120.0f, 0.0f)))
-					Gui::CloseCurrentPopup();
-
-				Gui::EndPopup();
-			}
-		}
-
-		void ResourcesWindow()
-		{
-			if (Gui::Begin("Resources"))
-			{
-				if (Gui::BeginTabBar("##Resources_TabBar"))
-				{
-					if (Gui::BeginTabItem("Animations"))
-					{
-						if (Gui::Button("+A"))
-						{
-							SDL_memset(newAnimName, 0, sizeof(newAnimName));
-							newAnimTimings[0] = 0;
-							newAnimTimings[1] = 60;
-							Gui::OpenPopup("New Animation");
-						}
-
-						NewAnimationModalWindow();
-
-						const ImVec2 contentRegion = Gui::GetContentRegionAvail();
-						if (Gui::BeginListBox("##Resources_AnimationList", ImVec2(-FLT_MIN, contentRegion.y)))
-						{
-							for (auto& anim : animations)
-							{
-								const bool selected = &anim == currentAnim;
-
-								if (Gui::Selectable(anim.Name.c_str(), &selected))
-									currentAnim = &anim;
-							}
-
-							Gui::EndListBox();
-						}
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Sprites"))
-					{
-						Gui::Text("fjiofjeoiwfjwoejfoewijoew sprites tab\njfiorjfew");
-						Gui::EndTabItem();
-					}
-					Gui::EndTabBar();
-				}
-			}
-			Gui::End();
-		}
-
-		std::array<char, 64> newLayerName{};
-
-		void RenameLayerPopUp()
-		{
-			if (layerToModify == nullptr || renameLayer == false)
-				return;
-
-			const ImGuiViewport* viewport = Gui::GetMainViewport();
-			const ImVec2 windowPos = { viewport->Size.x / 2.0f, viewport->Size.y / 2.0f };
-
-			Gui::SetNextWindowPos(windowPos, 0, ImVec2(0.5f, 0.5f));
-			if (Gui::Begin("Rename Layer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
-			{
-				Gui::Text("Enter a new name for layer \"%s\"", layerToModify->Name.c_str());
-				bool newNameEntered = Gui::InputText("##RenameLayer_Input", newLayerName.data(), newLayerName.size() - 1);
-
-				if (Gui::Button("OK"))
-				{
-					layerToModify->Name = newLayerName.data();
-					newLayerName.fill(0);
-					layerToModify = nullptr;
-					renameLayer = false;
-				};
-				Gui::SameLine();
-				if (Gui::Button("Cancel"))
-				{
-					newLayerName.fill(0);
-					layerToModify = nullptr;
-					renameLayer = false;
-				}
-				Gui::End();
-			}
-		}
-
-		const Sprite* spriteToSet{};
-
-		void ChangeLayerSpritePopUp()
-		{
-			if (layerToModify == nullptr || changeLayerSprite == false)
-				return;
-
-			const ImGuiViewport* viewport = Gui::GetMainViewport();
-			const ImVec2 windowPos = { viewport->Size.x / 2.0f, viewport->Size.y / 2.0f };
-
-			Gui::SetNextWindowPos(windowPos, 0, ImVec2(0.5f, 0.5f));
-			if (Gui::Begin("Change Layer Sprite", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
-			{
-				Gui::Text("Select a new sprite for layer \"%s\"", layerToModify->Name.c_str());
-
-				const f32 listHeight = Gui::GetTextLineHeightWithSpacing() * 8.0f;
-				if (Gui::BeginListBox("##ChangeLayerSprite_List", ImVec2(-FLT_MIN, listHeight)))
-				{
-					auto& sprites = spriteSheet.GetSprites();
-
-					for (auto& sprite : sprites)
-					{
-						bool selected = spriteToSet == &sprite;
-						ImGuiSelectableFlags flags = selected ? ImGuiSelectableFlags_Highlight : 0;
-						if (Gui::Selectable(sprite.Name.c_str(), &selected, flags))
-						{
-							spriteToSet = &sprite;
-						}
-					}
-
-					Gui::EndListBox();
-				}
-
-				if (Gui::Button("OK"))
-				{
-					layerToModify->Sprite = spriteToSet;
-
-					layerToModify = nullptr;
-					spriteToSet = nullptr;
-					changeLayerSprite = false;
-				};
-				Gui::SameLine();
-				if (Gui::Button("Cancel"))
-				{
-					layerToModify = nullptr;
-					spriteToSet = nullptr;
-					changeLayerSprite = false;
-				}
-				Gui::End();
-			}
-		}
-
-		void DeleteLayerPopUp()
-		{
-			if (!layerToDeleteIsSet)
-				return;
-
-			const ImGuiViewport* viewport = Gui::GetMainViewport();
-			const ImVec2 windowPos = { viewport->Size.x / 2.0f, viewport->Size.y / 2.0f };
-
-			Gui::SetNextWindowPos(windowPos, 0, ImVec2(0.5f, 0.5f));
-			if (Gui::Begin("Delete Layer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
-			{
-				Gui::Text("Are you sure you want to delete layer \"%s\"?", layerToDelete->Name.c_str());
-
-				if (Gui::Button("Yes"))
-				{
-					if (&*layerToDelete == selectedLayer) { selectedLayer = nullptr; }
-					currentAnim->Layers.erase(layerToDelete);
-					layerToDeleteIsSet = false;
-				};
-				Gui::SameLine();
-				if (Gui::Button("No")) { layerToDeleteIsSet = false; }
-				Gui::End();
-			}
 		}
 
 		void UpdateDragState()
@@ -1215,119 +852,58 @@ namespace Starshine
 			auto& io = Gui::GetIO();
 			DragStateData& dragState = parent->DragState;
 
-			Layer* hoveredLayer = nullptr;
-			auto& layers = currentAnim->Layers;
+			EditorLayer* hoveredLayer = nullptr;
+			auto& layers = context.Layers;
 			for (auto& layer : layers)
 			{
-				const vec2 origin = layer.CurrentEditTransform.Origin * layer.Sprite->SourceRectangle.Size();
-				const vec2 pos = layer.CurrentEditTransform.Position;
-				const vec2 size = layer.CurrentEditTransform.Scale * layer.Sprite->SourceRectangle.Size();
+				const Layer* baseLayer = layer.GetLayerPointer();
+
+				const vec2 pos = layer.CurrentTransform.Position;
+				const vec2 size = layer.CurrentTransform.Scale * baseLayer->SpriteDefinition->Size;
+				const vec2 origin = layer.CurrentTransform.Origin * size;
 				const RectangleF layerRect(viewPan.x + pos.x - origin.x, viewPan.y + pos.y - origin.y, size.x, size.y);
 
 				if (layerRect.Contains(io.MousePos.x, io.MousePos.y))
-				{
 					hoveredLayer = &layer;
+			}
+
+			if (io.MouseClicked[ImGuiMouseButton_Left])
+				context.CurrentLayer = hoveredLayer;
+
+			if ((dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Left)) && context.CurrentLayer != nullptr)
+			{
+				f32& basePosX = dragState.UserBaseValues.Floats[0];
+				f32& basePosY = dragState.UserBaseValues.Floats[1];
+
+				if (!dragState.UserBaseValues.BaseValuesSet)
+				{
+					basePosX = context.CurrentLayer->CurrentTransform.Position.x;
+					basePosY = context.CurrentLayer->CurrentTransform.Position.y;
+					dragState.UserBaseValues.BaseValuesSet = true;
 				}
-			}
 
-			if (io.MouseClicked[0])
-			{
-				selectedLayer = hoveredLayer;
-			}
-
-			if ((dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Left)) && selectedLayer != nullptr)
-			{
 				if (dragState.FavorOneAxis)
 				{
 					switch (dragState.AxisToFavor)
 					{
 					case DragAxis::Horizontal:
-						selectedLayer->CurrentEditTransform.Position.x += dragState.DeltaMousePosition.x;
+						context.CurrentLayer->CurrentTransform.Position.x = basePosX + dragState.RelativeMousePosition.x;
 						break;
 					case DragAxis::Vertical:
-						selectedLayer->CurrentEditTransform.Position.y += dragState.DeltaMousePosition.y;
+						context.CurrentLayer->CurrentTransform.Position.y = basePosY + dragState.RelativeMousePosition.y;
 						break;
 					}
 				}
 				else
 				{
-					selectedLayer->CurrentEditTransform.Position += dragState.DeltaMousePosition;
+					const vec2 basePos(basePosX, basePosY);
+					context.CurrentLayer->CurrentTransform.Position = basePos + dragState.RelativeMousePosition;
 				}
 			}
-		}
-
-		template <typename T>
-		void WriteKeyframes_Xml(const std::vector<Keyframe<T>>& keyframes, std::string_view elementName, Xml::Element* layerElement)
-		{
-			if (keyframes.empty())
-				return;
-
-			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
-			for (const auto& frame : keyframes)
+			else
 			{
-				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
-				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
-				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Value, frame.Value);
-			}
-		}
-
-		void WriteKeyframes_Xml(const std::vector<Keyframe<f32>>& keyframes, std::string_view elementName, Xml::Element* layerElement)
-		{
-			if (keyframes.empty())
-				return;
-
-			Xml::Element* frameListElement = layerElement->InsertNewChildElement(elementName.data());
-			for (const auto& frame : keyframes)
-			{
-				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
-				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
-				frameElement->SetAttribute(XmlElementNames::Keyframe_Value, frame.Value);
-			}
-		}
-
-		template <typename T>
-		void ReadKeyframes_Xml(std::vector<Keyframe<T>>& keyframes, std::string_view elementName, const Xml::Element* layerElement)
-		{
-			const Xml::Element* frameListElement = layerElement->FirstChildElement(elementName.data());
-			if (frameListElement == nullptr)
-				return;
-
-			for (const Xml::Element* frameElement = frameListElement->FirstChildElement(XmlElementNames::Keyframe);
-				frameElement;
-				frameElement = frameElement->NextSiblingElement(XmlElementNames::Keyframe))
-			{
-				i32 frame = 0;
-				if (frameElement->QueryIntAttribute(XmlElementNames::Keyframe_Frame, &frame) != 0)
-					return;
-
-				T value;
-				const Xml::Attribute* valueAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Value);
-				Xml::TryGetValue(value, valueAttrib);
-
-				keyframes.emplace_back(Keyframe<T>(frame, value));
-			}
-		}
-
-		void ReadKeyframes_Xml(std::vector<Keyframe<f32>>& keyframes, std::string_view elementName, const Xml::Element* layerElement)
-		{
-			const Xml::Element* frameListElement = layerElement->FirstChildElement(elementName.data());
-			if (frameListElement == nullptr)
-				return;
-
-			for (const Xml::Element* frameElement = frameListElement->FirstChildElement(XmlElementNames::Keyframe);
-				frameElement;
-				frameElement = frameElement->NextSiblingElement(XmlElementNames::Keyframe))
-			{
-				i32 frame = 0;
-				f32 value = 0.0f;
-
-				if (frameElement->QueryIntAttribute(XmlElementNames::Keyframe_Frame, &frame) != 0)
-					return;
-
-				if (frameElement->QueryFloatAttribute(XmlElementNames::Keyframe_Value, &value) != 0)
-					return;
-
-				keyframes.emplace_back(Keyframe<f32>(frame, value));
+				if (dragState.UserBaseValues.BaseValuesSet)
+					dragState.UserBaseValues.BaseValuesSet = false;
 			}
 		}
 
@@ -1339,138 +915,7 @@ namespace Starshine
 			if (!saveFileDialog.OpenSave())
 				return;
 
-			Xml::Document animSetDoc;
-			Xml::Element* rootElement = animSetDoc.NewElement(XmlElementNames::AnimationSet);
-
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_Width, canvasSize.x);
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_Height, canvasSize.y);
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_FPS, baseFPS);
-			Xml::SetAttribute(rootElement, XmlElementNames::AnimationSet_StageColor, canvasColor);
-			rootElement->SetAttribute(XmlElementNames::AnimationSet_SpriteSheet, spriteSheetPath.c_str());
-
-			Xml::Element* spriteDefsElement = rootElement->InsertNewChildElement(XmlElementNames::SpriteDefs);
-			for (const auto& spr : spriteSheet.GetSprites())
-			{
-				Xml::Element* spriteDefElement = spriteDefsElement->InsertNewChildElement(XmlElementNames::SpriteDefs_Sprite);
-				spriteDefElement->SetAttribute(XmlElementNames::Common_Name, spr.Name.c_str());
-				Xml::SetAttribute(spriteDefElement, XmlElementNames::Common_Size, spr.SourceRectangle.Size());
-			}
-
-			for (const auto& anim : animations)
-			{
-				Xml::Element* animElement = rootElement->InsertNewChildElement(XmlElementNames::Animation);
-				animElement->SetAttribute(XmlElementNames::Common_Name, anim.Name.c_str());
-				animElement->SetAttribute(XmlElementNames::Common_Start, anim.StartTime);
-				animElement->SetAttribute(XmlElementNames::Common_End, anim.EndTime);
-
-				for (const auto& layer : anim.Layers)
-				{
-					Xml::Element* layerElement = animElement->InsertNewChildElement(XmlElementNames::AnimationLayer);
-					layerElement->SetAttribute(XmlElementNames::Common_Name, layer.Name.c_str());
-					layerElement->SetAttribute(XmlElementNames::Common_Sprite, layer.Sprite->Name.c_str());
-
-					size_t blendModeIndex = static_cast<size_t>(layer.BlendMode);
-					layerElement->SetAttribute(XmlElementNames::AnimationLayer_BlendMode, BlendModeNames[blendModeIndex].data());
-
-					layerElement->SetAttribute(XmlElementNames::Common_Start, static_cast<i32>(layer.StartTime));
-					layerElement->SetAttribute(XmlElementNames::Common_End, static_cast<i32>(layer.EndTime));
-
-					// Oh boy, I can't wait to start abusing the C++ type system!
-					WriteKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
-					WriteKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
-					WriteKeyframes_Xml(layer.Scale, XmlElementNames::Keyframes_Scale, layerElement);
-					WriteKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
-					WriteKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
-				}
-			}
-
-			animSetDoc.InsertFirstChild(rootElement);
-			animSetDoc.SaveFile(saveFileDialog.OutputFilePath.c_str());
-		}
-
-		void OpenFileDialog()
-		{
-			FileDialog openFileDialog;
-			openFileDialog.Title = "Open";
-
-			if (!openFileDialog.OpenRead())
-				return;
-
-			currentAnim = nullptr;
-			animations.clear();
-
-			Xml::Document animSetDoc;
-			if (!Xml::ParseFromFile(animSetDoc, openFileDialog.OutputFilePath));
-
-			const Xml::Element* rootElement = animSetDoc.FirstChildElement(XmlElementNames::AnimationSet);
-			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Width, &canvasSize.x);
-			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_Height, &canvasSize.y);
-			rootElement->QueryIntAttribute(XmlElementNames::AnimationSet_FPS, &baseFPS);
-			Xml::TryGetValue(canvasColor, rootElement->FindAttribute(XmlElementNames::AnimationSet_StageColor));
-
-			const char* sprSheetPath{};
-			if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath) == 0)
-			{
-				spriteSheetPath = sprSheetPath;
-				ImportSpritesFromFolder(sprSheetPath);
-			}
-
-			for (const Xml::Element* animElement = rootElement->FirstChildElement(XmlElementNames::Animation);
-				animElement;
-				animElement = animElement->NextSiblingElement(XmlElementNames::Animation))
-			{
-				auto& anim = animations.emplace_back();
-
-				const char* animName{};
-				if (animElement->QueryAttribute(XmlElementNames::Common_Name, &animName) == 0)
-					anim.Name = animName;
-
-				animElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &anim.StartTime);
-				animElement->QueryUnsignedAttribute(XmlElementNames::Common_End, &anim.EndTime);
-
-				for (const Xml::Element* layerElement = animElement->FirstChildElement(XmlElementNames::AnimationLayer);
-					layerElement;
-					layerElement = layerElement->NextSiblingElement(XmlElementNames::AnimationLayer))
-				{
-					Layer& layer = anim.Layers.emplace_back();
-
-					const char* elementName = layerElement->Attribute(XmlElementNames::Common_Name);
-					layer.Name = std::string(elementName);
-
-					const char* refName{};
-					if (layerElement->QueryAttribute(XmlElementNames::Common_Sprite, &refName) == 0)
-						layer.Sprite = &spriteSheet.GetSprite(refName);
-
-					// TODO: Implement animation referencing
-
-					const char* blendModeName{};
-					if (layerElement->QueryAttribute(XmlElementNames::AnimationLayer_BlendMode, &blendModeName) == 0)
-					{
-						for (size_t i = 0; i < EnumCount<BlendMode>(); i++)
-						{
-							if (BlendModeNames[i] == blendModeName)
-							{
-								layer.BlendMode = static_cast<BlendMode>(i);
-								break;
-							}
-						}
-					}
-
-					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_Start, &layer.StartTime);
-					layerElement->QueryUnsignedAttribute(XmlElementNames::Common_End, &layer.EndTime);
-
-					ReadKeyframes_Xml(layer.Origin, XmlElementNames::Keyframes_Origin, layerElement);
-					ReadKeyframes_Xml(layer.Position, XmlElementNames::Keyframes_Position, layerElement);
-					ReadKeyframes_Xml(layer.Scale, XmlElementNames::Keyframes_Scale, layerElement);
-					ReadKeyframes_Xml(layer.Rotation, XmlElementNames::Keyframes_Rotation, layerElement);
-					ReadKeyframes_Xml(layer.Color, XmlElementNames::Keyframes_Color, layerElement);
-
-					timelineFrame = 0.0f;
-					layer.CurrentEditTransform = GetTransformAtFrame(layer, 0.0f);
-				}
-			}
-
-			currentAnim = &animations.front();
+			context.AnimSet.WriteXml(saveFileDialog.OutputFilePath);
 		}
 
 		void ImportSpritesFromFolder(std::string_view path)
@@ -1478,13 +923,30 @@ namespace Starshine
 			if (!IO::Directory::Exists(path))
 				return;
 
-			spriteSheet.Destroy();
+			spriteSheet = std::make_shared<SpriteSheet>();
 
+			SpritePacker sprPacker;
 			sprPacker.AddFromDirectory(path);
 			sprPacker.Pack();
 
-			spriteSheet.CreateFromSpritePacker(sprPacker);
-			sprPacker.Clear();
+			spriteSheet->CreateFromSpritePacker(sprPacker);
+
+			auto& sprDefs = context.AnimSet.GetSpriteDefinitions();
+			sprDefs.clear();
+
+			context.AnimSet.LinkToSpriteSheet(spriteSheet);
+
+			for (const auto& spr : spriteSheet->GetSprites())
+			{
+				SpriteDefinition& sprDef = sprDefs.emplace_back();
+				sprDef.Name = spr.Name;
+				sprDef.Size = spr.SourceRectangle.Size();
+				sprDef.RealSprite = &spr;
+			}
+
+			context.AnimSet.SetSpriteSheetPath(path);
+
+			spriteEditorWindow.SetSpriteSheet(spriteSheet.get());
 		}
 
 		void ImportSpritesFromFolderDialog()
@@ -1495,8 +957,28 @@ namespace Starshine
 			if (!dialog.OpenDirectory())
 				return;
 
-			spriteSheetPath = IO::Path::GetNormalizedPath(dialog.OutputFilePath);
-			ImportSpritesFromFolder(spriteSheetPath);
+			std::string path = IO::Path::GetNormalizedPath(dialog.OutputFilePath);
+
+			ImportSpritesFromFolder(path);
+		}
+
+		void OpenFileDialog()
+		{
+			FileDialog openFileDialog;
+			openFileDialog.Title = "Open";
+
+			if (!openFileDialog.OpenRead())
+				return;
+
+			context.CurrentAnimation = nullptr;
+			context.AnimSet.GetSpriteDefinitions().clear();
+			context.AnimSet.GetAnimations().clear();
+
+			context.AnimSet.LoadXml(openFileDialog.OutputFilePath);
+			ImportSpritesFromFolder(context.AnimSet.GetSpriteSheetPath());
+
+			context.CurrentAnimation = &context.AnimSet.GetAnimations().front();
+			debugKeyframeListWindow.SetAnimation(&context.AnimSet, context.CurrentAnimation);
 		}
 
 		void MainMenu()
@@ -1505,12 +987,12 @@ namespace Starshine
 			{
 				if (Gui::BeginMenu("File"))
 				{
-					if (Gui::MenuItem("New"))
+					/*if (Gui::MenuItem("New"))
 					{
 						currentAnim->Layers.clear();
-						selectedLayer = nullptr;
+						//selectedLayer = nullptr;
 						timelineFrame = 0.0f;
-					}
+					}*/
 					if (Gui::MenuItem("Open"))
 						OpenFileDialog();
 					if (Gui::MenuItem("Save"))
@@ -1541,6 +1023,9 @@ namespace Starshine
 					if (Gui::MenuItem("Animation Set Properties"))
 						animSetProperites_display = true;
 
+					if (Gui::MenuItem("Sprite Editor"))
+						spriteEditorWindow.DrawWindow = true;
+
 					Gui::EndMenu();
 				}
 
@@ -1548,7 +1033,7 @@ namespace Starshine
 				{
 					Gui::MenuItem("Metrics Window", nullptr, &showMetricsWindow);
 					Gui::MenuItem("ID Stack Window", nullptr, &showIDStackWindow);
-					Gui::MenuItem("Keyframe List Window", nullptr, &showKeyframeListWindow);
+					Gui::MenuItem("Keyframe List Window", nullptr, &debugKeyframeListWindow.DrawWindow);
 					Gui::EndMenu();
 				}
 			}
@@ -1615,181 +1100,30 @@ namespace Starshine
 				Gui::Text("Resolution");
 				Gui::SameLine();
 				
-				Gui::DragInt2("##AnimSetProperties_Resolution", &canvasSize[0]);
+				ivec2 animRes = context.AnimSet.GetResolution();
+				i32 animFPS = context.AnimSet.GetFPS();
+
+				Gui::DragInt2("##AnimSetProperties_Resolution", &animRes[0]);
 				if (Gui::IsItemEdited())
 				{
-					canvasSize.x = MathExtensions::Clamp<i32>(canvasSize.x, ValueRanges::MinResolution.x, ValueRanges::MaxResolution.x);
-					canvasSize.y = MathExtensions::Clamp<i32>(canvasSize.y, ValueRanges::MinResolution.y, ValueRanges::MaxResolution.y);
+					animRes.x = MathExtensions::Clamp<i32>(animRes.x, ValueRanges::MinResolution.x, ValueRanges::MaxResolution.x);
+					animRes.y = MathExtensions::Clamp<i32>(animRes.y, ValueRanges::MinResolution.y, ValueRanges::MaxResolution.y);
+					context.AnimSet.SetResolution(animRes);
 				}
 
 				Gui::Text("FPS");
 				Gui::SameLine();
-				Gui::DragInt("##AnimSetProperties_FPS", &baseFPS, 1.0f, 30, 120);
+				Gui::DragInt("##AnimSetProperties_FPS", &animFPS, 1.0f, 30, 120);
+				if (Gui::IsItemEdited())
+					context.AnimSet.SetFPS(animFPS);
 
 				Gui::Text("Stage Color");
 				Gui::SameLine();
 
-				vec4 stageColor_vec4 = canvasColor.ToVector4();
+				vec4 stageColor_vec4 = stageColor.ToVector4();
 				Gui::ColorEdit3("##AnimSetProperties_StageColor", &stageColor_vec4[0]);
 				if (Gui::IsItemEdited())
-					canvasColor = Color(stageColor_vec4);
-
-				Gui::End();
-			}
-		}
-
-		Layer* layerToDisplay = nullptr;
-		void ShowKeyframeListWindow()
-		{
-			if (Gui::Begin("Keyframe List", &showKeyframeListWindow))
-			{
-				Gui::Text("Layer");
-				Gui::SameLine();
-				if (Gui::BeginCombo("##LayerList", layerToDisplay != nullptr ? layerToDisplay->Name.c_str() : "[None]"))
-				{
-					for (Layer& layer : currentAnim->Layers)
-					{
-						const bool isSelected = layerToDisplay == &layer;
-						if (Gui::Selectable(layer.Name.c_str(), isSelected))
-							layerToDisplay = &layer;
-					}
-
-					Gui::EndCombo();
-				}
-				if (Gui::BeginTabBar("##AnimProps_TabBar"))
-				{
-					if (Gui::BeginTabItem("Origin"))
-					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Origin); }
-						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
-						{
-							Gui::TableSetupColumn("Frame");
-							Gui::TableSetupColumn("Value");
-							Gui::TableHeadersRow();
-							if (layerToDisplay != nullptr)
-							{
-								for (const auto& keyframe : layerToDisplay->Origin)
-								{
-									Gui::TableNextRow();
-
-									Gui::TableSetColumnIndex(0);
-									Gui::Text("%d", keyframe.Frame);
-
-									Gui::TableSetColumnIndex(1);
-									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
-								}
-							}
-
-							Gui::EndTable();
-						}
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Position"))
-					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Position); }
-						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
-						{
-							Gui::TableSetupColumn("Frame");
-							Gui::TableSetupColumn("Value");
-							Gui::TableHeadersRow();
-							if (layerToDisplay != nullptr)
-							{
-								for (const auto& keyframe : layerToDisplay->Position)
-								{
-									Gui::TableNextRow();
-
-									Gui::TableSetColumnIndex(0);
-									Gui::Text("%d", keyframe.Frame);
-
-									Gui::TableSetColumnIndex(1);
-									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
-								}
-							}
-
-							Gui::EndTable();
-						}
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Size"))
-					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Scale); }
-						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
-						{
-							Gui::TableSetupColumn("Frame");
-							Gui::TableSetupColumn("Value");
-							Gui::TableHeadersRow();
-							if (layerToDisplay != nullptr)
-							{
-								for (const auto& keyframe : layerToDisplay->Scale)
-								{
-									Gui::TableNextRow();
-
-									Gui::TableSetColumnIndex(0);
-									Gui::Text("%d", keyframe.Frame);
-
-									Gui::TableSetColumnIndex(1);
-									Gui::Text("%.3f %.3f", keyframe.Value.x, keyframe.Value.y);
-								}
-							}
-
-							Gui::EndTable();
-						}
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Rotation"))
-					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Rotation); }
-						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
-						{
-							Gui::TableSetupColumn("Frame");
-							Gui::TableSetupColumn("Value");
-							Gui::TableHeadersRow();
-							if (layerToDisplay != nullptr)
-							{
-								for (const auto& keyframe : layerToDisplay->Rotation)
-								{
-									Gui::TableNextRow();
-
-									Gui::TableSetColumnIndex(0);
-									Gui::Text("%d", keyframe.Frame);
-
-									Gui::TableSetColumnIndex(1);
-									Gui::Text("%.3f", keyframe.Value);
-								}
-							}
-
-							Gui::EndTable();
-						}
-						Gui::EndTabItem();
-					}
-					if (Gui::BeginTabItem("Color"))
-					{
-						if (Gui::Button("Sort")) { if (layerToDisplay != nullptr) SortKeyframes(layerToDisplay->Color); }
-						if (Gui::BeginTable("##FrameTable", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV))
-						{
-							Gui::TableSetupColumn("Frame");
-							Gui::TableSetupColumn("Value");
-							Gui::TableHeadersRow();
-							if (layerToDisplay != nullptr)
-							{
-								for (const auto& keyframe : layerToDisplay->Color)
-								{
-									Gui::TableNextRow();
-
-									Gui::TableSetColumnIndex(0);
-									Gui::Text("%d", keyframe.Frame);
-
-									Gui::TableSetColumnIndex(1);
-									Gui::Text("%d %d %d %d", keyframe.Value.R, keyframe.Value.G, keyframe.Value.B, keyframe.Value.A);
-								}
-							}
-
-							Gui::EndTable();
-						}
-						Gui::EndTabItem();
-					}
-					Gui::EndTabBar();
-				}
+					stageColor = Color(stageColor_vec4);
 
 				Gui::End();
 			}
@@ -1798,14 +1132,12 @@ namespace Starshine
 		void OnGUI()
 		{
 			DrawTimeline();
-			//EasingPlotWindow();
-			ResourcesWindow();
+			spriteEditorWindow.OnGUI();
+			resourcesWindow.OnGUI();
 
+			layerModalWindow.OnGUI();
+			
 			AnimationSetPropertiesWindow();
-
-			RenameLayerPopUp();
-			ChangeLayerSpritePopUp();
-			DeleteLayerPopUp();
 
 			UpdateViewportInput();
 
@@ -1815,8 +1147,8 @@ namespace Starshine
 				Gui::ShowMetricsWindow(&showMetricsWindow);
 			if (showIDStackWindow)
 				Gui::ShowIDStackToolWindow(&showIDStackWindow);
-			if (showKeyframeListWindow)
-				ShowKeyframeListWindow();
+
+			debugKeyframeListWindow.OnGUI();
 		}
 
 		ivec2 baseViewPan{};
@@ -1826,68 +1158,16 @@ namespace Starshine
 			DragStateData& dragState = parent->DragState;
 
 			if (dragState.HeldMouseButtonsMask & (1 << ImGuiMouseButton_Middle)) // Panning
-			{
 				viewPan += dragState.DeltaMousePosition;
-			}
 
-			const vec2 realCanvasSize = vec2(canvasSize) * viewZoom;
+			const vec2 realCanvasSize = vec2(context.AnimSet.GetResolution()) * viewZoom;
 
 			sprRenderer->SetSpritePosition(viewPan);
 			sprRenderer->SetSpriteSize(realCanvasSize);
-			sprRenderer->SetSpriteColor(canvasColor);
+			sprRenderer->SetSpriteColor(stageColor);
 			sprRenderer->PushSprite(nullptr);
 
 			sprRenderer->PushOutlineRect(viewPan, realCanvasSize, {}, DefaultColors::Black);
-		}
-
-		void DrawAnimation(SpriteRenderer* sprRenderer)
-		{
-			BlendMode prevBlendMode{};
-			for (const auto& layer : currentAnim->Layers)
-			{
-				if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
-					continue;
-
-				const Transform2D transform = GetTransformAtFrame(layer, timelineFrame);
-				const Sprite& sprite = *layer.Sprite;
-				const vec2& spriteSize = sprite.SourceRectangle.Size();
-				const vec2& spriteLayerSize = spriteSize * transform.Scale;
-
-				if (prevBlendMode != layer.BlendMode)
-				{
-					sprRenderer->RenderSprites(nullptr);
-					sprRenderer->SetBlendMode(layer.BlendMode);
-				}
-
-				i32 texIndex{};
-
-				sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, sprite, {}, &texIndex);
-				sprRenderer->SetSpriteOrigin(transform.Origin * spriteLayerSize);
-				sprRenderer->SetSpritePosition(transform.Position + viewPan);
-				sprRenderer->SetSpriteSize(transform.Scale * spriteSize);
-				sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
-				sprRenderer->SetSpriteColor(transform.Color);
-				sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
-
-				prevBlendMode = layer.BlendMode;
-			}
-
-			sprRenderer->RenderSprites(nullptr);
-		}
-
-		f32 easeTime{};
-		void EasingTest(SpriteRenderer* sprRenderer)
-		{
-			easeTime += (1.0f / 60.0f);
-			if (easeTime >= 1.0f)
-				easeTime = 0.0f;
-
-			f32 easedT = GetCubicBezierPoint(easingTime.x, easingTime.y, easeTime);
-			f32 value = GetCubicBezierPoint(easingValue.x, easingValue.y, easedT);
-
-			const vec2 sprPos(640.0f + value * 200.0f, 360.0f);
-
-			sprRenderer->SpriteSheet().PushSprite(spriteSheet, 0, sprPos, vec2(1.0f), DefaultColors::White);
 		}
 
 		void Draw(Starshine::GameTime& gameTime)
@@ -1899,70 +1179,86 @@ namespace Starshine
 
 			if (playing)
 			{
-				DrawAnimation(sprRenderer);
+				sprRenderer->AnimationSet().PushAnimation(&context.AnimSet, context.CurrentAnimation, context.TimelineFrame, viewPan, vec2(viewZoom));
+				sprRenderer->RenderSprites(nullptr);
 
-				timelineFrame += 1.0f;
-				timelineFrame = std::fmodf(timelineFrame, currentAnim->EndTime) + currentAnim->StartTime;
+				context.TimelineFrame += context.AnimSet.GetRelativeFrameTimeStep(gameTime.ElapsedFrameTime.GetSeconds());
+				context.TimelineFrame = std::fmodf(context.TimelineFrame, context.CurrentAnimation->EndTime) + context.CurrentAnimation->StartTime;
 			}
 			else
 			{
 				DragStateData& dragState = parent->DragState;
+				BlendMode prevBlendMode = BlendMode::Normal;
 
-				BlendMode prevBlendMode{};
-				for (const auto& layer : currentAnim->Layers)
+				for (const auto& editLayer : context.Layers)
 				{
-					if (timelineFrame < layer.StartTime || timelineFrame > layer.EndTime)
+					const Layer* baseLayer = editLayer.GetLayerPointer();
+
+					if (!baseLayer->Visible)
 						continue;
 
-					const Transform2D& currentTransform = layer.CurrentEditTransform;
-					const Sprite& sprite = *layer.Sprite;
-					const vec2& spriteSize = sprite.SourceRectangle.Size();
-					const vec2& spriteLayerSize = spriteSize * currentTransform.Scale;
+					const Transform2D transform = editLayer.CurrentTransform;
+					const SpriteDefinition* spriteDef = baseLayer->SpriteDefinition;
+					const vec2& spriteSize = spriteDef->Size * viewZoom;
+					const vec2& spriteLayerSize = spriteSize * transform.Scale;
 
-					if (prevBlendMode != layer.BlendMode)
+					if (prevBlendMode != baseLayer->BlendMode)
 					{
+						vec2 basePos{};
+						vec2 baseScale{};
+
 						sprRenderer->RenderSprites(nullptr);
-						sprRenderer->SetBlendMode(layer.BlendMode);
+						sprRenderer->SetBlendMode(baseLayer->BlendMode);
 					}
 
 					i32 texIndex{};
-					sprRenderer->SpriteSheet().SetSpriteState(spriteSheet, sprite, {}, &texIndex);
-					sprRenderer->SetSpriteOrigin(currentTransform.Origin * spriteLayerSize);
-					sprRenderer->SetSpritePosition(currentTransform.Position + viewPan);
-					sprRenderer->SetSpriteSize(currentTransform.Scale * spriteSize);
-					sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(currentTransform.Rotation));
-					sprRenderer->SetSpriteColor(currentTransform.Color);
-					sprRenderer->PushSprite(spriteSheet.GetTexture(texIndex));
 
-					prevBlendMode = layer.BlendMode;
+					if (spriteDef->RealSprite != nullptr)
+						sprRenderer->SpriteSheet().SetSpriteState(*spriteSheet, *spriteDef->RealSprite, vec2{}, &texIndex);
+
+					sprRenderer->SetSpriteOrigin(transform.Origin * spriteLayerSize);
+					sprRenderer->SetSpritePosition(transform.Position + viewPan);
+					sprRenderer->SetSpriteSize(transform.Scale * spriteSize);
+					sprRenderer->SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
+					sprRenderer->SetSpriteColor(transform.Color);
+
+					if (spriteDef->RealSprite != nullptr)
+						sprRenderer->PushSprite(spriteSheet->GetTexture(texIndex));
+					else
+						sprRenderer->PushSprite(nullptr);
+
+					prevBlendMode = baseLayer->BlendMode;
 				}
-				
-				sprRenderer->RenderSprites(nullptr);
 
 				sprRenderer->SetBlendMode(BlendMode::Normal);
-				if (selectedLayer != nullptr)
+				if (context.CurrentLayer != nullptr)
 				{
-					const Transform2D& transform = selectedLayer->CurrentEditTransform;
+					const Transform2D& transform = context.CurrentLayer->CurrentTransform;
+					const SpriteDefinition* spriteDef = context.CurrentLayer->BaseLayer->SpriteDefinition;
+					const vec2& spriteSize = spriteDef->Size * viewZoom;
+					const vec2& spriteLayerSize = spriteSize * transform.Scale;
+					const vec2& spriteLayerOrigin = spriteLayerSize * transform.Origin;
+
 					static constexpr Color boxColor(255, 0, 0, 92);
 					static constexpr Color borderColor(255, 0, 0, 255);
 
 					// Bounding box
-					sprRenderer->SetSpriteOrigin(transform.Origin);
+					sprRenderer->SetSpriteOrigin(spriteLayerOrigin);
 					sprRenderer->SetSpritePosition(transform.Position + viewPan);
-					sprRenderer->SetSpriteSize(transform.Scale);
+					sprRenderer->SetSpriteSize(spriteLayerSize);
 					sprRenderer->SetSpriteColor(boxColor);
 					sprRenderer->PushSprite(nullptr);
 
-					sprRenderer->PushOutlineRect(transform.Position + viewPan, transform.Scale, transform.Origin, borderColor);
+					sprRenderer->PushOutlineRect(transform.Position + viewPan, spriteLayerSize, spriteLayerOrigin, borderColor);
 
 					// Origin axes
-					sprRenderer->SetSpritePosition(vec2{ transform.Position.x, transform.Position.y - transform.Origin.y } + viewPan); // X axis
-					sprRenderer->SetSpriteSize(vec2{ 1.0f, transform.Scale.y });
+					sprRenderer->SetSpritePosition(vec2{ transform.Position.x, transform.Position.y - spriteLayerOrigin.y } + viewPan); // X axis
+					sprRenderer->SetSpriteSize(vec2{ 1.0f, spriteLayerSize.y });
 					sprRenderer->SetSpriteColor(DefaultColors::Red);
 					sprRenderer->PushSprite(nullptr);
 
-					sprRenderer->SetSpritePosition(vec2{ transform.Position.x - transform.Origin.x, transform.Position.y } + viewPan); // Y axis
-					sprRenderer->SetSpriteSize(vec2{ transform.Scale.x, 1.0f });
+					sprRenderer->SetSpritePosition(vec2{ transform.Position.x - spriteLayerOrigin.x, transform.Position.y } + viewPan); // Y axis
+					sprRenderer->SetSpriteSize(vec2{ spriteLayerSize.x, 1.0f });
 					sprRenderer->SetSpriteColor(DefaultColors::Red);
 					sprRenderer->PushSprite(nullptr);
 
@@ -1973,11 +1269,12 @@ namespace Starshine
 						const vec2 absMousePos = dragState.AbsoluteMousePosition;
 
 						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", relMousePos.x, relMousePos.y);
-						sprRenderer->Font().PushString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
+						sprRenderer->Font().DrawString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
 					}
 
 					sprRenderer->RenderSprites(nullptr);
 				}
+				sprRenderer->RenderSprites(nullptr);
 			}
 			OnGUI();
 		}
@@ -2027,10 +1324,5 @@ namespace Starshine
 	void AnimEditor::ResetDragState()
 	{
 		impl->ResetDragState();
-	}
-
-	i64 AnimEditor::GetStateID() const
-	{
-		return GameState_Main;
 	}
 }

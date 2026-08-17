@@ -30,6 +30,18 @@
     <ClCompile Include="src\Editor\FileDialog.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\DebugKeyframeList.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\ResourcesWindow.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\SpriteEditorWindow.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\LayerModalWindow.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameContext.h">
@@ -42,6 +54,21 @@
       <Filter>Source Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\FileDialog.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\DebugKeyframeList.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\ResourcesWindow.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\SpriteEditorWindow.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorContext.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\LayerModalWindow.h">
       <Filter>Source Files\Editor</Filter>
     </ClInclude>
   </ItemGroup>

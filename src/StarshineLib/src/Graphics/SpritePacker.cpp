@@ -95,6 +95,7 @@ namespace Starshine::Graphics
 		rectPacker.Clear();
 		sprites.clear();
 		textures.clear();
+		texturesToReserve = 1;
 	}
 
 	bool SpritePacker::AddImage(std::string_view filePath)
@@ -257,6 +258,8 @@ namespace Starshine::Graphics
 							Detail::GetPixel(x, y, sprInfo.ImageSize.x, tempSpriteBuffer.get());
 					}
 				}
+
+				tempSpriteBuffer = nullptr;
 			}
 
 			currentTexIndex++;

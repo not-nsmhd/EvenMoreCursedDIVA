@@ -9,7 +9,7 @@ namespace Starshine::Rendering::Render2D
 	{
 	}
 
-	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame)
+	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame, const vec2& position, const vec2& scale)
 	{
 		if (animSet == nullptr || anim == nullptr)
 			return;
@@ -22,7 +22,7 @@ namespace Starshine::Rendering::Render2D
 
 			const Transform2D transform = layer.GetTransform(frame);
 			const SpriteDefinition* spriteDef = layer.SpriteDefinition;
-			const vec2& spriteSize = spriteDef->Size;
+			const vec2& spriteSize = spriteDef->Size * scale;
 			const vec2& spriteLayerSize = spriteSize * transform.Scale;
 
 			if (prevBlendMode != layer.BlendMode)
@@ -39,17 +39,25 @@ namespace Starshine::Rendering::Render2D
 			i32 texIndex{};
 
 			if (spriteDef->RealSprite != nullptr)
-			{
 				sprRenderer.SpriteSheet().SetSpriteState(*animSet->GetSpriteSheet(), *spriteDef->RealSprite, vec2{}, &texIndex);
-				sprRenderer.SetSpriteOrigin(transform.Origin * spriteLayerSize);
-				sprRenderer.SetSpritePosition(transform.Position);
-				sprRenderer.SetSpriteSize(transform.Scale * spriteSize);
-				sprRenderer.SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
-				sprRenderer.SetSpriteColor(transform.Color);
+
+			sprRenderer.SetSpriteOrigin(transform.Origin * spriteLayerSize);
+			sprRenderer.SetSpritePosition(transform.Position + position);
+			sprRenderer.SetSpriteSize(transform.Scale * spriteSize);
+			sprRenderer.SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
+			sprRenderer.SetSpriteColor(transform.Color);
+
+			if (spriteDef->RealSprite != nullptr)
 				sprRenderer.PushSprite(animSet->GetSpriteSheet()->GetTexture(texIndex));
-			}
+			else
+				sprRenderer.PushSprite(nullptr);
 
 			prevBlendMode = layer.BlendMode;
 		}
+	}
+
+	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame)
+	{
+		PushAnimation(animSet, anim, frame, vec2(0.0f), vec2(1.0f));
 	}
 }

@@ -18,13 +18,26 @@ namespace Starshine::IO
 
 		std::string GetNormalizedPath(std::string_view path)
 		{
-			std::string result(path.data());
+			std::string result(path);
 
 			for (auto& c : result)
 			{
 				if (c == '\\')
 					c = '/';
 			}
+
+			return result;
+		}
+
+		std::string Append(std::string_view originalPath, std::string_view appendPath)
+		{
+			if (originalPath.empty())
+				return std::string(appendPath);
+
+			std::string result(originalPath);
+
+			result += DirectorySeparator;
+			result += appendPath;
 
 			return result;
 		}

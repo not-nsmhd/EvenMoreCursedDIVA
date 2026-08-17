@@ -30,6 +30,7 @@ namespace Starshine::Graphics
 		const Sprite& GetSprite(std::string_view name) const;
 		i32 GetSpriteIndex(std::string_view name) const;
 
+		std::vector<Sprite>& GetSprites();
 		const std::vector<Sprite>& GetSprites() const;
 		size_t GetSpriteCount() const;
 
