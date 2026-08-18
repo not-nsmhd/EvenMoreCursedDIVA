@@ -47,7 +47,10 @@ namespace DIVA::MainGame
 			Layer* FrameTop_Difficulty{};
 
 			vec2 SongNameTextPosition{};
+
 			vec2 ScoreTextPosition{};
+			f32 ScoreTextSpacing{};
+
 			vec2 LyricsTextPosition{};
 		} animCache;
 
@@ -203,9 +206,13 @@ namespace DIVA::MainGame
 			songNameRef.Visible = false;
 			animCache.SongNameTextPosition = songNameRef.GetTransform(0.0f).Position;
 
-			Layer& scoreRef = animCache.FrameTop->GetLayer("Score_Ref");
-			scoreRef.Visible = false;
-			animCache.ScoreTextPosition = scoreRef.GetTransform(0.0f).Position;
+			Layer* scoreRef = &animCache.FrameTop->GetLayer("Score_Ref1");
+			scoreRef->Visible = false;
+			animCache.ScoreTextPosition = scoreRef->GetTransform(0.0f).Position;
+
+			scoreRef = &animCache.FrameTop->GetLayer("Score_Ref2");
+			scoreRef->Visible = false;
+			animCache.ScoreTextSpacing = animCache.ScoreTextPosition.x - scoreRef->GetTransform(0.0f).Position.x;
 
 			Layer& lyricsTextRef = animCache.FrameBottom->GetLayer("LyricsText_Ref");
 			lyricsTextRef.Visible = false;
@@ -296,8 +303,9 @@ namespace DIVA::MainGame
 		}
 
 		void DrawScoreDisplay()
-		{
-			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, animCache.ScoreTextPosition, vec2(1.0f), 25.0f, DefaultColors::White, -1);
+		{	
+			DrawSpriteNumericValue(ScoreDisplay.DisplayValue, spriteCache.ScoreNumbers, animCache.ScoreTextPosition,
+				vec2(1.0f), animCache.ScoreTextSpacing, DefaultColors::White, -1);
 		}
 
 		void DrawComboDisplay()
@@ -319,7 +327,7 @@ namespace DIVA::MainGame
 				vec2 valuTextPos
 				{ 
 					ComboDisplayState.Position.x + animTransform.Position.x,
-					ComboDisplayState.Position.y - 35.0f + animTransform.Position.y
+					ComboDisplayState.Position.y - 52.0f + animTransform.Position.y
 				};
 
 				if (ComboDisplayState.Combo <= 1)
@@ -328,15 +336,15 @@ namespace DIVA::MainGame
 				}
 				else
 				{
-					constexpr float valuComboSpacing = 17.0f;
+					constexpr float valuComboSpacing = 26.0f;
 
-					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, 17.0f);
+					float comboTextWidth = MeasureSpriteNumericValue(ComboDisplayState.Combo, valuComboSpacing);
 
 					vec2 comboTextPos = { valuTextPos.x + (valuComboSpacing + (comboTextWidth / 2.0f)) * animTransform.Scale.x, valuTextPos.y };
 					valuTextPos.x -= ((comboTextWidth / 2.0f) + valuComboSpacing) * animTransform.Scale.x;
 
 					sprRenderer.PushSprite(*spriteCache.hudSprites, *valuSprite, valuTextPos, animTransform.Scale, animTransform.Color);
-					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, animTransform.Scale, 17.0f, animTransform.Color);
+					DrawSpriteNumericValue(ComboDisplayState.Combo, spriteCache.ComboNumbers, comboTextPos, animTransform.Scale, valuComboSpacing, animTransform.Color);
 				}
 			}
 		}
@@ -351,15 +359,15 @@ namespace DIVA::MainGame
 
 				SpriteSheetRenderer& sprRenderer = mainGameContext->SpriteRenderer->SpriteSheet();
 
-				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, 15.0f);
+				float textWidth = MeasureSpriteNumericValue(ScoreBonusDisplay.Value * 10, 23.0f);
 				float plusWidth = spriteCache.ScoreBonus_Plus->SourceRectangle.Width;
 
 				vec2 textPos
 				{ 
 					ScoreBonusDisplay.Position.x + animTransform.Position.x,
-					ScoreBonusDisplay.Position.y - 70.0f + animTransform.Position.y
+					ScoreBonusDisplay.Position.y - 105.0f + animTransform.Position.y
 				};
-				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, animTransform.Scale, 15.0f, animTransform.Color);
+				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, animTransform.Scale, 23.0f, animTransform.Color);
 
 				textPos.x -= textWidth - plusWidth - 5.0f;
 				sprRenderer.PushSprite(*spriteCache.hudSprites, *spriteCache.ScoreBonus_Plus, textPos, animTransform.Scale, animTransform.Color);
@@ -428,10 +436,8 @@ namespace DIVA::MainGame
 			DrawScoreBonusDisplay();
 			DrawFrame();
 
-			const vec2 fontScale = viewportSize / BaseResolution;
-
-			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, fontScale, DefaultColors::White);
-			DrawLyricsText(fontScale);
+			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+			DrawLyricsText(vec2(1.0f));
 		}
 	};
 

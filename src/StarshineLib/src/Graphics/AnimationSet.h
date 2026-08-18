@@ -92,6 +92,7 @@ namespace Starshine::Graphics
 		std::vector<Keyframe<f32>> Rotation;
 		std::vector<Keyframe<Color>> Color;
 
+		std::string ReferenceName;
 		const SpriteDefinition* SpriteDefinition{};
 	};
 
@@ -137,6 +138,7 @@ namespace Starshine::Graphics
 		i32 GetAnimationIndex(std::string_view name) const;
 
 		const SpriteDefinition& GetSpriteDefinition(std::string_view name) const;
+		i32 GetSpriteDefinitionIndex(std::string_view name) const;
 		SpriteSheet* GetSpriteSheet();
 
 	public:

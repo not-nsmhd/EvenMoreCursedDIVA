@@ -72,13 +72,13 @@ namespace DIVA::MainGame
 		NoteShape Shape{};
 		NoteType Type{};
 
-		float X{};
-		float Y{};
+		f32 X{};
+		f32 Y{};
 
-		float Angle{};
-		float Frequency{};
-		float Amplitude{};
-		float Distance{};
+		f32 Angle{};
+		f32 Frequency{};
+		f32 Amplitude{};
+		f32 Distance{};
 
 		ChartNote* NextNote{};
 	};
@@ -107,6 +107,8 @@ namespace DIVA::MainGame
 	public:
 		void ProcessNoteReferences();
 		void Clear();
+
+		void RemapToResolution(const vec2& targetResolution);
 
 		bool LoadXml(std::string_view filePath);
 

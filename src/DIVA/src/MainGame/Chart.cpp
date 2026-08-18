@@ -98,6 +98,17 @@ namespace DIVA::MainGame
 		ChanceTimes.clear();
 	}
 
+	void Chart::RemapToResolution(const vec2& targetResolution)
+	{
+		const vec2 scaleFactor(targetResolution.x / 1280.0f, targetResolution.y / 720.0f);
+		for (auto& note : Notes)
+		{
+			note.X *= scaleFactor.x;
+			note.Y *= scaleFactor.y;
+			note.Distance *= scaleFactor.y;
+		}
+	}
+
 	void Chart::ProcessNoteReferences()
 	{
 		size_t i = 0;

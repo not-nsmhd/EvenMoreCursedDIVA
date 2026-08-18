@@ -58,5 +58,7 @@ namespace Starshine
 		i32 CurrentLayerIndex{ -1 };
 
 		f32 TimelineFrame{};
+
+		void RecreateLayerList();
 	};
 }

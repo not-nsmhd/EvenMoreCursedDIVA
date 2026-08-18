@@ -42,6 +42,9 @@
     <ClCompile Include="src\Editor\LayerModalWindow.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\EditorContext.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameContext.h">

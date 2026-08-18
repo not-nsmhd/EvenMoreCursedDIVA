@@ -83,6 +83,8 @@ namespace Starshine::Rendering::Render2D
 
 		auto device = sprRenderer.GetRenderingDevice();
 		device->SetUniformBuffer(fontUniformBuffer.get(), ShaderStage::Fragment, 0);
+
+		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
 		sprRenderer.RenderSprites(fontShader.get());
 
 		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);

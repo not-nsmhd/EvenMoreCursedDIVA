@@ -33,22 +33,6 @@ namespace Starshine
 				Gui::EndPopup();
 			}
 		}
-
-		void RecreateEditorLayerVector(Animation* anim, std::vector<EditorLayer>& editorLayers)
-		{
-			if (anim == nullptr)
-				return;
-
-			editorLayers.clear();
-			editorLayers.reserve(anim->Layers.size());
-			
-			i32 layerIndex = 0;
-			for (auto& layer : anim->Layers)
-			{
-				EditorLayer editLayer = EditorLayer(anim->Layers, layerIndex++);
-				editorLayers.push_back(editLayer);
-			}
-		}
 	}
 
 	ResourcesWindow::ResourcesWindow(EditorContextData* context) : context(context)
@@ -87,7 +71,7 @@ namespace Starshine
 								if (!selected)
 								{
 									context->CurrentAnimation = &anim;
-									RecreateEditorLayerVector(context->CurrentAnimation, context->Layers);
+									context->RecreateLayerList();
 								}
 							}
 						}

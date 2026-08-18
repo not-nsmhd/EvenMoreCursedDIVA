@@ -194,7 +194,7 @@ namespace DIVA::MainGame
 		{
 			sprPacker = std::make_unique<SpritePacker>();
 			sprPacker->Initialize();
-			sprPacker->AddFromDirectory("diva/sprites/iconset_dev");
+			sprPacker->AddFromDirectory("diva/sprites/iconset_ps4");
 			sprPacker->Pack();
 
 			MainGameContext.IconSetSprites.SpriteSheet = std::make_shared<SpriteSheet>();
@@ -322,7 +322,12 @@ namespace DIVA::MainGame
 
 		bool LoadChart(std::string_view chartPath)
 		{
-			return songChart.LoadXml(chartPath);
+			bool loadResult = songChart.LoadXml(chartPath);
+
+			if (loadResult)
+				songChart.RemapToResolution(BaseResolution);
+
+			return loadResult;
 		}
 
 		bool LoadLyrics(std::string_view lyricsPath)
@@ -932,16 +937,17 @@ namespace DIVA::MainGame
 		{
 			if (CurrentSubState == SubState::Results)
 			{
+				spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
 				DrawResults();
 				return;
 			}
 
 			const RectangleF viewportSize = GFXDevice->GetViewportSize();
-			//const vec2 baseScale = vec2(viewportSize.Width / 1280.0f, viewportSize.Height / 720.0f);
+			const vec2 baseScale = vec2(viewportSize.Width / BaseResolution.x, viewportSize.Height / BaseResolution.y);
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			for (auto& note : ActiveNotes)
 			{
@@ -954,9 +960,10 @@ namespace DIVA::MainGame
 				note.Draw(gameTime);
 			}
 
-			spriteRenderer->RenderSprites(nullptr);
-
 			hud->Draw(gameTime);
+
+			spriteRenderer->RenderSprites(nullptr);
+			spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
 
 			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 

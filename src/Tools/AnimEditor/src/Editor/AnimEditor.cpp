@@ -944,6 +944,12 @@ namespace Starshine
 				sprDef.RealSprite = &spr;
 			}
 
+			for (auto& anim : context.AnimSet.GetAnimations())
+			{
+				for (auto& layer : anim.Layers)
+					layer.SpriteDefinition = &context.AnimSet.GetSpriteDefinition(layer.ReferenceName);
+			}
+
 			context.AnimSet.SetSpriteSheetPath(path);
 
 			spriteEditorWindow.SetSpriteSheet(spriteSheet.get());
@@ -978,6 +984,8 @@ namespace Starshine
 			ImportSpritesFromFolder(context.AnimSet.GetSpriteSheetPath());
 
 			context.CurrentAnimation = &context.AnimSet.GetAnimations().front();
+			context.RecreateLayerList();
+
 			debugKeyframeListWindow.SetAnimation(&context.AnimSet, context.CurrentAnimation);
 		}
 

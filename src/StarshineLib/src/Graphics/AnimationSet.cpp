@@ -229,7 +229,10 @@ namespace Starshine::Graphics
 
 				const char* refName{};
 				if (layerElement->QueryAttribute(XmlElementNames::Common_Sprite, &refName) == 0)
-					layer.SpriteDefinition = &GetSpriteDefinition(refName);
+				{
+					layer.ReferenceName = refName;
+					layer.SpriteDefinition = &GetSpriteDefinition(layer.ReferenceName);
+				}
 
 				// TODO: Implement animation referencing
 
@@ -417,6 +420,19 @@ namespace Starshine::Graphics
 				return sprDef;
 		}
 		return spriteDefinitions[0];
+	}
+
+	i32 AnimationSet::GetSpriteDefinitionIndex(std::string_view name) const
+	{
+		i32 index = 0;
+		for (const auto& sprDef : spriteDefinitions)
+		{
+			if (sprDef.Name == name)
+				return index;
+
+			index++;
+		}
+		return 0;
 	}
 
 	SpriteSheet* AnimationSet::GetSpriteSheet()
