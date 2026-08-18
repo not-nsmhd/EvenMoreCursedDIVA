@@ -1,0 +1,77 @@
+<AnimationSet Width="1280" Height="720" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/iconset_ps4">
+    <SpriteDefinitions>
+        <SpriteDefinition Name="Arrow_Glow" Size="100.000000 103.000000"/>
+        <SpriteDefinition Name="HoldTrail_Circle" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="HoldTrail_Cross" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="HoldTrail_Square" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="HoldTrail_Star" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="HoldTrail_Triangle" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="IconGlow_Circle" Size="95.000000 95.000000"/>
+        <SpriteDefinition Name="IconGlow_Cross" Size="91.000000 91.000000"/>
+        <SpriteDefinition Name="IconGlow_Square" Size="87.000000 87.000000"/>
+        <SpriteDefinition Name="IconGlow_Star" Size="117.000000 113.000000"/>
+        <SpriteDefinition Name="IconGlow_Triangle" Size="106.000000 94.000000"/>
+        <SpriteDefinition Name="Icon_Circle" Size="83.000000 83.000000"/>
+        <SpriteDefinition Name="Icon_Circle_Double" Size="85.000000 85.000000"/>
+        <SpriteDefinition Name="Icon_Circle_Hold" Size="73.000000 73.000000"/>
+        <SpriteDefinition Name="Icon_Cross" Size="76.000000 76.000000"/>
+        <SpriteDefinition Name="Icon_Cross_Double" Size="84.000000 84.000000"/>
+        <SpriteDefinition Name="Icon_Cross_Hold" Size="67.000000 67.000000"/>
+        <SpriteDefinition Name="Icon_Square" Size="75.000000 75.000000"/>
+        <SpriteDefinition Name="Icon_Square_Double" Size="84.000000 84.000000"/>
+        <SpriteDefinition Name="Icon_Square_Hold" Size="66.000000 66.000000"/>
+        <SpriteDefinition Name="Icon_Star" Size="93.000000 89.000000"/>
+        <SpriteDefinition Name="Icon_Star_Double" Size="90.000000 86.000000"/>
+        <SpriteDefinition Name="Icon_Star_Hold" Size="82.000000 78.000000"/>
+        <SpriteDefinition Name="Icon_Triangle" Size="88.000000 78.000000"/>
+        <SpriteDefinition Name="Icon_Triangle_Double" Size="84.000000 84.000000"/>
+        <SpriteDefinition Name="Icon_Triangle_Hold" Size="79.000000 68.000000"/>
+        <SpriteDefinition Name="TargetHand_Circle" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="TargetHand_Cross" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="TargetHand_Normal" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="TargetHand_Square" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="TargetHand_Star" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="TargetHand_Triangle" Size="26.000000 73.000000"/>
+        <SpriteDefinition Name="Target_Circle" Size="94.000000 94.000000"/>
+        <SpriteDefinition Name="Target_Circle_Double" Size="94.000000 96.000000"/>
+        <SpriteDefinition Name="Target_Circle_Hold" Size="88.000000 88.000000"/>
+        <SpriteDefinition Name="Target_Cross" Size="91.000000 91.000000"/>
+        <SpriteDefinition Name="Target_Cross_Double" Size="96.000000 94.000000"/>
+        <SpriteDefinition Name="Target_Cross_Hold" Size="82.000000 82.000000"/>
+        <SpriteDefinition Name="Target_Square" Size="86.000000 86.000000"/>
+        <SpriteDefinition Name="Target_Square_Double" Size="92.000000 94.000000"/>
+        <SpriteDefinition Name="Target_Square_Hold" Size="80.000000 80.000000"/>
+        <SpriteDefinition Name="Target_Star" Size="114.000000 109.000000"/>
+        <SpriteDefinition Name="Target_Star_Double" Size="102.000000 97.000000"/>
+        <SpriteDefinition Name="Target_Star_Hold" Size="103.000000 98.000000"/>
+        <SpriteDefinition Name="Target_Triangle" Size="109.000000 96.000000"/>
+        <SpriteDefinition Name="Target_Triangle_Double" Size="96.000000 94.000000"/>
+        <SpriteDefinition Name="Target_Triangle_Hold" Size="96.000000 84.000000"/>
+        <SpriteDefinition Name="Trail_CT" Size="128.000000 24.000000"/>
+        <SpriteDefinition Name="Trail_Normal" Size="128.000000 33.000000"/>
+    </SpriteDefinitions>
+    <Animation Name="Animation 0" Start="0" End="60">
+        <Layer Name="Icon_Circle" Sprite="Icon_Triangle" BlendMode="Normal" Start="0" End="60">
+            <Scale>
+                <Keyframe Frame="0" Value="3.000000 3.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="Target_Circle" Sprite="Target_Triangle" BlendMode="Normal" Start="0" End="60">
+            <Scale>
+                <Keyframe Frame="0" Value="3.000000 3.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="TargetHand_Normal" Sprite="TargetHand_Normal" BlendMode="Normal" Start="0" End="60">
+            <Origin>
+                <Keyframe Frame="0" Value="0.500000 0.863013"/>
+            </Origin>
+            <Scale>
+                <Keyframe Frame="0" Value="3.000000 3.000000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Value="0"/>
+                <Keyframe Frame="60" Value="360"/>
+            </Rotation>
+        </Layer>
+    </Animation>
+</AnimationSet>

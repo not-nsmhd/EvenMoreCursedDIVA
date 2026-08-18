@@ -1,0 +1,117 @@
+<AnimationSet Width="1280" Height="720" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/devtest">
+    <SpriteDefinitions>
+        <SpriteDefinition Name="Test1" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test2" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test3" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test4" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test5" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test6" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test7" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Test8" Size="128.000000 128.000000"/>
+    </SpriteDefinitions>
+    <Animation Name="Testing_00" Start="0" End="60">
+        <Layer Name="Layer 0" Sprite="Test1" BlendMode="Normal" Start="0" End="50">
+            <Position>
+                <Keyframe Frame="0" Value="451.000000 360.000000"/>
+                <Keyframe Frame="30" Value="640.000000 360.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Value="ff000000"/>
+                <Keyframe Frame="30" Value="ff0000ff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Layer 1" Sprite="Test2" BlendMode="Normal" Start="0" End="50">
+            <Position>
+                <Keyframe Frame="0" Value="640.000000 468.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="10" Value="2.500000 1.000000"/>
+                <Keyframe Frame="18" Value="1.500000 1.000000"/>
+                <Keyframe Frame="25" Value="2.500000 1.000000"/>
+                <Keyframe Frame="32" Value="1.500000 1.000000"/>
+                <Keyframe Frame="40" Value="2.500000 1.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="Layer 2" Sprite="Test3" BlendMode="Normal" Start="0" End="50">
+            <Position>
+                <Keyframe Frame="0" Value="640.000000 241.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="0" Value="0"/>
+                <Keyframe Frame="30" Value="135"/>
+                <Keyframe Frame="44" Value="60"/>
+            </Rotation>
+        </Layer>
+        <Layer Name="Layer 3" Sprite="Test1" BlendMode="Normal" Start="0" End="50">
+            <Position>
+                <Keyframe Frame="0" Value="888.000000 360.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffff"/>
+                <Keyframe Frame="10" Value="ff0000ff"/>
+                <Keyframe Frame="20" Value="07ff00ff"/>
+                <Keyframe Frame="30" Value="0100ffff"/>
+                <Keyframe Frame="40" Value="ff00e0ff"/>
+                <Keyframe Frame="50" Value="ffffffff"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="Testing_01" Start="0" End="45">
+        <Layer Name="Layer 0" Sprite="Test1" BlendMode="Normal" Start="0" End="45">
+            <Rotation>
+                <Keyframe Frame="0" Value="0"/>
+                <Keyframe Frame="45" Value="360"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffff"/>
+                <Keyframe Frame="5" Value="ff0000ff"/>
+                <Keyframe Frame="10" Value="13ff00ff"/>
+                <Keyframe Frame="16" Value="0003ffff"/>
+                <Keyframe Frame="24" Value="00fffcff"/>
+                <Keyframe Frame="27" Value="8fff00ff"/>
+                <Keyframe Frame="33" Value="ff009fff"/>
+                <Keyframe Frame="45" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Layer 1" Sprite="Test1" BlendMode="Normal" Start="0" End="45">
+            <Position>
+                <Keyframe Frame="0" Value="246.000000 76.000000"/>
+                <Keyframe Frame="20" Value="246.000000 183.000000"/>
+                <Keyframe Frame="35" Value="245.000000 32.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="Testing_Sequential" Start="0" End="60">
+        <Layer Name="Layer 0" Sprite="Test1" BlendMode="Normal" Start="0" End="9">
+            <Position>
+                <Keyframe Frame="0" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Layer 1" Sprite="Test2" BlendMode="Normal" Start="10" End="20">
+            <Position>
+                <Keyframe Frame="5" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Layer 2" Sprite="Test3" BlendMode="Normal" Start="21" End="30">
+            <Position>
+                <Keyframe Frame="10" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Layer 3" Sprite="Test4" BlendMode="Normal" Start="31" End="39">
+            <Position>
+                <Keyframe Frame="31" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Layer 4" Sprite="Test5" BlendMode="Normal" Start="40" End="49">
+            <Position>
+                <Keyframe Frame="40" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Layer 5" Sprite="Test6" BlendMode="Normal" Start="50" End="60">
+            <Position>
+                <Keyframe Frame="50" Value="640.000000 360.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+</AnimationSet>

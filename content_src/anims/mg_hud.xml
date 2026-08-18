@@ -1,0 +1,415 @@
+<AnimationSet Width="1920" Height="1080" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/mg_hud">
+    <SpriteDefinitions>
+        <SpriteDefinition Name="ChanceTime_NoticeText_Over" Size="428.000000 31.000000"/>
+        <SpriteDefinition Name="ChanceTime_NoticeText_Start" Size="458.000000 31.000000"/>
+        <SpriteDefinition Name="ChanceTime_Notice_Base" Size="440.000000 62.000000"/>
+        <SpriteDefinition Name="ClearGauge_Base" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Base_Excellent" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Base_Great" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Base_Standard" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Fill_Clear" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Fill_Normal" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Marker" Size="5.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Overlay" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Shadow_Corner" Size="23.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Shadow_Middle" Size="23.000000 42.000000"/>
+        <SpriteDefinition Name="ClearPercentage_0" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_1" Size="23.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_2" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_3" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_4" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_5" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_6" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_7" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_8" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_9" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="ClearPercentage_Colon" Size="16.000000 25.000000"/>
+        <SpriteDefinition Name="ClearPercentage_Percent" Size="58.000000 40.000000"/>
+        <SpriteDefinition Name="ClearPercentage_Period" Size="15.000000 15.000000"/>
+        <SpriteDefinition Name="Combo_0" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_1" Size="18.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_2" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_3" Size="32.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_4" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_5" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_6" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_7" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_8" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Combo_9" Size="33.000000 33.000000"/>
+        <SpriteDefinition Name="Difficulty_Easy" Size="116.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Easy_ChanceTime" Size="116.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Extreme" Size="193.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Extreme_ChanceTime" Size="193.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Hard" Size="116.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Hard_ChanceTime" Size="116.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Normal" Size="176.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Normal_ChanceTime" Size="176.000000 37.000000"/>
+        <SpriteDefinition Name="Difficulty_Tutorial" Size="214.000000 43.000000"/>
+        <SpriteDefinition Name="Difficulty_Tutorial_ChanceTime" Size="214.000000 43.000000"/>
+        <SpriteDefinition Name="Frame_Bottom" Size="1.000000 73.000000"/>
+        <SpriteDefinition Name="Frame_Top01" Size="1.000000 88.000000"/>
+        <SpriteDefinition Name="Frame_Top02" Size="197.000000 88.000000"/>
+        <SpriteDefinition Name="HitValu_Bad" Size="89.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Bad_Wrong" Size="169.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Cool" Size="117.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Cool_InTime" Size="117.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Cool_Wrong" Size="169.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Good" Size="122.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Good_Wrong" Size="169.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Miss" Size="108.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Safe" Size="115.000000 37.000000"/>
+        <SpriteDefinition Name="HitValu_Safe_Wrong" Size="169.000000 37.000000"/>
+        <SpriteDefinition Name="LyricsBar_Base" Size="1.000000 49.000000"/>
+        <SpriteDefinition Name="LyricsBar_Label" Size="172.000000 70.000000"/>
+        <SpriteDefinition Name="ScoreBonus_0" Size="25.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_1" Size="14.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_2" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_3" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_4" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_5" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_6" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_7" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_8" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_9" Size="35.000000 25.000000"/>
+        <SpriteDefinition Name="ScoreBonus_Plus" Size="16.000000 16.000000"/>
+        <SpriteDefinition Name="Score_0" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_1" Size="24.000000 42.000000"/>
+        <SpriteDefinition Name="Score_2" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_3" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_4" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_5" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_6" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_7" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_8" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="Score_9" Size="59.000000 42.000000"/>
+        <SpriteDefinition Name="SongIcon" Size="62.000000 76.000000"/>
+        <SpriteDefinition Name="StateIndicator_Autoplay" Size="175.000000 32.000000"/>
+        <SpriteDefinition Name="StateIndicator_Replay" Size="130.000000 32.000000"/>
+        <SpriteDefinition Name="TechnicalZone_0" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_1" Size="23.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_2" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_3" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_4" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_5" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_6" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_7" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_8" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_9" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Display" Size="566.000000 133.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeText_Completed" Size="675.000000 31.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeText_Start" Size="551.000000 31.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Notice_Base" Size="440.000000 62.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Notice_Base_Completed" Size="440.000000 62.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Notice_Base_Failed" Size="440.000000 62.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Notice_Failed" Size="561.000000 31.000000"/>
+        <SpriteDefinition Name="TimelineMarker_ChanceTime" Size="43.000000 23.000000"/>
+        <SpriteDefinition Name="TimelineMarker_TechnicalZone" Size="43.000000 23.000000"/>
+        <SpriteDefinition Name="TimelineSection_ChanceTime" Size="1.000000 42.000000"/>
+        <SpriteDefinition Name="TimelineSection_TechnicalZone" Size="1.000000 42.000000"/>
+    </SpriteDefinitions>
+    <Animation Name="HitValu_Normal" Start="0" End="35">
+        <Layer Name="HitValu" Sprite="HitValu_Cool" BlendMode="Normal" Start="0" End="35">
+            <Origin>
+                <Keyframe Frame="0" Value="0.500000 0.500000"/>
+            </Origin>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="2" Value="1.200000 1.200000"/>
+                <Keyframe Frame="4" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffff"/>
+                <Keyframe Frame="25" Value="ffffffff"/>
+                <Keyframe Frame="35" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="HitValu_Miss" Start="0" End="35">
+        <Layer Name="HitValu" Sprite="HitValu_Miss" BlendMode="Normal" Start="0" End="35">
+            <Color>
+                <Keyframe Frame="0" Value="ffffffff"/>
+                <Keyframe Frame="25" Value="ffffffff"/>
+                <Keyframe Frame="35" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="ScoreBonus" Start="0" End="35">
+        <Layer Name="Layer 0" Sprite="ScoreBonus_0" BlendMode="Normal" Start="0" End="35">
+            <Position>
+                <Keyframe Frame="0" Value="0.000000 0.000000"/>
+                <Keyframe Frame="35" Value="0.000000 -25.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffff"/>
+                <Keyframe Frame="25" Value="ffffffff"/>
+                <Keyframe Frame="35" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="Frame_Top" Start="0" End="1">
+        <Layer Name="Frame_Top01" Sprite="Frame_Top01" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="0.000000 48.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1275.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffe1"/>
+            </Color>
+        </Layer>
+        <Layer Name="Frame_Top02" Sprite="Frame_Top02" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="1275.000000 48.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffe1"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="116.000000 43.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="SongIcon" Sprite="SongIcon" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="246.000000 45.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="SongName_Ref" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="295.000000 24.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Score_Ref1" Sprite="Score_0" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="1872.000000 47.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Score_Ref2" Sprite="Score_0" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="1833.000000 47.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="Frame_Bottom" Start="0" End="1">
+        <Layer Name="LyricsBar_Base" Sprite="LyricsBar_Base" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="0.000000 989.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1920.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffe1"/>
+            </Color>
+        </Layer>
+        <Layer Name="LyricsBar_Label" Sprite="LyricsBar_Label" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="100.000000 983.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="FrameBase" Sprite="Frame_Bottom" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="0.000000 1039.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1920.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffffe1"/>
+            </Color>
+        </Layer>
+        <Layer Name="LyricsText_Ref" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="186.000000 967.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearPercentage_Percent" Sprite="ClearPercentage_Percent" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="205.000000 1042.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearPercentage_Ref1" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="172.000000 1040.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearPercentage_Ref2" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="141.000000 1040.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearPercentage_Period" Sprite="ClearPercentage_Period" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="120.000000 1050.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearPercentage_Ref3" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Value="98.000000 1040.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="ClearGauge_Base" Sprite="ClearGauge_Base" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="230.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1670.000000 1.000000"/>
+            </Scale>
+        </Layer>
+    </Animation>
+    <Animation Name="CT_Display_Start" Start="0" End="200">
+        <Layer Name="Base1" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="200">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="520.000000 930.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Base2" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="200">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="1400.000000 930.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="-1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Text" Sprite="ChanceTime_NoticeText_Start" BlendMode="Normal" Start="0" End="200">
+            <Position>
+                <Keyframe Frame="0" Value="960.000000 931.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="CT_Display_Over" Start="0" End="200">
+        <Layer Name="Base1" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="90">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="520.000000 930.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Base2" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="90">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="1400.000000 930.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="-1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Text" Sprite="ChanceTime_NoticeText_Over" BlendMode="Normal" Start="0" End="90">
+            <Position>
+                <Keyframe Frame="0" Value="960.000000 931.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Value="ffffff00"/>
+                <Keyframe Frame="10" Value="ffffffff"/>
+                <Keyframe Frame="190" Value="ffffffff"/>
+                <Keyframe Frame="200" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="TZ_Display_Start" Start="0" End="90">
+        <Layer Name="TechnicalZone_Display" Sprite="TechnicalZone_Display" BlendMode="Normal" Start="0" End="90">
+            <Origin>
+                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Value="-580.000000 210.000000"/>
+                <Keyframe Frame="9" Value="-360.500000 210.000000"/>
+                <Keyframe Frame="17" Value="-233.005004 209.999984"/>
+                <Keyframe Frame="23" Value="-190.388000 210.000000"/>
+                <Keyframe Frame="30" Value="-187.000000 210.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="TZCount_Ref1" Sprite="TechnicalZone_0" BlendMode="Normal" Start="0" End="90">
+            <Position>
+                <Keyframe Frame="30" Value="271.000000 239.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="30" Value="ffffff00"/>
+                <Keyframe Frame="40" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="TZCount_Ref2" Sprite="TechnicalZone_0" BlendMode="Normal" Start="0" End="90">
+            <Position>
+                <Keyframe Frame="30" Value="240.000000 239.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="30" Value="ffffff00"/>
+                <Keyframe Frame="40" Value="ffffffff"/>
+            </Color>
+        </Layer>
+    </Animation>
+</AnimationSet>

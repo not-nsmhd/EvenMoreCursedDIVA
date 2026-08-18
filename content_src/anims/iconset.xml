@@ -1,0 +1,88 @@
+<AnimationSet Width="1280" Height="720" FPS="60" StageColor="808080ff" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/iconset_dev">
+    <SpriteDefinitions>
+        <SpriteDefinition Name="HoldTrail_Circle" Size="1.000000 28.000000"/>
+        <SpriteDefinition Name="HoldTrail_Cross" Size="1.000000 28.000000"/>
+        <SpriteDefinition Name="HoldTrail_Square" Size="1.000000 28.000000"/>
+        <SpriteDefinition Name="HoldTrail_Star" Size="1.000000 28.000000"/>
+        <SpriteDefinition Name="HoldTrail_Triangle" Size="1.000000 28.000000"/>
+        <SpriteDefinition Name="IconGlow_Arrow" Size="67.000000 69.000000"/>
+        <SpriteDefinition Name="IconGlow_Circle" Size="64.000000 64.000000"/>
+        <SpriteDefinition Name="IconGlow_Cross" Size="61.000000 61.000000"/>
+        <SpriteDefinition Name="IconGlow_Square" Size="58.000000 58.000000"/>
+        <SpriteDefinition Name="IconGlow_Star" Size="78.000000 75.000000"/>
+        <SpriteDefinition Name="IconGlow_Triangle" Size="70.000000 63.000000"/>
+        <SpriteDefinition Name="Icon_Circle" Size="48.000000 48.000000"/>
+        <SpriteDefinition Name="Icon_Circle_Double" Size="49.000000 49.000000"/>
+        <SpriteDefinition Name="Icon_Circle_Hold" Size="49.000000 49.000000"/>
+        <SpriteDefinition Name="Icon_Cross" Size="44.000000 44.000000"/>
+        <SpriteDefinition Name="Icon_Cross_Double" Size="48.000000 49.000000"/>
+        <SpriteDefinition Name="Icon_Cross_Hold" Size="45.000000 45.000000"/>
+        <SpriteDefinition Name="Icon_Square" Size="44.000000 44.000000"/>
+        <SpriteDefinition Name="Icon_Square_Double" Size="49.000000 49.000000"/>
+        <SpriteDefinition Name="Icon_Square_Hold" Size="44.000000 44.000000"/>
+        <SpriteDefinition Name="Icon_Star" Size="54.000000 51.000000"/>
+        <SpriteDefinition Name="Icon_Star_Double" Size="53.000000 50.000000"/>
+        <SpriteDefinition Name="Icon_Star_Hold" Size="55.000000 52.000000"/>
+        <SpriteDefinition Name="Icon_Triangle" Size="52.000000 45.000000"/>
+        <SpriteDefinition Name="Icon_Triangle_Double" Size="48.000000 49.000000"/>
+        <SpriteDefinition Name="Icon_Triangle_Hold" Size="52.000000 45.000000"/>
+        <SpriteDefinition Name="TargetHand_Circle" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="TargetHand_Cross" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="TargetHand_Normal" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="TargetHand_Square" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="TargetHand_Star" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="TargetHand_Triangle" Size="17.000000 49.000000"/>
+        <SpriteDefinition Name="Target_AppearEffect" Size="127.000000 134.000000"/>
+        <SpriteDefinition Name="Target_Circle" Size="63.000000 63.000000"/>
+        <SpriteDefinition Name="Target_Circle_Double" Size="62.000000 64.000000"/>
+        <SpriteDefinition Name="Target_Circle_Hold" Size="59.000000 59.000000"/>
+        <SpriteDefinition Name="Target_Cross" Size="60.000000 60.000000"/>
+        <SpriteDefinition Name="Target_Cross_Double" Size="64.000000 63.000000"/>
+        <SpriteDefinition Name="Target_Cross_Hold" Size="55.000000 55.000000"/>
+        <SpriteDefinition Name="Target_Square" Size="57.000000 57.000000"/>
+        <SpriteDefinition Name="Target_Square_Double" Size="61.000000 63.000000"/>
+        <SpriteDefinition Name="Target_Square_Hold" Size="53.000000 53.000000"/>
+        <SpriteDefinition Name="Target_Star" Size="76.000000 72.000000"/>
+        <SpriteDefinition Name="Target_Star_Double" Size="68.000000 65.000000"/>
+        <SpriteDefinition Name="Target_Star_Hold" Size="68.000000 66.000000"/>
+        <SpriteDefinition Name="Target_Triangle" Size="73.000000 64.000000"/>
+        <SpriteDefinition Name="Target_Triangle_Double" Size="64.000000 63.000000"/>
+        <SpriteDefinition Name="Target_Triangle_Hold" Size="63.000000 56.000000"/>
+        <SpriteDefinition Name="Trail_CT" Size="85.000000 16.000000"/>
+        <SpriteDefinition Name="Trail_Normal" Size="86.000000 22.000000"/>
+    </SpriteDefinitions>
+    <Animation Name="Note_Appear" Start="0" End="60">
+        <Layer Name="Target" Sprite="Target_Cross" BlendMode="Normal" Start="0" End="60">
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="4" Value="1.000000 1.000000"/>
+                <Keyframe Frame="7" Value="1.299998 1.299998"/>
+                <Keyframe Frame="10" Value="1.000000 1.000000"/>
+            </Scale>
+        </Layer>
+    </Animation>
+    <Animation Name="Note_Disappear" Start="0" End="10">
+        <Layer Name="Note" Sprite="Target_Cross" BlendMode="Normal" Start="0" End="10">
+            <Scale>
+                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="10" Value="0.000000 0.000000"/>
+            </Scale>
+        </Layer>
+    </Animation>
+	<Animation Name="Note_AppearEffect" Start="0" End="29">
+        <Layer Name="AppearEffect" Sprite="Target_AppearEffect" BlendMode="Normal" Start="4" End="29">
+            <Scale>
+                <Keyframe Frame="4" Value="0.666998 0.666998"/>
+                <Keyframe Frame="29" Value="1.200000 1.200000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="4" Value="0"/>
+                <Keyframe Frame="29" Value="57"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="21" Value="ffffffff"/>
+                <Keyframe Frame="29" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+</AnimationSet>
