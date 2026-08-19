@@ -7,18 +7,22 @@
 
 namespace Starshine::Graphics
 {
+	constexpr vec2 LinearEasing = vec2(1.0f / 2.0f);
+
 	template <typename T>
 	struct Keyframe
 	{
 		u32 Frame{};
 		T Value{};
+		vec2 Easing{};
 
 		Keyframe() {};
-		Keyframe(const u32& frame, const T& value) : Frame(frame), Value(value) {};
+		Keyframe(const u32& frame, const T& value) : Frame(frame), Value(value), Easing(LinearEasing) {};
+		Keyframe(const u32& frame, const T& value, const vec2& easing) : Frame(frame), Value(value), Easing(easing) {};
 	};
 
 	template <typename T>
-	bool InterpolateKeyframes(const std::vector<Keyframe<T>>& keyframes, const f32& frame, T& value)
+	bool InterpolateKeyframes(const std::vector<Keyframe<T>>& keyframes, f32 frame, T& value)
 	{
 		if (keyframes.empty())
 			return false;
@@ -58,7 +62,9 @@ namespace Starshine::Graphics
 
 		const f32 range = static_cast<f32>(end->Frame - start->Frame);
 		const f32 f = frame - static_cast<f32>(start->Frame);
-		const f32 frameFactor = MathExtensions::ConvertRange<f32>(0.0f, range, 0.0f, 1.0f, f);
+		const f32 bezierFactor = MathExtensions::ConvertRange<f32>(0.0f, range, 0.0f, 1.0f, f);
+		const f32 frameFactor = MathExtensions::GetEasingPoint(start->Easing, end->Easing, bezierFactor);
+			
 		value = start->Value * (1.0f - frameFactor) + end->Value * frameFactor;
 
 		return true;

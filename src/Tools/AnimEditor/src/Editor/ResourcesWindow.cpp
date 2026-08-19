@@ -139,6 +139,7 @@ namespace Starshine
 				context->CurrentAnimation = &newAnim;
 				context->CurrentLayer = nullptr;
 				context->CurrentLayerIndex = -1;
+				context->RecreateLayerList();
 				Gui::CloseCurrentPopup();
 			}
 

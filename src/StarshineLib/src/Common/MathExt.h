@@ -117,4 +117,52 @@ namespace Starshine::MathExtensions
 	{
 		return (size + (alignment - 1)) & ~(alignment - 1);
 	}
+
+	constexpr f32 BezierSlopeFromT(f32 a, f32 b, f32 c, f32 t)
+	{
+		const f32 tSquared = t * t;
+		return 1.0f / (3.0f * a * tSquared + 2.0f * b * t + c);
+	}
+
+	constexpr void GetCubicBezierPolynomials(const f32& start, const f32& end, f32 output[4])
+	{
+		output[0] = 1.0f - 3.0f * end + 3.0f * start - 0.0f;
+		output[1] = 3.0f * end - 6.0f * start + 3.0f * 0.0f;
+		output[2] = 3.0f * start - 3.0f * 0.0f;
+		output[3] = 0.0f;
+	}
+
+	constexpr f32 GetCubicBezierPoint(f32 start, f32 cp0, f32 cp1, f32 end, f32 t)
+	{
+		const f32 tSquared = t * t;
+		const f32 tCubed = t * t * t;
+
+		return start * tCubed + cp0 * tSquared + cp1 * t + end;
+	}
+
+	constexpr f32 GetEasingPoint(const vec2& start, const vec2& end, const f32& t)
+	{
+		// NOTE: stolen from https://gist.github.com/iinfin/0f1e782dd868e4ee8716e385634a930e
+		if (start == end)
+			return t;
+
+		f32 plTime[4]{};
+		f32 plValue[4]{};
+
+		GetCubicBezierPolynomials(start.x, end.x, plTime);
+		GetCubicBezierPolynomials(start.y, end.y, plValue);
+
+		f32 current = t;
+
+		f32 currentX = GetCubicBezierPoint(plTime[0], plTime[1], plTime[2], plTime[3], current);
+		f32 currentSlope = BezierSlopeFromT(plTime[0], plTime[1], plTime[2], current);
+
+		if (currentSlope == INFINITY)
+			currentSlope = t;
+
+		current -= (currentX - t) * currentSlope;
+		current = MathExtensions::Min(MathExtensions::Max(current, 0.0f), 1.0f);
+
+		return GetCubicBezierPoint(plValue[0], plValue[1], plValue[2], plValue[3], current);
+	}
 };

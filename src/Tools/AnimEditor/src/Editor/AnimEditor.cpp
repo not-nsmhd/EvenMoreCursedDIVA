@@ -10,6 +10,7 @@
 #include "ResourcesWindow.h"
 #include "SpriteEditorWindow.h"
 #include "LayerModalWindow.h"
+#include "EasingCurveWindow.h"
 #include "DebugKeyframeList.h"
 
 #include <ImGui/Core/imgui.h>
@@ -61,6 +62,8 @@ namespace Starshine
 		ResourcesWindow resourcesWindow;
 		SpriteEditorWindow spriteEditorWindow;
 		LayerModalWindow layerModalWindow;
+		EasingCurveWindow easingCurveWindow;
+
 		DebugKeyframeList debugKeyframeListWindow;
 
 		Impl(AnimEditor* parent) : parent(parent), resourcesWindow(&context), layerModalWindow(&context)
@@ -410,14 +413,16 @@ namespace Starshine
 
 		static constexpr f32 frameLineDistance = 20.0f;
 
-		void TimelineKeyframeContextMenu(const i32& index, i32& removeIndex)
+		void TimelineKeyframeContextMenu(const i32& index, i32& removeIndex, i32& editEasingIndex)
 		{
 			if (Gui::BeginPopupContextItem())
 			{
+				if (Gui::Selectable("Edit Easing"))
+					editEasingIndex = index;
+
 				if (Gui::Selectable("Delete"))
-				{
 					removeIndex = index;
-				}
+
 				Gui::EndPopup();
 			}
 		}
@@ -477,10 +482,11 @@ namespace Starshine
 			bool sortKeyframesWhenDone = false;
 
 			i32 keyframeToRemove = -1;
+			i32 editEasingKeyframe = -1;
 			for (auto it = frames.begin(); it != frames.end(); it++)
 			{
 				bool dragging = TimelineKeyframe(keyframeIndex, it->Frame, pos);
-				TimelineKeyframeContextMenu(keyframeIndex++, keyframeToRemove);
+				TimelineKeyframeContextMenu(keyframeIndex++, keyframeToRemove, editEasingKeyframe);
 
 				ImGuiID keyframeID = Gui::GetItemID();
 
@@ -519,6 +525,15 @@ namespace Starshine
 
 			if (keyframeToRemove != -1)
 				frames.erase(frames.begin() + keyframeToRemove);
+
+			if (editEasingKeyframe != -1 && editEasingKeyframe != frames.size() - 1)
+			{
+				easingCurveWindow.DrawWindow = true;
+
+				Keyframe<T>& frame1 = frames[editEasingKeyframe];
+				Keyframe<T>& frame2 = frames[editEasingKeyframe + 1];
+				easingCurveWindow.SetEasingPoints(&frame1.Easing, &frame2.Easing);
+			}
 
 			if (sortKeyframesWhenDone)
 				SortKeyframes(frames);
@@ -1048,55 +1063,6 @@ namespace Starshine
 			Gui::EndMainMenuBar();
 		}
 
-		constexpr f32 GetCubicBezierPoint(const f32& start, const f32& end, const f32& t)
-		{
-			const f32 tSquared = t * t;
-			const f32 tCubed = t * t * t;
-			const f32 tInv = 1.0f - t;
-
-			f32 value = 3 * (tInv * tInv) * t * start;
-			value += 3 * tInv * tSquared * end;
-			value += tCubed * 1.0f;
-
-			return value;
-		}
-
-		vec2 easingTime{ 0.5f, 0.5f };
-		vec2 easingValue{ 0.5f, 0.5f };
-
-		void EasingPlotWindow()
-		{
-			f32 hermitePoints[60]{};
-			f32 t = 0.0f;
-			for (size_t i = 0.0f; i < 60; i++)
-			{
-				t += 1.0f / 60.0f;
-				f32 easedT = GetCubicBezierPoint(easingTime.x, easingTime.y, t);
-				hermitePoints[i] = GetCubicBezierPoint(easingValue.x, easingValue.y, easedT);
-			}
-
-			if (Gui::Begin("Easing"))
-			{
-				const ImVec2 contentRegion = Gui::GetContentRegionAvail();
-
-				Gui::Text("Graph");
-
-				Gui::PlotLines("##PlotPoints", hermitePoints, 60, 0, nullptr, 0.0f, 1.0f, ImVec2(contentRegion.x, contentRegion.y - 128.0f));
-
-				Gui::Text("Time");
-				Gui::SameLine();
-				Gui::SetNextItemWidth(128.0f);
-				Gui::DragFloat2("##EaseTime", &easingTime.x, 0.1f, 0.0f, 1.0f);
-
-				Gui::Text("Value");
-				Gui::SameLine();
-				Gui::SetNextItemWidth(128.0f);
-				Gui::DragFloat2("##EaseValue", &easingValue.x, 0.1f, 0.0f, 1.0f);
-
-				Gui::End();
-			}
-		}
-
 		bool animSetProperites_display = false;
 		void AnimationSetPropertiesWindow()
 		{
@@ -1142,6 +1108,7 @@ namespace Starshine
 			DrawTimeline();
 			spriteEditorWindow.OnGUI();
 			resourcesWindow.OnGUI();
+			easingCurveWindow.OnGUI();
 
 			layerModalWindow.OnGUI();
 			
@@ -1182,7 +1149,8 @@ namespace Starshine
 		{
 			auto sprRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			auto font = GameContext::GetInstance()->DebugFont.get();
-			
+
+			sprRenderer->SetBlendMode(BlendMode::Normal);
 			DrawCanvas(sprRenderer);
 
 			if (playing)
@@ -1198,6 +1166,7 @@ namespace Starshine
 				DragStateData& dragState = parent->DragState;
 				BlendMode prevBlendMode = BlendMode::Normal;
 
+				sprRenderer->SetBlendMode(BlendMode::Normal);
 				for (const auto& editLayer : context.Layers)
 				{
 					const Layer* baseLayer = editLayer.GetLayerPointer();
@@ -1238,7 +1207,9 @@ namespace Starshine
 					prevBlendMode = baseLayer->BlendMode;
 				}
 
+				sprRenderer->RenderSprites(nullptr);
 				sprRenderer->SetBlendMode(BlendMode::Normal);
+
 				if (context.CurrentLayer != nullptr)
 				{
 					const Transform2D& transform = context.CurrentLayer->CurrentTransform;
@@ -1279,9 +1250,8 @@ namespace Starshine
 						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", relMousePos.x, relMousePos.y);
 						sprRenderer->Font().DrawString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
 					}
-
-					sprRenderer->RenderSprites(nullptr);
 				}
+
 				sprRenderer->RenderSprites(nullptr);
 			}
 			OnGUI();

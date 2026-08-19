@@ -35,6 +35,7 @@ namespace Starshine::Graphics
 
 		static constexpr const char* Keyframe = "Keyframe";
 		static constexpr const char* Keyframe_Frame = "Frame";
+		static constexpr const char* Keyframe_Easing = "Easing";
 		static constexpr const char* Keyframe_Value = "Value";
 	}
 
@@ -57,9 +58,14 @@ namespace Starshine::Graphics
 
 				T value;
 				const Xml::Attribute* valueAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Value);
-				Xml::TryGetValue(value, valueAttrib);
+				if (!Xml::TryGetValue(value, valueAttrib))
+					return;
 
-				keyframes.emplace_back(Keyframe<T>(frame, value));
+				vec2 easing = LinearEasing;
+				const Xml::Attribute* easingAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Easing);
+				Xml::TryGetValue(easing, easingAttrib);
+
+				keyframes.emplace_back(Keyframe<T>(frame, value, easing));
 			}
 		}
 
@@ -82,7 +88,11 @@ namespace Starshine::Graphics
 				if (frameElement->QueryFloatAttribute(XmlElementNames::Keyframe_Value, &value) != 0)
 					return;
 
-				keyframes.emplace_back(Keyframe<f32>(frame, value));
+				vec2 easing = LinearEasing;
+				const Xml::Attribute* easingAttrib = frameElement->FindAttribute(XmlElementNames::Keyframe_Easing);
+				Xml::TryGetValue(easing, easingAttrib);
+
+				keyframes.emplace_back(Keyframe<f32>(frame, value, easing));
 			}
 		}
 
@@ -97,6 +107,7 @@ namespace Starshine::Graphics
 			{
 				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
 				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
+				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Easing, frame.Easing);
 				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}
@@ -111,6 +122,7 @@ namespace Starshine::Graphics
 			{
 				Xml::Element* frameElement = frameListElement->InsertNewChildElement(XmlElementNames::Keyframe);
 				frameElement->SetAttribute(XmlElementNames::Keyframe_Frame, frame.Frame);
+				Xml::SetAttribute(frameElement, XmlElementNames::Keyframe_Easing, frame.Easing);
 				frameElement->SetAttribute(XmlElementNames::Keyframe_Value, frame.Value);
 			}
 		}

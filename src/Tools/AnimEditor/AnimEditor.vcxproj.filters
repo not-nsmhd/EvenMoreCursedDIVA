@@ -45,6 +45,9 @@
     <ClCompile Include="src\Editor\EditorContext.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Editor\EasingCurveWindow.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameContext.h">
@@ -72,6 +75,9 @@
       <Filter>Source Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\LayerModalWindow.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EasingCurveWindow.h">
       <Filter>Source Files\Editor</Filter>
     </ClInclude>
   </ItemGroup>

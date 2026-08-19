@@ -110,6 +110,27 @@ namespace Starshine
 		}
 	};
 
+	constexpr Color operator*(const f32& left, const Color& right)
+	{
+		u8 newR = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.R) * left, 0.0f, 255.0f));
+		u8 newG = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.G) * left, 0.0f, 255.0f));
+		u8 newB = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.B) * left, 0.0f, 255.0f));
+		u8 newA = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.A) * left, 0.0f, 255.0f));
+		return Color(newR, newG, newB, newA);
+	}
+
+	constexpr Color operator/(const f32& left, const Color& right)
+	{
+		if (left <= 0.0f)
+			return Color(255, 255, 255, 255);
+
+		u8 newR = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.R) / left, 0.0f, 255.0f));
+		u8 newG = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.G) / left, 0.0f, 255.0f));
+		u8 newB = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.B) / left, 0.0f, 255.0f));
+		u8 newA = static_cast<u8>(MathExtensions::Clamp<f32>(static_cast<f32>(right.A) / left, 0.0f, 255.0f));
+		return Color(newR, newG, newB, newA);
+	}
+
 	namespace DefaultColors
 	{
 		constexpr Color Transparent { 0, 0, 0, 0 };
