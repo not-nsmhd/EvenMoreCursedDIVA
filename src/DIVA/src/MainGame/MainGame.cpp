@@ -266,7 +266,7 @@ namespace DIVA::MainGame
 		bool LoadAnimations()
 		{
 			MainGameContext.IconSetAnimations.Animations = std::make_unique<AnimationSet>();
-			MainGameContext.IconSetAnimations.Animations->LoadXml("diva/sprites/iconset.xml");
+			MainGameContext.IconSetAnimations.Animations->LoadXml("diva/sprites/iconset.xml", true);
 			MainGameContext.IconSetAnimations.Animations->LinkToSpriteSheet(MainGameContext.IconSetSprites.SpriteSheet);
 
 			auto getAnimationLayer = [&](std::string_view animName, std::string_view layerName)
@@ -278,6 +278,17 @@ namespace DIVA::MainGame
 			MainGameContext.IconSetAnimations.NoteAppearLayer = getAnimationLayer("Note_Appear", "Target");
 			MainGameContext.IconSetAnimations.NoteDisappearLayer = getAnimationLayer("Note_Disappear", "Target");
 			MainGameContext.IconSetAnimations.NoteAppearEffect = &MainGameContext.IconSetAnimations.Animations->GetAnimation("Note_AppearEffect");
+
+			// --------------------
+
+			MainGameContext.EffectAnimations.Animations = std::make_unique<AnimationSet>();
+			MainGameContext.EffectAnimations.Animations->LoadXml("diva/sprites/mg_effects.xml", false);
+
+			MainGameContext.EffectAnimations.HitEffect_Cool = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Cool");
+			MainGameContext.EffectAnimations.HitEffect_Good = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Good");
+			MainGameContext.EffectAnimations.HitEffect_Safe = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Safe");
+			MainGameContext.EffectAnimations.HitEffect_Bad = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Bad");
+			MainGameContext.EffectAnimations.HitEffect_Wrong = MainGameContext.EffectAnimations.HitEffect_Bad;
 
 			return true;
 		}
@@ -365,6 +376,7 @@ namespace DIVA::MainGame
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_Loop);
 			AudioEngine::GetInstance()->UnloadSource(HitSound_StarHold_LoopEnd);
 
+			MainGameContext.EffectAnimations.Animations = nullptr;
 			MainGameContext.IconSetAnimations.Animations = nullptr;
 			MainGameContext.IconSetSprites.SpriteSheet = nullptr;
 			sprPacker->Clear();
@@ -850,7 +862,9 @@ namespace DIVA::MainGame
 			SDL_memset(debugText, 0, sizeof(debugText));
 
 			size_t lastPos = 0;
-			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f\n", ElapsedTime.GetSeconds());
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f/%.03f\n",
+				ElapsedTime.GetSeconds(), songChart.Duration.GetSeconds());
+
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
 		}
@@ -959,6 +973,15 @@ namespace DIVA::MainGame
 			{
 				note.Draw(gameTime);
 			}
+
+			for (auto& note : ActiveNotes)
+			{
+				note.DrawEffect(gameTime);
+			}
+
+			spriteRenderer->RenderSprites(nullptr);
+			spriteRenderer->SetBlendMode(BlendMode::Normal);
+			spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			hud->Draw(gameTime);
 

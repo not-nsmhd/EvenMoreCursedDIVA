@@ -61,8 +61,6 @@ namespace DIVA::MainGame
 
 				Trail.Start = MathExtensions::Clamp<f32>(GetNormalizedRemainingTime(), 0.0f, TrailMaxProgress);
 				Trail.End = Trail.Start + normalizedLength;
-
-				//DrawTrail();
 			}
 		}
 	}
@@ -70,6 +68,11 @@ namespace DIVA::MainGame
 	void GameNote::DrawTrail()
 	{
 		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart) || Type == NoteType::HoldEnd) { return; }
+
+		if (HasBeenHit && NextNote != nullptr)
+		{
+			if (NextNote->HasBeenHit) { return; }
+		}
 
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
 		auto& iconSet = MainGameContext->IconSetSprites;
@@ -251,6 +254,9 @@ namespace DIVA::MainGame
 				}
 			}
 		}
+
+		if (HasBeenHit)
+			HitEffectAnimationFrame += MainGameContext->EffectAnimations.Animations->GetRelativeFrameTimeStep(gameTime.ElapsedFrameTime.GetSeconds());
 	}
 
 	void GameNote::Draw(GameTime& gameTime)
@@ -313,6 +319,41 @@ namespace DIVA::MainGame
 		{
 			sprRenderer->SpriteSheet().PushSprite(*iconSet.SpriteSheet, *iconSprite, IconPosition, vec2(1.0f), DefaultColors::White);
 		}
+	}
+
+	void GameNote::DrawEffect(GameTime& gameTime)
+	{
+		auto& sprRenderer = MainGameContext->SpriteRenderer;
+		if (!HasBeenHit || Expired || ShouldBeRemoved)
+			return;
+
+		const Animation* hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Cool;
+		if (!HitWrong)
+		{
+			switch (HitEvaluation)
+			{
+			case HitEvaluation::Cool:
+				hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Cool;
+				break;
+			case HitEvaluation::Good:
+				hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Good;
+				break;
+			case HitEvaluation::Safe:
+				hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Safe;
+				break;
+			case HitEvaluation::Bad:
+				hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Bad;
+				break;
+			}
+		}
+		else
+			hitEffectAnim = MainGameContext->EffectAnimations.HitEffect_Bad;
+
+		if (HitEffectAnimationFrame > hitEffectAnim->EndTime)
+			return;
+
+		AnimationSet* animSet = MainGameContext->EffectAnimations.Animations.get();
+		sprRenderer->AnimationSet().PushAnimation(animSet, hitEffectAnim, HitEffectAnimationFrame, TargetPosition, vec2(1.0f));
 	}
 
 	bool GameNote::Evaluate(NoteShape shape)

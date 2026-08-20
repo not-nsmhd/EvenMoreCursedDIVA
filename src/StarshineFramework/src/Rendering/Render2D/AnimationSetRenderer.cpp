@@ -14,7 +14,7 @@ namespace Starshine::Rendering::Render2D
 		if (animSet == nullptr || anim == nullptr)
 			return;
 
-		BlendMode prevBlendMode{};
+		BlendMode prevBlendMode = BlendMode::Normal;
 		for (const auto& layer : anim->Layers)
 		{
 			if (frame < layer.StartTime || frame > layer.EndTime || !layer.Visible)

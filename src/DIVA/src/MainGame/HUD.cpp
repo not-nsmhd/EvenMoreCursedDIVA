@@ -187,7 +187,7 @@ namespace DIVA::MainGame
 			};
 
 			animCache.hudAnimSet = std::make_unique<AnimationSet>();
-			animCache.hudAnimSet->LoadXml("diva/sprites/mg_hud.xml");
+			animCache.hudAnimSet->LoadXml("diva/sprites/mg_hud.xml", true);
 			animCache.hudAnimSet->LinkToSpriteSheet(spriteCache.hudSprites);
 
 			animCache.HitValu_Normal = &animCache.hudAnimSet->GetAnimation("HitValu_Normal");

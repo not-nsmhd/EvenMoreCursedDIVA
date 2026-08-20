@@ -111,6 +111,11 @@ namespace DIVA::MainGame
 		void Update(GameTime& gameTime);
 		void Draw(GameTime& gameTime);
 
+	public:
+		f32 HitEffectAnimationFrame{};
+		void DrawEffect(GameTime& gameTime);
+
+	public:
 		bool Evaluate(NoteShape shape);
 	};
 }

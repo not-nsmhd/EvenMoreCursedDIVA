@@ -2,6 +2,7 @@
 #include "Common/MathExt.h"
 #include "IO/Xml.h"
 #include "IO/Path/File.h"
+#include "SpritePacker.h"
 
 namespace Starshine::Graphics
 {
@@ -182,7 +183,7 @@ namespace Starshine::Graphics
 		return Layers.at(index);
 	};
 
-	bool AnimationSet::ReadXml(std::string_view xmlData)
+	bool AnimationSet::ReadXml(std::string_view xmlData, bool doNotLoadSprites)
 	{
 		if (xmlData.size() == 0)
 			return false;
@@ -198,10 +199,7 @@ namespace Starshine::Graphics
 
 		const char* sprSheetPath{};
 		if (rootElement->QueryAttribute(XmlElementNames::AnimationSet_SpriteSheet, &sprSheetPath) == 0)
-		{
 			spriteSheetPath = sprSheetPath;
-			//ImportSpritesFromFolder(sprSheetPath);
-		}
 
 		const Xml::Element* sprDefsElement = rootElement->FirstChildElement(XmlElementNames::SpriteDefs);
 
@@ -272,10 +270,21 @@ namespace Starshine::Graphics
 			}
 		}
 
+		if (!doNotLoadSprites)
+		{
+			SpritePacker sprPacker;
+			sprPacker.AddFromDirectory(spriteSheetPath);
+			sprPacker.Pack();
+
+			std::shared_ptr<SpriteSheet> sprSheet = std::make_shared<SpriteSheet>();
+			sprSheet->CreateFromSpritePacker(sprPacker);
+			LinkToSpriteSheet(sprSheet);
+		}
+
 		return true;
 	}
 
-	bool AnimationSet::LoadXml(std::string_view filePath)
+	bool AnimationSet::LoadXml(std::string_view filePath, bool doNotLoadSprites)
 	{
 		std::unique_ptr<char[]> xmlData;
 		size_t xmlSize = IO::File::ReadAllText(filePath, xmlData);
@@ -285,7 +294,7 @@ namespace Starshine::Graphics
 			return false;
 		}
 
-		bool result = ReadXml(std::string_view(xmlData.get(), xmlSize));
+		bool result = ReadXml(std::string_view(xmlData.get(), xmlSize), doNotLoadSprites);
 		return result;
 	}
 

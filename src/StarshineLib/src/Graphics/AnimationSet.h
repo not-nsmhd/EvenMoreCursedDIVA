@@ -127,8 +127,8 @@ namespace Starshine::Graphics
 		~AnimationSet() = default;
 
 	public:
-		bool ReadXml(std::string_view xmlData);
-		bool LoadXml(std::string_view filePath);
+		bool ReadXml(std::string_view xmlData, bool doNotLoadSprites);
+		bool LoadXml(std::string_view filePath, bool doNotLoadSprites);
 
 		void WriteXml(std::string_view filePath);
 

@@ -54,6 +54,17 @@ namespace DIVA::MainGame
 			const Starshine::Graphics::Animation* NoteAppearEffect{};
 		} IconSetAnimations;
 
+		struct EffectAnimationCache
+		{
+			std::unique_ptr<Starshine::Graphics::AnimationSet> Animations{};
+
+			const Starshine::Graphics::Animation* HitEffect_Cool{};
+			const Starshine::Graphics::Animation* HitEffect_Good{};
+			const Starshine::Graphics::Animation* HitEffect_Safe{};
+			const Starshine::Graphics::Animation* HitEffect_Bad{};
+			const Starshine::Graphics::Animation* HitEffect_Wrong{}; // Same as bad
+		} EffectAnimations;
+
 		MainGameContext() {}
 	};
 
