@@ -17,7 +17,7 @@ namespace Starshine::IO
 		~StreamReader() = default;
 
 	public:
-		inline size_t ReadBuffer(void* dst, size_t size) { return baseStream->ReadBuffer(dst, size); }
+		inline size_t ReadBuffer(void* dst, size_t size) { return baseStream.ReadBuffer(dst, size); }
 
 		std::string ReadString();
 		std::string ReadStringPointer();

@@ -80,7 +80,7 @@ namespace DIVA
 		if (!Detail::ReadFont(DebugFont.get(), "diva/fonts/debug.dat")) { return false; }
 
 		DefaultFont = std::make_unique<Font>();
-		if (!Detail::ReadFont(DefaultFont.get(), "diva/fonts/sourcesans3.dat")) { return false; }
+		if (!Detail::ReadFont(DefaultFont.get(), "diva/fonts/sourcehansans.dat")) { return false; }
 
 		return true;
 	}

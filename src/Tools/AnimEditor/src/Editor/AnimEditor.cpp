@@ -133,11 +133,11 @@ namespace Starshine
 					continue;
 				}
 
-				keyframes.emplace(placement, Keyframe<T>(frame, value));
+				keyframes.emplace(placement, Keyframe<T>(frame, value, LinearEasing));
 				return;
 			}
 
-			keyframes.push_back(Keyframe<T>(frame, value));
+			keyframes.push_back(Keyframe<T>(frame, value, LinearEasing));
 		}
 
 		void TimelineHeader()
@@ -995,7 +995,7 @@ namespace Starshine
 			context.AnimSet.GetSpriteDefinitions().clear();
 			context.AnimSet.GetAnimations().clear();
 
-			context.AnimSet.LoadXml(openFileDialog.OutputFilePath);
+			context.AnimSet.LoadXml(openFileDialog.OutputFilePath, true);
 			ImportSpritesFromFolder(context.AnimSet.GetSpriteSheetPath());
 
 			context.CurrentAnimation = &context.AnimSet.GetAnimations().front();
@@ -1145,13 +1145,72 @@ namespace Starshine
 			sprRenderer->PushOutlineRect(viewPan, realCanvasSize, {}, DefaultColors::Black);
 		}
 
+		void OBBTest(SpriteRenderer* sprRenderer)
+		{
+			const RectangleF rect(640.0f, 360.0f, 128.0f, 128.0f);
+			constexpr f32 orientation = MathExtensions::ToRadians(32.0f);
+
+			DragStateData& dragState = parent->DragState;
+			ImVec2 mousePos = Gui::GetIO().MousePos;
+
+			vec2 orientedPos = MathExtensions::RotateVector(vec2(mousePos.x, mousePos.y), rect.Position(), orientation) + rect.Position();
+
+			bool mouseInsideRect = (orientedPos.y > 0.0f) && (orientedPos.y < rect.Height)
+				&& (orientedPos.x > 0.0f) && (orientedPos.x < rect.Width);
+
+			sprRenderer->SetSpritePosition(rect.Position());
+			sprRenderer->SetSpriteSize(rect.Size());
+			sprRenderer->SetSpriteRotation(orientation);
+			sprRenderer->SetSpriteColor(mouseInsideRect ? DefaultColors::Purple : DefaultColors::Red);
+			sprRenderer->PushSprite(nullptr);
+
+			vec2 cornerPos = MathExtensions::RotateVector(vec2(rect.X, rect.Y), rect.Position(), orientation) + rect.Position();
+			sprRenderer->SetSpritePosition(cornerPos);
+			sprRenderer->SetSpriteSize(vec2(4.0f));
+			sprRenderer->SetSpriteOrigin(vec2(2.0f));
+			sprRenderer->SetSpriteColor(DefaultColors::Blue);
+			sprRenderer->PushSprite(nullptr);
+
+			cornerPos = MathExtensions::RotateVector(vec2(rect.X + rect.Width, rect.Y), rect.Position(), orientation) + rect.Position();
+			sprRenderer->SetSpritePosition(cornerPos);
+			sprRenderer->SetSpriteSize(vec2(4.0f));
+			sprRenderer->SetSpriteOrigin(vec2(2.0f));
+			sprRenderer->SetSpriteColor(DefaultColors::Blue);
+			sprRenderer->PushSprite(nullptr);
+
+			cornerPos = MathExtensions::RotateVector(vec2(rect.X, rect.Y + rect.Height), rect.Position(), orientation) + rect.Position();
+			sprRenderer->SetSpritePosition(cornerPos);
+			sprRenderer->SetSpriteSize(vec2(4.0f));
+			sprRenderer->SetSpriteOrigin(vec2(2.0f));
+			sprRenderer->SetSpriteColor(DefaultColors::Blue);
+			sprRenderer->PushSprite(nullptr);
+
+			cornerPos = MathExtensions::RotateVector(vec2(rect.X + rect.Width, rect.Y + rect.Height), rect.Position(), orientation) + rect.Position();
+			sprRenderer->SetSpritePosition(cornerPos);
+			sprRenderer->SetSpriteSize(vec2(4.0f));
+			sprRenderer->SetSpriteOrigin(vec2(2.0f));
+			sprRenderer->SetSpriteColor(DefaultColors::Blue);
+			sprRenderer->PushSprite(nullptr);
+
+			char posText[64]{};
+
+			auto font = GameContext::GetInstance()->DebugFont.get();
+
+			SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", mousePos.x, mousePos.y);
+			sprRenderer->Font().DrawString(font, posText, vec2(mousePos.x, mousePos.y), vec2(1.0f), DefaultColors::White);
+		}
+
 		void Draw(Starshine::GameTime& gameTime)
 		{
 			auto sprRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			auto font = GameContext::GetInstance()->DebugFont.get();
 
 			sprRenderer->SetBlendMode(BlendMode::Normal);
+
 			DrawCanvas(sprRenderer);
+			OBBTest(sprRenderer);
+
+			DragStateData& dragState = parent->DragState;
 
 			if (playing)
 			{
@@ -1163,7 +1222,6 @@ namespace Starshine
 			}
 			else
 			{
-				DragStateData& dragState = parent->DragState;
 				BlendMode prevBlendMode = BlendMode::Normal;
 
 				sprRenderer->SetBlendMode(BlendMode::Normal);
@@ -1251,9 +1309,9 @@ namespace Starshine
 						sprRenderer->Font().DrawString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
 					}
 				}
-
 				sprRenderer->RenderSprites(nullptr);
 			}
+
 			OnGUI();
 		}
 	};

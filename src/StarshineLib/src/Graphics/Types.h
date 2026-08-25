@@ -57,6 +57,16 @@ namespace Starshine::Graphics
 
 		u16 Reserved : 13;
 	};
+	static_assert(sizeof(TextureFlags) == 2);
+
+	struct TextureFileFlags
+	{
+		u16 CompressedQOI : 1; // TODO: Implement
+		u16 CompressedBZ2 : 1;
+
+		u16 Reserved : 14;
+	};
+	static_assert(sizeof(TextureFileFlags) == 2);
 
 	enum class BlendMode : i32
 	{

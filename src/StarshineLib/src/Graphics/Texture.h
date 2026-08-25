@@ -22,7 +22,9 @@ namespace Starshine::Graphics
 	public:
 		ivec2 GetSize() const;
 		TextureFormat GetFormat() const;
-		TextureFlags GetFlags() const;
+
+		TextureFlags& GetFlags();
+		const TextureFlags& GetFlags() const;
 
 		u8* GetData();
 		const u8* GetData() const;
@@ -37,6 +39,8 @@ namespace Starshine::Graphics
 		bool ReadBinary(IO::StreamReader& writer);
 		void WriteBinary(IO::StreamWriter& writer);
 
+		void SetWriteFlags(TextureFileFlags flags);
+
 	public:
 		ManagedGPUResource GPUTexture{};
 
@@ -46,6 +50,8 @@ namespace Starshine::Graphics
 		ivec2 size{};
 		TextureFormat format{};
 		TextureFlags flags{};
+
+		TextureFileFlags fileFlags{};
 
 		size_t dataSize{};
 		std::unique_ptr<u8[]> data{};

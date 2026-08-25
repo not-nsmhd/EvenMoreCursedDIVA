@@ -21,7 +21,7 @@ namespace Starshine::IO
 		~StreamWriter() = default;
 
 	public:
-		inline size_t WriteBuffer(const void* src, size_t size) { return baseStream->WriteBuffer(src, size); }
+		inline size_t WriteBuffer(const void* src, size_t size) { return baseStream.WriteBuffer(src, size); }
 
 		void WriteString(std::string_view value);
 		void WriteStringPointer(std::string_view value, i32 alignment = 0);

@@ -9,6 +9,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBI_WRITE_NO_STDIO
+#include <stb_image_write.h>
+
 using namespace Starshine::IO;
 using namespace Starshine::Graphics;
 
@@ -48,6 +52,12 @@ namespace Starshine::Misc
 
 			constexpr stbi_io_callbacks STBICallbacks_IStream{ STBIRead_IStream, STBISkip_IStream, STBIEndOfFile_IStream };
 
+			void STBIWriteImage_IStream(void* streamPtr, void* data, int size)
+			{
+				IStream* stream = static_cast<IStream*>(streamPtr);
+				stream->WriteBuffer(data, size);
+			}
+
 			size_t ConvertRGBAData(const u8* rgbaData, size_t rgbaDataSize, u8* outputData, Graphics::TextureFormat targetFormat)
 			{
 				if (targetFormat == TextureFormat::RGBA8)
@@ -76,6 +86,39 @@ namespace Starshine::Misc
 				}
 
 				return resultDataSize;
+			}
+
+			size_t ConvertDataToRGBA(const u8* formatData, size_t formatDataSize, u8* outputRGBAdata, Graphics::TextureFormat sourceFormat)
+			{
+				if (sourceFormat == TextureFormat::RGBA8)
+				{
+					SDL_memcpy(outputRGBAdata, formatData, formatDataSize);
+					return formatDataSize;
+				}
+
+				const size_t pixelSize = TexturePixelSizes[static_cast<size_t>(sourceFormat)];
+				const size_t pixelCount = formatDataSize / pixelSize;
+
+				for (size_t i = 0; i < pixelCount; i++)
+				{
+					switch (sourceFormat)
+					{
+					case TextureFormat::R8:
+						outputRGBAdata[i * 4 + 0] = formatData[i];
+						outputRGBAdata[i * 4 + 1] = 0;
+						outputRGBAdata[i * 4 + 2] = 0;
+						outputRGBAdata[i * 4 + 3] = 255;
+						break;
+					case TextureFormat::RG8:
+						outputRGBAdata[i * 4 + 0] = formatData[i * 2 + 0];
+						outputRGBAdata[i * 4 + 1] = formatData[i * 2 + 1];
+						outputRGBAdata[i * 4 + 2] = 0;
+						outputRGBAdata[i * 4 + 3] = 255;
+						break;
+					}
+				}
+
+				return pixelCount * 4;
 			}
 		}
 
@@ -210,6 +253,34 @@ namespace Starshine::Misc
 				outTexture->SetData({}, texSize, imageData.get());
 
 			return true;
+		}
+
+		void WriteImageFile(IO::IStream& outputStream, ImageFormat outputFormat, const u8* data, ivec2 size, TextureFormat format)
+		{
+			assert(outputStream.IsWritable());
+			assert(data != nullptr && size.x > 0 && size.y > 0);
+
+			std::unique_ptr<u8[]> rgbaData = std::make_unique<u8[]>(size.x * size.y * 4);
+			const size_t pixelSize = TexturePixelSizes[static_cast<size_t>(format)];
+			Detail::ConvertDataToRGBA(data, size.x * size.y * pixelSize, rgbaData.get(), format);
+
+			const int stride = size.x * 4;
+
+			switch (outputFormat)
+			{
+			case ImageFormat::PNG:
+				stbi_write_png_to_func(Detail::STBIWriteImage_IStream, &outputStream, size.x, size.y, 4, rgbaData.get(), stride);
+				break;
+			case ImageFormat::TGA:
+				stbi_write_tga_to_func(Detail::STBIWriteImage_IStream, &outputStream, size.x, size.y, 4, rgbaData.get());
+				break;
+			}
+		}
+
+		void WriteImageFile(std::string_view filePath, ImageFormat outputFormat, const u8* data, ivec2 size, TextureFormat format)
+		{
+			FileStream fileStream = File::CreateWrite(filePath);
+			WriteImageFile(fileStream, outputFormat, data, size, format);
 		}
 	}
 }

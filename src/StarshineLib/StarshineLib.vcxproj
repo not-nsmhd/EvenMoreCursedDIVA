@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +129,7 @@
     <ClInclude Include="src\Graphics\AnimationSet.h" />
     <ClInclude Include="src\Graphics\Font.h" />
     <ClInclude Include="src\Graphics\GPUResource.h" />
+    <ClInclude Include="src\Graphics\qoi.h" />
     <ClInclude Include="src\Graphics\RectanglePacker.h" />
     <ClInclude Include="src\Graphics\SpritePacker.h" />
     <ClInclude Include="src\Graphics\SpriteSheet.h" />
@@ -144,6 +145,7 @@
     <ClInclude Include="src\IO\StreamReader.h" />
     <ClInclude Include="src\IO\StreamWriter.h" />
     <ClInclude Include="src\IO\Xml.h" />
+    <ClInclude Include="src\Misc\Compression.h" />
     <ClInclude Include="src\Misc\EndianHelper.h" />
     <ClInclude Include="src\Misc\ImageHelper.h" />
   </ItemGroup>
@@ -155,6 +157,7 @@
     <ClCompile Include="src\Common\Logging\Logging.cpp" />
     <ClCompile Include="src\Graphics\AnimationSet.cpp" />
     <ClCompile Include="src\Graphics\Font.cpp" />
+    <ClCompile Include="src\Graphics\qoi.cpp" />
     <ClCompile Include="src\Graphics\RectanglePacker.cpp" />
     <ClCompile Include="src\Graphics\SpritePacker.cpp" />
     <ClCompile Include="src\Graphics\SpriteSheet.cpp" />
@@ -165,7 +168,13 @@
     <ClCompile Include="src\IO\Path\Path.cpp" />
     <ClCompile Include="src\IO\StreamReader.cpp" />
     <ClCompile Include="src\IO\StreamWriter.cpp" />
+    <ClCompile Include="src\Misc\Compression.cpp" />
     <ClCompile Include="src\Misc\ImageHelper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dependencies\bzip2\bzip2.vcxproj">
+      <Project>{b394981a-024a-48f7-9d58-dfe00743e2f2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

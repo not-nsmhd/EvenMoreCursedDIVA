@@ -13,6 +13,7 @@ obj/
 
 src/!old
 src/StarshineLib/src/BuildInfo.h
+src/Dependencies/bin
 
 .vs/
 lib_vs/*
