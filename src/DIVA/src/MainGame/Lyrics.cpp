@@ -10,9 +10,7 @@ namespace DIVA::MainGame
 	namespace Lyrics
 	{
 		bool LoadXml(std::string_view filePath, std::vector<Lyric>& lyricsList)
-		{
-			if (!File::Exists(filePath)) { return false; }
-			
+		{			
 			Xml::Document doc;
 			if (!Xml::ParseFromFile(doc, filePath)) { return false; }
 

@@ -4,6 +4,7 @@
 #include "Decoding/DecoderFactory.h"
 #include "SampleProvider/StreamingSampleProvider.h"
 #include "IO/Path/File.h"
+#include "IO/FileSystem/FileSystem.h"
 #include "Common/Logging/Logging.h"
 
 namespace Starshine::Audio
@@ -481,7 +482,7 @@ namespace Starshine::Audio
 	SourceHandle AudioEngine::LoadSource(std::string_view filePath)
 	{
 		std::unique_ptr<u8[]> fileData = nullptr;
-		size_t fileSize = IO::File::ReadAllBytes(filePath, fileData);
+		size_t fileSize = IO::FileSystem::GetInstance()->ReadAllBytes(filePath, fileData);
 
 		if (fileData != nullptr && fileSize > 0)
 		{
@@ -505,7 +506,7 @@ namespace Starshine::Audio
 	SourceHandle AudioEngine::LoadStreamingSource(std::string_view filePath)
 	{
 		std::unique_ptr<u8[]> fileData = nullptr;
-		size_t fileSize = IO::File::ReadAllBytes(filePath, fileData);
+		size_t fileSize = IO::FileSystem::GetInstance()->ReadAllBytes(filePath, fileData);
 
 		if (fileData != nullptr && fileSize > 0)
 		{

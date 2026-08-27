@@ -92,43 +92,7 @@ namespace Starshine::Rendering::Render2D
 
 	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)
 	{
-		vec2 basePos{};
-
-		auto c = text.cbegin();
-		const FontGlyph* prevGlyph{};
-
-		while (c != text.cend())
-		{
-			i32 utfChar = utf8::next(c, text.cend());
-
-			if (utfChar == '\n')
-			{
-				basePos.x = 0.0f;
-				basePos.y += font->LineHeight;
-				continue;
-			}
-
-			const FontGlyph* glyph = font->GetGlyph(utfChar);
-
-			if (utfChar == ' ')
-			{
-				basePos.x += glyph->XAdvance;
-				continue;
-			}
-
-			if (prevGlyph != nullptr && prevGlyph->KerningList != nullptr)
-			{
-				for (const auto& kern : prevGlyph->KerningList->KerningList)
-				{
-					if (kern.SecondCharCode == utfChar)
-						basePos.x += kern.Amount;
-				}
-			}
-
-			basePos.x += glyph->XAdvance;
-		}
-
-		return basePos;
+		return font->MeasureString(text);
 	}
 
 	void FontRenderer::PushGlyph(const Font* font, const FontGlyph* glyph, const vec2& position, const vec2& scale, const Color& color)

@@ -1,7 +1,8 @@
 #pragma once
-#include <Common/Types.h>
-#include <Common/MathExt.h>
-#include <Common/Color.h>
+#include "Common/Types.h"
+#include "Common/MathExt.h"
+#include "Common/Color.h"
+#include "IO/FileSystem/FileSystem.h"
 #include <SDL2/SDL_stdinc.h>
 #include <tinyxml2.h>
 
@@ -19,8 +20,14 @@ namespace Starshine::Xml
 
 	inline bool Parse(Document& doc, const char* text, size_t textSize) { return doc.Parse(text, textSize) == Error::XML_SUCCESS; }
 	inline bool ParseFromFile(Document& doc, std::string_view filePath)
-	{ 
-		return doc.LoadFile(filePath.data()) == Error::XML_SUCCESS;
+	{
+		auto fs = IO::FileSystem::GetInstance();
+		std::string fullPath = fs->GetFullFilePath(filePath);
+
+		if (!fullPath.empty())
+			return doc.LoadFile(fullPath.c_str()) == Error::XML_SUCCESS;
+
+		return false;
 	}
 
 	inline Element* GetRootElement(Document& doc) { return doc.RootElement(); }

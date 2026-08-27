@@ -110,7 +110,7 @@ namespace DIVA::MainGame
 			sprPacker.Clear();
 			sprPacker.Initialize();
 
-			sprPacker.AddFromDirectory("diva/sprites/mg_hud");
+			sprPacker.AddFromDirectory("sprites/mg_hud");
 			sprPacker.Pack();
 
 			spriteCache.hudSprites = std::make_shared<SpriteSheet>();
@@ -187,7 +187,7 @@ namespace DIVA::MainGame
 			};
 
 			animCache.hudAnimSet = std::make_unique<AnimationSet>();
-			animCache.hudAnimSet->LoadXml("diva/sprites/mg_hud.xml", true);
+			animCache.hudAnimSet->LoadXml("sprites/mg_hud.xml", true);
 			animCache.hudAnimSet->LinkToSpriteSheet(spriteCache.hudSprites);
 
 			animCache.HitValu_Normal = &animCache.hudAnimSet->GetAnimation("HitValu_Normal");
@@ -202,9 +202,13 @@ namespace DIVA::MainGame
 			size_t difficultyIndex = static_cast<size_t>(mainGameContext->Difficulty);
 			animCache.FrameTop_Difficulty->SpriteDefinition = &animCache.hudAnimSet->GetSpriteDefinition(DifficultyLayerNames[difficultyIndex]);
 
+			const vec2 textSize = GameContext::GetInstance()->DefaultFont->MeasureString("ABCD1234");
+			const vec2 textOrigin = vec2(0.0f, textSize.y / 2.0f);
+
 			Layer& songNameRef = animCache.FrameTop->GetLayer("SongName_Ref");
 			songNameRef.Visible = false;
 			animCache.SongNameTextPosition = songNameRef.GetTransform(0.0f).Position;
+			animCache.SongNameTextPosition.y -= textOrigin.y;
 
 			Layer* scoreRef = &animCache.FrameTop->GetLayer("Score_Ref1");
 			scoreRef->Visible = false;
@@ -217,6 +221,7 @@ namespace DIVA::MainGame
 			Layer& lyricsTextRef = animCache.FrameBottom->GetLayer("LyricsText_Ref");
 			lyricsTextRef.Visible = false;
 			animCache.LyricsTextPosition = lyricsTextRef.GetTransform(0.0f).Position;
+			animCache.LyricsTextPosition.y -= textOrigin.y;
 
 			return true;
 		}
@@ -327,7 +332,7 @@ namespace DIVA::MainGame
 				vec2 valuTextPos
 				{ 
 					ComboDisplayState.Position.x + animTransform.Position.x,
-					ComboDisplayState.Position.y - 52.0f + animTransform.Position.y
+					ComboDisplayState.Position.y + animTransform.Position.y
 				};
 
 				if (ComboDisplayState.Combo <= 1)
@@ -365,7 +370,7 @@ namespace DIVA::MainGame
 				vec2 textPos
 				{ 
 					ScoreBonusDisplay.Position.x + animTransform.Position.x,
-					ScoreBonusDisplay.Position.y - 105.0f + animTransform.Position.y
+					ScoreBonusDisplay.Position.y + animTransform.Position.y
 				};
 				DrawSpriteNumericValue(ScoreBonusDisplay.Value, spriteCache.ScoreBonusNumbers, textPos, animTransform.Scale, 23.0f, animTransform.Color);
 

@@ -4,6 +4,7 @@
 #include "IO/Path/Path.h"
 #include "Common/Logging/Logging.h"
 #include "Misc/ImageHelper.h"
+#include <utf8.h>
 
 namespace Starshine::Graphics
 {
@@ -345,6 +346,48 @@ namespace Starshine::Graphics
 		}
 
 		return &Glyphs[0];
+	}
+
+	vec2 Font::MeasureString(std::string_view str) const
+	{
+		vec2 basePos{};
+
+		auto c = str.cbegin();
+		const FontGlyph* prevGlyph{};
+
+		while (c != str.cend())
+		{
+			i32 utfChar = utf8::next(c, str.cend());
+
+			if (utfChar == '\n')
+			{
+				basePos.x = 0.0f;
+				basePos.y += LineHeight;
+				continue;
+			}
+
+			const FontGlyph* glyph = GetGlyph(utfChar);
+
+			if (utfChar == ' ')
+			{
+				basePos.x += glyph->XAdvance;
+				continue;
+			}
+
+			if (prevGlyph != nullptr && prevGlyph->KerningList != nullptr)
+			{
+				for (const auto& kern : prevGlyph->KerningList->KerningList)
+				{
+					if (kern.SecondCharCode == utfChar)
+						basePos.x += kern.Amount;
+				}
+			}
+
+			basePos.x += glyph->XAdvance;
+			basePos.y = MathExtensions::Max(basePos.y, static_cast<f32>(glyph->Height));
+		}
+
+		return basePos;
 	}
 
 	FontType Font::GetType() const

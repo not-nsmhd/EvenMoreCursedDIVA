@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)lib/glm/include;$(SolutionDir)lib/tinyxml2/include;$(SolutionDir)lib/stb/include;$(SolutionDir)lib_vs/SDL2/include;$(SolutionDir)src/Dependencies/bzip2/src;$(SolutionDir)lib/utf8cpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +137,7 @@
     <ClInclude Include="src\Graphics\Types.h" />
     <ClInclude Include="src\IO\BinaryMode.h" />
     <ClInclude Include="src\IO\FileStream.h" />
+    <ClInclude Include="src\IO\FileSystem\FileSystem.h" />
     <ClInclude Include="src\IO\IStream.h" />
     <ClInclude Include="src\IO\Path\Directory.h" />
     <ClInclude Include="src\IO\Path\File.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="src\Graphics\SpriteSheet.cpp" />
     <ClCompile Include="src\Graphics\Texture.cpp" />
     <ClCompile Include="src\IO\FileStream.cpp" />
+    <ClCompile Include="src\IO\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\IO\Path\Directory.cpp" />
     <ClCompile Include="src\IO\Path\File.cpp" />
     <ClCompile Include="src\IO\Path\Path.cpp" />

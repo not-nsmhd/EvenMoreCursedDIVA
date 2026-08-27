@@ -4,6 +4,7 @@
 #include "IO/Xml.h"
 #include "Misc/ImageHelper.h"
 #include "Common/MathExt.h"
+#include "IO/FileSystem/FileSystem.h"
 #include <algorithm>
 
 namespace Starshine::Graphics
@@ -100,12 +101,10 @@ namespace Starshine::Graphics
 
 	bool SpritePacker::AddImage(std::string_view filePath)
 	{
-		std::string_view fileName = Path::GetFileName(filePath, false);
 		if (Path::GetExtension(filePath) != ".png")
-		{
 			return false;
-		}
 
+		std::string_view fileName = Path::GetFileName(filePath, false);
 		SpriteInfo spriteInfo{};
 
 		if (ImageHelper::GetImageInfo(filePath, spriteInfo.ImageSize, nullptr))
@@ -123,20 +122,15 @@ namespace Starshine::Graphics
 
 			// Check if the corresponding XML file is also present
 			std::string xmlFilePath = Path::ChangeExtension(filePath, ".xml");
-			if (File::Exists(xmlFilePath))
+			Xml::Document doc;
+			if (Xml::ParseFromFile(doc, xmlFilePath))
 			{
-				Xml::Document doc;
-				if (Xml::ParseFromFile(doc, xmlFilePath))
-				{
-					Detail::ParseSpritePackOptions(doc, spriteInfo);
-					if ((static_cast<size_t>(spriteInfo.DesiredTextureIndex) + 1ull) > texturesToReserve)
-					{ 
-						texturesToReserve = static_cast<size_t>(spriteInfo.DesiredTextureIndex) + 1ull;
-					}
-				}
-
-				doc.Clear();
+				Detail::ParseSpritePackOptions(doc, spriteInfo);
+				if ((static_cast<size_t>(spriteInfo.DesiredTextureIndex) + 1ull) > texturesToReserve)
+					texturesToReserve = static_cast<size_t>(spriteInfo.DesiredTextureIndex) + 1ull;
 			}
+
+			doc.Clear();
 
 			sprites.push_back(spriteInfo);
 			return true;
@@ -147,9 +141,12 @@ namespace Starshine::Graphics
 
 	bool SpritePacker::AddFromDirectory(std::string_view dirPath)
 	{
-		if (!Directory::Exists(dirPath)) { return false; }
+		auto fs = FileSystem::GetInstance();
+		std::string fullDirPath = fs->GetFullDirectoryPath(dirPath);
+		if (fullDirPath.empty())
+			return false;
 
-		Directory::IterateFiles(dirPath, [&](std::string_view filePath) { AddImage(filePath); });
+		Directory::IterateFiles(fullDirPath, [&](std::string_view filePath) { AddImage(filePath); });
 
 		return true;
 	}

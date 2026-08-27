@@ -229,7 +229,7 @@ namespace Starshine::Rendering::Render2D
 
 		void Internal_CreateDefaultSpriteResources()
 		{
-			Rendering::Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
+			Rendering::Utilities::LoadShader("shaders/d3d11/VS_SpriteDefault.cso", "shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
 
 			static constexpr u8 defaultTexData[4] { 0xFF, 0xFF, 0xFF, 0xFF };
 			DefaultSpriteResources.DefaultTexture = std::make_unique<Graphics::Texture>(vec2{ 1, 1 }, TextureFormat::RGBA8, TextureFlags{}, defaultTexData);

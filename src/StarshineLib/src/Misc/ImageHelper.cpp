@@ -1,5 +1,6 @@
 #include "ImageHelper.h"
 #include "IO/Path/File.h"
+#include "IO/FileSystem/FileSystem.h"
 
 #define STBI_NO_PSD
 #define STBI_NO_PIC
@@ -167,8 +168,8 @@ namespace Starshine::Misc
 		{
 			constexpr int rgbaPixelSize = 4;
 
-			FileStream fileStream = File::OpenRead(filePath);
-			if (!fileStream.IsOpen())
+			FileStream fileStream;
+			if (!FileSystem::GetInstance()->OpenFileStream(fileStream, filePath, true, false))
 				return false;
 
 			int x, y, comp{};

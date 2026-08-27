@@ -70,6 +70,8 @@ namespace Starshine::Graphics
 		const FontGlyph* GetGlyph(i32 code) const;
 		FontType GetType() const;
 
+		vec2 MeasureString(std::string_view str) const;
+
 	public:
 		bool ReadBMFont(std::string_view basePath, const char* xmlData, size_t xmlSize, TextureFormat texFormat);
 		bool ReadBMFont(const std::string_view filePath, TextureFormat texFormat = TextureFormat::RGBA8);

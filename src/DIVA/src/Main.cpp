@@ -4,7 +4,7 @@
 #include "Definitions.h"
 #include "Settings.h"
 #include <Common/Logging/Logging.h>
-#include <IO/Path/File.h>
+#include <IO/FileSystem/FileSystem.h>
 
 using namespace Starshine;
 using namespace DIVA;
@@ -15,7 +15,11 @@ int SDL_main(int argc, char* argv[])
 	
 	if (game.Initialize(false))
 	{
-		if (!GameContext::CreateInstance()) { return 1; }
+		if (!IO::FileSystem::GetInstance()->AddSearchPath("diva"))
+			return 1;
+
+		if (!GameContext::CreateInstance())
+			return 1;
 
 		if (!SettingsData.LoadFromFile())
 			SettingsData.SetDefaultValues();

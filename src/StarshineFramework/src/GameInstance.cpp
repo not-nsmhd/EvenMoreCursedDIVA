@@ -6,6 +6,7 @@
 #include "Input/Keyboard.h"
 #include "Input/Gamepad.h"
 #include "Audio/AudioEngine.h"
+#include "IO/FileSystem/FileSystem.h"
 
 #include "ImGui/Core/imgui.h"
 #include "ImGui/Core/backends/imgui_impl_sdl2.h"
@@ -79,6 +80,14 @@ namespace Starshine
 			}
 
 			BaseWindow = Parent->GameWindow->GetBaseWindow();
+
+			IO::FileSystem::CreateInstance();
+			if (!IO::FileSystem::GetInstance()->AddSearchPath("framework"))
+			{
+				LogMessage("Failed to add framework data as a search path");
+				SDL_Quit();
+				return false;
+			}
 
 			Rendering::InitializeDevice(BaseWindow, DeviceType::D3D11);
 			GFXDevice = Rendering::GetDevice();

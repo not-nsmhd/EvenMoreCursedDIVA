@@ -26,6 +26,9 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{ad413135-77d1-462b-bbd1-05c587831afd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\IO\FileSystem">
+      <UniqueIdentifier>{6c49a91c-944d-4da6-b0f2-f6ccf0d551d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Common\Types.h">
@@ -112,6 +115,9 @@
     <ClInclude Include="src\Graphics\qoi.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\IO\FileSystem\FileSystem.h">
+      <Filter>Source Files\IO\FileSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -169,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="src\Graphics\qoi.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\FileSystem\FileSystem.cpp">
+      <Filter>Source Files\IO\FileSystem</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

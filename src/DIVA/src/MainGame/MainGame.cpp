@@ -194,7 +194,7 @@ namespace DIVA::MainGame
 		{
 			sprPacker = std::make_unique<SpritePacker>();
 			sprPacker->Initialize();
-			sprPacker->AddFromDirectory("diva/sprites/iconset_ps4");
+			sprPacker->AddFromDirectory("sprites/iconset_ps4");
 			sprPacker->Pack();
 
 			MainGameContext.IconSetSprites.SpriteSheet = std::make_shared<SpriteSheet>();
@@ -266,7 +266,7 @@ namespace DIVA::MainGame
 		bool LoadAnimations()
 		{
 			MainGameContext.IconSetAnimations.Animations = std::make_unique<AnimationSet>();
-			MainGameContext.IconSetAnimations.Animations->LoadXml("diva/sprites/iconset.xml", true);
+			MainGameContext.IconSetAnimations.Animations->LoadXml("sprites/iconset.xml", true);
 			MainGameContext.IconSetAnimations.Animations->LinkToSpriteSheet(MainGameContext.IconSetSprites.SpriteSheet);
 
 			auto getAnimationLayer = [&](std::string_view animName, std::string_view layerName)
@@ -282,7 +282,7 @@ namespace DIVA::MainGame
 			// --------------------
 
 			MainGameContext.EffectAnimations.Animations = std::make_unique<AnimationSet>();
-			MainGameContext.EffectAnimations.Animations->LoadXml("diva/sprites/mg_effects.xml", false);
+			MainGameContext.EffectAnimations.Animations->LoadXml("sprites/mg_effects.xml", false);
 
 			MainGameContext.EffectAnimations.HitEffect_Cool = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Cool");
 			MainGameContext.EffectAnimations.HitEffect_Good = &MainGameContext.EffectAnimations.Animations->GetAnimation("HitEffect_Good");
@@ -306,17 +306,17 @@ namespace DIVA::MainGame
 
 			hud->LoadSprites(*sprPacker);
 			
-			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Normal01.ogg");
-			HitSound_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Double01.ogg");
+			HitSound_Normal = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Normal_Normal01.ogg");
+			HitSound_Double = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Normal_Double01.ogg");
 
-			HitSound_Star_Normal = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Normal01.ogg");
-			HitSound_Star_Double = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Double01.ogg");
+			HitSound_Star_Normal = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Star_Normal01.ogg");
+			HitSound_Star_Double = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Star_Double01.ogg");
 
-			HitSound_Hold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_Loop.ogg");
-			HitSound_Hold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Normal_Hold01_LoopEnd.ogg");
+			HitSound_Hold_Loop = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Normal_Hold01_Loop.ogg");
+			HitSound_Hold_LoopEnd = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Normal_Hold01_LoopEnd.ogg");
 
-			HitSound_StarHold_Loop = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_Loop.ogg");
-			HitSound_StarHold_LoopEnd = AudioEngine::GetInstance()->LoadSource("diva/sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
+			HitSound_StarHold_Loop = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Star_Hold01_Loop.ogg");
+			HitSound_StarHold_LoopEnd = AudioEngine::GetInstance()->LoadSource("sounds/mg_notes/Star_Hold01_LoopEnd.ogg");
 
 			HitSound_Hold_LoopVoice = AudioEngine::GetInstance()->AllocateVoice(HitSound_Hold_Loop);
 			HitSound_Hold_LoopVoice.SetLoopState(true);

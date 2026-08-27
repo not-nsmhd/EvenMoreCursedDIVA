@@ -2,6 +2,7 @@
 #include <Common/Logging/Logging.h>
 #include <IO/Path/Directory.h>
 #include <IO/Path/File.h>
+#include <IO/FileSystem/FileSystem.h>
 
 using namespace Starshine;
 using namespace Starshine::IO;
@@ -15,12 +16,11 @@ namespace DIVA
 	{
 		bool ReadFont(Font* font, std::string_view filePath)
 		{
-			if (!File::Exists(filePath))
+			FileStream fileStream;
+			if (!FileSystem::GetInstance()->OpenFileStream(fileStream, filePath, true, false))
 				return false;
 
-			FileStream fileStream = File::OpenRead(filePath);
 			StreamReader reader(fileStream);
-
 			return font->ReadBinary(reader);
 		}
 	}
@@ -77,23 +77,25 @@ namespace DIVA
 		SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
 
 		DebugFont = std::make_unique<Font>();
-		if (!Detail::ReadFont(DebugFont.get(), "diva/fonts/debug.dat")) { return false; }
+		if (!Detail::ReadFont(DebugFont.get(), "fonts/debug.dat")) { return false; }
 
 		DefaultFont = std::make_unique<Font>();
-		if (!Detail::ReadFont(DefaultFont.get(), "diva/fonts/sourcehansans.dat")) { return false; }
+		if (!Detail::ReadFont(DefaultFont.get(), "fonts/sourcehansans.dat")) { return false; }
 
 		return true;
 	}
 
 	bool GameContext::LoadSongList()
 	{
-		Directory::IterateFiles("diva/songdata", [&](std::string_view filePath)
+		std::string songdataDir = FileSystem::GetInstance()->GetFullDirectoryPath("songdata");
+		if (songdataDir.empty())
+			return false;
+
+		Directory::IterateFiles(songdataDir, [&](std::string_view filePath)
 			{
 				SongInfo info{};
 				if (info.ParseFromFile(filePath))
-				{
 					SongList.push_back(info);
-				}
 			});
 
 		return true;

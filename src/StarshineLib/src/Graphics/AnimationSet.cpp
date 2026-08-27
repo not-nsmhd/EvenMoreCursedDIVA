@@ -2,6 +2,7 @@
 #include "Common/MathExt.h"
 #include "IO/Xml.h"
 #include "IO/Path/File.h"
+#include "IO/FileSystem/FileSystem.h"
 #include "SpritePacker.h"
 
 namespace Starshine::Graphics
@@ -287,12 +288,10 @@ namespace Starshine::Graphics
 	bool AnimationSet::LoadXml(std::string_view filePath, bool doNotLoadSprites)
 	{
 		std::unique_ptr<char[]> xmlData;
-		size_t xmlSize = IO::File::ReadAllText(filePath, xmlData);
+		size_t xmlSize = IO::FileSystem::GetInstance()->ReadAllText(filePath, xmlData);
 
 		if (xmlData == nullptr || xmlSize == 0)
-		{
 			return false;
-		}
 
 		bool result = ReadXml(std::string_view(xmlData.get(), xmlSize), doNotLoadSprites);
 		return result;
