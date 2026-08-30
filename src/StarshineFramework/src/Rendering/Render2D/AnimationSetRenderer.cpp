@@ -26,15 +26,7 @@ namespace Starshine::Rendering::Render2D
 			const vec2& spriteLayerSize = spriteSize * transform.Scale;
 
 			if (prevBlendMode != layer.BlendMode)
-			{
-				vec2 basePos{};
-				vec2 baseScale{};
-
-				sprRenderer.GetBasePositionAndScale(basePos, baseScale);
-				sprRenderer.RenderSprites(nullptr);
-				sprRenderer.SetBasePositionAndScale(basePos, baseScale);
 				sprRenderer.SetBlendMode(layer.BlendMode);
-			}
 
 			i32 texIndex{};
 

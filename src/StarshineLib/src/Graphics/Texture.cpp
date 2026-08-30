@@ -210,4 +210,10 @@ namespace Starshine::Graphics
 	{
 		fileFlags = flags;
 	}
+
+	void Texture::FreeCPUData()
+	{
+		if (!GPUTexture.Dynamic && GPUTexture.Resource != nullptr)
+			data = nullptr;
+	}
 }

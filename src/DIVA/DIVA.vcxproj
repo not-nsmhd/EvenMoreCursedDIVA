@@ -102,6 +102,8 @@
     <ClCompile Include="src\MainGame\Lyrics.cpp" />
     <ClCompile Include="src\MainGame\MainGame.cpp" />
     <ClCompile Include="src\Menu\ChartSelect.cpp" />
+    <ClCompile Include="src\Sandbox\AlphaDilationTest.cpp" />
+    <ClCompile Include="src\Sandbox\SpriteCommandTest.cpp" />
     <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +121,8 @@
     <ClInclude Include="src\MainGame\Lyrics.h" />
     <ClInclude Include="src\MainGame\MainGame.h" />
     <ClInclude Include="src\Menu\ChartSelect.h" />
+    <ClInclude Include="src\Sandbox\AlphaDilationTest.h" />
+    <ClInclude Include="src\Sandbox\SpriteCommandTest.h" />
     <ClInclude Include="src\Settings.h" />
   </ItemGroup>
   <ItemGroup>

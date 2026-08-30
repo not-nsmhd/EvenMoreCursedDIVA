@@ -13,31 +13,27 @@ namespace Starshine::Rendering::Render2D
 
 	void FontRenderer::LoadResources(Device* device)
 	{
-		Utilities::LoadShader("diva/shaders/d3d11/VS_SpriteDefault.cso", "diva/shaders/d3d11/FS_Font.cso", fontShader);
-
-		BufferCreationData creationData{};
-		creationData.Type = BufferType::Uniform;
-		creationData.Size = sizeof(FontUniforms);
-		creationData.Dynamic = true;
-		device->CreateBuffer(creationData, fontUniformBuffer);
-
-		fontUniformBuffer->SetDebugName("FontRenderer::FontUniforms");
+		Utilities::LoadShader("shaders/d3d11/VS_SpriteDefault.cso", "shaders/d3d11/FS_Font.cso", fontShader);
 	}
 
-	void FontRenderer::DrawString(const Font* font, std::string_view text, const vec2& position, const vec2& scale,
+	void FontRenderer::PushString(const Font* font, std::string_view text, const vec2& position, const vec2& scale,
 		const Color& fillColor, const Color& outlineColor)
 	{
-		vec2 sprPos{};
-		vec2 sprScale{};
-
-		sprRenderer.GetBasePositionAndScale(sprPos, sprScale);
-		sprRenderer.RenderSprites(nullptr);
-
 		vec2 basePos{};
 		vec2 glyphOffset{};
 
 		auto c = text.cbegin();
 		const FontGlyph* prevGlyph{};
+
+		if (previousFont != font || !doNotSetShaderOnNextCall)
+		{
+			FontUniforms.FontType = static_cast<i32>(font->GetType());
+			FontUniforms.OutlineColor_Vec4 = outlineColor.ToVector4();
+			sprRenderer.SetShader(fontShader.get(), &FontUniforms, sizeof(FontUniforms));
+
+			previousFont = font;
+			doNotSetShaderOnNextCall = true;
+		}
 
 		while (c != text.cend())
 		{
@@ -76,18 +72,6 @@ namespace Starshine::Rendering::Render2D
 			basePos.x += glyph->XAdvance * scale.x;
 			prevGlyph = glyph;
 		}
-
-		FontUniforms.FontType = static_cast<i32>(font->GetType());
-		FontUniforms.OutlineColor_Vec4 = outlineColor.ToVector4();
-		fontUniformBuffer->SetData(&FontUniforms, 0, sizeof(FontUniforms));
-
-		auto device = sprRenderer.GetRenderingDevice();
-		device->SetUniformBuffer(fontUniformBuffer.get(), ShaderStage::Fragment, 0);
-
-		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
-		sprRenderer.RenderSprites(fontShader.get());
-
-		sprRenderer.SetBasePositionAndScale(sprPos, sprScale);
 	}
 
 	vec2 FontRenderer::MeasureString(const Font* font, std::string_view text)
@@ -103,7 +87,7 @@ namespace Starshine::Rendering::Render2D
 		float srcHeight = static_cast<float>(glyph->Height);
 
 		sprRenderer.SetSpritePosition(position);
-		sprRenderer.SetSpriteSize(vec2{ srcWidth, srcHeight } *scale);
+		sprRenderer.SetSpriteSize(vec2{ srcWidth, srcHeight } * scale);
 		sprRenderer.SetSpriteColor(color);
 
 		sprRenderer.SetSpriteSource(font->TextureImage.get(), RectangleF{ srcX, srcY, srcWidth, srcHeight });

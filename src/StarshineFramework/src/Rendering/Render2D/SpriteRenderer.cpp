@@ -13,62 +13,35 @@ namespace Starshine::Rendering::Render2D
 	using StarshineTex = Graphics::Texture;
 
 	constexpr size_t MaxSprites = 4096;
-	constexpr size_t MaxLists = 2048;
+	constexpr size_t MaxCommands = 4096;
 	constexpr size_t MaxVertices = MaxSprites * 4;
 	constexpr size_t MaxIndices = MaxSprites * 6;
 
 	constexpr size_t MaxShapeVertices = 2048;
 
-	struct SpriteVertexColors
+	namespace
 	{
-		Color TopLeft;
-		Color TopRight;
-		Color BottomLeft;
-		Color BottomRight;
-	};
+		struct SpriteVertexColors
+		{
+			Color TopLeft;
+			Color TopRight;
+			Color BottomLeft;
+			Color BottomRight;
+		};
 
-	struct SpriteState
-	{
-		vec2 Position{};
-		vec2 Origin{};
-		vec2 Size{};
-		SpriteVertexColors VertexColors{};
+		struct SpriteState
+		{
+			vec2 Position{};
+			vec2 Origin{};
+			vec2 Size{};
+			SpriteVertexColors VertexColors{};
 
-		float RotationCos = 0.0f;
-		float RotationSin = 0.0f;
+			float RotationCos = 0.0f;
+			float RotationSin = 0.0f;
 
-		RectangleF SourceRect_TexSpace{};
-		bool FlipHorizontal = false;
-		bool FlipVertical = false;
-	};
-
-	struct DrawCommand
-	{
-		u32 FirstSpriteIndex = 0;
-		u32 SpriteCount = 0;
-
-		u32 ShapeFirstVertex = 0;
-		u32 ShapeVertexCount = 0;
-
-		PrimitiveType PrimitiveType = PrimitiveType::Triangles;
-		StarshineTex* Texture = nullptr;
-	};
-
-	constexpr array<VertexAttrib, 3> SpriteVertexAttribs
-	{
-		VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, Position) },
-		VertexAttrib { VertexAttribType::TexCoord, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, TexCoord) },
-		VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte4Norm, sizeof(SpriteVertex), offsetof(SpriteVertex, Color) }
-	};
-
-	constexpr std::array<BlendStateDesc, EnumCount<BlendMode>()> BlendModeDescs
-	{
-		BlendStateDesc
-		{ BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add },
-		{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
-		{ BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
-		{ BlendFactor::DestColor, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add }
-	};
+			RectangleF SourceRect_TexSpace{};
+		};
+	}
 
 	std::vector<std::unique_ptr<BlendState>> BlendStates; // RAII moment
 
@@ -82,11 +55,8 @@ namespace Starshine::Rendering::Render2D
 
 		struct ShaderUniformsBufferData
 		{
-			mat4 TransformMatrix;
+			mat4 TransProjMatrix;
 		} ShaderUniforms;
-
-		vec2 BasePosition{};
-		vec2 BaseScale{ 1.0f, 1.0f };
 
 		struct
 		{
@@ -96,7 +66,8 @@ namespace Starshine::Rendering::Render2D
 
 			std::unique_ptr<Buffer> ShapeVertexBuffer{};
 
-			std::unique_ptr<Buffer> ShaderUniformBuffer{};
+			std::unique_ptr<Buffer> VSUniformBuffer{};
+			std::unique_ptr<Buffer> FSUniformBuffer{};
 		} GraphicsResources;
 
 		struct
@@ -106,33 +77,34 @@ namespace Starshine::Rendering::Render2D
 		} DefaultSpriteResources;
 
 		vector<SpriteState> Sprites;
-		vector<DrawCommand> DrawCommands;
-		vector<SpriteVertex> SpriteVertices;
+		vector<SpriteVertex> SpriteVertexData;
+		vector<SpriteVertex> ShapeVertexData;
 
-		vector<SpriteVertex> ShapeVertices;
+		vector<DrawCommand> DrawCommands;
 
 		u32 PushedSprites = 0;
 		u32 PushedShapeVertices = 0;
-		u32 PushedDrawCommands = 0;
 
 		SpriteState CurrentSprite{};
-		DrawCommand CurrentList{};
+
+		DrawCommand CurrentDrawCommand{};
+		StarshineTex* LastSpriteTexture{};
 
 	public:
 		Impl(SpriteRenderer& parent) : SpriteSheetRenderer(parent), FontRenderer(parent), AnimationSetRenderer(parent)
 		{
 			GFXDevice = Rendering::GetDevice();
 
-			Internal_CreateDefaultSpriteResources();
-			Internal_CreateShaderUniformBuffer();
+			Init_CreateDefaultSpriteResources();
+			Init_CreateShaderUniformBuffer();
+			Init_CreateBlendStates();
 
-			Internal_CreateVertexBuffer();
-			Internal_CreateIndexBuffer();
-			Internal_CreateBlendStates();
+			Init_CreateVertexBuffer();
+			Init_CreateIndexBuffer();
 
 			FontRenderer.LoadResources(GFXDevice);
 
-			SetBlendMode(BlendMode::Normal);
+			PushFrameBeginCommands();
 		}
 
 		~Impl()
@@ -140,7 +112,7 @@ namespace Starshine::Rendering::Render2D
 			BlendStates.clear();
 		}
 
-		void Internal_CreateVertexBuffer()
+		void Init_CreateVertexBuffer()
 		{
 			BufferCreationData bufferInfo{};
 			bufferInfo.Type = BufferType::Vertex;
@@ -152,7 +124,14 @@ namespace Starshine::Rendering::Render2D
 			bufferInfo.Size = MaxShapeVertices * sizeof(SpriteVertex);
 			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.ShapeVertexBuffer);
 
-			GFXDevice->CreateVertexDesc(SpriteVertexAttribs.data(), SpriteVertexAttribs.size(), 
+			static constexpr array<VertexAttrib, 3> spriteVertexDesc
+			{
+				VertexAttrib { VertexAttribType::Position, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, Position) },
+				VertexAttrib { VertexAttribType::TexCoord, 0, VertexAttribFormat::Float2, sizeof(SpriteVertex), offsetof(SpriteVertex, TexCoord) },
+				VertexAttrib { VertexAttribType::Color, 0, VertexAttribFormat::UnsignedByte4Norm, sizeof(SpriteVertex), offsetof(SpriteVertex, Color) }
+			};
+
+			GFXDevice->CreateVertexDesc(spriteVertexDesc.data(), spriteVertexDesc.size(),
 				DefaultSpriteResources.DefaultShader.get(), GraphicsResources.VertexDesc);
 
 #if defined(_DEBUG)
@@ -162,7 +141,7 @@ namespace Starshine::Rendering::Render2D
 #endif
 		}
 
-		void Internal_CreateIndexBuffer()
+		void Init_CreateIndexBuffer()
 		{
 			std::unique_ptr<u16[]> indexData = std::make_unique<u16[]>(MaxIndices);
 
@@ -177,8 +156,6 @@ namespace Starshine::Rendering::Render2D
 			u16 baseVertex = 0;
 			for (size_t i = 0; i < MaxIndices; i += 6)
 			{
-				// NOTE: Indices are always arranged in clockwise order regardless of backend
-				// (OpenGL is switchted to clockwise order on initialization, D3D uses clockwise order by default)
 				indexData[i + 0] = baseVertex + 0;
 				indexData[i + 1] = baseVertex + 2;
 				indexData[i + 2] = baseVertex + 1;
@@ -202,22 +179,37 @@ namespace Starshine::Rendering::Render2D
 #endif
 		}
 	
-		void Internal_CreateBlendStates()
+		void Init_CreateBlendStates()
 		{
 #if defined (_DEBUG)
 			static constexpr std::array<std::string_view, EnumCount<BlendMode>()> debugBlendStateNames
 			{
-				"SpriteRenderer::BlendState_Disabled",
 				"SpriteRenderer::BlendState_Normal",
 				"SpriteRenderer::BlendState_Add",
-				"SpriteRenderer::BlendState_Multiply"
+				"SpriteRenderer::BlendState_Multiply",
+
+				"SpriteRenderer::BlendState_Disabled"
 			};
 #endif
 
-			BlendStates.resize(BlendModeDescs.size());
+			static constexpr std::array<BlendStateDesc, EnumCount<BlendMode>()> descs
+			{
+				BlendStateDesc
+				// Normal
+				{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+				// Add
+				{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcColor, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+				// Multiply
+				{ BlendFactor::DestColor, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+
+				// Disabled
+				{ BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendFactor::Zero, BlendOperation::Add, BlendOperation::Add },
+			};
+
+			BlendStates.resize(descs.size());
 
 			size_t i = 0;
-			for (auto& desc : BlendModeDescs)
+			for (auto& desc : descs)
 			{
 				GFXDevice->CreateBlendState(desc, BlendStates[i]);
 #ifdef _DEBUG
@@ -227,7 +219,7 @@ namespace Starshine::Rendering::Render2D
 			}
 		}
 
-		void Internal_CreateDefaultSpriteResources()
+		void Init_CreateDefaultSpriteResources()
 		{
 			Rendering::Utilities::LoadShader("shaders/d3d11/VS_SpriteDefault.cso", "shaders/d3d11/FS_SpriteDefault.cso", DefaultSpriteResources.DefaultShader);
 
@@ -241,104 +233,161 @@ namespace Starshine::Rendering::Render2D
 #endif
 		}
 
-		void Internal_CreateShaderUniformBuffer()
+		void Init_CreateShaderUniformBuffer()
 		{
 			BufferCreationData bufferInfo{};
 			bufferInfo.Type = BufferType::Uniform;
 			bufferInfo.Size = sizeof(ShaderUniformsBufferData);
 			bufferInfo.Dynamic = true;
 
-			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.ShaderUniformBuffer);
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.VSUniformBuffer);
+
+			bufferInfo.Type = BufferType::Uniform;
+			bufferInfo.Size = MaxFSUniformDataSize;
+			bufferInfo.Dynamic = true;
+
+			GFXDevice->CreateBuffer(bufferInfo, GraphicsResources.FSUniformBuffer);
 #ifdef _DEBUG
-			GraphicsResources.ShaderUniformBuffer->SetDebugName("SpriteRenderer::ShaderUniformBuffer");
+			GraphicsResources.VSUniformBuffer->SetDebugName("SpriteRenderer::VSUniformBuffer");
+			GraphicsResources.FSUniformBuffer->SetDebugName("SpriteRenderer::FSUniformBuffer");
 #endif
 		}
 
-		void ResetSprite()
+		void PushFrameBeginCommands()
+		{
+			SetShader(nullptr, nullptr, 0);
+			SetBlendMode(BlendMode::Normal);
+		}
+
+		inline void ResetSprite()
 		{
 			CurrentSprite = {};
 
 			CurrentSprite.RotationCos = SDL_cosf(0.0f);
 			CurrentSprite.RotationSin = SDL_sinf(0.0f);
 
-			CurrentSprite.VertexColors.TopLeft = { 255, 255, 255, 255 };
-			CurrentSprite.VertexColors.TopRight = { 255, 255, 255, 255 };
-			CurrentSprite.VertexColors.BottomLeft = { 255, 255, 255, 255 };
-			CurrentSprite.VertexColors.BottomRight = { 255, 255, 255, 255 };
+			CurrentSprite.VertexColors.TopLeft = DefaultColors::White;
+			CurrentSprite.VertexColors.TopRight = DefaultColors::White;
+			CurrentSprite.VertexColors.BottomLeft = DefaultColors::White;
+			CurrentSprite.VertexColors.BottomRight = DefaultColors::White;
 
 			CurrentSprite.SourceRect_TexSpace = { 0.0f, 0.0f, 1.0f, 1.0f };
 		}
 
-		void ResetList()
+		inline void PushCurrentDrawCommand()
 		{
-			CurrentList = {};
+			if (CurrentDrawCommand.Type == CommandType::DrawSprites || CurrentDrawCommand.Type == CommandType::DrawShape)
+			{
+				if (FontRenderer.doNotSetShaderOnNextCall)
+				{
+					FontRenderer.doNotSetShaderOnNextCall = false;
+					SetShader(DefaultSpriteResources.DefaultShader.get(), nullptr, 0);
+				}
+
+				DrawCommands.push_back(CurrentDrawCommand);
+				CurrentDrawCommand = {};
+			}
+		}
+
+		inline void PushSetTextureCommand(StarshineTex* tex)
+		{
+			DrawCommand& setTexCommand = DrawCommands.emplace_back();
+			setTexCommand.Type = CommandType::SetTexture;
+			setTexCommand.SetTexture.Texture = tex;
 		}
 
 		void PushSprite(StarshineTex* texture)
 		{
-			if (PushedSprites >= MaxSprites)
-			{
-				RenderSprites(nullptr, true);
-			}
+			if (PushedSprites >= MaxSprites || DrawCommands.size() >= MaxCommands)
+				Present();
 
-			PushedSprites++;
 			Sprites.push_back(CurrentSprite);
 
 			ResetSprite();
 
-			StarshineTex* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
+			StarshineTex* commandTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
-			if (CurrentList.Texture != listTex || CurrentList.ShapeVertexCount != 0)
+			if (LastSpriteTexture != commandTex || CurrentDrawCommand.Type != CommandType::DrawSprites)
 			{
-				if (PushedDrawCommands == 0)
-				{
-					CurrentList.Texture = listTex;
-					CurrentList.PrimitiveType = PrimitiveType::Triangles;
+				PushCurrentDrawCommand();
+				PushSetTextureCommand(commandTex);
 
-					CurrentList.SpriteCount++;
-					PushedDrawCommands = 1;
-				}
-				else
-				{
-					DrawCommands.push_back(CurrentList);
-					PushedDrawCommands++;
+				CurrentDrawCommand.Type = CommandType::DrawSprites;
+				CurrentDrawCommand.DrawSprites.FirstSpriteIndex = PushedSprites;
+				CurrentDrawCommand.DrawSprites.SpriteCount = 1;
 
-					CurrentList.Texture = listTex;
-					CurrentList.PrimitiveType = PrimitiveType::Triangles;
-
-					CurrentList.FirstSpriteIndex = PushedSprites - 1;
-					CurrentList.SpriteCount = 1;
-				}
-
-				CurrentList.ShapeFirstVertex = 0;
-				CurrentList.ShapeVertexCount = 0;
+				LastSpriteTexture = commandTex;
 			}
 			else
-			{
-				CurrentList.SpriteCount++;
-			}
+				CurrentDrawCommand.DrawSprites.SpriteCount++;
+
+			PushedSprites++;
 		}
 
-		void RenderSprites(Shader* shader, bool doNotResetBaseValues)
+		void DrawShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Graphics::Texture* texture)
 		{
-			if (PushedSprites == 0 && PushedShapeVertices == 0)
-			{
-				return;
-			}
+			assert(vertexCount <= MaxShapeVertices);
+			if (PushedShapeVertices >= MaxShapeVertices || DrawCommands.size() >= MaxCommands)
+				Present();
 
-			DrawCommands.push_back(CurrentList);
+			for (size_t i = 0; i < vertexCount; i++)
+				ShapeVertexData.emplace_back(vertices[i]);
 
-			size_t spriteVertexCount = static_cast<size_t>(PushedSprites) * 4;
-			if (SpriteVertices.size() < spriteVertexCount)
-			{
-				SpriteVertices.insert(SpriteVertices.cbegin(), spriteVertexCount - SpriteVertices.size(), SpriteVertex());
-			}
+			PushCurrentDrawCommand();
+			PushSetTextureCommand((texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get());
+
+			CurrentDrawCommand.Type = CommandType::DrawShape;
+			CurrentDrawCommand.DrawShape.FirstVertexIndex = PushedShapeVertices;
+			CurrentDrawCommand.DrawShape.VertexCount = vertexCount;
+			CurrentDrawCommand.DrawShape.PrimitiveType = primType;
+			PushCurrentDrawCommand();
+
+			PushedShapeVertices += vertexCount;
+		}
+
+		void SetBlendMode(BlendMode mode)
+		{
+			PushCurrentDrawCommand();
+
+			DrawCommand& setBlendModeCommand = DrawCommands.emplace_back();
+			setBlendModeCommand.Type = CommandType::SetBlendMode;
+			setBlendModeCommand.SetBlendMode.Mode = mode;
+		}
+
+		void SetShader(const Shader* shader, const void* fsData, size_t fsDataSize)
+		{
+			assert(fsDataSize <= MaxFSUniformDataSize);
+				
+			PushCurrentDrawCommand();
+
+			DrawCommand& command = DrawCommands.emplace_back();
+			command.Type = CommandType::SetShader;
+			command.SetShader.Shader = (shader == nullptr ? DefaultSpriteResources.DefaultShader.get() : shader);
+
+			if (fsData != nullptr && fsDataSize > 0)
+				SDL_memcpy(command.SetShader.FSUniformData, fsData, fsDataSize);
+		}
+
+		void SetTransformMatrix(mat4 matrix)
+		{
+			PushCurrentDrawCommand();
+
+			DrawCommand& command = DrawCommands.emplace_back();
+			command.Type = CommandType::SetTransformMatrix;
+			command.SetTransformMatrix.Matrix = glm::transpose(matrix);
+		}
+
+		void GenerateSpriteVertices()
+		{
+			const size_t spriteVertexCount = static_cast<size_t>(PushedSprites) * 4;
+			if (SpriteVertexData.size() < spriteVertexCount)
+				SpriteVertexData.resize(spriteVertexCount);
 
 			size_t baseVertex = 0;
 			for (auto curSprite = Sprites.cbegin(); curSprite != Sprites.cbegin() + PushedSprites; curSprite++)
 			{
 				// Top-left
-				SpriteVertex* vertex = &SpriteVertices[baseVertex + 0];
+				SpriteVertex* vertex = &SpriteVertexData[baseVertex + 0];
 				vec2 basePos = {};
 
 				vertex->Position = MathExtensions::RotateVector(basePos, curSprite->Origin, curSprite->RotationCos, curSprite->RotationSin) + curSprite->Position;
@@ -346,7 +395,7 @@ namespace Starshine::Rendering::Render2D
 				vertex->Color = curSprite->VertexColors.TopLeft;
 
 				// Bottom-right
-				vertex = &SpriteVertices[baseVertex + 1];
+				vertex = &SpriteVertexData[baseVertex + 1];
 				basePos = { curSprite->Size.x, curSprite->Size.y };
 
 				vertex->Position = MathExtensions::RotateVector(basePos, curSprite->Origin, curSprite->RotationCos, curSprite->RotationSin) + curSprite->Position;
@@ -354,7 +403,7 @@ namespace Starshine::Rendering::Render2D
 				vertex->Color = curSprite->VertexColors.BottomRight;
 
 				// Top-right
-				vertex = &SpriteVertices[baseVertex + 2];
+				vertex = &SpriteVertexData[baseVertex + 2];
 				basePos = { curSprite->Size.x, 0.0f };
 
 				vertex->Position = MathExtensions::RotateVector(basePos, curSprite->Origin, curSprite->RotationCos, curSprite->RotationSin) + curSprite->Position;
@@ -362,7 +411,7 @@ namespace Starshine::Rendering::Render2D
 				vertex->Color = curSprite->VertexColors.TopRight;
 
 				// Bottom-left
-				vertex = &SpriteVertices[baseVertex + 3];
+				vertex = &SpriteVertexData[baseVertex + 3];
 				basePos = { 0.0f, curSprite->Size.y };
 
 				vertex->Position = MathExtensions::RotateVector(basePos, curSprite->Origin, curSprite->RotationCos, curSprite->RotationSin) + curSprite->Position;
@@ -372,128 +421,119 @@ namespace Starshine::Rendering::Render2D
 				baseVertex += 4;
 			}
 
-			if (!ShapeVertices.empty())
-			{
-				GraphicsResources.ShapeVertexBuffer->SetData(ShapeVertices.data(), 0, ShapeVertices.size() * sizeof(SpriteVertex));
-			}
+			if (spriteVertexCount > 0)
+				GraphicsResources.SpriteVertexBuffer->SetData(SpriteVertexData.data(), 0, spriteVertexCount * sizeof(SpriteVertex));
+		}
 
-			if (PushedSprites > 0)
-			{
-				GraphicsResources.SpriteVertexBuffer->SetData(SpriteVertices.data(), 0, static_cast<size_t>(PushedSprites) * sizeof(SpriteVertex) * 4);
-			}
+		inline void Present_Prepare()
+		{
+			PushCurrentDrawCommand();
 
-			Shader* spriteShader = (shader != nullptr) ? shader : DefaultSpriteResources.DefaultShader.get();
+			GenerateSpriteVertices();
 
-			RectangleF viewportSize = GFXDevice->GetViewportSize();
-			viewportSize.X += BasePosition.x;
-			viewportSize.Y += BasePosition.y;
-			viewportSize.Width /= BaseScale.x;
-			viewportSize.Height /= BaseScale.y;
-			ShaderUniforms.TransformMatrix = glm::transpose(glm::orthoRH_ZO(viewportSize.X, viewportSize.Width, viewportSize.Height, viewportSize.Y, 0.0f, 1.0f));
+			if (!ShapeVertexData.empty())
+				GraphicsResources.ShapeVertexBuffer->SetData(ShapeVertexData.data(), 0, ShapeVertexData.size() * sizeof(SpriteVertex));
+		}
 
-			GraphicsResources.ShaderUniformBuffer->SetData(&ShaderUniforms, 0, sizeof(ShaderUniformsBufferData));
-			GFXDevice->SetUniformBuffer(GraphicsResources.ShaderUniformBuffer.get(), ShaderStage::Vertex, 0);
-
-			GFXDevice->SetIndexBuffer(GraphicsResources.SpriteIndexBuffer.get());
-			GFXDevice->SetShader(spriteShader);
-
-			bool switchBackToSpriteBuffer = true;
-
-			for (auto list = DrawCommands.cbegin(); list != DrawCommands.cend(); list++)
-			{
-				GFXDevice->SetTexture(list->Texture, 0);
-				if (list->ShapeVertexCount == 0)
-				{
-					if (switchBackToSpriteBuffer)
-					{
-						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
-						switchBackToSpriteBuffer = false;
-					}
-					GFXDevice->DrawIndexed(PrimitiveType::Triangles, list->FirstSpriteIndex * 6, 0, list->SpriteCount * 6);
-				}
-				else
-				{
-					GFXDevice->SetVertexBuffer(GraphicsResources.ShapeVertexBuffer.get(), GraphicsResources.VertexDesc.get());
-					GFXDevice->DrawArrays(list->PrimitiveType, list->ShapeFirstVertex, list->ShapeVertexCount);
-					switchBackToSpriteBuffer = true;
-				}
-			}
-
+		void Present_End()
+		{
 			Sprites.clear();
-			ShapeVertices.clear();
+			SpriteVertexData.clear();
+			ShapeVertexData.clear();
 			DrawCommands.clear();
 
 			PushedSprites = 0;
-			PushedDrawCommands = 0;
 			PushedShapeVertices = 0;
 
 			ResetSprite();
-			ResetList();
+			LastSpriteTexture = nullptr;
 
-			if (!doNotResetBaseValues)
-			{
-				BasePosition = {};
-				BaseScale = vec2(1.0f);
-			}
+			PushFrameBeginCommands();
 		}
 
-		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
+		void Present_ProcessCommands()
 		{
-			if (PushedDrawCommands + 1 >= MaxLists || PushedShapeVertices + vertexCount >= MaxShapeVertices)
-				RenderSprites(nullptr, true);
+			const RectangleF viewportSize = GFXDevice->GetViewportSize();
+			const mat4 projMatrix = glm::transpose(glm::ortho(viewportSize.X, viewportSize.Width, viewportSize.Height, viewportSize.Y, 0.0f, 1.0f));
+			GraphicsResources.VSUniformBuffer->SetData(glm::value_ptr(projMatrix), 0, sizeof(mat4));
 
-			StarshineTex* listTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
+			GFXDevice->SetUniformBuffer(GraphicsResources.VSUniformBuffer.get(), ShaderStage::Vertex, 0);
+			GFXDevice->SetUniformBuffer(GraphicsResources.FSUniformBuffer.get(), ShaderStage::Fragment, 0);
 
-			if (CurrentList.SpriteCount != 0 || CurrentList.PrimitiveType != primType || CurrentList.Texture != listTex)
+			bool currentBufferIsSprite = false;
+			for (const auto& command : DrawCommands)
 			{
-				if (PushedDrawCommands == 0)
+				switch (command.Type)
 				{
-					PushedDrawCommands++;
-				}
-				else
+				case CommandType::DrawSprites:
 				{
-					DrawCommands.push_back(CurrentList);
-					PushedDrawCommands++;
+					if (!currentBufferIsSprite)
+					{
+						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
+						GFXDevice->SetIndexBuffer(GraphicsResources.SpriteIndexBuffer.get());
+						currentBufferIsSprite = true;
+					}
 
-					CurrentList.FirstSpriteIndex = 0;
-					CurrentList.SpriteCount = 0;
+					const u32 baseVertex = command.DrawSprites.FirstSpriteIndex * 4;
+					const u32 indexCount = command.DrawSprites.SpriteCount * 6;
+					GFXDevice->DrawIndexed(PrimitiveType::Triangles, 0, baseVertex, indexCount);
+					break;
+				}
+				case CommandType::DrawShape:
+				{
+					if (currentBufferIsSprite)
+					{
+						GFXDevice->SetVertexBuffer(GraphicsResources.ShapeVertexBuffer.get(), GraphicsResources.VertexDesc.get());
+						GFXDevice->SetIndexBuffer(nullptr);
+						currentBufferIsSprite = false;
+					}
+
+					GFXDevice->DrawArrays(command.DrawShape.PrimitiveType, command.DrawShape.FirstVertexIndex, command.DrawShape.VertexCount);
+					break;
+				}
+				case CommandType::SetTexture:
+				{
+					GFXDevice->SetTexture(command.SetTexture.Texture, 0);
+					break;
+				}
+				case CommandType::SetTransformMatrix:
+				{
+					const mat4 transProjMatrix = command.SetTransformMatrix.Matrix * projMatrix;
+					GraphicsResources.VSUniformBuffer->SetData(glm::value_ptr(transProjMatrix), 0, sizeof(mat4));
+					break;
+				}
+				case CommandType::SetShader:
+				{
+					GraphicsResources.FSUniformBuffer->SetData(command.SetShader.FSUniformData, 0, MaxFSUniformDataSize);
+					GFXDevice->SetShader(command.SetShader.Shader);
+					break;
+				}
+				case CommandType::SetBlendMode:
+				{
+					if (command.SetBlendMode.Mode == BlendMode::Disabled)
+						GFXDevice->SetBlendState(nullptr);
+					else
+					{
+						const size_t index = static_cast<size_t>(command.SetBlendMode.Mode);
+						GFXDevice->SetBlendState(BlendStates[index].get());
+					}
+					break;
+				}
 				}
 			}
 
-			CurrentList.Texture = listTex;
-			CurrentList.PrimitiveType = primType;
-
-			CurrentList.ShapeVertexCount += vertexCount;
-
-			size_t capacity = PushedShapeVertices;
-			if (capacity < PushedShapeVertices + vertexCount)
-			{
-				ShapeVertices.reserve(PushedShapeVertices + vertexCount);
-			}
-
-			for (size_t i = 0; i < vertexCount; i++)
-			{
-				const SpriteVertex* srcVertex = &vertices[i];
-				SpriteVertex& newVertex = ShapeVertices.emplace_back();
-
-				newVertex.Position = srcVertex->Position;
-				newVertex.TexCoord = srcVertex->TexCoord;
-				newVertex.Color = srcVertex->Color;
-			}
-
-			PushedShapeVertices += vertexCount;
+			GFXDevice->SetUniformBuffer(nullptr, ShaderStage::Vertex, 0);
+			GFXDevice->SetUniformBuffer(nullptr, ShaderStage::Fragment, 0);
 		}
 
-		void SetBlendMode(BlendMode mode)
+		void Present()
 		{
-			if (mode == BlendMode::Disabled)
-			{
-				GFXDevice->SetBlendState(nullptr);
-			}
-			else
-			{
-				GFXDevice->SetBlendState(BlendStates[static_cast<size_t>(mode)].get());
-			}
+			if (PushedSprites == 0 && PushedShapeVertices == 0)
+				return;
+
+			Present_Prepare();
+			Present_ProcessCommands();
+			Present_End();
 		}
 	};
 
@@ -536,12 +576,12 @@ namespace Starshine::Rendering::Render2D
 		impl->CurrentSprite.RotationSin = SDL_sinf(radians);
 	}
 
-	void SpriteRenderer::SetSpriteSource(const RectangleF& texSpaceSource)
+	void SpriteRenderer::SetSpriteSource(RectangleF texSpaceSource)
 	{
 		impl->CurrentSprite.SourceRect_TexSpace = texSpaceSource;
 	}
 
-	void SpriteRenderer::SetSpriteSource(const StarshineTex* texture, const RectangleF& absSource)
+	void SpriteRenderer::SetSpriteSource(const StarshineTex* texture, RectangleF absSource)
 	{
 		const ivec2 texSize = texture->GetSize();
 
@@ -552,12 +592,6 @@ namespace Starshine::Rendering::Render2D
 		impl->CurrentSprite.SourceRect_TexSpace.Width = (absSource.X + absSource.Width) / w;
 		impl->CurrentSprite.SourceRect_TexSpace.Y = absSource.Y / h;
 		impl->CurrentSprite.SourceRect_TexSpace.Height = (absSource.Y + absSource.Height) / h;
-	}
-	
-	void SpriteRenderer::SetSpriteFlip(bool flipHorizontal, bool flipVertical)
-	{
-		impl->CurrentSprite.FlipHorizontal = flipHorizontal;
-		impl->CurrentSprite.FlipVertical = flipVertical;
 	}
 
 	void SpriteRenderer::SetSpriteColor(const Color& color)
@@ -573,31 +607,29 @@ namespace Starshine::Rendering::Render2D
 		impl->SetBlendMode(mode);
 	}
 
+	void SpriteRenderer::SetShader(const Shader* shader, const void* fsData, size_t fsDataSize)
+	{
+		impl->SetShader(shader, fsData, fsDataSize);
+	}
+
+	void SpriteRenderer::SetTransformMatrix(mat4 matrix)
+	{
+		impl->SetTransformMatrix(matrix);
+	}
+
 	void SpriteRenderer::PushSprite(StarshineTex* texture)
 	{
 		impl->PushSprite(texture);
 	}
 
-	void SpriteRenderer::SetBasePositionAndScale(const vec2& pos, const vec2& scale)
+	void SpriteRenderer::DrawShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
 	{
-		impl->BasePosition = pos;
-		impl->BaseScale = scale;
+		impl->DrawShape(vertices, vertexCount, primType, texture);
 	}
 
-	void SpriteRenderer::GetBasePositionAndScale(vec2& pos, vec2& scale)
+	void SpriteRenderer::Present()
 	{
-		pos = impl->BasePosition;
-		scale = impl->BaseScale;
-	}
-
-	void SpriteRenderer::RenderSprites(Shader* shader)
-	{
-		impl->RenderSprites(shader, false);
-	}
-
-	void SpriteRenderer::PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, StarshineTex* texture)
-	{
-		impl->PushShape(vertices, vertexCount, primType, texture);
+		impl->Present();
 	}
 
 	void SpriteRenderer::PushLine(const vec2& position, float angle, float length, const Color& color, float thickness)
@@ -645,5 +677,15 @@ namespace Starshine::Rendering::Render2D
 	AnimationSetRenderer& SpriteRenderer::AnimationSet()
 	{
 		return impl->AnimationSetRenderer;
+	}
+
+	size_t SpriteRenderer::GetDrawCommands(DrawCommand** commands)
+	{
+#ifdef _DEBUG
+		if (commands != nullptr)
+			*commands = impl->DrawCommands.data();
+		return impl->DrawCommands.size();
+#endif // _DEBUG
+		return 0;
 	}
 };

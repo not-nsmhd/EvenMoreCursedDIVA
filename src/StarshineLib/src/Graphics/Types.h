@@ -70,20 +70,22 @@ namespace Starshine::Graphics
 
 	enum class BlendMode : i32
 	{
-		Disabled,
 		Normal,
 		Add,
 		Mulitply,
+
+		Disabled,
 
 		Count
 	};
 
 	constexpr std::array<std::string_view, EnumCount<BlendMode>()> BlendModeNames
 	{
-		"Disabled",
 		"Normal",
 		"Add",
-		"Multiply"
+		"Multiply",
+
+		"Disabled",
 	};
 
 	struct Transform2D

@@ -951,7 +951,7 @@ namespace DIVA::MainGame
 		{
 			if (CurrentSubState == SubState::Results)
 			{
-				spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
+				//spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
 				DrawResults();
 				return;
 			}
@@ -961,7 +961,7 @@ namespace DIVA::MainGame
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			for (auto& note : ActiveNotes)
 			{
@@ -979,21 +979,21 @@ namespace DIVA::MainGame
 				note.DrawEffect(gameTime);
 			}
 
-			spriteRenderer->RenderSprites(nullptr);
+			//spriteRenderer->RenderSprites(nullptr);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			hud->Draw(gameTime);
 
-			spriteRenderer->RenderSprites(nullptr);
-			spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
+			//spriteRenderer->RenderSprites(nullptr);
+			//spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
 
 			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			if (Paused)
 				DrawPauseMenu();
 
-			spriteRenderer->RenderSprites(nullptr);
+			//spriteRenderer->RenderSprites(nullptr);
 		}
 
 		void DrawPauseMenu()
@@ -1027,7 +1027,7 @@ namespace DIVA::MainGame
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 
-			spriteRenderer->RenderSprites(nullptr);
+			//spriteRenderer->RenderSprites(nullptr);
 		}
 	};
 

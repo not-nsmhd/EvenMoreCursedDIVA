@@ -15,6 +15,82 @@ namespace Starshine::Rendering::Render2D
 		Color Color{};
 	};
 
+	enum class CommandType : i32
+	{
+		NotSet,
+
+		DrawSprites,
+		DrawShape,
+
+		SetTexture,
+		SetShader,
+		SetBlendMode,
+
+		SetTransformMatrix,
+
+		Count
+	};
+
+	constexpr std::array<const char*, EnumCount<CommandType>()> CommandTypeNames
+	{
+		"NotSet",
+		"DrawSprites",
+		"DrawShape",
+		"SetTexture",
+		"SetShader",
+		"SetBlendMode",
+		"SetTransformMatrix"
+	};
+
+	constexpr size_t MaxFSUniformDataSize = 64;
+
+	union DrawCommand
+	{
+		CommandType Type{};
+
+		struct
+		{
+			CommandType Type{};
+
+			u32 FirstSpriteIndex{};
+			u32 SpriteCount{};
+		} DrawSprites;
+
+		struct
+		{
+			CommandType Type{};
+
+			u32 FirstVertexIndex{};
+			u32 VertexCount{};
+			PrimitiveType PrimitiveType{};
+		} DrawShape;
+
+		struct
+		{
+			CommandType Type{};
+			Graphics::Texture* Texture{};
+		} SetTexture;
+
+		struct
+		{
+			CommandType Type;
+			const Shader* Shader{};
+			u8 FSUniformData[MaxFSUniformDataSize]{};
+		} SetShader;
+
+		struct
+		{
+			CommandType Type{};
+			Graphics::BlendMode Mode{};
+		} SetBlendMode;
+
+		struct
+		{
+			CommandType Type{};
+			glm::mat4 Matrix{};
+		} SetTransformMatrix;
+	};
+
 	class SpriteRenderer
 	{
 	public:
@@ -33,23 +109,19 @@ namespace Starshine::Rendering::Render2D
 
 		// NOTE: Source must be specified in texture space
 		// (texture's point at its width and height is represented as a (1.0, 1.0) coordinate)
-		void SetSpriteSource(const RectangleF& texSpaceSource);
-		void SetSpriteSource(const Graphics::Texture* texture, const RectangleF& absSource);
+		void SetSpriteSource(RectangleF texSpaceSource);
+		void SetSpriteSource(const Graphics::Texture* texture, RectangleF absSource);
 
-		void SetSpriteFlip(bool flipHorizontal, bool flipVertical);
 		void SetSpriteColor(const Color& color);
 
 		void SetBlendMode(Graphics::BlendMode mode);
+		void SetShader(const Shader* shader, const void* fsData, size_t fsDataSize);
+		void SetTransformMatrix(mat4 matrix);
 
 		void PushSprite(Graphics::Texture* texture);
+		void DrawShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Graphics::Texture* texture);
 
-		void SetBasePositionAndScale(const vec2& pos, const vec2& scale);
-		void GetBasePositionAndScale(vec2& pos, vec2& scale);
-
-		void RenderSprites(Shader* shader);
-
-	public:
-		void PushShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Graphics::Texture* texture);
+		void Present();
 
 	public:
 		void PushLine(const vec2& position, float angle, float length, const Color& color, float thickness = 1.0f);
@@ -59,6 +131,9 @@ namespace Starshine::Rendering::Render2D
 		SpriteSheetRenderer& SpriteSheet();
 		FontRenderer& Font();
 		AnimationSetRenderer& AnimationSet();
+
+	public:
+		size_t GetDrawCommands(DrawCommand** commands);
 
 	private:
 		struct Impl;

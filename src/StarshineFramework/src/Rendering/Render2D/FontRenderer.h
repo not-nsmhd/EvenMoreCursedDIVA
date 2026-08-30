@@ -3,7 +3,6 @@
 #include "Common/Color.h"
 #include "Graphics/Font.h"
 #include "Rendering/Device.h"
-#include "Rendering/Buffers.h"
 #include "Rendering/Shader.h"
 
 namespace Starshine::Rendering::Render2D
@@ -19,8 +18,7 @@ namespace Starshine::Rendering::Render2D
 		~FontRenderer() = default;
 
 	public:
-		// NOTE: This function flushes all pushed sprites currently stored in sprite renderer before drawing text
-		void DrawString(const Graphics::Font* font, std::string_view text, const vec2& position, const vec2& scale,
+		void PushString(const Graphics::Font* font, std::string_view text, const vec2& position, const vec2& scale,
 			const Color& fillColor, const Color& outlineColor = DefaultColors::Transparent);
 
 	public:
@@ -42,6 +40,8 @@ namespace Starshine::Rendering::Render2D
 		SpriteRenderer& sprRenderer;
 
 		std::unique_ptr<Shader> fontShader{};
-		std::unique_ptr<Buffer> fontUniformBuffer{};
+
+		const Graphics::Font* previousFont{};
+		bool doNotSetShaderOnNextCall{};
 	};
 }

@@ -112,7 +112,7 @@ namespace Starshine
 			Gui::DragFloat("##SpriteEditor_DisplayScale_Y", &displayScale.y, 1.0f, 1.0f);
 
 			Texture* sprTex = currentSpriteSheet->GetTexture(currentSprite->BaseSprite->TextureIndex);
-			Rendering::Utilities::EnsureTextureIsUploaded(sprTex);
+			Rendering::Utilities::UploadTextureToGPU(sprTex);
 
 			const ivec2 texSize = sprTex->GetSize();
 

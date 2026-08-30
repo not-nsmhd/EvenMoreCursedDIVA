@@ -53,6 +53,12 @@
     <ClCompile Include="src\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Sandbox\AlphaDilationTest.cpp">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sandbox\SpriteCommandTest.cpp">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -95,6 +101,12 @@
     </ClInclude>
     <ClInclude Include="src\Settings.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox\AlphaDilationTest.h">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox\SpriteCommandTest.h">
+      <Filter>Source Files\Sandbox</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

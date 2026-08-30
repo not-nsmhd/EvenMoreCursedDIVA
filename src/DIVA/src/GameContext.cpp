@@ -3,6 +3,7 @@
 #include <IO/Path/Directory.h>
 #include <IO/Path/File.h>
 #include <IO/FileSystem/FileSystem.h>
+#include <Rendering/Utilities.h>
 
 using namespace Starshine;
 using namespace Starshine::IO;
@@ -82,6 +83,9 @@ namespace DIVA
 		DefaultFont = std::make_unique<Font>();
 		if (!Detail::ReadFont(DefaultFont.get(), "fonts/sourcehansans.dat")) { return false; }
 
+		Utilities::UploadTextureToGPU(DebugFont->TextureImage.get());
+		Utilities::UploadTextureToGPU(DefaultFont->TextureImage.get());
+			
 		return true;
 	}
 

@@ -43,6 +43,7 @@ namespace Starshine::Graphics
 
 	public:
 		ManagedGPUResource GPUTexture{};
+		void FreeCPUData();
 
 	private:
 		std::array<char, MaxTextureNameLength + 1> name; // NOTE: Additional byte for a null terminator

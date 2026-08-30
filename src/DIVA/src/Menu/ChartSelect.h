@@ -1,5 +1,5 @@
 #pragma once
-#include "Common/Types.h"
+#include <Common/Types.h>
 #include <GameInstance.h>
 
 namespace DIVA::Menu

@@ -78,7 +78,7 @@
       <ObjectFileOutput>$(ProjectDir)d3d11shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
+      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\framework\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying compiled shader objects...</Message>
@@ -113,7 +113,7 @@
       <ObjectFileOutput>$(ProjectDir)d3d11shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\diva\shaders\d3d11\ /y</Command>
+      <Command>xcopy $(ProjectDir)d3d11shaders\*.cso $(SolutionDir)bin\framework\shaders\d3d11\ /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying compiled shader objects...</Message>

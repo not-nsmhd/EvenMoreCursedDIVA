@@ -4,6 +4,8 @@
 
 #include "Menu/ChartSelect.h"
 #include "MainGame/MainGame.h"
+#include "Sandbox/AlphaDilationTest.h"
+#include "Sandbox/SpriteCommandTest.h"
 
 namespace DIVA
 {
@@ -14,13 +16,19 @@ namespace DIVA
 		ChartSelect,
 		MainGame,
 
+		Sandbox_AlphaDilationTest,
+		Sandbox_SpriteCommandTest,
+
 		Count
 	};
 
 	static std::unique_ptr<Starshine::GameState> StateInstances[Starshine::EnumCount<StateID>()]
 	{
 		std::make_unique<Menu::ChartSelect>(),
-		std::make_unique<MainGame::MainGameState>()
+		std::make_unique<MainGame::MainGameState>(),
+
+		std::make_unique<Sandbox::AlphaDilationTest>(),
+		std::make_unique<Sandbox::SpriteCommandTest>(),
 	};
 
 	inline Starshine::GameState* GetStatePointer(StateID id)

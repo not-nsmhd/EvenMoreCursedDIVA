@@ -28,10 +28,15 @@ namespace Starshine::Rendering
 			return Rendering::GetDevice()->CreateShader(vsData.get(), vsSize, fsData.get(), fsSize, shader);
 		}
 
-		void EnsureTextureIsUploaded(Graphics::Texture* texture)
+		void UploadTextureToGPU(Graphics::Texture* texture, bool freeCPUData)
 		{
 			if (texture->GPUTexture.Resource == nullptr)
+			{
 				Rendering::GetDevice()->UploadTexture(texture);
+
+				if (freeCPUData)
+					texture->FreeCPUData();
+			}
 		}
 	}
 }

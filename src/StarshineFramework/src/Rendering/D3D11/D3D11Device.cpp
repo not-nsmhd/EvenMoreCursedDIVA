@@ -356,13 +356,14 @@ namespace Starshine::Rendering::D3D11
 		{
 			if (buffer == nullptr)
 			{
+				ID3D11Buffer* bufferPtr = nullptr;
 				switch (stage)
 				{
 				case ShaderStage::Vertex:
-					D3D11.DeviceContext->VSSetConstantBuffers(bufferIndex, 1, nullptr);
+					D3D11.DeviceContext->VSSetConstantBuffers(bufferIndex, 1, &bufferPtr);
 					break;
 				case ShaderStage::Fragment:
-					D3D11.DeviceContext->PSSetConstantBuffers(bufferIndex, 1, nullptr);
+					D3D11.DeviceContext->PSSetConstantBuffers(bufferIndex, 1, &bufferPtr);
 					break;
 				}
 			}
