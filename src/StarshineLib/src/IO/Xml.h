@@ -5,6 +5,8 @@
 #include "IO/FileSystem/FileSystem.h"
 #include <SDL2/SDL_stdinc.h>
 #include <tinyxml2.h>
+#include "XmlStreamPrinter.h"
+#include "IO/Path/File.h"
 
 namespace Starshine::Xml
 {
@@ -28,6 +30,20 @@ namespace Starshine::Xml
 			return doc.LoadFile(fullPath.c_str()) == Error::XML_SUCCESS;
 
 		return false;
+	}
+
+	inline void Write(Document& doc, IO::IStream& stream)
+	{
+		assert(stream.IsWritable());
+		StreamPrinter streamPrinter(stream);
+		doc.Print(&streamPrinter);
+	}
+
+	inline void WriteToFile(Document& doc, std::string_view filePath)
+	{
+		IO::FileStream fileStream = IO::File::CreateWrite(filePath);
+		Write(doc, fileStream);
+		fileStream.Close();
 	}
 
 	inline Element* GetRootElement(Document& doc) { return doc.RootElement(); }

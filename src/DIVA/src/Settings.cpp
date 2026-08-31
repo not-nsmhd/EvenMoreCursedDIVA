@@ -131,7 +131,7 @@ namespace DIVA
 		writeKeybindElement(inputElement, "MainGame_Star", Input.MainGame_Star);
 
 		document.InsertFirstChild(rootElement);
-		document.SaveFile(filePath.data());
+		Xml::WriteToFile(document, "userdata/settings_new.xml");
 	}
 
 	void Settings::SetDefaultValues()

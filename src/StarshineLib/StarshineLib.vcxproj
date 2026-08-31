@@ -146,6 +146,7 @@
     <ClInclude Include="src\IO\StreamReader.h" />
     <ClInclude Include="src\IO\StreamWriter.h" />
     <ClInclude Include="src\IO\Xml.h" />
+    <ClInclude Include="src\IO\XmlStreamPrinter.h" />
     <ClInclude Include="src\Misc\Compression.h" />
     <ClInclude Include="src\Misc\EndianHelper.h" />
     <ClInclude Include="src\Misc\ImageHelper.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\IO\Path\Path.cpp" />
     <ClCompile Include="src\IO\StreamReader.cpp" />
     <ClCompile Include="src\IO\StreamWriter.cpp" />
+    <ClCompile Include="src\IO\XmlStreamPrinter.cpp" />
     <ClCompile Include="src\Misc\Compression.cpp" />
     <ClCompile Include="src\Misc\ImageHelper.cpp" />
   </ItemGroup>

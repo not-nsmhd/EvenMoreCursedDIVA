@@ -118,6 +118,9 @@
     <ClInclude Include="src\IO\FileSystem\FileSystem.h">
       <Filter>Source Files\IO\FileSystem</Filter>
     </ClInclude>
+    <ClInclude Include="src\IO\XmlStreamPrinter.h">
+      <Filter>Source Files\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -178,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="src\IO\FileSystem\FileSystem.cpp">
       <Filter>Source Files\IO\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\XmlStreamPrinter.cpp">
+      <Filter>Source Files\IO</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
