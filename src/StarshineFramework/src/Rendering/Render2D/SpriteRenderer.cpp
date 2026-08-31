@@ -12,13 +12,6 @@ namespace Starshine::Rendering::Render2D
 	using namespace Graphics;
 	using StarshineTex = Graphics::Texture;
 
-	constexpr size_t MaxSprites = 4096;
-	constexpr size_t MaxCommands = 4096;
-	constexpr size_t MaxVertices = MaxSprites * 4;
-	constexpr size_t MaxIndices = MaxSprites * 6;
-
-	constexpr size_t MaxShapeVertices = 2048;
-
 	namespace
 	{
 		struct SpriteVertexColors
@@ -80,14 +73,14 @@ namespace Starshine::Rendering::Render2D
 		vector<SpriteVertex> SpriteVertexData;
 		vector<SpriteVertex> ShapeVertexData;
 
-		vector<DrawCommand> DrawCommands;
+		vector<Command> Commands;
 
 		u32 PushedSprites = 0;
 		u32 PushedShapeVertices = 0;
 
 		SpriteState CurrentSprite{};
 
-		DrawCommand CurrentDrawCommand{};
+		Command CurrentCommand{};
 		StarshineTex* LastSpriteTexture{};
 
 	public:
@@ -198,7 +191,7 @@ namespace Starshine::Rendering::Render2D
 				// Normal
 				{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
 				// Add
-				{ BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcColor, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
+				{ BlendFactor::SrcAlpha, BlendFactor::One, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
 				// Multiply
 				{ BlendFactor::DestColor, BlendFactor::OneMinusSrcAlpha, BlendFactor::Zero, BlendFactor::One, BlendOperation::Add, BlendOperation::Add },
 
@@ -274,9 +267,9 @@ namespace Starshine::Rendering::Render2D
 			CurrentSprite.SourceRect_TexSpace = { 0.0f, 0.0f, 1.0f, 1.0f };
 		}
 
-		inline void PushCurrentDrawCommand()
+		inline void PushCurrentCommand()
 		{
-			if (CurrentDrawCommand.Type == CommandType::DrawSprites || CurrentDrawCommand.Type == CommandType::DrawShape)
+			if (CurrentCommand.Type == CommandType::DrawSprites || CurrentCommand.Type == CommandType::DrawShape)
 			{
 				if (FontRenderer.doNotSetShaderOnNextCall)
 				{
@@ -284,21 +277,21 @@ namespace Starshine::Rendering::Render2D
 					SetShader(DefaultSpriteResources.DefaultShader.get(), nullptr, 0);
 				}
 
-				DrawCommands.push_back(CurrentDrawCommand);
-				CurrentDrawCommand = {};
+				Commands.push_back(CurrentCommand);
+				CurrentCommand = {};
 			}
 		}
 
 		inline void PushSetTextureCommand(StarshineTex* tex)
 		{
-			DrawCommand& setTexCommand = DrawCommands.emplace_back();
+			Command& setTexCommand = Commands.emplace_back();
 			setTexCommand.Type = CommandType::SetTexture;
 			setTexCommand.SetTexture.Texture = tex;
 		}
 
 		void PushSprite(StarshineTex* texture)
 		{
-			if (PushedSprites >= MaxSprites || DrawCommands.size() >= MaxCommands)
+			if (PushedSprites >= MaxSprites || Commands.size() >= MaxCommands)
 				Present();
 
 			Sprites.push_back(CurrentSprite);
@@ -307,19 +300,19 @@ namespace Starshine::Rendering::Render2D
 
 			StarshineTex* commandTex = (texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get();
 
-			if (LastSpriteTexture != commandTex || CurrentDrawCommand.Type != CommandType::DrawSprites)
+			if (LastSpriteTexture != commandTex || CurrentCommand.Type != CommandType::DrawSprites)
 			{
-				PushCurrentDrawCommand();
+				PushCurrentCommand();
 				PushSetTextureCommand(commandTex);
 
-				CurrentDrawCommand.Type = CommandType::DrawSprites;
-				CurrentDrawCommand.DrawSprites.FirstSpriteIndex = PushedSprites;
-				CurrentDrawCommand.DrawSprites.SpriteCount = 1;
+				CurrentCommand.Type = CommandType::DrawSprites;
+				CurrentCommand.DrawSprites.FirstSpriteIndex = PushedSprites;
+				CurrentCommand.DrawSprites.SpriteCount = 1;
 
 				LastSpriteTexture = commandTex;
 			}
 			else
-				CurrentDrawCommand.DrawSprites.SpriteCount++;
+				CurrentCommand.DrawSprites.SpriteCount++;
 
 			PushedSprites++;
 		}
@@ -327,29 +320,29 @@ namespace Starshine::Rendering::Render2D
 		void DrawShape(const SpriteVertex* vertices, size_t vertexCount, PrimitiveType primType, Graphics::Texture* texture)
 		{
 			assert(vertexCount <= MaxShapeVertices);
-			if (PushedShapeVertices >= MaxShapeVertices || DrawCommands.size() >= MaxCommands)
+			if (PushedShapeVertices >= MaxShapeVertices || Commands.size() >= MaxCommands)
 				Present();
 
 			for (size_t i = 0; i < vertexCount; i++)
 				ShapeVertexData.emplace_back(vertices[i]);
 
-			PushCurrentDrawCommand();
+			PushCurrentCommand();
 			PushSetTextureCommand((texture != nullptr) ? texture : DefaultSpriteResources.DefaultTexture.get());
 
-			CurrentDrawCommand.Type = CommandType::DrawShape;
-			CurrentDrawCommand.DrawShape.FirstVertexIndex = PushedShapeVertices;
-			CurrentDrawCommand.DrawShape.VertexCount = vertexCount;
-			CurrentDrawCommand.DrawShape.PrimitiveType = primType;
-			PushCurrentDrawCommand();
+			CurrentCommand.Type = CommandType::DrawShape;
+			CurrentCommand.DrawShape.FirstVertexIndex = PushedShapeVertices;
+			CurrentCommand.DrawShape.VertexCount = vertexCount;
+			CurrentCommand.DrawShape.PrimitiveType = primType;
+			PushCurrentCommand();
 
 			PushedShapeVertices += vertexCount;
 		}
 
 		void SetBlendMode(BlendMode mode)
 		{
-			PushCurrentDrawCommand();
+			PushCurrentCommand();
 
-			DrawCommand& setBlendModeCommand = DrawCommands.emplace_back();
+			Command& setBlendModeCommand = Commands.emplace_back();
 			setBlendModeCommand.Type = CommandType::SetBlendMode;
 			setBlendModeCommand.SetBlendMode.Mode = mode;
 		}
@@ -358,9 +351,9 @@ namespace Starshine::Rendering::Render2D
 		{
 			assert(fsDataSize <= MaxFSUniformDataSize);
 				
-			PushCurrentDrawCommand();
+			PushCurrentCommand();
 
-			DrawCommand& command = DrawCommands.emplace_back();
+			Command& command = Commands.emplace_back();
 			command.Type = CommandType::SetShader;
 			command.SetShader.Shader = (shader == nullptr ? DefaultSpriteResources.DefaultShader.get() : shader);
 
@@ -370,9 +363,9 @@ namespace Starshine::Rendering::Render2D
 
 		void SetTransformMatrix(mat4 matrix)
 		{
-			PushCurrentDrawCommand();
+			PushCurrentCommand();
 
-			DrawCommand& command = DrawCommands.emplace_back();
+			Command& command = Commands.emplace_back();
 			command.Type = CommandType::SetTransformMatrix;
 			command.SetTransformMatrix.Matrix = glm::transpose(matrix);
 		}
@@ -427,7 +420,7 @@ namespace Starshine::Rendering::Render2D
 
 		inline void Present_Prepare()
 		{
-			PushCurrentDrawCommand();
+			PushCurrentCommand();
 
 			GenerateSpriteVertices();
 
@@ -440,7 +433,7 @@ namespace Starshine::Rendering::Render2D
 			Sprites.clear();
 			SpriteVertexData.clear();
 			ShapeVertexData.clear();
-			DrawCommands.clear();
+			Commands.clear();
 
 			PushedSprites = 0;
 			PushedShapeVertices = 0;
@@ -451,6 +444,13 @@ namespace Starshine::Rendering::Render2D
 			PushFrameBeginCommands();
 		}
 
+		enum class VertexBufferType
+		{
+			NotSet,
+			Sprite,
+			Shape
+		};
+
 		void Present_ProcessCommands()
 		{
 			const RectangleF viewportSize = GFXDevice->GetViewportSize();
@@ -460,18 +460,18 @@ namespace Starshine::Rendering::Render2D
 			GFXDevice->SetUniformBuffer(GraphicsResources.VSUniformBuffer.get(), ShaderStage::Vertex, 0);
 			GFXDevice->SetUniformBuffer(GraphicsResources.FSUniformBuffer.get(), ShaderStage::Fragment, 0);
 
-			bool currentBufferIsSprite = false;
-			for (const auto& command : DrawCommands)
+			VertexBufferType currentBuffer = VertexBufferType::NotSet;
+			for (const auto& command : Commands)
 			{
 				switch (command.Type)
 				{
 				case CommandType::DrawSprites:
 				{
-					if (!currentBufferIsSprite)
+					if (currentBuffer != VertexBufferType::Sprite)
 					{
 						GFXDevice->SetVertexBuffer(GraphicsResources.SpriteVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 						GFXDevice->SetIndexBuffer(GraphicsResources.SpriteIndexBuffer.get());
-						currentBufferIsSprite = true;
+						currentBuffer = VertexBufferType::Sprite;
 					}
 
 					const u32 baseVertex = command.DrawSprites.FirstSpriteIndex * 4;
@@ -481,11 +481,11 @@ namespace Starshine::Rendering::Render2D
 				}
 				case CommandType::DrawShape:
 				{
-					if (currentBufferIsSprite)
+					if (currentBuffer != VertexBufferType::Shape)
 					{
 						GFXDevice->SetVertexBuffer(GraphicsResources.ShapeVertexBuffer.get(), GraphicsResources.VertexDesc.get());
 						GFXDevice->SetIndexBuffer(nullptr);
-						currentBufferIsSprite = false;
+						currentBuffer = VertexBufferType::Shape;
 					}
 
 					GFXDevice->DrawArrays(command.DrawShape.PrimitiveType, command.DrawShape.FirstVertexIndex, command.DrawShape.VertexCount);
@@ -679,12 +679,12 @@ namespace Starshine::Rendering::Render2D
 		return impl->AnimationSetRenderer;
 	}
 
-	size_t SpriteRenderer::GetDrawCommands(DrawCommand** commands)
+	size_t SpriteRenderer::GetCommands(Command** commands)
 	{
 #ifdef _DEBUG
 		if (commands != nullptr)
-			*commands = impl->DrawCommands.data();
-		return impl->DrawCommands.size();
+			*commands = impl->Commands.data();
+		return impl->Commands.size();
 #endif // _DEBUG
 		return 0;
 	}

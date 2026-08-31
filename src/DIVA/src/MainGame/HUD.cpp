@@ -416,7 +416,7 @@ namespace DIVA::MainGame
 				FontRenderer& fontRenderer = mainGameContext->SpriteRenderer->Font();
 				auto font = GameContext::GetInstance()->DefaultFont.get();
 
-				fontRenderer.DrawString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, scale, LyricsColor);
+				fontRenderer.PushString(font, LyricsTextBuffer.data(), animCache.LyricsTextPosition, scale, LyricsColor);
 			}
 		}
 
@@ -441,7 +441,7 @@ namespace DIVA::MainGame
 			DrawScoreBonusDisplay();
 			DrawFrame();
 
-			fontRenderer.DrawString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
+			fontRenderer.PushString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
 			DrawLyricsText(vec2(1.0f));
 		}
 	};

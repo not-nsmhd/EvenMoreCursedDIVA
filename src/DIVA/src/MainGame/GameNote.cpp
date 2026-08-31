@@ -65,13 +65,15 @@ namespace DIVA::MainGame
 		}
 	}
 
-	void GameNote::DrawTrail()
+	size_t GameNote::PushTrail(SpriteVertex* vertexBuffer)
 	{
-		if (Expiring || Expired || (HasBeenHit && Type != NoteType::HoldStart) || Type == NoteType::HoldEnd) { return; }
+		if (Expiring || Expired || ShouldBeRemoved || (HasBeenHit && Type != NoteType::HoldStart) || Type == NoteType::HoldEnd)
+			return 0;
 
 		if (HasBeenHit && NextNote != nullptr)
 		{
-			if (NextNote->HasBeenHit) { return; }
+			if (NextNote->HasBeenHit)
+				return 0;
 		}
 
 		auto& sprRenderer = MainGameContext->SpriteRenderer;
@@ -206,7 +208,8 @@ namespace DIVA::MainGame
 			}
 		}
 
-		sprRenderer->PushShape(trailVertices.data(), trailVertices.size(), PrimitiveType::TriangleStrip, trailTexture);
+		SDL_memcpy(vertexBuffer, trailVertices.data(), trailVertices.size() * sizeof(SpriteVertex));
+		return trailVertices.size();
 	}
 
 	void GameNote::Update(GameTime& gameTime)

@@ -17,6 +17,7 @@
 #include "audio/AudioEngine.h"
 #include "Menu/ChartSelect.h"
 #include "../Settings.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <deque>
 
 namespace DIVA::MainGame
@@ -63,6 +64,7 @@ namespace DIVA::MainGame
 		Font* debugFont{};
 
 		bool Paused = false;
+		bool DisplayPauseMenu = false;
 
 		Chart songChart;
 		size_t chartNoteOffset = 0;
@@ -130,6 +132,8 @@ namespace DIVA::MainGame
 
 		std::unique_ptr<SpritePacker> sprPacker;
 
+		std::unique_ptr<SpriteVertex[]> noteTrailVertices{};
+
 		char debugText[512] = {};
 
 		Impl(MainGame::MainGameContext& context) : MainGameContext{ context }
@@ -176,6 +180,8 @@ namespace DIVA::MainGame
 
 			hud = std::make_unique<HUD>(MainGameContext);
 			hud->Initialize();
+
+			noteTrailVertices = std::make_unique<SpriteVertex[]>(SpriteRenderer::MaxShapeVertices);
 
 			Reset();
 			SetKeybinds();
@@ -391,6 +397,8 @@ namespace DIVA::MainGame
 			ActiveNotes.clear();
 			songChart.Clear();
 			songLyrics.clear();
+
+			noteTrailVertices = nullptr;
 		}
 
 		GameNote* FindNoteToEvaluate()
@@ -494,7 +502,7 @@ namespace DIVA::MainGame
 				}
 
 				note->Update(gameTime);
-				//UpdateNoteAutoplay(note);
+				UpdateNoteAutoplay(note);
 
 				noteIndex++;
 			}
@@ -855,6 +863,7 @@ namespace DIVA::MainGame
 			if (Keyboard::IsAnyTapped(KeyboardBinds.Pause, nullptr, nullptr))
 			{
 				Paused = !Paused;
+				DisplayPauseMenu = Paused;
 				if (MusicSource != SourceHandle::Invalid)
 					MusicVoice.SetPlaying(!Paused);
 			}
@@ -896,6 +905,9 @@ namespace DIVA::MainGame
 				pause_optionIndex = 0;
 				return;
 			}
+
+			if (Keyboard::IsKeyTapped(SDLK_TAB))
+				DisplayPauseMenu = !DisplayPauseMenu;
 		}
 
 		void UpdateResults()
@@ -951,23 +963,37 @@ namespace DIVA::MainGame
 		{
 			if (CurrentSubState == SubState::Results)
 			{
-				//spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
 				DrawResults();
 				return;
 			}
 
 			const RectangleF viewportSize = GFXDevice->GetViewportSize();
 			const vec2 baseScale = vec2(viewportSize.Width / BaseResolution.x, viewportSize.Height / BaseResolution.y);
+			const mat4 scaleMatrix = glm::scale(glm::identity<mat4>(), vec3(baseScale.x, baseScale.y, 1.0f));
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
+			spriteRenderer->SetTransformMatrix(scaleMatrix);
+
+			size_t noteTrailVerticesToDraw = 0;
+			size_t trailVertexCount = 0;
 
 			for (auto& note : ActiveNotes)
 			{
+				if (noteTrailVerticesToDraw + trailVertexCount >= SpriteRenderer::MaxShapeVertices)
+				{
+					auto tex = MainGameContext.IconSetSprites.SpriteSheet->GetTexture(0);
+					spriteRenderer->DrawShape(noteTrailVertices.get(), noteTrailVerticesToDraw, PrimitiveType::TriangleStrip, tex);
+					noteTrailVerticesToDraw = 0;
+				}
+
 				note.UpdateTrail();
-				note.DrawTrail();
+				trailVertexCount = note.PushTrail(&noteTrailVertices[noteTrailVerticesToDraw]);
+				noteTrailVerticesToDraw += trailVertexCount;
 			}
+
+			auto tex = MainGameContext.IconSetSprites.SpriteSheet->GetTexture(0);
+			spriteRenderer->DrawShape(noteTrailVertices.get(), noteTrailVerticesToDraw, PrimitiveType::TriangleStrip, tex);
 
 			for (auto& note : ActiveNotes)
 			{
@@ -979,21 +1005,16 @@ namespace DIVA::MainGame
 				note.DrawEffect(gameTime);
 			}
 
-			//spriteRenderer->RenderSprites(nullptr);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
-			//spriteRenderer->SetBasePositionAndScale({}, baseScale);
 
 			hud->Draw(gameTime);
 
-			//spriteRenderer->RenderSprites(nullptr);
-			//spriteRenderer->SetBasePositionAndScale({}, vec2(1.0f));
-
-			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
-
-			if (Paused)
+			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
+			if (Paused && DisplayPauseMenu)
 				DrawPauseMenu();
 
-			//spriteRenderer->RenderSprites(nullptr);
+			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Present();
 		}
 
 		void DrawPauseMenu()
@@ -1008,7 +1029,7 @@ namespace DIVA::MainGame
 
 			for (i32 i = 0; i < pauseMenu_OptionLabels.size(); i++)
 			{
-				spriteRenderer->Font().DrawString(debugFont, pauseMenu_OptionLabels[i],
+				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i],
 					vec2(menuPosition.x, menuPosition.y + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == pause_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
@@ -1019,15 +1040,15 @@ namespace DIVA::MainGame
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
-			spriteRenderer->Font().DrawString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{
-				spriteRenderer->Font().DrawString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 
-			//spriteRenderer->RenderSprites(nullptr);
+			spriteRenderer->Present();
 		}
 	};
 

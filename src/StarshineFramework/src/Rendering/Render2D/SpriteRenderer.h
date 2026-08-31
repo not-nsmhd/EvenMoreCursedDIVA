@@ -15,82 +15,6 @@ namespace Starshine::Rendering::Render2D
 		Color Color{};
 	};
 
-	enum class CommandType : i32
-	{
-		NotSet,
-
-		DrawSprites,
-		DrawShape,
-
-		SetTexture,
-		SetShader,
-		SetBlendMode,
-
-		SetTransformMatrix,
-
-		Count
-	};
-
-	constexpr std::array<const char*, EnumCount<CommandType>()> CommandTypeNames
-	{
-		"NotSet",
-		"DrawSprites",
-		"DrawShape",
-		"SetTexture",
-		"SetShader",
-		"SetBlendMode",
-		"SetTransformMatrix"
-	};
-
-	constexpr size_t MaxFSUniformDataSize = 64;
-
-	union DrawCommand
-	{
-		CommandType Type{};
-
-		struct
-		{
-			CommandType Type{};
-
-			u32 FirstSpriteIndex{};
-			u32 SpriteCount{};
-		} DrawSprites;
-
-		struct
-		{
-			CommandType Type{};
-
-			u32 FirstVertexIndex{};
-			u32 VertexCount{};
-			PrimitiveType PrimitiveType{};
-		} DrawShape;
-
-		struct
-		{
-			CommandType Type{};
-			Graphics::Texture* Texture{};
-		} SetTexture;
-
-		struct
-		{
-			CommandType Type;
-			const Shader* Shader{};
-			u8 FSUniformData[MaxFSUniformDataSize]{};
-		} SetShader;
-
-		struct
-		{
-			CommandType Type{};
-			Graphics::BlendMode Mode{};
-		} SetBlendMode;
-
-		struct
-		{
-			CommandType Type{};
-			glm::mat4 Matrix{};
-		} SetTransformMatrix;
-	};
-
 	class SpriteRenderer
 	{
 	public:
@@ -133,7 +57,92 @@ namespace Starshine::Rendering::Render2D
 		AnimationSetRenderer& AnimationSet();
 
 	public:
-		size_t GetDrawCommands(DrawCommand** commands);
+		static constexpr size_t MaxSprites = 4096;
+		static constexpr size_t MaxCommands = 4096;
+		static constexpr size_t MaxVertices = MaxSprites * 4;
+		static constexpr size_t MaxIndices = MaxSprites * 6;
+
+		static constexpr size_t MaxShapeVertices = 2048;
+
+	public:
+		enum class CommandType : i32
+		{
+			NotSet,
+
+			DrawSprites,
+			DrawShape,
+
+			SetTexture,
+			SetShader,
+			SetBlendMode,
+
+			SetTransformMatrix,
+
+			Count
+		};
+
+		static constexpr std::array<const char*, EnumCount<CommandType>()> CommandTypeNames
+		{
+			"NotSet",
+			"DrawSprites",
+			"DrawShape",
+			"SetTexture",
+			"SetShader",
+			"SetBlendMode",
+			"SetTransformMatrix"
+		};
+
+		static constexpr size_t MaxFSUniformDataSize = 64;
+
+		union Command
+		{
+			CommandType Type{};
+
+			struct
+			{
+				CommandType Type{};
+
+				u32 FirstSpriteIndex{};
+				u32 SpriteCount{};
+			} DrawSprites;
+
+			struct
+			{
+				CommandType Type{};
+
+				u32 FirstVertexIndex{};
+				u32 VertexCount{};
+				PrimitiveType PrimitiveType{};
+			} DrawShape;
+
+			struct
+			{
+				CommandType Type{};
+				Graphics::Texture* Texture{};
+			} SetTexture;
+
+			struct
+			{
+				CommandType Type;
+				const Shader* Shader{};
+				u8 FSUniformData[MaxFSUniformDataSize]{};
+			} SetShader;
+
+			struct
+			{
+				CommandType Type{};
+				Graphics::BlendMode Mode{};
+			} SetBlendMode;
+
+			struct
+			{
+				CommandType Type{};
+				glm::mat4 Matrix{};
+			} SetTransformMatrix;
+		};
+
+	public:
+		size_t GetCommands(Command** commands);
 
 	private:
 		struct Impl;

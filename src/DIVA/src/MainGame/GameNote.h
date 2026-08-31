@@ -7,6 +7,7 @@
 
 using Starshine::TimeSpan;
 using Starshine::GameTime;
+using Starshine::Rendering::Render2D::SpriteVertex;
 
 namespace DIVA::MainGame
 {
@@ -105,7 +106,7 @@ namespace DIVA::MainGame
 		} Trail;
 
 		void UpdateTrail();
-		void DrawTrail();
+		size_t PushTrail(SpriteVertex* vertexBuffer);
 
 	public:
 		void Update(GameTime& gameTime);

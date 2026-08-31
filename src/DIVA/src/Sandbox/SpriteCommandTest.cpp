@@ -67,16 +67,16 @@ namespace DIVA::Sandbox
 			auto& fontRenderer = sprRenderer->Font();
 			auto font = GameContext::GetInstance()->DefaultFont.get();
 
-			fontRenderer.DrawString(font, "0123456789 ABCDEF abcdef", vec2(256.0f), vec2(1.5f), DefaultColors::White);
-			fontRenderer.DrawString(font, "Line 1 (after text)", vec2(256.0f, 300.0f), vec2(1.0f), DefaultColors::White);
+			fontRenderer.PushString(font, "0123456789 ABCDEF abcdef", vec2(256.0f), vec2(1.5f), DefaultColors::White);
+			fontRenderer.PushString(font, "Line 1 (after text)", vec2(256.0f, 300.0f), vec2(1.0f), DefaultColors::White);
 
 			sprRenderer->SetSpritePosition(vec2(640.0f, 360.0f));
 			sprRenderer->SetSpriteSize(vec2(testTexture->GetSize()));
 			sprRenderer->SetSpriteColor(DefaultColors::White);
 			sprRenderer->PushSprite(testTexture.get());
 
-			fontRenderer.DrawString(font, "Line 2 (after sprite)", vec2(256.0f, 350.0f), vec2(1.0f), DefaultColors::White);
-			fontRenderer.DrawString(font, u8"\n初音ミク (after text)", vec2(256.0f, 350.0f), vec2(1.0f), DefaultColors::White);
+			fontRenderer.PushString(font, "Line 2 (after sprite)", vec2(256.0f, 350.0f), vec2(1.0f), DefaultColors::White);
+			fontRenderer.PushString(font, u8"\n初音ミク (after text)", vec2(256.0f, 350.0f), vec2(1.0f), DefaultColors::White);
 		}
 
 		void TestBlendModes(SpriteRenderer* sprRenderer)
@@ -136,15 +136,13 @@ namespace DIVA::Sandbox
 
 			if (!displayReport)
 			{
-				fontRenderer.DrawString(font, "Press F10 to display command list", vec2(0.0f), vec2(1.0f),
+				fontRenderer.PushString(font, "Press F10 to display command list", vec2(0.0f), vec2(1.0f),
 					DefaultColors::White, DefaultColors::Black);
 				return;
 			}
 
-			using Rendering::Render2D::CommandType;
-
-			Rendering::Render2D::DrawCommand* commands = nullptr;
-			size_t commandCount = sprRenderer->GetDrawCommands(&commands);
+			SpriteRenderer::Command* commands = nullptr;
+			size_t commandCount = sprRenderer->GetCommands(&commands);
 
 			char text[1024]{};
 			i32 offset = 0;
@@ -153,9 +151,9 @@ namespace DIVA::Sandbox
 			for (size_t i = 0; i < commandCount; i++)
 			{
 				const auto* command = &commands[i];
-				const char* commandName = Rendering::Render2D::CommandTypeNames[static_cast<size_t>(command->Type)];
+				const char* commandName = SpriteRenderer::CommandTypeNames[static_cast<size_t>(command->Type)];
 				
-				if (command->Type == CommandType::DrawSprites)
+				if (command->Type == SpriteRenderer::CommandType::DrawSprites)
 				{
 					offset += SDL_snprintf(text + offset, sizeof(text) - offset, "\nCommand %llu: DrawSprites(%u, %u)",
 						i, command->DrawSprites.FirstSpriteIndex, command->DrawSprites.SpriteCount);
@@ -164,7 +162,7 @@ namespace DIVA::Sandbox
 					offset += SDL_snprintf(text + offset, sizeof(text) - offset, "\nCommand %llu: %s", i, commandName);
 			}
 
-			fontRenderer.DrawString(font, text, vec2(0.0f), vec2(1.0f), DefaultColors::White, DefaultColors::Black);
+			fontRenderer.PushString(font, text, vec2(0.0f), vec2(1.0f), DefaultColors::White, DefaultColors::Black);
 		}
 
 		void Draw()
