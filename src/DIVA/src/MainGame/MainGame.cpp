@@ -1052,7 +1052,7 @@ namespace DIVA::MainGame
 		}
 	};
 
-	MainGameState::MainGameState() : impl(std::make_unique<Impl>(context))
+	MainGameState::MainGameState()
 	{
 	}
 
@@ -1062,6 +1062,7 @@ namespace DIVA::MainGame
 	
 	bool MainGameState::Initialize()
 	{
+		impl = std::make_unique<Impl>(context);
 		impl->MainGameContext.SongName = LoadSettings.SongName;
 		impl->MainGameContext.Difficulty = LoadSettings.Difficulty;
 
@@ -1086,6 +1087,7 @@ namespace DIVA::MainGame
 	void MainGameState::Destroy()
 	{
 		impl->Destroy();
+		impl = nullptr;
 	}
 	
 	void MainGameState::Update(GameTime& gameTime)
