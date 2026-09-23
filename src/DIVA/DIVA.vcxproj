@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;mf.lib;mfplat.lib;mfplay.lib;mfuuid.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -89,7 +89,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;mf.lib;mfplat.lib;mfplay.lib;mfuuid.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -103,6 +103,7 @@
     <ClCompile Include="src\MainGame\MainGame.cpp" />
     <ClCompile Include="src\Menu\ChartSelect.cpp" />
     <ClCompile Include="src\Sandbox\AlphaDilationTest.cpp" />
+    <ClCompile Include="src\Sandbox\MFVideoTest.cpp" />
     <ClCompile Include="src\Sandbox\SpriteCommandTest.cpp" />
     <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
@@ -122,6 +123,7 @@
     <ClInclude Include="src\MainGame\MainGame.h" />
     <ClInclude Include="src\Menu\ChartSelect.h" />
     <ClInclude Include="src\Sandbox\AlphaDilationTest.h" />
+    <ClInclude Include="src\Sandbox\MFVideoTest.h" />
     <ClInclude Include="src\Sandbox\SpriteCommandTest.h" />
     <ClInclude Include="src\Settings.h" />
   </ItemGroup>

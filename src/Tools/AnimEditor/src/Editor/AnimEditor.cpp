@@ -19,6 +19,7 @@
 #include "FileDialog.h"
 #include <IO/Path/Path.h>
 #include <IO/Path/Directory.h>
+#include <IO/FileSystem/FileSystem.h>
 #include <Common/Logging/Logging.h>
 #include <algorithm>
 
@@ -1145,7 +1146,7 @@ namespace Starshine
 			sprRenderer->PushOutlineRect(viewPan, realCanvasSize, {}, DefaultColors::Black);
 		}
 
-		void OBBTest(SpriteRenderer* sprRenderer)
+		/*void OBBTest(SpriteRenderer* sprRenderer)
 		{
 			const RectangleF rect(640.0f, 360.0f, 128.0f, 128.0f);
 			constexpr f32 orientation = MathExtensions::ToRadians(32.0f);
@@ -1198,24 +1199,22 @@ namespace Starshine
 
 			SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", mousePos.x, mousePos.y);
 			sprRenderer->Font().DrawString(font, posText, vec2(mousePos.x, mousePos.y), vec2(1.0f), DefaultColors::White);
-		}
+		}*/
 
 		void Draw(Starshine::GameTime& gameTime)
 		{
 			auto sprRenderer = GameContext::GetInstance()->SpriteRenderer.get();
 			auto font = GameContext::GetInstance()->DebugFont.get();
 
-			sprRenderer->SetBlendMode(BlendMode::Normal);
-
 			DrawCanvas(sprRenderer);
-			OBBTest(sprRenderer);
+			//OBBTest(sprRenderer);
 
 			DragStateData& dragState = parent->DragState;
 
 			if (playing)
 			{
 				sprRenderer->AnimationSet().PushAnimation(&context.AnimSet, context.CurrentAnimation, context.TimelineFrame, viewPan, vec2(viewZoom));
-				sprRenderer->RenderSprites(nullptr);
+				sprRenderer->Present();
 
 				context.TimelineFrame += context.AnimSet.GetRelativeFrameTimeStep(gameTime.ElapsedFrameTime.GetSeconds());
 				context.TimelineFrame = std::fmodf(context.TimelineFrame, context.CurrentAnimation->EndTime) + context.CurrentAnimation->StartTime;
@@ -1238,13 +1237,7 @@ namespace Starshine
 					const vec2& spriteLayerSize = spriteSize * transform.Scale;
 
 					if (prevBlendMode != baseLayer->BlendMode)
-					{
-						vec2 basePos{};
-						vec2 baseScale{};
-
-						sprRenderer->RenderSprites(nullptr);
 						sprRenderer->SetBlendMode(baseLayer->BlendMode);
-					}
 
 					i32 texIndex{};
 
@@ -1265,7 +1258,6 @@ namespace Starshine
 					prevBlendMode = baseLayer->BlendMode;
 				}
 
-				sprRenderer->RenderSprites(nullptr);
 				sprRenderer->SetBlendMode(BlendMode::Normal);
 
 				if (context.CurrentLayer != nullptr)
@@ -1306,10 +1298,10 @@ namespace Starshine
 						const vec2 absMousePos = dragState.AbsoluteMousePosition;
 
 						SDL_snprintf(posText, sizeof(posText) - 1, "X: %+.1f\nY: %+.1f", relMousePos.x, relMousePos.y);
-						sprRenderer->Font().DrawString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
+						sprRenderer->Font().PushString(font, posText, absMousePos, vec2(1.0f), DefaultColors::White);
 					}
 				}
-				sprRenderer->RenderSprites(nullptr);
+				sprRenderer->Present();
 			}
 
 			OnGUI();
@@ -1326,6 +1318,7 @@ namespace Starshine
 
 	bool AnimEditor::Initialize()
 	{
+		IO::FileSystem::GetInstance()->AddSearchPath("../diva");
 		return impl->Initialize();
 	}
 

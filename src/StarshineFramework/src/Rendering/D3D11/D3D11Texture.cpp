@@ -48,6 +48,31 @@ namespace Starshine::Rendering::D3D11
 		baseDev->CreateShaderResourceView(BaseTexture.Get(), &srvDesc, &ShaderResourceView);
 	}
 
+	D3D11Texture::D3D11Texture(D3D11Device& device, DXGI_FORMAT format, const D3D11_TEXTURE2D_DESC& desc)
+		: deviceRef(device)
+	{
+		ID3D11Device* baseDev = device.GetBaseDevice();
+
+		baseDev->CreateTexture2D(&desc, nullptr, &BaseTexture);
+
+		D3D11_SAMPLER_DESC samplerDesc{};
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+
+		baseDev->CreateSamplerState(&samplerDesc, &Sampler);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Format = format;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+
+		baseDev->CreateShaderResourceView(BaseTexture.Get(), &srvDesc, &ShaderResourceView);
+	}
+
 	D3D11Texture::~D3D11Texture()
 	{
 		deviceRef.QueueObjectForDeletion(ShaderResourceView);

@@ -27,7 +27,7 @@ namespace Starshine::Graphics
 		dataSize = GetTextureDataSize(size, format);
 		data = std::make_unique<u8[]>(dataSize);
 
-		if (data != nullptr)
+		if (initialData != nullptr)
 			SDL_memcpy(data.get(), initialData, dataSize);
 	}
 

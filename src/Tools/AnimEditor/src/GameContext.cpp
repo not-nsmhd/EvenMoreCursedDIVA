@@ -1,11 +1,26 @@
 #include "GameContext.h"
 #include <IO/Path/Directory.h>
+#include <IO/FileStream.h>
+#include <IO/FileSystem/FileSystem.h>
 
 using namespace Starshine;
 using namespace Starshine::IO;
 using namespace Starshine::Rendering;
 
 std::unique_ptr<GameContext> GlobalInstance{};
+
+namespace Detail
+{
+	bool ReadFont(Graphics::Font* font, std::string_view filePath)
+	{
+		IO::FileStream fileStream;
+		if (!FileSystem::GetInstance()->OpenFileStream(fileStream, filePath, true, false))
+			return false;
+
+		StreamReader reader(fileStream);
+		return font->ReadBinary(reader);
+	}
+}
 
 GameContext::GameContext()
 {
@@ -51,7 +66,7 @@ bool GameContext::LoadGraphics()
 
 	SpriteRenderer = std::make_unique<Render2D::SpriteRenderer>();
 	DebugFont = std::make_unique<Graphics::Font>();
-	if (!DebugFont->ReadBMFont("diva/fonts/debug.fnt")) { return false; }
+	if (!Detail::ReadFont(DebugFont.get(), "fonts/debug.dat")) { return false; }
 
 	return true;
 }

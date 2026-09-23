@@ -9,40 +9,51 @@
 using namespace Starshine;
 using namespace DIVA;
 
-int SDL_main(int argc, char* argv[])
+#ifdef __cplusplus
+extern "C"
 {
-	GameInstance game;
-	
-	if (game.Initialize(false))
+#endif
+	int SDL_main(int argc, char* argv[])
 	{
-		if (!IO::FileSystem::GetInstance()->AddSearchPath("diva"))
-			return 1;
+		bool startVideoTest = false;
+		if (argc == 2)
+			startVideoTest = SDL_strncmp("video", argv[1], 5) == 0;
 
-		if (!GameContext::CreateInstance())
-			return 1;
+		GameInstance game;
 
-		if (!SettingsData.LoadFromFile())
-			SettingsData.SetDefaultValues();
+		if (game.Initialize(false))
+		{
+			if (!IO::FileSystem::GetInstance()->AddSearchPath("diva"))
+				return 1;
 
-		auto window = game.GetWindow();
-		window->SetTitle("Even More Cursed DIVA");
-		window->SetMode(SettingsData.Window.Mode);
-		window->SetPosition(SettingsData.Window.Position);
-		window->SetSize(SettingsData.Window.Size);
+			if (!GameContext::CreateInstance())
+				return 1;
 
-		if (!game.SetState(GetStatePointer(StateID::ChartSelect))) { return 1; }
+			if (!SettingsData.LoadFromFile())
+				SettingsData.SetDefaultValues();
 
-		game.EnterLoop();
+			auto window = game.GetWindow();
+			window->SetTitle("Even More Cursed DIVA");
+			window->SetMode(SettingsData.Window.Mode);
+			window->SetPosition(SettingsData.Window.Position);
+			window->SetSize(SettingsData.Window.Size);
 
-		SettingsData.Window.Mode = window->GetMode();
-		SettingsData.Window.Position = window->GetPosition();
-		SettingsData.Window.Size = window->GetSize();
-		SettingsData.SaveToFile();
+			if (!game.SetState(GetStatePointer(startVideoTest ? StateID::Sandbox_MFVideoTest : StateID::ChartSelect))) { return 1; }
 
-		GameContext::GetInstance()->Unload();
-		game.Destroy();
-		return 0;
+			game.EnterLoop();
+
+			SettingsData.Window.Mode = window->GetMode();
+			SettingsData.Window.Position = window->GetPosition();
+			SettingsData.Window.Size = window->GetSize();
+			SettingsData.SaveToFile();
+
+			GameContext::GetInstance()->Unload();
+			game.Destroy();
+			return 0;
+		}
+
+		return 1;
 	}
-
-	return 1;
+#ifdef __cplusplus
 }
+#endif

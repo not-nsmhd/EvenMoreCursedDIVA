@@ -101,8 +101,8 @@ namespace Starshine::Rendering::D3D11
 				return false;
 			}
 
-			static constexpr D3D_FEATURE_LEVEL targetFeatureLevel{ D3D_FEATURE_LEVEL_11_0 };
-			static UINT deviceFlags = 0;
+			static constexpr D3D_FEATURE_LEVEL targetFeatureLevel{ D3D_FEATURE_LEVEL_11_1 };
+			static UINT deviceFlags = D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
 #if defined (_DEBUG)
 			deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif

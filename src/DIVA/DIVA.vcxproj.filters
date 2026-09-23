@@ -59,6 +59,9 @@
     <ClCompile Include="src\Sandbox\SpriteCommandTest.cpp">
       <Filter>Source Files\Sandbox</Filter>
     </ClCompile>
+    <ClCompile Include="src\Sandbox\MFVideoTest.cpp">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -106,6 +109,9 @@
       <Filter>Source Files\Sandbox</Filter>
     </ClInclude>
     <ClInclude Include="src\Sandbox\SpriteCommandTest.h">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox\MFVideoTest.h">
       <Filter>Source Files\Sandbox</Filter>
     </ClInclude>
   </ItemGroup>

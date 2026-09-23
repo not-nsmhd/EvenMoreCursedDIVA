@@ -10,6 +10,7 @@ namespace Starshine::Rendering::D3D11
 	{
 	public:
 		D3D11Texture(D3D11Device& device, Graphics::Texture* texture);
+		D3D11Texture(D3D11Device& device, DXGI_FORMAT format, const D3D11_TEXTURE2D_DESC& desc);
 		~D3D11Texture() override;
 
 	public:

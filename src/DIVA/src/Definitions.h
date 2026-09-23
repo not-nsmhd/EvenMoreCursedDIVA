@@ -6,6 +6,7 @@
 #include "MainGame/MainGame.h"
 #include "Sandbox/AlphaDilationTest.h"
 #include "Sandbox/SpriteCommandTest.h"
+#include "Sandbox/MFVideoTest.h"
 
 namespace DIVA
 {
@@ -18,6 +19,8 @@ namespace DIVA
 
 		Sandbox_AlphaDilationTest,
 		Sandbox_SpriteCommandTest,
+		Sandbox_MFVideoTest,
+		DumbIdea,
 
 		Count
 	};
@@ -29,6 +32,7 @@ namespace DIVA
 
 		std::make_unique<Sandbox::AlphaDilationTest>(),
 		std::make_unique<Sandbox::SpriteCommandTest>(),
+		std::make_unique<Sandbox::MFVideoTest>()
 	};
 
 	inline Starshine::GameState* GetStatePointer(StateID id)

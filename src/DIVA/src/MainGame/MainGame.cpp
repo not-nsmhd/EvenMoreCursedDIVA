@@ -502,7 +502,7 @@ namespace DIVA::MainGame
 				}
 
 				note->Update(gameTime);
-				UpdateNoteAutoplay(note);
+				//UpdateNoteAutoplay(note);
 
 				noteIndex++;
 			}
@@ -582,8 +582,8 @@ namespace DIVA::MainGame
 				break;
 			case NoteType::Double:
 			{
-				if (primTapped) { note->DoubleTap.Primary = true; }
-				if (altTapped) { note->DoubleTap.Alternative = true; }
+				if (primTapped) { note->DoubleTap.Primary = shape == note->Shape; }
+				if (altTapped) { note->DoubleTap.Alternative = shape == note->Shape; }
 
 				note->Hold.PrimaryHeld = primDown;
 				note->Hold.AlternativeHeld = altDown;
@@ -641,11 +641,15 @@ namespace DIVA::MainGame
 			}
 
 			if (IsChanceTime && !note->HitWrong)
-			{
 				noteScore *= 2;
-			}
 
 			MainGameContext.Score.Score += noteScore;
+
+			if (MainGameContext.Score.Combo > 0 && MainGameContext.Score.Combo % 10 == 0)
+			{
+				u32 comboBonusMultiplier = MathExtensions::Clamp<u32>(MainGameContext.Score.Combo / 10, 0, 10);
+				MainGameContext.Score.Score += comboBonusMultiplier * 50;
+			}
 
 			if (note->Type == NoteType::Double &&
 				!note->HitWrong)
