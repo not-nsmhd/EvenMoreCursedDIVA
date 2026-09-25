@@ -41,6 +41,9 @@
     <Filter Include="Source Files\ImGui\Extensions">
       <UniqueIdentifier>{813ced81-37c6-4758-a770-52e0ce684ae3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Video">
+      <UniqueIdentifier>{7e35ab16-bca1-48af-b56f-fd6b66d6bb88}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameInstance.h">
@@ -175,6 +178,9 @@
     <ClInclude Include="src\Rendering\Render2D\AnimationSetRenderer.h">
       <Filter>Source Files\Rendering\Render2D</Filter>
     </ClInclude>
+    <ClInclude Include="src\Video\VideoPlayer.h">
+      <Filter>Source Files\Video</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -277,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\Render2D\AnimationSetRenderer.cpp">
       <Filter>Source Files\Rendering\Render2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Video\VideoPlayer.cpp">
+      <Filter>Source Files\Video</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

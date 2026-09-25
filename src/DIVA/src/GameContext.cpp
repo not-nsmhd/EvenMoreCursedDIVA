@@ -41,12 +41,17 @@ namespace DIVA
 		if (!LoadGraphics()) { return false; }
 		if (!LoadSongList()) { return false; }
 
+		VideoPlayer = Video::InitializeVideoPlayer_MediaFoundation();
+		if (VideoPlayer == nullptr)
+			return false;
+
 		return true;
 	}
 
 	void GameContext::Unload()
 	{		
 		SongList.clear();
+		VideoPlayer = nullptr;
 		DebugFont = nullptr;
 		DefaultFont = nullptr;
 		SpriteRenderer = nullptr;

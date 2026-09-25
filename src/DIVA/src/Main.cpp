@@ -15,10 +15,6 @@ extern "C"
 #endif
 	int SDL_main(int argc, char* argv[])
 	{
-		bool startVideoTest = false;
-		if (argc == 2)
-			startVideoTest = SDL_strncmp("video", argv[1], 5) == 0;
-
 		GameInstance game;
 
 		if (game.Initialize(false))
@@ -38,7 +34,7 @@ extern "C"
 			window->SetPosition(SettingsData.Window.Position);
 			window->SetSize(SettingsData.Window.Size);
 
-			if (!game.SetState(GetStatePointer(startVideoTest ? StateID::Sandbox_MFVideoTest : StateID::ChartSelect))) { return 1; }
+			if (!game.SetState(GetStatePointer(StateID::ChartSelect))) { return 1; }
 
 			game.EnterLoop();
 

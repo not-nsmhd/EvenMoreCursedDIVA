@@ -4,6 +4,7 @@
 #include <Graphics/Font.h>
 #include <vector>
 #include "Formats/SongInfo.h"
+#include <Video/VideoPlayer.h>
 
 namespace DIVA
 {
@@ -23,6 +24,8 @@ namespace DIVA
 		std::unique_ptr<Starshine::Rendering::Render2D::SpriteRenderer> SpriteRenderer;
 
 		std::vector<Formats::SongInfo> SongList;
+
+		std::unique_ptr<Starshine::Video::VideoPlayer> VideoPlayer{};
 
 	public:
 		static bool CreateInstance();

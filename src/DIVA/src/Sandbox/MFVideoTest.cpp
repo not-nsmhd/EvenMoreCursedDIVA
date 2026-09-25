@@ -95,6 +95,7 @@ namespace DIVA::Sandbox
 
 		bool loaded = false;
 		f64 currentTime{};
+		LONGLONG presentTime{};
 
 		Impl()
 		{
@@ -193,7 +194,7 @@ namespace DIVA::Sandbox
 
 		bool LoadContent()
 		{
-			BSTR filePath = SysAllocString(L"diva/videos/devtest_long.mp4");
+			BSTR filePath = SysAllocString(L"diva/videos/devtest_720.mp4");
 
 			HRESULT result = S_OK;
 			if (result = MF.mediaEngine->SetSource(filePath), result != S_OK)
@@ -230,6 +231,7 @@ namespace DIVA::Sandbox
 
 				currentTime = MF.mediaEngine->GetCurrentTime();
 			}
+			presentTime = pts;
 		}
 
 		void Draw()
@@ -253,7 +255,7 @@ namespace DIVA::Sandbox
 			sprRenderer->PushSprite(videoTex);
 
 			char buffer[128]{};
-			SDL_snprintf(buffer, sizeof(buffer), "Current time: %0.3f", currentTime);
+			SDL_snprintf(buffer, sizeof(buffer), "Current time: %0.3f\nPresentation time: %lld", currentTime, presentTime);
 
 			fontRenderer.PushString(font, buffer, vec2(0.0f), vec2(1.0f), DefaultColors::White, DefaultColors::Black);
 

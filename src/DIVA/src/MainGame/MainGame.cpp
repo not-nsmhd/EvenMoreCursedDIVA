@@ -27,6 +27,7 @@ namespace DIVA::MainGame
 	using namespace Starshine::Rendering;
 	using namespace Starshine::Rendering::Render2D;
 	using namespace Starshine::Audio;
+	using namespace Starshine::Video;
 	using namespace Starshine::Input;
 
 	enum class SubState : i32
@@ -133,6 +134,9 @@ namespace DIVA::MainGame
 		std::unique_ptr<SpritePacker> sprPacker;
 
 		std::unique_ptr<SpriteVertex[]> noteTrailVertices{};
+
+		VideoPlayer* videoPlayer{};
+		bool hasVideo{};
 
 		char debugText[512] = {};
 
@@ -334,6 +338,13 @@ namespace DIVA::MainGame
 				MusicVoice.SetPlaying(true);
 			}
 
+			videoPlayer = GameContext::GetInstance()->VideoPlayer.get();
+			if (videoPlayer->OpenFile("diva/videos/wdym.mp4"))
+			{
+				hasVideo = true;
+				//videoPlayer->SetIsPlaying(true);
+			}
+
 			return true;
 		}
 
@@ -365,6 +376,9 @@ namespace DIVA::MainGame
 
 		void UnloadContent()
 		{
+			if (hasVideo)
+				videoPlayer->CloseFile();
+
 			AudioEngine::GetInstance()->FreeVoice(MusicVoice);
 			AudioEngine::GetInstance()->FreeVoice(HitSound_Hold_LoopVoice);
 
@@ -869,17 +883,23 @@ namespace DIVA::MainGame
 				Paused = !Paused;
 				DisplayPauseMenu = Paused;
 				if (MusicSource != SourceHandle::Invalid)
+				{
 					MusicVoice.SetPlaying(!Paused);
+					if (hasVideo)
+						videoPlayer->SetIsPlaying(!Paused);
+				}
 			}
 
 			SDL_memset(debugText, 0, sizeof(debugText));
 
+#if 0
 			size_t lastPos = 0;
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f/%.03f\n",
 				ElapsedTime.GetSeconds(), songChart.Duration.GetSeconds());
 
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
+#endif
 		}
 
 		void UpdatePauseMenu()
@@ -895,11 +915,13 @@ namespace DIVA::MainGame
 				case 0:
 					Paused = false;
 					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
+					if (hasVideo) { videoPlayer->SetIsPlaying(true); }
 					break;
 				case 1:
 					Reset();
 					Paused = false;
 					if (MusicSource != SourceHandle::Invalid) { MusicVoice.SetPlaying(!Paused); }
+					if (hasVideo) { videoPlayer->SetIsPlaying(true); }
 					break;
 				case 2:
 					GameInstance->SetState(GetStatePointer(StateID::ChartSelect));
@@ -979,6 +1001,14 @@ namespace DIVA::MainGame
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 			spriteRenderer->SetTransformMatrix(scaleMatrix);
 
+			if (hasVideo)
+			{
+				spriteRenderer->SetSpritePosition(vec2());
+				spriteRenderer->SetSpriteSize(BaseResolution);
+				spriteRenderer->SetSpriteSource(RectangleF(0.0f, 0.0f, 1.0f, 1.0f));
+				spriteRenderer->PushSprite(videoPlayer->GetVideoTexture());
+			}
+
 			size_t noteTrailVerticesToDraw = 0;
 			size_t trailVertexCount = 0;
 
@@ -1013,11 +1043,13 @@ namespace DIVA::MainGame
 
 			hud->Draw(gameTime);
 
+#if 0
 			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
 			if (Paused && DisplayPauseMenu)
 				DrawPauseMenu();
 
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+#endif
 			spriteRenderer->Present();
 		}
 
