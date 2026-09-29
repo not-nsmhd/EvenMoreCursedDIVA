@@ -338,13 +338,6 @@ namespace DIVA::MainGame
 				MusicVoice.SetPlaying(true);
 			}
 
-			videoPlayer = GameContext::GetInstance()->VideoPlayer.get();
-			if (videoPlayer->OpenFile("diva/videos/wdym.mp4"))
-			{
-				hasVideo = true;
-				//videoPlayer->SetIsPlaying(true);
-			}
-
 			return true;
 		}
 
@@ -372,6 +365,16 @@ namespace DIVA::MainGame
 				return true;
 			}
 			return false;
+		}
+
+		void LoadVideo(std::string_view videoPath)
+		{
+			videoPlayer = GameContext::GetInstance()->VideoPlayer.get();
+			if (videoPlayer->OpenFile(videoPath))
+			{
+				videoPlayer->WaitUntilCanBePlayed();
+				hasVideo = true;
+			}
 		}
 
 		void UnloadContent()
@@ -859,7 +862,7 @@ namespace DIVA::MainGame
 			if (!Paused)
 			{	
 				if (MusicSource != SourceHandle::Invalid && MusicVoice.IsPlaying())
-					ElapsedTime = TimeSpanConversion::FromSeconds(static_cast<f64>(MusicVoice.GetFramePosition() / 44100.0));
+					ElapsedTime = TimeSpan::FromSeconds(static_cast<f64>(MusicVoice.GetFramePosition() / 44100.0));
 				else
 					ElapsedTime += gameTime.ElapsedFrameTime;
 
@@ -1043,11 +1046,11 @@ namespace DIVA::MainGame
 
 			hud->Draw(gameTime);
 
-#if 0
-			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
 			if (Paused && DisplayPauseMenu)
 				DrawPauseMenu();
 
+#if 0
+			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 #endif
 			spriteRenderer->Present();
@@ -1055,32 +1058,33 @@ namespace DIVA::MainGame
 
 		void DrawPauseMenu()
 		{
-			const RectangleF viewportSize = GFXDevice->GetViewportSize();
-			const vec2 menuPosition = { viewportSize.Width / 2.0f, (viewportSize.Height / 2.0f) - debugFont->LineHeight * 3.0f };
+			const Font* font = GameContext::GetInstance()->DefaultFont.get();
+			const vec2 menuPosition = { BaseResolution.x / 2.0f, (BaseResolution.y / 2.0f) - (font->LineHeight * 3.0f) / 2.0f };
 
 			spriteRenderer->SetSpriteColor({ 0, 0, 0, 128 });
-			spriteRenderer->SetSpritePosition(viewportSize.Position());
-			spriteRenderer->SetSpriteSize(viewportSize.Size());
+			spriteRenderer->SetSpriteSize(BaseResolution);
 			spriteRenderer->PushSprite(nullptr);
 
 			for (i32 i = 0; i < pauseMenu_OptionLabels.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, pauseMenu_OptionLabels[i],
-					vec2(menuPosition.x, menuPosition.y + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(font, pauseMenu_OptionLabels[i],
+					vec2(menuPosition.x, menuPosition.y + static_cast<float>(i) * font->LineHeight), vec2(1.0f),
 					i == pause_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 		}
 
 		void DrawResults()
 		{
+			const Font* font = GameContext::GetInstance()->DefaultFont.get();
+
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
-			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(font, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{
-				spriteRenderer->Font().PushString(debugFont, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * debugFont->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(font, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * font->LineHeight), vec2(1.0f),
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 
@@ -1099,7 +1103,7 @@ namespace DIVA::MainGame
 	bool MainGameState::Initialize()
 	{
 		impl = std::make_unique<Impl>(context);
-		impl->MainGameContext.SongName = LoadSettings.SongName;
+		impl->MainGameContext.SongName = LoadSettings.SongInfoToLoad.Name;
 		impl->MainGameContext.Difficulty = LoadSettings.Difficulty;
 
 		impl->GameInstance = GameInstance;
@@ -1109,9 +1113,12 @@ namespace DIVA::MainGame
 	
 	bool MainGameState::LoadContent()
 	{
-		impl->LoadChart(LoadSettings.ChartPath);
-		impl->LoadLyrics(LoadSettings.LyricsPath);
-		impl->LoadMusic(LoadSettings.MusicPath);
+		size_t difficultyIndex = static_cast<size_t>(LoadSettings.Difficulty);
+		impl->LoadChart(LoadSettings.SongInfoToLoad.ChartFilePaths[difficultyIndex]);
+		impl->LoadLyrics(LoadSettings.SongInfoToLoad.LyricsFilePath);
+		impl->LoadMusic(LoadSettings.SongInfoToLoad.MusicFilePath);
+		impl->LoadVideo(LoadSettings.SongInfoToLoad.VideoFilePath);
+		
 		return impl->LoadContent();
 	}
 	

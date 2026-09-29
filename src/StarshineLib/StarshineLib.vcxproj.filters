@@ -29,6 +29,12 @@
     <Filter Include="Source Files\IO\FileSystem">
       <UniqueIdentifier>{6c49a91c-944d-4da6-b0f2-f6ccf0d551d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Random">
+      <UniqueIdentifier>{9412a5fa-bfd2-43f1-9509-7e27fe629b8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Random\pcg">
+      <UniqueIdentifier>{aaee9d9c-669b-4d4e-b752-16354da91d33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Common\Types.h">
@@ -121,6 +127,15 @@
     <ClInclude Include="src\IO\XmlStreamPrinter.h">
       <Filter>Source Files\IO</Filter>
     </ClInclude>
+    <ClInclude Include="src\Common\TimeSpan.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Random\RNG.h">
+      <Filter>Source Files\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Random\pcg\pcg_variants.h">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -184,6 +199,63 @@
     </ClCompile>
     <ClCompile Include="src\IO\XmlStreamPrinter.cpp">
       <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Common\TimeSpan.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-advance-32.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-advance-64.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-advance-128.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-global-32.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-global-64.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-output-8.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-output-16.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-output-32.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-output-64.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-output-128.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-rngs-8.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-rngs-16.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-rngs-32.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-rngs-64.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-rngs-128.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-advance-8.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\pcg\pcg-advance-16.c">
+      <Filter>Source Files\Random\pcg</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random\RNG.cpp">
+      <Filter>Source Files\Random</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

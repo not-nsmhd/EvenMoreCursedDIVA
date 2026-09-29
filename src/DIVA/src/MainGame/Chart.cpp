@@ -1,8 +1,10 @@
 #include "Chart.h"
 
+using namespace Starshine;
+
 namespace DIVA::MainGame
 {
-	constexpr TimeSpan DefaultNoteDuration = Starshine::TimeSpanConversion::FromSeconds(2.0);
+	constexpr TimeSpan DefaultNoteDuration = Starshine::TimeSpan::FromSeconds(2.0);
 
 	using namespace Starshine;
 
@@ -14,7 +16,7 @@ namespace DIVA::MainGame
 		Xml::Element* rootElement = chartDoc.RootElement();
 		float time_seconds = 0.0f;
 		rootElement->QueryFloatAttribute("Duration", &time_seconds);
-		Duration = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+		Duration = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 		size_t noteCount = static_cast<size_t>(rootElement->ChildElementCount("Note"));
 		size_t noteTimeChangesCount = static_cast<size_t>(rootElement->ChildElementCount("SetNoteTime"));
@@ -31,7 +33,7 @@ namespace DIVA::MainGame
 
 			time_seconds = 0.0f;
 			element->QueryFloatAttribute("Time", &time_seconds);
-			newNote.AppearTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+			newNote.AppearTime = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 			curAttrib = element->FindAttribute("Shape");
 			newNote.Shape = Starshine::EnumFromString<NoteShape>(NoteShapeStringTable, curAttrib->Value());
@@ -57,10 +59,10 @@ namespace DIVA::MainGame
 
 			time_seconds = 0.0f;
 			element->QueryFloatAttribute("Time", &time_seconds);
-			newTimeChange.Time = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+			newTimeChange.Time = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 			element->QueryFloatAttribute("Value", &time_seconds);
-			newTimeChange.Value = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+			newTimeChange.Value = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 			element = element->NextSiblingElement("SetNoteTime");
 		}
@@ -72,14 +74,14 @@ namespace DIVA::MainGame
 
 			time_seconds = 0.0f;
 			element->QueryFloatAttribute("Time", &time_seconds);
-			chanceTime.StartTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+			chanceTime.StartTime = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 			element = rootElement->FirstChildElement("ChanceTimeEnd");
 			if (element != nullptr)
 			{
 				time_seconds = 0.0f;
 				element->QueryFloatAttribute("Time", &time_seconds);
-				chanceTime.EndTime = Starshine::TimeSpanConversion::FromSeconds(time_seconds);
+				chanceTime.EndTime = Starshine::TimeSpan::FromSeconds(time_seconds);
 
 				ChanceTimes.push_back(chanceTime);
 			}

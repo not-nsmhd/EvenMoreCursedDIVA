@@ -89,11 +89,7 @@ namespace DIVA::MainGame
 	public:
 		struct LoadSetttingsData
 		{
-			std::string ChartPath;
-			std::string LyricsPath;
-			std::string MusicPath;
-
-			std::string SongName;
+			Formats::SongInfo SongInfoToLoad;
 			Formats::ChartDifficulty Difficulty{};
 		} LoadSettings;
 

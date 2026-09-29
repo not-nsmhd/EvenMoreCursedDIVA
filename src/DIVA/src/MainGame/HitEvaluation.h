@@ -21,13 +21,13 @@ namespace DIVA::MainGame
 
 	namespace HitThresholds
 	{
-		constexpr TimeSpan CoolThreshold = TimeSpanConversion::FromMilliseconds(30.0);
-		constexpr TimeSpan GoodThreshold = TimeSpanConversion::FromMilliseconds(70.0);
-		constexpr TimeSpan SafeThreshold = TimeSpanConversion::FromMilliseconds(100.0);
-		constexpr TimeSpan BadThreshold = TimeSpanConversion::FromMilliseconds(130.0);
+		constexpr TimeSpan CoolThreshold = TimeSpan::FromMilliseconds(30.0);
+		constexpr TimeSpan GoodThreshold = TimeSpan::FromMilliseconds(70.0);
+		constexpr TimeSpan SafeThreshold = TimeSpan::FromMilliseconds(100.0);
+		constexpr TimeSpan BadThreshold = TimeSpan::FromMilliseconds(130.0);
 				  
-		constexpr TimeSpan ThresholdStart = TimeSpanConversion::FromMilliseconds(130.0);
-		constexpr TimeSpan ThresholdMiss = TimeSpanConversion::FromMilliseconds(-130.0);
+		constexpr TimeSpan ThresholdStart = TimeSpan::FromMilliseconds(130.0);
+		constexpr TimeSpan ThresholdMiss = TimeSpan::FromMilliseconds(-130.0);
 	}
 
 	namespace ScoreValues

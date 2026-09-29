@@ -61,7 +61,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -78,7 +78,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -102,9 +102,7 @@
     <ClCompile Include="src\MainGame\Lyrics.cpp" />
     <ClCompile Include="src\MainGame\MainGame.cpp" />
     <ClCompile Include="src\Menu\ChartSelect.cpp" />
-    <ClCompile Include="src\Sandbox\AlphaDilationTest.cpp" />
-    <ClCompile Include="src\Sandbox\MFVideoTest.cpp" />
-    <ClCompile Include="src\Sandbox\SpriteCommandTest.cpp" />
+    <ClCompile Include="src\Sandbox\RNGTest.cpp" />
     <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +120,7 @@
     <ClInclude Include="src\MainGame\Lyrics.h" />
     <ClInclude Include="src\MainGame\MainGame.h" />
     <ClInclude Include="src\Menu\ChartSelect.h" />
-    <ClInclude Include="src\Sandbox\AlphaDilationTest.h" />
-    <ClInclude Include="src\Sandbox\MFVideoTest.h" />
-    <ClInclude Include="src\Sandbox\SpriteCommandTest.h" />
+    <ClInclude Include="src\Sandbox\RNGTest.h" />
     <ClInclude Include="src\Settings.h" />
   </ItemGroup>
   <ItemGroup>

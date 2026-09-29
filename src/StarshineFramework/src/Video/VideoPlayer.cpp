@@ -164,6 +164,9 @@ namespace Starshine::Video
 
 		bool OpenFile(std::string_view filePath) override
 		{
+			if (filePath.empty())
+				return false;
+
 			HRESULT result = S_OK;
 			if (result = mediaEngine->SetSource(StrViewToBStr(filePath)), result != S_OK)
 			{
@@ -182,6 +185,26 @@ namespace Starshine::Video
 			videoFileLoaded = false;
 			canStart = false;
 			playing = false;
+		}
+
+		bool QueryCanBePlayed() override
+		{
+			if (!videoFileLoaded)
+				return false;
+
+			return canStart;
+		}
+
+		void WaitUntilCanBePlayed() override
+		{
+			if (!videoFileLoaded)
+				return;
+
+			while (true)
+			{
+				if (canStart)
+					return;
+			}
 		}
 
 		bool GetIsPlaying() override
@@ -204,14 +227,14 @@ namespace Starshine::Video
 		{
 			if (!videoFileLoaded)
 				return {};
-			return TimeSpanConversion::FromSeconds(videoDuration);
+			return TimeSpan::FromSeconds(videoDuration);
 		}
 
 		TimeSpan GetPosition() override
 		{
 			if (!videoFileLoaded)
 				return {};
-			return TimeSpanConversion::FromSeconds(currentVideoTime);
+			return TimeSpan::FromSeconds(currentVideoTime);
 		}
 
 		ivec2 GetResolution() override

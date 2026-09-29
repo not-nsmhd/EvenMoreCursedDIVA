@@ -1,10 +1,8 @@
 #pragma once
 #include "Common/Types.h"
-#include "TimeSpan.h"
+#include "Common/TimeSpan.h"
 #include "IO/Xml.h"
 #include <vector>
-
-using Starshine::TimeSpan;
 
 namespace DIVA::MainGame
 {
@@ -68,7 +66,7 @@ namespace DIVA::MainGame
 
 	struct ChartNote
 	{
-		TimeSpan AppearTime{};
+		Starshine::TimeSpan AppearTime{};
 		NoteShape Shape{};
 		NoteType Type{};
 
@@ -85,20 +83,20 @@ namespace DIVA::MainGame
 
 	struct NoteTimeChange
 	{
-		TimeSpan Time{};
-		TimeSpan Value{};
+		Starshine::TimeSpan Time{};
+		Starshine::TimeSpan Value{};
 	};
 
 	struct ChanceTime
 	{
-		TimeSpan StartTime{};
-		TimeSpan EndTime{};
+		Starshine::TimeSpan StartTime{};
+		Starshine::TimeSpan EndTime{};
 	};
 
 	class Chart
 	{
 	public:
-		TimeSpan Duration{};
+		Starshine::TimeSpan Duration{};
 	public:
 		std::vector<ChartNote> Notes;
 		std::vector<NoteTimeChange> NoteTimeChanges;
@@ -112,7 +110,7 @@ namespace DIVA::MainGame
 
 		bool LoadXml(std::string_view filePath);
 
-		TimeSpan GetNoteTime(const TimeSpan& time);
-		const ChanceTime* GetNextChanceTime(const TimeSpan& time);
+		Starshine::TimeSpan GetNoteTime(const Starshine::TimeSpan& time);
+		const ChanceTime* GetNextChanceTime(const Starshine::TimeSpan& time);
 	};
 }

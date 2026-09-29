@@ -15,6 +15,7 @@ namespace DIVA::Formats
 		static constexpr std::string_view ChartFileList = "Charts";
 		static constexpr std::string_view LyricsFile = "LyricsFile";
 		static constexpr std::string_view MusicFile = "MusicFile";
+		static constexpr std::string_view VideoFile = "VideoFile";
 	}
 
 	bool SongInfo::ParseFromFile(std::string_view filePath)
@@ -61,6 +62,10 @@ namespace DIVA::Formats
 			else if (!::strncmp(childElement->Name(), PropertyNames::MusicFile.data(), PropertyNames::MusicFile.size()))
 			{
 				getAttributeValue(childElement, "Path", MusicFilePath);
+			}
+			else if (!::strncmp(childElement->Name(), PropertyNames::VideoFile.data(), PropertyNames::VideoFile.size()))
+			{
+				getAttributeValue(childElement, "Path", VideoFilePath);
 			}
 
 			childElement = childElement->NextSiblingElement();

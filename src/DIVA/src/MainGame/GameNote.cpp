@@ -8,7 +8,7 @@ namespace DIVA::MainGame
 	using namespace Starshine::Rendering;
 	using namespace Starshine::Rendering::Render2D;
 
-	constexpr TimeSpan NoteRemoveTimeThreshold = TimeSpanConversion::FromMilliseconds(-1000.0);
+	constexpr TimeSpan NoteRemoveTimeThreshold = TimeSpan::FromMilliseconds(-1000.0);
 	constexpr f32 TrailMaxProgress{ 1.0f };
 
 	TimeSpan GameNote::GetRemainingTime() const

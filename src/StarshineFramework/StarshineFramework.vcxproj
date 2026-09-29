@@ -56,7 +56,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -162,7 +162,6 @@
     <ClInclude Include="src\Rendering\Types.h" />
     <ClInclude Include="src\Rendering\Utilities.h" />
     <ClInclude Include="src\Rendering\VertexDesc.h" />
-    <ClInclude Include="src\TimeSpan.h" />
     <ClInclude Include="src\Video\VideoPlayer.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
@@ -200,7 +199,6 @@
     <ClCompile Include="src\Rendering\Render2D\SpriteRenderer.cpp" />
     <ClCompile Include="src\Rendering\Render2D\SpriteSheetRenderer.cpp" />
     <ClCompile Include="src\Rendering\Utilities.cpp" />
-    <ClCompile Include="src\TimeSpan.cpp" />
     <ClCompile Include="src\Video\VideoPlayer.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

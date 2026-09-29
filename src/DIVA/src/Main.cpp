@@ -9,10 +9,8 @@
 using namespace Starshine;
 using namespace DIVA;
 
-#ifdef __cplusplus
 extern "C"
 {
-#endif
 	int SDL_main(int argc, char* argv[])
 	{
 		GameInstance game;
@@ -50,6 +48,4 @@ extern "C"
 
 		return 1;
 	}
-#ifdef __cplusplus
 }
-#endif

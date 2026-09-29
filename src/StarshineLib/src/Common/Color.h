@@ -23,6 +23,28 @@ namespace Starshine
 			B{ static_cast<u8>(vector.b * 255.0f) },
 			A{ static_cast<u8>(vector.a * 255.0f) } {};
 
+		// NOTE: Hue is specified in [0; 360) range
+		//       saturation and value are specified in [0; 1] range
+		static inline Color FromHSV(f32 hue, f32 saturation, f32 value)
+		{
+			f32 h = hue / 60;
+			f32 c = value * saturation;
+			f32 x = c * (1.0f - ::fabsf(::fmodf(h, 2.0f) - 1.0f));
+
+			switch (static_cast<i32>(h))
+			{
+			case 0: return Color(vec4(c, x, 0.0f, 1.0f));
+			case 1: return Color(vec4(x, c, 0.0f, 1.0f));
+			case 2: return Color(vec4(0.0f, c, x, 1.0f));
+			case 3: return Color(vec4(0.0f, x, c, 1.0f));
+			case 4: return Color(vec4(x, 0.0f, c, 1.0f));
+			case 5: return Color(vec4(c, 0.0f, x, 1.0f));
+			default: return Color();
+			}
+
+			return Color();
+		}
+
 		constexpr Color operator+(const Color& right) const
 		{ 
 			return Color(R + right.R, G + right.G, B + right.B, A + right.A);

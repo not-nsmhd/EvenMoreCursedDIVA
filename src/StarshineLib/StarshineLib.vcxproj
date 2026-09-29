@@ -58,7 +58,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -90,7 +90,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -125,6 +125,7 @@
     <ClInclude Include="src\Common\Logging\Logging.h" />
     <ClInclude Include="src\Common\MathExt.h" />
     <ClInclude Include="src\Common\Rect.h" />
+    <ClInclude Include="src\Common\TimeSpan.h" />
     <ClInclude Include="src\Common\Types.h" />
     <ClInclude Include="src\Graphics\AnimationSet.h" />
     <ClInclude Include="src\Graphics\Font.h" />
@@ -150,6 +151,8 @@
     <ClInclude Include="src\Misc\Compression.h" />
     <ClInclude Include="src\Misc\EndianHelper.h" />
     <ClInclude Include="src\Misc\ImageHelper.h" />
+    <ClInclude Include="src\Random\pcg\pcg_variants.h" />
+    <ClInclude Include="src\Random\RNG.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig" />
@@ -157,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\lib\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="src\Common\Logging\Logging.cpp" />
+    <ClCompile Include="src\Common\TimeSpan.cpp" />
     <ClCompile Include="src\Graphics\AnimationSet.cpp" />
     <ClCompile Include="src\Graphics\Font.cpp" />
     <ClCompile Include="src\Graphics\qoi.cpp" />
@@ -174,6 +178,24 @@
     <ClCompile Include="src\IO\XmlStreamPrinter.cpp" />
     <ClCompile Include="src\Misc\Compression.cpp" />
     <ClCompile Include="src\Misc\ImageHelper.cpp" />
+    <ClCompile Include="src\Random\pcg\pcg-advance-128.c" />
+    <ClCompile Include="src\Random\pcg\pcg-advance-16.c" />
+    <ClCompile Include="src\Random\pcg\pcg-advance-32.c" />
+    <ClCompile Include="src\Random\pcg\pcg-advance-64.c" />
+    <ClCompile Include="src\Random\pcg\pcg-advance-8.c" />
+    <ClCompile Include="src\Random\pcg\pcg-global-32.c" />
+    <ClCompile Include="src\Random\pcg\pcg-global-64.c" />
+    <ClCompile Include="src\Random\pcg\pcg-output-128.c" />
+    <ClCompile Include="src\Random\pcg\pcg-output-16.c" />
+    <ClCompile Include="src\Random\pcg\pcg-output-32.c" />
+    <ClCompile Include="src\Random\pcg\pcg-output-64.c" />
+    <ClCompile Include="src\Random\pcg\pcg-output-8.c" />
+    <ClCompile Include="src\Random\pcg\pcg-rngs-128.c" />
+    <ClCompile Include="src\Random\pcg\pcg-rngs-16.c" />
+    <ClCompile Include="src\Random\pcg\pcg-rngs-32.c" />
+    <ClCompile Include="src\Random\pcg\pcg-rngs-64.c" />
+    <ClCompile Include="src\Random\pcg\pcg-rngs-8.c" />
+    <ClCompile Include="src\Random\RNG.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dependencies\bzip2\bzip2.vcxproj">

@@ -1,6 +1,6 @@
 #pragma once
 #include "Common/Types.h"
-#include "TimeSpan.h"
+#include "Common/TimeSpan.h"
 #include "Chart.h"
 #include "HitEvaluation.h"
 #include "MainGame.h"

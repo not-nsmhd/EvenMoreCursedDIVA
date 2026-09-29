@@ -4,9 +4,7 @@
 
 #include "Menu/ChartSelect.h"
 #include "MainGame/MainGame.h"
-#include "Sandbox/AlphaDilationTest.h"
-#include "Sandbox/SpriteCommandTest.h"
-#include "Sandbox/MFVideoTest.h"
+#include "Sandbox/RNGTest.h"
 
 namespace DIVA
 {
@@ -17,10 +15,7 @@ namespace DIVA
 		ChartSelect,
 		MainGame,
 
-		Sandbox_AlphaDilationTest,
-		Sandbox_SpriteCommandTest,
-		Sandbox_MFVideoTest,
-		DumbIdea,
+		Sandbox_RNGTest,
 
 		Count
 	};
@@ -30,9 +25,7 @@ namespace DIVA
 		std::make_unique<Menu::ChartSelect>(),
 		std::make_unique<MainGame::MainGameState>(),
 
-		std::make_unique<Sandbox::AlphaDilationTest>(),
-		std::make_unique<Sandbox::SpriteCommandTest>(),
-		std::make_unique<Sandbox::MFVideoTest>()
+		std::make_unique<Sandbox::RNGTest>(),
 	};
 
 	inline Starshine::GameState* GetStatePointer(StateID id)

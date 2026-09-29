@@ -172,9 +172,6 @@
     <ClInclude Include="src\ImGui\Extensions\StarshineExtensions.h">
       <Filter>Source Files\ImGui\Extensions</Filter>
     </ClInclude>
-    <ClInclude Include="src\TimeSpan.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\Render2D\AnimationSetRenderer.h">
       <Filter>Source Files\Rendering\Render2D</Filter>
     </ClInclude>
@@ -277,9 +274,6 @@
     </ClCompile>
     <ClCompile Include="src\ImGui\Core\backends\imgui_impl_dx11.cpp">
       <Filter>Source Files\ImGui\Core\backends</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TimeSpan.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\Render2D\AnimationSetRenderer.cpp">
       <Filter>Source Files\Rendering\Render2D</Filter>

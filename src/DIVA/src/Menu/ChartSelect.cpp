@@ -133,15 +133,12 @@ namespace DIVA::Menu
 
 			if (Keyboard::IsKeyTapped(SDLK_RETURN))
 			{
-				const SongInfo& info = songList[selectionIndex];
+				SongInfo& info = songList[selectionIndex];
 
 				if (!info.ChartFilePaths[currentDifficultyIndex].empty())
 				{
 					auto mgState = static_cast<MainGame::MainGameState*>(GetStatePointer(StateID::MainGame));
-					mgState->LoadSettings.ChartPath = info.ChartFilePaths[currentDifficultyIndex];
-					mgState->LoadSettings.LyricsPath = info.LyricsFilePath;
-					mgState->LoadSettings.MusicPath = info.MusicFilePath;
-					mgState->LoadSettings.SongName = info.Name;
+					mgState->LoadSettings.SongInfoToLoad = info;
 					mgState->LoadSettings.Difficulty = static_cast<ChartDifficulty>(currentDifficultyIndex);
 					GameInstance->SetState(mgState);
 				}

@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "TimeSpan.h"
+#include "Common/TimeSpan.h"
 
 namespace Starshine
 {
