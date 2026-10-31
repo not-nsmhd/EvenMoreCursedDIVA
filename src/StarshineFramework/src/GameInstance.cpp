@@ -60,7 +60,7 @@ namespace Starshine
 
 		bool Initialize(bool initImGui)
 		{
-#if defined (_DEBUG)
+#ifdef _DEBUG
 			LogMessage("--- Starshine %02d.%02d [Debug] ---", BuildInfo::BuildYear - 2000, BuildInfo::BuildMonth);
 #endif
 
@@ -68,6 +68,11 @@ namespace Starshine
 
 			LogMessage("Build Date: %s", BuildInfo::BuildDateString);
 			LogMessage("Git Information: %s, %s", BuildInfo::GitBranchName, BuildInfo::GitCommitHashString);
+
+#ifdef _DEBUG
+			if (BuildInfo::HasUnstagedChanges)
+				LogMessage("WARNING: Git repository has unstaged changes");
+#endif
 
 			SDL_Init(SDL_INIT_EVERYTHING);
 			Parent->GameWindow = std::make_unique<Window>("", 1280, 720, SDL_WINDOW_SHOWN);

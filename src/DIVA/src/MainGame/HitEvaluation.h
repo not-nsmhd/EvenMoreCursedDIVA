@@ -44,4 +44,14 @@ namespace DIVA::MainGame
 
 		constexpr u32 DoubleBonus = 200;
 	}
+
+	namespace LifeValues
+	{
+		constexpr i32 Cool = 14;
+		constexpr i32 Good = 7;
+		constexpr i32 Safe = 0;
+		constexpr i32 Bad = -15;
+		constexpr i32 Miss = -50;
+		constexpr i32 Wrong = Bad;
+	}
 }

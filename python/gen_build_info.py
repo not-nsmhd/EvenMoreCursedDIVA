@@ -17,6 +17,12 @@ def main():
     
     process = subprocess.run("git rev-parse --short=7 HEAD", capture_output=True, encoding="ASCII", shell=True)
     gitCommitHash = process.stdout
+    
+    process = subprocess.run("git diff --name-only", capture_output=True, encoding="ASCII", shell=True)
+    hasUnstagedChanges = "false"
+    
+    if (len(process.stdout) > 0):
+        hasUnstagedChanges = "true"
 
     # Writing
     buildDefFile = open(outputFile, "wb")
@@ -37,7 +43,8 @@ def main():
     # Variables
     buildDefFileWriter.write("\tstatic constexpr const char* BuildDateString = \"{genDate}\";\n".format(genDate=genDateString))
     buildDefFileWriter.write("\tstatic constexpr const char* GitBranchName = \"{branch}\";\n".format(branch=gitBranch[:-1]))
-    buildDefFileWriter.write("\tstatic constexpr const char* GitCommitHashString = \"{hash}\";\n\n".format(hash=gitCommitHash[:-1]))
+    buildDefFileWriter.write("\tstatic constexpr const char* GitCommitHashString = \"{hash}\";\n".format(hash=gitCommitHash[:-1]))
+    buildDefFileWriter.write("\tstatic constexpr bool HasUnstagedChanges = {value};\n\n".format(value=hasUnstagedChanges))
     
     buildDefFileWriter.write("\tstatic constexpr int BuildYear = {year};\n".format(year=genDate.year))
     buildDefFileWriter.write("\tstatic constexpr int BuildMonth = {month};\n".format(month=genDate.month))

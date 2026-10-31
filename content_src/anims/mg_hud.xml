@@ -1,18 +1,19 @@
 <AnimationSet Width="1920" Height="1080" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/mg_hud">
     <SpriteDefinitions>
+        <SpriteDefinition Name="ChanceTime_Label" Size="256.000000 35.000000"/>
+        <SpriteDefinition Name="ChanceTime_Label_Glow" Size="275.000000 52.000000"/>
+        <SpriteDefinition Name="ChanceTime_NoticeBase" Size="834.000000 59.000000"/>
         <SpriteDefinition Name="ChanceTime_NoticeText_Over" Size="428.000000 31.000000"/>
         <SpriteDefinition Name="ChanceTime_NoticeText_Start" Size="458.000000 31.000000"/>
-        <SpriteDefinition Name="ChanceTime_Notice_Base" Size="440.000000 62.000000"/>
         <SpriteDefinition Name="ClearGauge_Base" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Base_Excellent" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Base_Great" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Base_Standard" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Fill_Clear" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Fill_Normal" Size="1.000000 42.000000"/>
-        <SpriteDefinition Name="ClearGauge_Marker" Size="5.000000 42.000000"/>
         <SpriteDefinition Name="ClearGauge_Overlay" Size="1.000000 42.000000"/>
-        <SpriteDefinition Name="ClearGauge_Shadow_Corner" Size="23.000000 42.000000"/>
-        <SpriteDefinition Name="ClearGauge_Shadow_Middle" Size="23.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Shadow_Corner" Size="15.000000 42.000000"/>
+        <SpriteDefinition Name="ClearGauge_Shadow_Middle" Size="1.000000 42.000000"/>
         <SpriteDefinition Name="ClearPercentage_0" Size="48.000000 48.000000"/>
         <SpriteDefinition Name="ClearPercentage_1" Size="23.000000 48.000000"/>
         <SpriteDefinition Name="ClearPercentage_2" Size="48.000000 48.000000"/>
@@ -37,30 +38,54 @@
         <SpriteDefinition Name="Combo_8" Size="33.000000 33.000000"/>
         <SpriteDefinition Name="Combo_9" Size="33.000000 33.000000"/>
         <SpriteDefinition Name="Difficulty_Easy" Size="116.000000 37.000000"/>
-        <SpriteDefinition Name="Difficulty_Easy_ChanceTime" Size="116.000000 37.000000"/>
         <SpriteDefinition Name="Difficulty_Extreme" Size="193.000000 37.000000"/>
-        <SpriteDefinition Name="Difficulty_Extreme_ChanceTime" Size="193.000000 37.000000"/>
         <SpriteDefinition Name="Difficulty_Hard" Size="116.000000 37.000000"/>
-        <SpriteDefinition Name="Difficulty_Hard_ChanceTime" Size="116.000000 37.000000"/>
         <SpriteDefinition Name="Difficulty_Normal" Size="176.000000 37.000000"/>
-        <SpriteDefinition Name="Difficulty_Normal_ChanceTime" Size="176.000000 37.000000"/>
-        <SpriteDefinition Name="Difficulty_Tutorial" Size="214.000000 43.000000"/>
-        <SpriteDefinition Name="Difficulty_Tutorial_ChanceTime" Size="214.000000 43.000000"/>
+        <SpriteDefinition Name="Difficulty_Tutorial" Size="227.000000 43.000000"/>
         <SpriteDefinition Name="Frame_Bottom" Size="1.000000 73.000000"/>
+        <SpriteDefinition Name="Frame_Bottom_LifeGauge" Size="326.000000 283.000000"/>
         <SpriteDefinition Name="Frame_Top01" Size="1.000000 88.000000"/>
         <SpriteDefinition Name="Frame_Top02" Size="197.000000 88.000000"/>
         <SpriteDefinition Name="HitValu_Bad" Size="89.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Bad_Wrong" Size="169.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Cool" Size="117.000000 37.000000"/>
-        <SpriteDefinition Name="HitValu_Cool_InTime" Size="117.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Cool_Wrong" Size="169.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Good" Size="122.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Good_Wrong" Size="169.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Miss" Size="108.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Safe" Size="115.000000 37.000000"/>
         <SpriteDefinition Name="HitValu_Safe_Wrong" Size="169.000000 37.000000"/>
+        <SpriteDefinition Name="LifeGauge_Base" Size="199.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Center" Size="102.000000 102.000000"/>
+        <SpriteDefinition Name="LifeGauge_Center_Low01" Size="102.000000 102.000000"/>
+        <SpriteDefinition Name="LifeGauge_Center_Low02" Size="102.000000 102.000000"/>
+        <SpriteDefinition Name="LifeGauge_ExclMark" Size="36.000000 138.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_01" Size="50.000000 100.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_02" Size="86.000000 100.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_03" Size="100.000000 100.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_04" Size="100.000000 149.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_05" Size="100.000000 186.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_06" Size="100.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_07" Size="149.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_08" Size="186.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_09" Size="199.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_10" Size="199.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Fill_11" Size="199.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Base" Size="199.000000 199.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Inner01" Size="193.000000 209.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Inner02" Size="193.000000 205.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Note" Size="162.000000 193.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Particle01" Size="37.000000 37.000000"/>
+        <SpriteDefinition Name="LifeGauge_Full_Particle02" Size="36.000000 36.000000"/>
+        <SpriteDefinition Name="LifeGauge_Gloss" Size="306.000000 306.000000"/>
+        <SpriteDefinition Name="LifeGauge_Heart" Size="140.000000 129.000000"/>
+        <SpriteDefinition Name="LifeGauge_NextArrow" Size="98.000000 139.000000"/>
+        <SpriteDefinition Name="LifeGauge_NextGlow" Size="166.000000 166.000000"/>
+        <SpriteDefinition Name="LifeGauge_NextSegment" Size="200.000000 203.000000"/>
+        <SpriteDefinition Name="LifeGauge_Protected" Size="199.000000 199.000000"/>
         <SpriteDefinition Name="LyricsBar_Base" Size="1.000000 49.000000"/>
         <SpriteDefinition Name="LyricsBar_Label" Size="172.000000 70.000000"/>
+        <SpriteDefinition Name="NoteRef" Size="91.000000 91.000000"/>
         <SpriteDefinition Name="ScoreBonus_0" Size="25.000000 25.000000"/>
         <SpriteDefinition Name="ScoreBonus_1" Size="14.000000 25.000000"/>
         <SpriteDefinition Name="ScoreBonus_2" Size="35.000000 25.000000"/>
@@ -83,8 +108,8 @@
         <SpriteDefinition Name="Score_8" Size="59.000000 42.000000"/>
         <SpriteDefinition Name="Score_9" Size="59.000000 42.000000"/>
         <SpriteDefinition Name="SongIcon" Size="62.000000 76.000000"/>
-        <SpriteDefinition Name="StateIndicator_Autoplay" Size="175.000000 32.000000"/>
-        <SpriteDefinition Name="StateIndicator_Replay" Size="130.000000 32.000000"/>
+        <SpriteDefinition Name="StateIndicator_Autoplay" Size="91.000000 32.000000"/>
+        <SpriteDefinition Name="StateIndicator_Replay" Size="139.000000 32.000000"/>
         <SpriteDefinition Name="TechnicalZone_0" Size="48.000000 48.000000"/>
         <SpriteDefinition Name="TechnicalZone_1" Size="23.000000 48.000000"/>
         <SpriteDefinition Name="TechnicalZone_2" Size="48.000000 48.000000"/>
@@ -95,13 +120,17 @@
         <SpriteDefinition Name="TechnicalZone_7" Size="48.000000 48.000000"/>
         <SpriteDefinition Name="TechnicalZone_8" Size="48.000000 48.000000"/>
         <SpriteDefinition Name="TechnicalZone_9" Size="48.000000 48.000000"/>
-        <SpriteDefinition Name="TechnicalZone_Display" Size="566.000000 133.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Display" Size="521.000000 133.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Display_Completed" Size="521.000000 133.000000"/>
+        <SpriteDefinition Name="TechnicalZone_Display_Failed" Size="521.000000 133.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NotesLeftText" Size="129.000000 22.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeBase" Size="834.000000 59.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeBase_Completed" Size="834.000000 59.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeBase_Failed" Size="834.000000 59.000000"/>
         <SpriteDefinition Name="TechnicalZone_NoticeText_Completed" Size="675.000000 31.000000"/>
+        <SpriteDefinition Name="TechnicalZone_NoticeText_Failed" Size="520.000000 31.000000"/>
         <SpriteDefinition Name="TechnicalZone_NoticeText_Start" Size="551.000000 31.000000"/>
-        <SpriteDefinition Name="TechnicalZone_Notice_Base" Size="440.000000 62.000000"/>
-        <SpriteDefinition Name="TechnicalZone_Notice_Base_Completed" Size="440.000000 62.000000"/>
-        <SpriteDefinition Name="TechnicalZone_Notice_Base_Failed" Size="440.000000 62.000000"/>
-        <SpriteDefinition Name="TechnicalZone_Notice_Failed" Size="561.000000 31.000000"/>
+        <SpriteDefinition Name="TextRef" Size="326.000000 29.000000"/>
         <SpriteDefinition Name="TimelineMarker_ChanceTime" Size="43.000000 23.000000"/>
         <SpriteDefinition Name="TimelineMarker_TechnicalZone" Size="43.000000 23.000000"/>
         <SpriteDefinition Name="TimelineSection_ChanceTime" Size="1.000000 42.000000"/>
@@ -110,305 +139,848 @@
     <Animation Name="HitValu_Normal" Start="0" End="35">
         <Layer Name="HitValu" Sprite="HitValu_Cool" BlendMode="Normal" Start="0" End="35">
             <Origin>
-                <Keyframe Frame="0" Value="0.500000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.500000 0.500000"/>
             </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 -60.000000"/>
+            </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1.000000 1.000000"/>
-                <Keyframe Frame="2" Value="1.200000 1.200000"/>
-                <Keyframe Frame="4" Value="1.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
+                <Keyframe Frame="2" Easing="0.500000 0.500000" Value="1.200000 1.200000"/>
+                <Keyframe Frame="4" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffffff"/>
-                <Keyframe Frame="25" Value="ffffffff"/>
-                <Keyframe Frame="35" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="25" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="ffffff00"/>
             </Color>
         </Layer>
     </Animation>
     <Animation Name="HitValu_Miss" Start="0" End="35">
         <Layer Name="HitValu" Sprite="HitValu_Miss" BlendMode="Normal" Start="0" End="35">
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 -60.000000"/>
+            </Position>
             <Color>
-                <Keyframe Frame="0" Value="ffffffff"/>
-                <Keyframe Frame="25" Value="ffffffff"/>
-                <Keyframe Frame="35" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="25" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="ffffff00"/>
             </Color>
         </Layer>
     </Animation>
     <Animation Name="ScoreBonus" Start="0" End="35">
         <Layer Name="Layer 0" Sprite="ScoreBonus_0" BlendMode="Normal" Start="0" End="35">
             <Position>
-                <Keyframe Frame="0" Value="0.000000 0.000000"/>
-                <Keyframe Frame="35" Value="0.000000 -25.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 -105.000000"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="0.000000 -145.000000"/>
             </Position>
             <Color>
-                <Keyframe Frame="0" Value="ffffffff"/>
-                <Keyframe Frame="25" Value="ffffffff"/>
-                <Keyframe Frame="35" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="25" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="ffffff00"/>
             </Color>
         </Layer>
     </Animation>
     <Animation Name="Frame_Top" Start="0" End="1">
         <Layer Name="Frame_Top01" Sprite="Frame_Top01" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="0.000000 48.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 48.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1275.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1200.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffffe1"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffe1"/>
             </Color>
         </Layer>
         <Layer Name="Frame_Top02" Sprite="Frame_Top02" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="1275.000000 48.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1200.000000 48.000000"/>
             </Position>
             <Color>
-                <Keyframe Frame="0" Value="ffffffe1"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffe1"/>
             </Color>
         </Layer>
-        <Layer Name="Difficulty" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+        <Layer Name="Difficulty_Easy" Sprite="Difficulty_Easy" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="116.000000 43.000000"/>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
             </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="22ff7bff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Normal" Sprite="Difficulty_Normal" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="00c0ffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Hard" Sprite="Difficulty_Hard" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffb700ff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Extreme" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ff2c2cff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Tutorial" Sprite="Difficulty_Tutorial" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="fffe00ff"/>
+            </Color>
         </Layer>
         <Layer Name="SongIcon" Sprite="SongIcon" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="246.000000 45.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="246.000000 45.000000"/>
             </Position>
         </Layer>
-        <Layer Name="SongName_Ref" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+        <Layer Name="SongName_Ref" Sprite="TextRef" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="295.000000 24.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="295.000000 33.000000"/>
             </Position>
         </Layer>
         <Layer Name="Score_Ref1" Sprite="Score_0" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="1872.000000 47.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1872.000000 47.000000"/>
             </Position>
         </Layer>
         <Layer Name="Score_Ref2" Sprite="Score_0" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="1833.000000 47.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1833.000000 47.000000"/>
             </Position>
         </Layer>
     </Animation>
     <Animation Name="Frame_Bottom" Start="0" End="1">
+        <Layer Name="Frame_Bottom_LifeGauge" Sprite="Frame_Bottom_LifeGauge" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 926.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffe1"/>
+            </Color>
+        </Layer>
+        <Layer Name="Frame_Bottom" Sprite="Frame_Bottom" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="326.000000 1039.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1593.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffe1"/>
+            </Color>
+        </Layer>
         <Layer Name="LyricsBar_Base" Sprite="LyricsBar_Base" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="0.000000 989.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="235.000000 989.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1920.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1685.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffffe1"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffffe1"/>
             </Color>
         </Layer>
-        <Layer Name="LyricsBar_Label" Sprite="LyricsBar_Label" BlendMode="Normal" Start="0" End="1">
-            <Position>
-                <Keyframe Frame="0" Value="100.000000 983.000000"/>
-            </Position>
-        </Layer>
-        <Layer Name="FrameBase" Sprite="Frame_Bottom" BlendMode="Normal" Start="0" End="1">
+        <Layer Name="LyricsText_Ref" Sprite="TextRef" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="0.000000 1039.000000"/>
-            </Position>
-            <Scale>
-                <Keyframe Frame="0" Value="1920.000000 1.000000"/>
-            </Scale>
-            <Color>
-                <Keyframe Frame="0" Value="ffffffe1"/>
-            </Color>
-        </Layer>
-        <Layer Name="LyricsText_Ref" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
-            <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.000000"/>
-            </Origin>
-            <Position>
-                <Keyframe Frame="0" Value="186.000000 967.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="249.000000 973.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearPercentage_Percent" Sprite="ClearPercentage_Percent" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="205.000000 1042.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="205.000000 1042.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearPercentage_Ref1" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="172.000000 1040.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="172.000000 1040.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearPercentage_Ref2" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="141.000000 1040.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="141.000000 1040.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearPercentage_Period" Sprite="ClearPercentage_Period" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="120.000000 1050.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="120.000000 1050.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearPercentage_Ref3" Sprite="ClearPercentage_0" BlendMode="Normal" Start="0" End="1">
             <Position>
-                <Keyframe Frame="0" Value="98.000000 1040.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="98.000000 1040.000000"/>
             </Position>
         </Layer>
         <Layer Name="ClearGauge_Base" Sprite="ClearGauge_Base" BlendMode="Normal" Start="0" End="1">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="230.000000 1040.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="230.000000 1040.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1670.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1670.000000 1.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="LifeGauge_Base" Sprite="LifeGauge_Base" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="Frame_Top_CT" Start="0" End="1">
+        <Layer Name="Base" Sprite="&lt;Blank&gt;" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1920.000000 90.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="000000c8"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Easy" Sprite="Difficulty_Easy" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Normal" Sprite="Difficulty_Normal" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Hard" Sprite="Difficulty_Hard" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Extreme" Sprite="Difficulty_Extreme" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="Difficulty_Tutorial" Sprite="Difficulty_Tutorial" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="116.000000 43.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+            </Color>
+        </Layer>
+        <Layer Name="SongIcon" Sprite="SongIcon" BlendMode="Normal" Start="0" End="1">
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="246.000000 45.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="Frame_Bottom_CT" Start="0" End="1">
+        <Layer Name="Base" Sprite="&lt;Blank&gt;" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 960.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1920.000000 120.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="000000e1"/>
+            </Color>
+        </Layer>
+        <Layer Name="ClearGauge_Base" Sprite="ClearGauge_Base" BlendMode="Normal" Start="0" End="1">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="230.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1670.000000 1.000000"/>
             </Scale>
         </Layer>
     </Animation>
     <Animation Name="CT_Display_Start" Start="0" End="200">
-        <Layer Name="Base1" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="200">
+        <Layer Name="Base" Sprite="ChanceTime_NoticeBase" BlendMode="Normal" Start="0" End="200">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.500000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="520.000000 930.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="960.000000 934.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
-            </Color>
-        </Layer>
-        <Layer Name="Base2" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="200">
-            <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
-            </Origin>
-            <Position>
-                <Keyframe Frame="0" Value="1400.000000 930.000000"/>
-            </Position>
-            <Scale>
-                <Keyframe Frame="0" Value="-1.000000 1.000000"/>
-            </Scale>
-            <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.129997 0.310000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.270000 0.810000" Value="ffffffc8"/>
+                <Keyframe Frame="190" Easing="0.129997 0.310000" Value="ffffffc8"/>
+                <Keyframe Frame="200" Easing="0.270000 0.810000" Value="ffffff00"/>
             </Color>
         </Layer>
         <Layer Name="Text" Sprite="ChanceTime_NoticeText_Start" BlendMode="Normal" Start="0" End="200">
             <Position>
-                <Keyframe Frame="0" Value="960.000000 931.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="960.000000 931.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.129997 0.310000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="190" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="200" Easing="0.270000 0.810000" Value="ffffff00"/>
             </Color>
         </Layer>
     </Animation>
     <Animation Name="CT_Display_Over" Start="0" End="200">
-        <Layer Name="Base1" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="90">
+        <Layer Name="Base" Sprite="ChanceTime_NoticeBase" BlendMode="Normal" Start="0" End="200">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.500000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="520.000000 930.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="960.000000 934.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="1.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.129997 0.310000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.270000 0.810000" Value="ffffffc8"/>
+                <Keyframe Frame="190" Easing="0.129997 0.310000" Value="ffffffc8"/>
+                <Keyframe Frame="200" Easing="0.270000 0.810000" Value="ffffff00"/>
             </Color>
         </Layer>
-        <Layer Name="Base2" Sprite="ChanceTime_Notice_Base" BlendMode="Normal" Start="0" End="90">
-            <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
-            </Origin>
+        <Layer Name="Text" Sprite="ChanceTime_NoticeText_Over" BlendMode="Normal" Start="0" End="200">
             <Position>
-                <Keyframe Frame="0" Value="1400.000000 930.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="960.000000 931.000000"/>
             </Position>
             <Scale>
-                <Keyframe Frame="0" Value="-1.000000 1.000000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
             </Scale>
             <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
-            </Color>
-        </Layer>
-        <Layer Name="Text" Sprite="ChanceTime_NoticeText_Over" BlendMode="Normal" Start="0" End="90">
-            <Position>
-                <Keyframe Frame="0" Value="960.000000 931.000000"/>
-            </Position>
-            <Scale>
-                <Keyframe Frame="0" Value="1.000000 1.000000"/>
-            </Scale>
-            <Color>
-                <Keyframe Frame="0" Value="ffffff00"/>
-                <Keyframe Frame="10" Value="ffffffff"/>
-                <Keyframe Frame="190" Value="ffffffff"/>
-                <Keyframe Frame="200" Value="ffffff00"/>
+                <Keyframe Frame="0" Easing="0.129997 0.310000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.270000 0.810000" Value="ffffffff"/>
+                <Keyframe Frame="190" Easing="0.129997 0.310000" Value="ffffffff"/>
+                <Keyframe Frame="200" Easing="0.270000 0.810000" Value="ffffff00"/>
             </Color>
         </Layer>
     </Animation>
     <Animation Name="TZ_Display_Start" Start="0" End="90">
         <Layer Name="TechnicalZone_Display" Sprite="TechnicalZone_Display" BlendMode="Normal" Start="0" End="90">
             <Origin>
-                <Keyframe Frame="0" Value="0.000000 0.500000"/>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
             </Origin>
             <Position>
-                <Keyframe Frame="0" Value="-580.000000 210.000000"/>
-                <Keyframe Frame="9" Value="-360.500000 210.000000"/>
-                <Keyframe Frame="17" Value="-233.005004 209.999984"/>
-                <Keyframe Frame="23" Value="-190.388000 210.000000"/>
-                <Keyframe Frame="30" Value="-187.000000 210.000000"/>
+                <Keyframe Frame="0" Easing="0.150000 0.419999" Value="-580.000000 210.000000"/>
+                <Keyframe Frame="20" Easing="0.460000 1.000000" Value="-152.000000 210.000000"/>
             </Position>
         </Layer>
         <Layer Name="TZCount_Ref1" Sprite="TechnicalZone_0" BlendMode="Normal" Start="0" End="90">
             <Position>
-                <Keyframe Frame="30" Value="271.000000 239.000000"/>
+                <Keyframe Frame="0" Easing="0.150000 0.419999" Value="-157.000000 239.000000"/>
+                <Keyframe Frame="20" Easing="0.460000 1.000000" Value="263.000000 239.000000"/>
             </Position>
-            <Color>
-                <Keyframe Frame="30" Value="ffffff00"/>
-                <Keyframe Frame="40" Value="ffffffff"/>
-            </Color>
         </Layer>
         <Layer Name="TZCount_Ref2" Sprite="TechnicalZone_0" BlendMode="Normal" Start="0" End="90">
             <Position>
-                <Keyframe Frame="30" Value="240.000000 239.000000"/>
+                <Keyframe Frame="0" Easing="0.150000 0.419999" Value="-188.000000 239.000000"/>
+                <Keyframe Frame="20" Easing="0.460000 1.000000" Value="232.000000 239.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="TechnicalZone_NotesLeftText" Sprite="TechnicalZone_NotesLeftText" BlendMode="Normal" Start="0" End="90">
+            <Position>
+                <Keyframe Frame="0" Easing="0.150000 0.419999" Value="-343.000000 239.000000"/>
+                <Keyframe Frame="20" Easing="0.460000 1.000000" Value="85.000000 239.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="ClearGauge_Fill" Start="0" End="100">
+        <Layer Name="ClearGauge_Fill_Normal" Sprite="ClearGauge_Fill_Normal" BlendMode="Normal" Start="0" End="70">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+                <Keyframe Frame="70" Easing="0.500000 0.500000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="230.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 1.000000"/>
+                <Keyframe Frame="70" Easing="0.500000 0.500000" Value="1169.000000 1.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="ClearGauge_Fill_Clear" Sprite="ClearGauge_Fill_Clear" BlendMode="Normal" Start="70" End="100">
+            <Origin>
+                <Keyframe Frame="70" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="70" Easing="0.000000 0.000000" Value="230.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="70" Easing="0.500000 0.500000" Value="1169.000000 1.000000"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="1670.000000 1.000000"/>
+            </Scale>
+        </Layer>
+        <Layer Name="ShadowLeft" Sprite="ClearGauge_Shadow_Corner" BlendMode="Normal" Start="0" End="100">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="230.000000 1040.000000"/>
             </Position>
             <Color>
-                <Keyframe Frame="30" Value="ffffff00"/>
-                <Keyframe Frame="40" Value="ffffffff"/>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffc0"/>
+            </Color>
+        </Layer>
+        <Layer Name="ShadowRight" Sprite="ClearGauge_Shadow_Corner" BlendMode="Normal" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1893.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="-1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffc0"/>
+            </Color>
+        </Layer>
+        <Layer Name="ShadowMiddle" Sprite="ClearGauge_Shadow_Middle" BlendMode="Normal" Start="0" End="100">
+            <Origin>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.000000 0.500000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="245.000000 1040.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1640.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffc0"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Fill" Start="0" End="100">
+        <Layer Name="LifeGauge_Fill_01" Sprite="LifeGauge_Fill_01" BlendMode="Normal" Start="0" End="8">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="95.000000 950.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_01" Sprite="LifeGauge_Fill_01" BlendMode="Normal" Start="8" End="16">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="95.000000 950.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_02" Sprite="LifeGauge_Fill_02" BlendMode="Normal" Start="16" End="24">
+            <Position>
+                <Keyframe Frame="8" Easing="0.000000 0.000000" Value="77.000000 950.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_03" Sprite="LifeGauge_Fill_03" BlendMode="Normal" Start="24" End="32">
+            <Position>
+                <Keyframe Frame="16" Easing="0.000000 0.000000" Value="70.000000 950.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_04" Sprite="LifeGauge_Fill_04" BlendMode="Normal" Start="32" End="40">
+            <Position>
+                <Keyframe Frame="24" Easing="0.000000 0.000000" Value="70.000000 926.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_05" Sprite="LifeGauge_Fill_05" BlendMode="Normal" Start="40" End="48">
+            <Position>
+                <Keyframe Frame="32" Easing="0.000000 0.000000" Value="70.000000 908.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_06" Sprite="LifeGauge_Fill_06" BlendMode="Normal" Start="48" End="56">
+            <Position>
+                <Keyframe Frame="40" Easing="0.000000 0.000000" Value="70.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_07" Sprite="LifeGauge_Fill_07" BlendMode="Normal" Start="56" End="64">
+            <Position>
+                <Keyframe Frame="48" Easing="0.000000 0.000000" Value="95.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_08" Sprite="LifeGauge_Fill_08" BlendMode="Normal" Start="64" End="72">
+            <Position>
+                <Keyframe Frame="56" Easing="0.000000 0.000000" Value="113.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_09" Sprite="LifeGauge_Fill_09" BlendMode="Normal" Start="72" End="80">
+            <Position>
+                <Keyframe Frame="64" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_10" Sprite="LifeGauge_Fill_10" BlendMode="Normal" Start="80" End="88">
+            <Position>
+                <Keyframe Frame="72" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Fill_11" Sprite="LifeGauge_Fill_11" BlendMode="Normal" Start="88" End="100">
+            <Position>
+                <Keyframe Frame="80" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Center" Sprite="LifeGauge_Center" BlendMode="Normal" Start="40" End="100">
+            <Position>
+                <Keyframe Frame="32" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Center_Low01" Sprite="LifeGauge_Center_Low01" BlendMode="Normal" Start="24" End="40">
+            <Position>
+                <Keyframe Frame="15" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Center_Low02" Sprite="LifeGauge_Center_Low02" BlendMode="Normal" Start="0" End="24">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="LifeGauge_Gloss" Sprite="LifeGauge_Gloss" BlendMode="Normal" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Full" Start="0" End="600">
+        <Layer Name="Base" Sprite="LifeGauge_Full_Base" BlendMode="Normal" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+        <Layer Name="Base_add" Sprite="LifeGauge_Full_Base" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="120" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="240" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="360" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="480" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="600" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="rot01" Sprite="LifeGauge_Full_Inner01" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1.000000 0.899999"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0"/>
+                <Keyframe Frame="600" Easing="0.500000 0.500000" Value="720"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="b5ffe20f"/>
+                <Keyframe Frame="58" Easing="0.500000 0.500000" Value="b5ffe286"/>
+                <Keyframe Frame="198" Easing="0.500000 0.500000" Value="b5ffe286"/>
+                <Keyframe Frame="240" Easing="0.500000 0.500000" Value="b5ffe212"/>
+                <Keyframe Frame="274" Easing="0.500000 0.500000" Value="b5ffe218"/>
+                <Keyframe Frame="367" Easing="0.500000 0.500000" Value="b4fee142"/>
+                <Keyframe Frame="458" Easing="0.500000 0.500000" Value="b5ffe26d"/>
+                <Keyframe Frame="567" Easing="0.500000 0.500000" Value="b5ffe218"/>
+            </Color>
+        </Layer>
+        <Layer Name="rot02" Sprite="LifeGauge_Full_Inner01" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.899999 0.949998"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0"/>
+                <Keyframe Frame="600" Easing="0.500000 0.500000" Value="360"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="004dff13"/>
+            </Color>
+        </Layer>
+        <Layer Name="rot03" Sprite="LifeGauge_Full_Inner02" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
+                <Keyframe Frame="222" Easing="0.500000 0.500000" Value="1.000000 0.800000"/>
+                <Keyframe Frame="600" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.790000 0.790000" Value="0"/>
+                <Keyframe Frame="600" Easing="0.280000 0.479999" Value="720"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="e0f0ff42"/>
+                <Keyframe Frame="74" Easing="0.500000 0.500000" Value="e0f0fff9"/>
+                <Keyframe Frame="237" Easing="0.850000 0.529999" Value="dfeffe19"/>
+                <Keyframe Frame="416" Easing="0.870000 0.740000" Value="e0f0ffcd"/>
+                <Keyframe Frame="600" Easing="0.500000 0.500000" Value="e0f0ff42"/>
+            </Color>
+        </Layer>
+        <Layer Name="note01" Sprite="LifeGauge_Full_Note" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="232" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="232" Easing="0.629998 0.349999" Value="0.000000 0.000000"/>
+                <Keyframe Frame="300" Easing="0.449999 0.649999" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="232" Easing="0.500000 0.500000" Value="deffe6ff"/>
+                <Keyframe Frame="300" Easing="0.500000 0.500000" Value="deffe400"/>
+            </Color>
+        </Layer>
+        <Layer Name="note02" Sprite="LifeGauge_Full_Note" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="232" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="256" Easing="0.629998 0.349999" Value="0.000000 0.000000"/>
+                <Keyframe Frame="324" Easing="0.449999 0.649999" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="256" Easing="0.500000 0.500000" Value="deffe6ff"/>
+                <Keyframe Frame="324" Easing="0.500000 0.500000" Value="deffe400"/>
+            </Color>
+        </Layer>
+        <Layer Name="note03" Sprite="LifeGauge_Full_Note" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="232" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="280" Easing="0.629998 0.349999" Value="0.000000 0.000000"/>
+                <Keyframe Frame="348" Easing="0.449999 0.649999" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="280" Easing="0.500000 0.500000" Value="deffe6ff"/>
+                <Keyframe Frame="348" Easing="0.500000 0.500000" Value="deffe400"/>
+            </Color>
+        </Layer>
+        <Layer Name="note04" Sprite="LifeGauge_Full_Note" BlendMode="Add" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="232" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="304" Easing="0.629998 0.349999" Value="0.000000 0.000000"/>
+                <Keyframe Frame="362" Easing="0.449999 0.649999" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="304" Easing="0.500000 0.500000" Value="deffe6ff"/>
+                <Keyframe Frame="362" Easing="0.500000 0.500000" Value="deffe400"/>
+            </Color>
+        </Layer>
+        <Layer Name="LifeGauge_Gloss" Sprite="LifeGauge_Gloss" BlendMode="Normal" Start="0" End="600">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Next_Up" Start="0" End="10">
+        <Layer Name="LifeGauge_NextSegment" Sprite="LifeGauge_NextSegment" BlendMode="Add" Start="0" End="10">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 903.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.039999 1.000000" Value="00ff8300"/>
+                <Keyframe Frame="2" Easing="0.479999 1.000000" Value="00fe82e2"/>
+                <Keyframe Frame="3" Easing="0.500000 0.500000" Value="00ff83ff"/>
+                <Keyframe Frame="10" Easing="0.500000 0.500000" Value="00ff8300"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Next_Down" Start="0" End="10">
+        <Layer Name="LifeGauge_NextSegment" Sprite="LifeGauge_NextSegment" BlendMode="Add" Start="0" End="10">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 903.000000"/>
+            </Position>
+            <Color>
+                <Keyframe Frame="0" Easing="0.039999 1.000000" Value="a100db00"/>
+                <Keyframe Frame="2" Easing="0.479999 1.000000" Value="a100dbe2"/>
+                <Keyframe Frame="3" Easing="0.500000 0.500000" Value="a100dbff"/>
+                <Keyframe Frame="10" Easing="0.500000 0.500000" Value="a100db00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Up" Start="0" End="100">
+        <Layer Name="arrow01" Sprite="LifeGauge_NextArrow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.400000 0.400000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="07ff8d00"/>
+                <Keyframe Frame="18" Easing="0.500000 0.500000" Value="00ff89aa"/>
+                <Keyframe Frame="39" Easing="0.500000 0.500000" Value="00ff8963"/>
+                <Keyframe Frame="50" Easing="0.500000 0.500000" Value="00ff89ff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="00ff8900"/>
+            </Color>
+        </Layer>
+        <Layer Name="arrow02" Sprite="LifeGauge_NextArrow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1.000000 1.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="07ff8d00"/>
+                <Keyframe Frame="20" Easing="0.500000 0.500000" Value="07ff8d2b"/>
+                <Keyframe Frame="38" Easing="0.500000 0.500000" Value="07ff8d00"/>
+                <Keyframe Frame="49" Easing="0.500000 0.500000" Value="07ff8dff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="07ff8d00"/>
+            </Color>
+        </Layer>
+        <Layer Name="glow01" Sprite="LifeGauge_NextGlow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.550000 0.550000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="07ff8d00"/>
+                <Keyframe Frame="19" Easing="0.500000 0.500000" Value="07ff8db8"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="07ff8d31"/>
+                <Keyframe Frame="49" Easing="0.500000 0.500000" Value="07ff8dff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="07ff8d00"/>
+            </Color>
+        </Layer>
+        <Layer Name="glow02" Sprite="LifeGauge_NextGlow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="37" Easing="0.059999 0.469998" Value="0.100000 0.100000"/>
+                <Keyframe Frame="69" Easing="0.500000 0.970000" Value="1.269999 1.269999"/>
+                <Keyframe Frame="80" Easing="0.819998 0.129997" Value="1.252547 1.252547"/>
+                <Keyframe Frame="99" Easing="1.000000 1.000000" Value="1.100000 1.100000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="07ff8d00"/>
+                <Keyframe Frame="37" Easing="0.500000 0.500000" Value="07ff8d00"/>
+                <Keyframe Frame="50" Easing="0.500000 0.500000" Value="07ff8dcf"/>
+                <Keyframe Frame="87" Easing="0.500000 0.500000" Value="07ff8d00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="LifeGauge_Down" Start="0" End="100">
+        <Layer Name="arrow01" Sprite="LifeGauge_NextArrow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.400000 0.400000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="180"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="b900ff00"/>
+                <Keyframe Frame="18" Easing="0.500000 0.500000" Value="b900ffaa"/>
+                <Keyframe Frame="39" Easing="0.500000 0.500000" Value="b900ff63"/>
+                <Keyframe Frame="50" Easing="0.500000 0.500000" Value="b900ffff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="b900ff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="arrow02" Sprite="LifeGauge_NextArrow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="1.000000 1.000000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="180"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="b900ff00"/>
+                <Keyframe Frame="20" Easing="0.500000 0.500000" Value="b900ff2b"/>
+                <Keyframe Frame="38" Easing="0.500000 0.500000" Value="b900ff00"/>
+                <Keyframe Frame="49" Easing="0.500000 0.500000" Value="b900ffff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="b900ff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="glow01" Sprite="LifeGauge_NextGlow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="0.550000 0.550000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="b900ff00"/>
+                <Keyframe Frame="19" Easing="0.500000 0.500000" Value="b900ffb8"/>
+                <Keyframe Frame="35" Easing="0.500000 0.500000" Value="b900ff31"/>
+                <Keyframe Frame="49" Easing="0.500000 0.500000" Value="b900ffff"/>
+                <Keyframe Frame="100" Easing="0.500000 0.500000" Value="b900ff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="glow02" Sprite="LifeGauge_NextGlow" BlendMode="Add" Start="0" End="100">
+            <Position>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="120.000000 901.000000"/>
+            </Position>
+            <Scale>
+                <Keyframe Frame="37" Easing="0.059999 0.469998" Value="0.100000 0.100000"/>
+                <Keyframe Frame="69" Easing="0.500000 0.970000" Value="1.269999 1.269999"/>
+                <Keyframe Frame="80" Easing="0.819998 0.129997" Value="1.252547 1.252547"/>
+                <Keyframe Frame="99" Easing="1.000000 1.000000" Value="1.100000 1.100000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="b900ff00"/>
+                <Keyframe Frame="37" Easing="0.500000 0.500000" Value="b900ff00"/>
+                <Keyframe Frame="50" Easing="0.500000 0.500000" Value="b900ffcf"/>
+                <Keyframe Frame="87" Easing="0.500000 0.500000" Value="b900ff00"/>
             </Color>
         </Layer>
     </Animation>

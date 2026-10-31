@@ -1,0 +1,251 @@
+<AnimationSet Width="1920" Height="1080" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/mg_effects">
+    <SpriteDefinitions>
+        <SpriteDefinition Name="Bad_Bubble" Size="256.000000 256.000000"/>
+        <SpriteDefinition Name="Cool_Explosion" Size="320.000000 320.000000"/>
+        <SpriteDefinition Name="Cool_Ring" Size="300.000000 300.000000"/>
+        <SpriteDefinition Name="Good_Ring" Size="128.000000 128.000000"/>
+        <SpriteDefinition Name="Good_Spark" Size="96.000000 192.000000"/>
+        <SpriteDefinition Name="Good_Star1" Size="300.000000 300.000000"/>
+        <SpriteDefinition Name="Good_Star2" Size="300.000000 300.000000"/>
+        <SpriteDefinition Name="Note" Size="285.000000 285.000000"/>
+        <SpriteDefinition Name="Safe_Explosion" Size="293.000000 303.000000"/>
+        <SpriteDefinition Name="Safe_Smoke" Size="280.000000 280.000000"/>
+    </SpriteDefinitions>
+    <Animation Name="HitEffect_Cool" Start="0" End="30">
+        <Layer Name="Cool_Explosion" Sprite="Cool_Explosion" BlendMode="Add" Start="0" End="10">
+            <Scale>
+                <Keyframe Frame="0" Easing="0.660000 0.670000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="9" Easing="0.419999 1.000000" Value="1.600000 1.600000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+                <Keyframe Frame="7" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Note" Sprite="Note" BlendMode="Add" Start="3" End="30">
+            <Scale>
+                <Keyframe Frame="3" Easing="0.180000 0.000000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="24" Easing="0.769999 1.000000" Value="1.100000 1.100000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="3" Easing="0.500000 0.500000" Value="ffffffaf"/>
+                <Keyframe Frame="9" Easing="0.000000 0.000000" Value="ffffffa4"/>
+                <Keyframe Frame="21" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Cool_Ring" Sprite="Cool_Ring" BlendMode="Add" Start="3" End="30">
+            <Scale>
+                <Keyframe Frame="3" Easing="0.289999 0.000000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="22" Easing="0.649999 1.000000" Value="2.000000 2.000000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="3" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="14" Easing="0.500000 0.500000" Value="fefefe89"/>
+                <Keyframe Frame="21" Easing="0.629998 1.000000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="HitEffect_Good" Start="0" End="60">
+        <Layer Name="Star" Sprite="Good_Star1" BlendMode="Add" Start="0" End="14">
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="7" Easing="0.500000 0.500000" Value="1.000000 1.000000"/>
+                <Keyframe Frame="13" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+            </Scale>
+            <Rotation>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="-37"/>
+                <Keyframe Frame="13" Easing="0.500000 0.500000" Value="61"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="0" Easing="0.000000 0.000000" Value="ffffffff"/>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff75"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Spark1" Sprite="Good_Spark" BlendMode="Add" Start="6" End="18">
+            <Origin>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="0.500000 1.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="11.000000 23.000000"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="-46.000000 -62.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="-36"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffff9d"/>
+                <Keyframe Frame="16" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Spark2" Sprite="Good_Spark" BlendMode="Add" Start="6" End="18">
+            <Origin>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="0.500000 1.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="-15.000000 8.000000"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="64.000000 -16.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="73"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffffa4"/>
+                <Keyframe Frame="16" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Spark3" Sprite="Good_Spark" BlendMode="Add" Start="6" End="18">
+            <Origin>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="0.500000 1.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="-12.000000 -20.000000"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="27.000000 101.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="163"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.500000 0.500000" Value="ffffffac"/>
+                <Keyframe Frame="15" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Spark4" Sprite="Good_Spark" BlendMode="Add" Start="6" End="18">
+            <Origin>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="0.500000 1.000000"/>
+            </Origin>
+            <Position>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="10.000000 -10.000000"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="-74.000000 73.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="-134"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffff92"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Ring1" Sprite="Good_Ring" BlendMode="Add" Start="6" End="32">
+            <Position>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="-57.000000 40.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="0"/>
+                <Keyframe Frame="23" Easing="0.500000 0.500000" Value="440"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="20" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Ring2" Sprite="Good_Ring" BlendMode="Add" Start="6" End="32">
+            <Position>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="61.000000 40.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="-98"/>
+                <Keyframe Frame="23" Easing="0.500000 0.500000" Value="-462.12"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="20" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Ring3" Sprite="Good_Ring" BlendMode="Add" Start="6" End="32">
+            <Position>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="0.000000 -61.000000"/>
+            </Position>
+            <Rotation>
+                <Keyframe Frame="6" Easing="0.000000 0.000000" Value="188"/>
+                <Keyframe Frame="22" Easing="0.500000 0.500000" Value="688"/>
+            </Rotation>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff00"/>
+                <Keyframe Frame="10" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="20" Easing="0.500000 0.500000" Value="ffffff02"/>
+            </Color>
+        </Layer>
+        <Layer Name="Note" Sprite="Note" BlendMode="Add" Start="4" End="22">
+            <Scale>
+                <Keyframe Frame="4" Easing="0.319999 0.000000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="17" Easing="0.680000 1.000000" Value="1.200000 1.200000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="5" Easing="0.500000 0.500000" Value="ffffffff"/>
+                <Keyframe Frame="16" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="HitEffect_Safe" Start="0" End="40">
+        <Layer Name="Safe_Explosion" Sprite="Safe_Explosion" BlendMode="Add" Start="0" End="18">
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="1.299998 1.299998"/>
+                <Keyframe Frame="16" Easing="0.500000 0.500000" Value="0.300000 0.300000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="7" Easing="0.500000 0.500000" Value="ffffff70"/>
+                <Keyframe Frame="12" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Smoke" Sprite="Safe_Ring" BlendMode="Add" Start="4" End="30">
+            <Scale>
+                <Keyframe Frame="7" Easing="0.200000 0.000000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="23" Easing="0.750000 1.000000" Value="1.600000 1.600000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="9" Easing="0.500000 0.500000" Value="ffffff92"/>
+                <Keyframe Frame="23" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Note" Sprite="Note" BlendMode="Add" Start="7" End="30">
+            <Scale>
+                <Keyframe Frame="7" Easing="0.209997 0.000000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="21" Easing="0.730000 1.000000" Value="1.100000 1.100000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="11" Easing="0.000000 0.000000" Value="ffffffff"/>
+                <Keyframe Frame="18" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+    <Animation Name="HitEffect_Bad" Start="0" End="40">
+        <Layer Name="Safe_Explosion" Sprite="Safe_Explosion" BlendMode="Add" Start="0" End="14">
+            <Scale>
+                <Keyframe Frame="0" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="12" Easing="0.500000 0.500000" Value="1.500000 1.500000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="3" Easing="0.500000 0.500000" Value="ffffff8c"/>
+                <Keyframe Frame="11" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Smoke" Sprite="Safe_Ring" BlendMode="Add" Start="4" End="19">
+            <Scale>
+                <Keyframe Frame="4" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="17" Easing="0.500000 0.500000" Value="1.700000 1.700000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="5" Easing="0.500000 0.500000" Value="ffffff53"/>
+                <Keyframe Frame="16" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+        <Layer Name="Bubble" Sprite="Bad_Ring" BlendMode="Add" Start="4" End="20">
+            <Scale>
+                <Keyframe Frame="4" Easing="0.500000 0.500000" Value="0.000000 0.000000"/>
+                <Keyframe Frame="12" Easing="0.500000 0.500000" Value="1.200000 1.200000"/>
+            </Scale>
+            <Color>
+                <Keyframe Frame="6" Easing="0.500000 0.500000" Value="ffffff93"/>
+                <Keyframe Frame="12" Easing="0.500000 0.500000" Value="ffffff00"/>
+            </Color>
+        </Layer>
+    </Animation>
+</AnimationSet>

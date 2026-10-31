@@ -1,4 +1,4 @@
-<AnimationSet Width="1280" Height="720" FPS="60" StageColor="808080ff" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/iconset_dev">
+<AnimationSet Width="1280" Height="720" FPS="60" StageColor="808080ff" SpriteSheet="sprites/iconset_dev">
     <SpriteDefinitions>
         <SpriteDefinition Name="HoldTrail_Circle" Size="1.000000 28.000000"/>
         <SpriteDefinition Name="HoldTrail_Cross" Size="1.000000 28.000000"/>

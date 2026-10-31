@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib;mf.lib;mfplat.lib;mfplay.lib;mfuuid.lib;Strmiids.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -103,7 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;d3d11.lib;dxgi.lib;winmm.lib;dxguid.lib;libogg.lib;libvorbis_static.lib;libvorbisfile_static.lib;mf.lib;mfplat.lib;mfplay.lib;mfuuid.lib;Strmiids.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib_vs/SDL2/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libogg/lib/$(PlatformShortName)/;$(SolutionDir)lib_vs/libvorbis/lib/$(PlatformShortName)/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

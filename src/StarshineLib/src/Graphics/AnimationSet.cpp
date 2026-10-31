@@ -184,6 +184,13 @@ namespace Starshine::Graphics
 		return Layers.at(index);
 	};
 
+	AnimationSet::AnimationSet()
+	{
+		blankSpriteDef.Name = "<Blank>";
+		blankSpriteDef.Size = { 1.0f, 1.0f };
+		blankSpriteDef.RealSprite = nullptr;
+	}
+
 	bool AnimationSet::ReadXml(std::string_view xmlData, bool doNotLoadSprites)
 	{
 		if (xmlData.size() == 0)
@@ -434,6 +441,9 @@ namespace Starshine::Graphics
 
 	const SpriteDefinition& AnimationSet::GetSpriteDefinition(std::string_view name) const
 	{
+		if (name == "<Blank>" || name.empty())
+			return blankSpriteDef;
+
 		for (const auto& sprDef : spriteDefinitions)
 		{
 			if (sprDef.Name == name)

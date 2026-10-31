@@ -48,6 +48,9 @@
     <ClCompile Include="src\Editor\EasingCurveWindow.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameContext.h">
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="src\Editor\EasingCurveWindow.h">
       <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Settings.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

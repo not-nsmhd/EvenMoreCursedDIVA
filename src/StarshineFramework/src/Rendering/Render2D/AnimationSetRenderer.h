@@ -19,6 +19,5 @@ namespace Starshine::Rendering::Render2D
 
 	private:
 		SpriteRenderer& sprRenderer;
-		Graphics::BlendMode prevBlendMode{ Graphics::BlendMode::Normal };
 	};
 }

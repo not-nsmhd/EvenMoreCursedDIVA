@@ -1,4 +1,4 @@
-<AnimationSet Width="1280" Height="720" FPS="60" SpriteSheet="C:/proj/EvenMoreCursedDIVA/bin/diva/sprites/iconset_ps4">
+<AnimationSet Width="1280" Height="720" FPS="60" SpriteSheet="sprites/iconset_ps4">
     <SpriteDefinitions>
         <SpriteDefinition Name="Arrow_Glow" Size="100.000000 103.000000"/>
         <SpriteDefinition Name="HoldTrail_Circle" Size="1.000000 42.000000"/>

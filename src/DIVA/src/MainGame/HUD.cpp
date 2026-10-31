@@ -31,6 +31,8 @@ namespace DIVA::MainGame
 
 			const Sprite* ScoreBonusNumbers[10]{};
 			const Sprite* ScoreBonus_Plus{};
+
+			const Sprite* ClearPercentageNumbers[10]{};
 		} spriteCache;
 
 		struct AnimationCache
@@ -42,9 +44,16 @@ namespace DIVA::MainGame
 
 			const Animation* ScoreBonus{};
 
+			const Animation* LifeGauge_Fill{};
+			const Animation* LifeGauge_FullAnim{};
+			const Animation* LifeGauge_NextSegmentUp{};
+			const Animation* LifeGauge_NextSegmentDown{};
+			const Animation* LifeGauge_Up{};
+			const Animation* LifeGauge_Down{};
+
 			Animation* FrameTop{};
 			Animation* FrameBottom{};
-			Layer* FrameTop_Difficulty{};
+			Animation* ClearGauge_Fill{};
 
 			vec2 SongNameTextPosition{};
 
@@ -52,6 +61,10 @@ namespace DIVA::MainGame
 			f32 ScoreTextSpacing{};
 
 			vec2 LyricsTextPosition{};
+
+			vec2 ClearPercentageTextPosition_Whole{};
+			vec2 ClearPercentageTextPosition_Fract{};
+			f32 ClearPercentageTextSpacing{};
 		} animCache;
 
 		struct ComboDisplayData
@@ -78,6 +91,17 @@ namespace DIVA::MainGame
 			u32 DisplayValue{};
 			f32 IncrementSpeed{ 0.02f };
 		} ScoreDisplay;
+
+		struct LifeGaugeData
+		{
+			i32 CurrentValue{};
+
+			f32 FillAnimFrame{};
+			f32 FullAnimFrame{};
+
+			f32 NextUpFrame{};
+			f32 NextDownFrame{};
+		} LifeGauge;
 
 		std::array<char, 256> LyricsTextBuffer{};
 		Color LyricsColor{};
@@ -136,7 +160,7 @@ namespace DIVA::MainGame
 			fetchHitValueSprite(HitEvaluation::Cool, "HitValu_Cool_Wrong", spriteCache.HitEvaluations_Wrong);
 			fetchHitValueSprite(HitEvaluation::Good, "HitValu_Good_Wrong", spriteCache.HitEvaluations_Wrong);
 			fetchHitValueSprite(HitEvaluation::Safe, "HitValu_Safe_Wrong", spriteCache.HitEvaluations_Wrong);
-			fetchHitValueSprite(HitEvaluation::Bad, "HitValu_Miss", spriteCache.HitEvaluations_Wrong);
+			fetchHitValueSprite(HitEvaluation::Bad, "HitValu_Bad_Wrong", spriteCache.HitEvaluations_Wrong);
 			fetchHitValueSprite(HitEvaluation::Miss, "HitValu_Miss", spriteCache.HitEvaluations_Wrong);
 
 			spriteCache.ScoreNumbers[0] = fetchSprite("Score_0");
@@ -173,19 +197,22 @@ namespace DIVA::MainGame
 			spriteCache.ScoreBonusNumbers[9] = fetchSprite("ScoreBonus_9");
 			spriteCache.ScoreBonus_Plus = fetchSprite("ScoreBonus_Plus");
 
+			spriteCache.ClearPercentageNumbers[0] = fetchSprite("ClearPercentage_0");
+			spriteCache.ClearPercentageNumbers[1] = fetchSprite("ClearPercentage_1");
+			spriteCache.ClearPercentageNumbers[2] = fetchSprite("ClearPercentage_2");
+			spriteCache.ClearPercentageNumbers[3] = fetchSprite("ClearPercentage_3");
+			spriteCache.ClearPercentageNumbers[4] = fetchSprite("ClearPercentage_4");
+			spriteCache.ClearPercentageNumbers[5] = fetchSprite("ClearPercentage_5");
+			spriteCache.ClearPercentageNumbers[6] = fetchSprite("ClearPercentage_6");
+			spriteCache.ClearPercentageNumbers[7] = fetchSprite("ClearPercentage_7");
+			spriteCache.ClearPercentageNumbers[8] = fetchSprite("ClearPercentage_8");
+			spriteCache.ClearPercentageNumbers[9] = fetchSprite("ClearPercentage_9");
+
 			return true;
 		}
 		
 		bool LoadAnimations()
 		{
-			static constexpr std::string_view DifficultyLayerNames[EnumCount<Formats::ChartDifficulty>()]
-			{
-				"Difficulty_Easy",
-				"Difficulty_Normal",
-				"Difficulty_Hard",
-				"Difficulty_Extreme"
-			};
-
 			animCache.hudAnimSet = std::make_unique<AnimationSet>();
 			animCache.hudAnimSet->LoadXml("sprites/mg_hud.xml", true);
 			animCache.hudAnimSet->LinkToSpriteSheet(spriteCache.hudSprites);
@@ -196,11 +223,35 @@ namespace DIVA::MainGame
 
 			animCache.FrameTop = &animCache.hudAnimSet->GetAnimation("Frame_Top");
 			animCache.FrameBottom = &animCache.hudAnimSet->GetAnimation("Frame_Bottom");
+			animCache.ClearGauge_Fill = &animCache.hudAnimSet->GetAnimation("ClearGauge_Fill");
 
-			animCache.FrameTop_Difficulty = &animCache.FrameTop->GetLayer("Difficulty");
+			animCache.FrameTop->GetLayer("Difficulty_Easy").Visible = false;
+			animCache.FrameTop->GetLayer("Difficulty_Normal").Visible = false;
+			animCache.FrameTop->GetLayer("Difficulty_Hard").Visible = false;
+			animCache.FrameTop->GetLayer("Difficulty_Extreme").Visible = false;
+			animCache.FrameTop->GetLayer("Difficulty_Tutorial").Visible = false;
 
-			size_t difficultyIndex = static_cast<size_t>(mainGameContext->Difficulty);
-			animCache.FrameTop_Difficulty->SpriteDefinition = &animCache.hudAnimSet->GetSpriteDefinition(DifficultyLayerNames[difficultyIndex]);
+			switch (mainGameContext->Difficulty)
+			{
+			case Formats::ChartDifficulty::Easy:
+				animCache.FrameTop->GetLayer("Difficulty_Easy").Visible = true;
+				break;
+			case Formats::ChartDifficulty::Normal:
+				animCache.FrameTop->GetLayer("Difficulty_Normal").Visible = true;
+				break;
+			case Formats::ChartDifficulty::Hard:
+				animCache.FrameTop->GetLayer("Difficulty_Hard").Visible = true;
+				break;
+			case Formats::ChartDifficulty::Extreme:
+				animCache.FrameTop->GetLayer("Difficulty_Extreme").Visible = true;
+				break;
+			}
+
+			animCache.LifeGauge_Fill = &animCache.hudAnimSet->GetAnimation("LifeGauge_Fill");
+			animCache.LifeGauge_FullAnim = &animCache.hudAnimSet->GetAnimation("LifeGauge_Full");
+			animCache.LifeGauge_NextSegmentUp = &animCache.hudAnimSet->GetAnimation("LifeGauge_Next_Up");
+			animCache.LifeGauge_NextSegmentDown = &animCache.hudAnimSet->GetAnimation("LifeGauge_Next_Down");
+			SetLifeGaugeValue(MainGameContext::StartingLifeValue);
 
 			const vec2 textSize = GameContext::GetInstance()->DefaultFont->MeasureString("ABCD1234");
 			const vec2 textOrigin = vec2(0.0f, textSize.y / 2.0f);
@@ -222,6 +273,18 @@ namespace DIVA::MainGame
 			lyricsTextRef.Visible = false;
 			animCache.LyricsTextPosition = lyricsTextRef.GetTransform(0.0f).Position;
 			animCache.LyricsTextPosition.y -= textOrigin.y;
+
+			Layer* clearPercentageRef = &animCache.FrameBottom->GetLayer("ClearPercentage_Ref1");
+			clearPercentageRef->Visible = false;
+			animCache.ClearPercentageTextPosition_Fract = clearPercentageRef->GetTransform(0.0f).Position;
+
+			clearPercentageRef = &animCache.FrameBottom->GetLayer("ClearPercentage_Ref2");
+			clearPercentageRef->Visible = false;
+			animCache.ClearPercentageTextSpacing = animCache.ClearPercentageTextPosition_Fract.x - clearPercentageRef->GetTransform(0.0f).Position.x;
+
+			clearPercentageRef = &animCache.FrameBottom->GetLayer("ClearPercentage_Ref3");
+			clearPercentageRef->Visible = false;
+			animCache.ClearPercentageTextPosition_Whole = clearPercentageRef->GetTransform(0.0f).Position;
 
 			return true;
 		}
@@ -261,6 +324,22 @@ namespace DIVA::MainGame
 			if (ScoreBonusDisplay.ElapsedDisplayTime <= scoreBonusAnim->EndTime && !ScoreBonusDisplay.Held)
 			{
 				ScoreBonusDisplay.ElapsedDisplayTime += animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
+			}
+		}
+
+		void UpdateLifeGauge(const f32& deltaTime)
+		{
+			if (LifeGauge.FillAnimFrame >= animCache.LifeGauge_Fill->EndTime)
+			{
+				LifeGauge.FullAnimFrame += animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
+				if (LifeGauge.FullAnimFrame >= animCache.LifeGauge_FullAnim->EndTime)
+					LifeGauge.FullAnimFrame = 0.0f;
+			}
+			else
+			{
+				const f32 timeStep = animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
+				LifeGauge.NextUpFrame += timeStep;
+				LifeGauge.NextDownFrame += timeStep;
 			}
 		}
 		
@@ -379,6 +458,17 @@ namespace DIVA::MainGame
 			}
 		}
 
+		void DrawClearPercentageDisplay(f32 percentage)
+		{
+			u32 wholePart = SDL_floorf(percentage);
+			u32 fractPart = ((percentage - SDL_floorf(percentage)) * 100.0f);
+
+			DrawSpriteNumericValue(fractPart, spriteCache.ClearPercentageNumbers, animCache.ClearPercentageTextPosition_Fract,
+				vec2(1.0f), animCache.ClearPercentageTextSpacing, DefaultColors::White, 2);
+			DrawSpriteNumericValue(wholePart, spriteCache.ClearPercentageNumbers, animCache.ClearPercentageTextPosition_Whole,
+				vec2(1.0f), animCache.ClearPercentageTextSpacing, DefaultColors::White);
+		}
+
 		void SetScoreBonusDisplayState(u32 value, vec2& position)
 		{
 			ScoreBonusDisplay.Position = position;
@@ -409,6 +499,22 @@ namespace DIVA::MainGame
 			LyricsColor = color;
 		}
 
+		void SetLifeGaugeValue(i32 value)
+		{
+			if (value < LifeGauge.CurrentValue)
+			{
+				LifeGauge.NextDownFrame = 0.0f;
+				LifeGauge.FullAnimFrame = 0.0f;
+			}
+			else if (value > LifeGauge.CurrentValue)
+			{
+				LifeGauge.NextUpFrame = 0.0f;
+			}
+
+			LifeGauge.CurrentValue = value;
+			LifeGauge.FillAnimFrame = MathExtensions::ConvertRange<f32>(0, MainGameContext::MaxLifeValue, 0, animCache.LifeGauge_Fill->EndTime, value);
+		}
+
 		void DrawLyricsText(const vec2 scale)
 		{
 			if (LyricsTextBuffer.size() > 0)
@@ -426,7 +532,21 @@ namespace DIVA::MainGame
 
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameTop, 0.0f);
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameBottom, 0.0f);
+
+			f32 clearPercentage = MathExtensions::ConvertRange<f32>(0, mainGameContext->Score.NoteCount, 0, 1.0f, mainGameContext->Score.NotesHit);
+			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.ClearGauge_Fill, clearPercentage * animCache.ClearGauge_Fill->EndTime);
+
 			DrawScoreDisplay();
+			DrawClearPercentageDisplay(clearPercentage * 100.0f);
+
+			if (LifeGauge.CurrentValue >= MainGameContext::MaxLifeValue)
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_FullAnim, LifeGauge.FullAnimFrame);
+			else
+			{
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_Fill, LifeGauge.FillAnimFrame);
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentUp, LifeGauge.NextUpFrame);
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentDown, LifeGauge.NextDownFrame);
+			}
 		}
 
 		void Draw()
@@ -489,6 +609,7 @@ namespace DIVA::MainGame
 		impl->UpdateScoreDisplay(deltaTime / gameTime.TargetFrameTime.GetSeconds());
 		impl->UpdateComboDisplay(deltaTime);
 		impl->UpdateScoreBonusDisplay(deltaTime);
+		impl->UpdateLifeGauge(deltaTime);
 	}
 
 	void HUD::Draw(Starshine::GameTime& gameTime)
@@ -530,5 +651,10 @@ namespace DIVA::MainGame
 	void HUD::SetLyricsText(std::string_view text, const Color& color)
 	{
 		impl->SetLyricsText(text, color);
+	}
+
+	void HUD::SetLifeGaugeValue(i32 value)
+	{
+		impl->SetLifeGaugeValue(value);
 	}
 }

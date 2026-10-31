@@ -123,7 +123,7 @@ namespace Starshine::Graphics
 	class AnimationSet
 	{
 	public:
-		AnimationSet() = default;
+		AnimationSet();
 		~AnimationSet() = default;
 
 	public:
@@ -171,6 +171,7 @@ namespace Starshine::Graphics
 		std::shared_ptr<SpriteSheet> linkedSpriteSheet;
 		std::vector<SpriteDefinition> spriteDefinitions;
 		std::vector<Animation> animations;
+		SpriteDefinition blankSpriteDef{};
 
 		ivec2 resolution{};
 		i32 fps{ 60 };

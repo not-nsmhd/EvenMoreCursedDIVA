@@ -163,6 +163,7 @@ namespace DIVA::MainGame
 			MainGameContext.Score.Score = 0;
 			MainGameContext.Score.Combo = 0;
 			MainGameContext.Score.MaxCombo = 0;
+			MainGameContext.Life = MainGameContext::StartingLifeValue;
 
 			IsChanceTime = false;
 			NextChanceTime = nullptr;
@@ -348,6 +349,9 @@ namespace DIVA::MainGame
 			if (loadResult)
 				songChart.RemapToResolution(BaseResolution);
 
+			MainGameContext.Score.NoteCount = songChart.Notes.size();
+			MainGameContext.Score.TargetScore = songChart.Notes.size() * ScoreValues::Cool;
+
 			return loadResult;
 		}
 
@@ -496,7 +500,12 @@ namespace DIVA::MainGame
 				{
 					note->Expired = true;
 					MainGameContext.Score.Combo = 0;
+
+					MainGameContext.Life += LifeValues::Miss;
+					MainGameContext.Life = MathExtensions::Clamp(MainGameContext.Life, 0, MainGameContext.MaxLifeValue);
+
 					hud->SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
+					hud->SetLifeGaugeValue(MainGameContext.Life);
 				}
 
 				if (note->ShouldBeRemoved)
@@ -639,23 +648,33 @@ namespace DIVA::MainGame
 			case HitEvaluation::Cool:
 				noteScore = note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				MainGameContext.Score.NotesHit += note->HitWrong ? 0 : 1;
+				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Cool;
 				break;
 			case HitEvaluation::Good:
 				noteScore = note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
+				MainGameContext.Score.NotesHit += note->HitWrong ? 0 : 1;
+				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Good;
 				break;
 			case HitEvaluation::Safe:
 				noteScore = note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
 				MainGameContext.Score.Combo = 0;
+				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Safe;
 				break;
 			case HitEvaluation::Bad:
 				noteScore = note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
 				MainGameContext.Score.Combo = 0;
+				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Bad;
 				break;
 			case HitEvaluation::Miss:
 				MainGameContext.Score.Combo = 0;
+				MainGameContext.Life += LifeValues::Miss;
 				break;
 			}
+
+			MainGameContext.Life = MathExtensions::Clamp(MainGameContext.Life, 0, MainGameContext.MaxLifeValue);
+			hud->SetLifeGaugeValue(MainGameContext.Life);
 
 			if (IsChanceTime && !note->HitWrong)
 				noteScore *= 2;
@@ -859,6 +878,16 @@ namespace DIVA::MainGame
 				return;
 			}
 
+			SDL_memset(debugText, 0, sizeof(debugText));
+
+			size_t lastPos = 0;
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f/%.03f\n",
+				ElapsedTime.GetSeconds(), songChart.Duration.GetSeconds());
+
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
+			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Life: %d/%d\n", MainGameContext.Life, MainGameContext::MaxLifeValue);
+
 			if (!Paused)
 			{	
 				if (MusicSource != SourceHandle::Invalid && MusicVoice.IsPlaying())
@@ -892,17 +921,6 @@ namespace DIVA::MainGame
 						videoPlayer->SetIsPlaying(!Paused);
 				}
 			}
-
-			SDL_memset(debugText, 0, sizeof(debugText));
-
-#if 0
-			size_t lastPos = 0;
-			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Elapsed Time: %.03f/%.03f\n",
-				ElapsedTime.GetSeconds(), songChart.Duration.GetSeconds());
-
-			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Chart Notes: %llu/%llu\n", chartNoteOffset, songChart.Notes.size());
-			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Active Notes: %llu\n", ActiveNotes.size());
-#endif
 		}
 
 		void UpdatePauseMenu()
@@ -1049,10 +1067,11 @@ namespace DIVA::MainGame
 			if (Paused && DisplayPauseMenu)
 				DrawPauseMenu();
 
-#if 0
+			spriteRenderer->Present();
+
 			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
-#endif
+
 			spriteRenderer->Present();
 		}
 
@@ -1075,16 +1094,20 @@ namespace DIVA::MainGame
 
 		void DrawResults()
 		{
+			const RectangleF viewportSize = GFXDevice->GetViewportSize();
+			const vec2 baseScale = vec2(viewportSize.Width / BaseResolution.x, viewportSize.Height / BaseResolution.y);
+			const mat4 scaleMatrix = glm::scale(glm::identity<mat4>(), vec3(baseScale.x, baseScale.y, 1.0f));
 			const Font* font = GameContext::GetInstance()->DefaultFont.get();
 
 			GFXDevice->Clear(ClearFlags::ClearFlags_Color, Color{ 0, 24, 24, 255 }, 1.0f, 0);
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
+			spriteRenderer->SetTransformMatrix(scaleMatrix);
 
 			spriteRenderer->Font().PushString(font, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{
-				spriteRenderer->Font().PushString(font, results_OptionNames[i], vec2(0.0f, 40.0f + static_cast<float>(i) * font->LineHeight), vec2(1.0f),
+				spriteRenderer->Font().PushString(font, results_OptionNames[i], vec2(0.0f, 180.0f + static_cast<float>(i) * font->LineHeight), vec2(1.0f),
 					i == results_optionIndex ? DefaultColors::Yellow : DefaultColors::White);
 			}
 
@@ -1105,6 +1128,7 @@ namespace DIVA::MainGame
 		impl = std::make_unique<Impl>(context);
 		impl->MainGameContext.SongName = LoadSettings.SongInfoToLoad.Name;
 		impl->MainGameContext.Difficulty = LoadSettings.Difficulty;
+		impl->MainGameContext.Score = {};
 
 		impl->GameInstance = GameInstance;
 		impl->Initialize();
@@ -1135,11 +1159,17 @@ namespace DIVA::MainGame
 	
 	void MainGameState::Update(GameTime& gameTime)
 	{
+		if (impl == nullptr)
+			return;
+
 		impl->Update(gameTime);
 	}
 	
 	void MainGameState::Draw(GameTime& gameTime)
 	{
+		if (impl == nullptr)
+			return;
+
 		impl->Draw(gameTime);
 	}
 }

@@ -24,6 +24,8 @@ namespace DIVA::MainGame
 		void HoldScoreBonus();
 		void ReleaseScoreBonus(bool drop);
 
+		void SetLifeGaugeValue(i32 value);
+
 		void SetLyricsText(std::string_view text, const Starshine::Color& color = Starshine::DefaultColors::White);
 	private:
 		MainGameContext& mainGameContext;

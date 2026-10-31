@@ -16,11 +16,19 @@ namespace DIVA::MainGame
 		std::string SongName;
 		Formats::ChartDifficulty Difficulty{};
 
+		static constexpr i32 StartingLifeValue{ 500 };
+		static constexpr i32 MaxLifeValue{ 1000 };
+		i32 Life{ StartingLifeValue };
+
 		struct ScoreData
 		{
 			u32 Score{};
 			u32 Combo{};
 			u32 MaxCombo{};
+
+			u32 TargetScore{};
+			u32 NoteCount{};
+			u32 NotesHit{};
 		} Score;
 
 		struct IconSetSpritesCache

@@ -73,6 +73,17 @@ namespace Starshine::IO
 
 	std::string FileSystem::GetFullFilePath(std::string_view path)
 	{
+#ifdef _WIN32
+		if (path.size() >= 2)
+		{
+			// We've got a full file path with the drive letter and all
+			if (path[1] == ':')
+			{
+				if (File::Exists(path))
+					return std::string(path);
+			}
+		}
+#endif
 		for (auto& mntPath : mountedPaths)
 		{
 			std::string fullPath = Path::Append(mntPath, path);
@@ -85,6 +96,18 @@ namespace Starshine::IO
 
 	std::string FileSystem::GetFullDirectoryPath(std::string_view path)
 	{
+#ifdef _WIN32
+		if (path.size() >= 2)
+		{
+			// We've got a full file path with the drive letter and all
+			if (path[1] == ':')
+			{
+				if (Directory::Exists(path))
+					return std::string(path);
+			}
+		}
+#endif
+
 		for (auto& mntPath : mountedPaths)
 		{
 			std::string fullPath = Path::Append(mntPath, path);
