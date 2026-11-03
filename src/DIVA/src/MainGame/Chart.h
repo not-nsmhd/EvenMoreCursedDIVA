@@ -93,6 +93,13 @@ namespace DIVA::MainGame
 		Starshine::TimeSpan EndTime{};
 	};
 
+	struct TechnicalZone
+	{
+		Starshine::TimeSpan StartTime{};
+		Starshine::TimeSpan EndTime{};
+		i32 NoteCount{};
+	};
+
 	class Chart
 	{
 	public:
@@ -101,6 +108,7 @@ namespace DIVA::MainGame
 		std::vector<ChartNote> Notes;
 		std::vector<NoteTimeChange> NoteTimeChanges;
 		std::vector<ChanceTime> ChanceTimes;
+		std::vector<TechnicalZone> TechnicalZones;
 
 	public:
 		void ProcessNoteReferences();
@@ -112,5 +120,6 @@ namespace DIVA::MainGame
 
 		Starshine::TimeSpan GetNoteTime(const Starshine::TimeSpan& time);
 		const ChanceTime* GetNextChanceTime(const Starshine::TimeSpan& time);
+		const TechnicalZone* GetNextTechnicalZone(const Starshine::TimeSpan& time);
 	};
 }

@@ -356,7 +356,7 @@ namespace DIVA::MainGame
 			return;
 
 		AnimationSet* animSet = MainGameContext->EffectAnimations.Animations.get();
-		sprRenderer->AnimationSet().PushAnimation(animSet, hitEffectAnim, HitEffectAnimationFrame, TargetPosition, vec2(1.0f));
+		sprRenderer->AnimationSet().PushAnimation(animSet, hitEffectAnim, HitEffectAnimationFrame, TargetPosition, vec2(1.0f), 0.0f);
 	}
 
 	bool GameNote::Evaluate(NoteShape shape)

@@ -9,7 +9,8 @@ namespace Starshine::Rendering::Render2D
 	{
 	}
 
-	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame, const vec2& position, const vec2& scale)
+	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame,
+		const vec2& position, const vec2& scale, const f32& angleRadians)
 	{
 		if (animSet == nullptr || anim == nullptr)
 			return;
@@ -39,7 +40,7 @@ namespace Starshine::Rendering::Render2D
 			sprRenderer.SetSpriteOrigin(transform.Origin * spriteLayerSize);
 			sprRenderer.SetSpritePosition(transform.Position + position);
 			sprRenderer.SetSpriteSize(transform.Scale * spriteSize);
-			sprRenderer.SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation));
+			sprRenderer.SetSpriteRotation(MathExtensions::ToRadians(transform.Rotation) + angleRadians);
 			sprRenderer.SetSpriteColor(transform.Color);
 
 			if (spriteDef->RealSprite != nullptr)
@@ -53,6 +54,6 @@ namespace Starshine::Rendering::Render2D
 
 	void AnimationSetRenderer::PushAnimation(Graphics::AnimationSet* animSet, const Graphics::Animation* anim, f32 frame)
 	{
-		PushAnimation(animSet, anim, frame, vec2(0.0f), vec2(1.0f));
+		PushAnimation(animSet, anim, frame, vec2(0.0f), vec2(1.0f), 0.0f);
 	}
 }

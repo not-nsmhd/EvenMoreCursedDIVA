@@ -56,6 +56,9 @@
     <ClCompile Include="src\Sandbox\RNGTest.cpp">
       <Filter>Source Files\Sandbox</Filter>
     </ClCompile>
+    <ClCompile Include="src\Sandbox\AsyncTest.cpp">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.editorconfig">
@@ -100,6 +103,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Sandbox\RNGTest.h">
+      <Filter>Source Files\Sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox\AsyncTest.h">
       <Filter>Source Files\Sandbox</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,6 +5,7 @@
 #include "Menu/ChartSelect.h"
 #include "MainGame/MainGame.h"
 #include "Sandbox/RNGTest.h"
+#include "Sandbox/AsyncTest.h"
 
 namespace DIVA
 {
@@ -16,6 +17,7 @@ namespace DIVA
 		MainGame,
 
 		Sandbox_RNGTest,
+		Sandbox_AsyncTest,
 
 		Count
 	};
@@ -26,6 +28,7 @@ namespace DIVA
 		std::make_unique<MainGame::MainGameState>(),
 
 		std::make_unique<Sandbox::RNGTest>(),
+		std::make_unique<Sandbox::AsyncTest>(),
 	};
 
 	inline Starshine::GameState* GetStatePointer(StateID id)

@@ -94,13 +94,22 @@ namespace DIVA::MainGame
 
 		struct LifeGaugeData
 		{
-			i32 CurrentValue{};
+			static constexpr f32 OneSegmentRotation = MathExtensions::ToRadians(30.0f);
+			static constexpr i32 OneSegmentThreshold = 1000 / 12;
 
-			f32 FillAnimFrame{};
+			i32 CurrentValue{ MainGameContext::StartingLifeValue };
+			i32 SegmentThreshold{};
+
+			f32 FillAnimFrame{ 6.0f };
 			f32 FullAnimFrame{};
 
-			f32 NextUpFrame{};
-			f32 NextDownFrame{};
+			f32 NextUpFrame{ 1000.0f };
+			f32 NextDownFrame{ 1000.0f };
+
+			f32 UpFrame{ 1000.0f };
+			f32 DownFrame{ 1000.0f };
+
+			f32 NextSegmentRotation{ OneSegmentRotation * 6.0f };
 		} LifeGauge;
 
 		std::array<char, 256> LyricsTextBuffer{};
@@ -251,6 +260,8 @@ namespace DIVA::MainGame
 			animCache.LifeGauge_FullAnim = &animCache.hudAnimSet->GetAnimation("LifeGauge_Full");
 			animCache.LifeGauge_NextSegmentUp = &animCache.hudAnimSet->GetAnimation("LifeGauge_Next_Up");
 			animCache.LifeGauge_NextSegmentDown = &animCache.hudAnimSet->GetAnimation("LifeGauge_Next_Down");
+			animCache.LifeGauge_Up = &animCache.hudAnimSet->GetAnimation("LifeGauge_Up");
+			animCache.LifeGauge_Down = &animCache.hudAnimSet->GetAnimation("LifeGauge_Down");
 			SetLifeGaugeValue(MainGameContext::StartingLifeValue);
 
 			const vec2 textSize = GameContext::GetInstance()->DefaultFont->MeasureString("ABCD1234");
@@ -329,18 +340,21 @@ namespace DIVA::MainGame
 
 		void UpdateLifeGauge(const f32& deltaTime)
 		{
-			if (LifeGauge.FillAnimFrame >= animCache.LifeGauge_Fill->EndTime)
+			const f32 timeStep = animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
+			if (mainGameContext->Life >= MainGameContext::MaxLifeValue)
 			{
-				LifeGauge.FullAnimFrame += animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
+				LifeGauge.FullAnimFrame += timeStep;
 				if (LifeGauge.FullAnimFrame >= animCache.LifeGauge_FullAnim->EndTime)
 					LifeGauge.FullAnimFrame = 0.0f;
 			}
 			else
 			{
-				const f32 timeStep = animCache.hudAnimSet->GetRelativeFrameTimeStep(deltaTime);
 				LifeGauge.NextUpFrame += timeStep;
 				LifeGauge.NextDownFrame += timeStep;
 			}
+
+			LifeGauge.UpFrame += timeStep;
+			LifeGauge.DownFrame += timeStep;
 		}
 		
 		// NOTE: Value text is displayed from right to left
@@ -501,18 +515,40 @@ namespace DIVA::MainGame
 
 		void SetLifeGaugeValue(i32 value)
 		{
-			if (value < LifeGauge.CurrentValue)
+			LifeGauge.SegmentThreshold += value - LifeGauge.CurrentValue;
+			if (LifeGauge.SegmentThreshold >= LifeGaugeData::OneSegmentThreshold)
 			{
-				LifeGauge.NextDownFrame = 0.0f;
-				LifeGauge.FullAnimFrame = 0.0f;
+				LifeGauge.SegmentThreshold = 0;
+				LifeGauge.FillAnimFrame = MathExtensions::Clamp(LifeGauge.FillAnimFrame + 1.0f, 0.0f, 12.0f);
+				LifeGauge.NextSegmentRotation = MathExtensions::Clamp(LifeGauge.NextSegmentRotation + LifeGaugeData::OneSegmentRotation, 0.0f,
+					LifeGaugeData::OneSegmentRotation * 11.0f);
+
+				LifeGauge.UpFrame = 0.0f;
 			}
-			else if (value > LifeGauge.CurrentValue)
+			else if (LifeGauge.SegmentThreshold <= -LifeGaugeData::OneSegmentThreshold)
 			{
-				LifeGauge.NextUpFrame = 0.0f;
+				LifeGauge.SegmentThreshold = 0;
+				LifeGauge.FillAnimFrame = MathExtensions::Clamp(LifeGauge.FillAnimFrame - 1.0f, 0.0f, 12.0f);
+				LifeGauge.NextSegmentRotation = MathExtensions::Clamp(LifeGauge.NextSegmentRotation - LifeGaugeData::OneSegmentRotation, 0.0f,
+					LifeGaugeData::OneSegmentRotation * 11.0f);
+
+				LifeGauge.DownFrame = 0.0f;
+			}
+
+			if (LifeGauge.CurrentValue < MainGameContext::MaxLifeValue)
+			{
+				if (value < LifeGauge.CurrentValue)
+				{
+					LifeGauge.NextDownFrame = 0.0f;
+					LifeGauge.FullAnimFrame = 0.0f;
+				}
+				else if (value > LifeGauge.CurrentValue)
+				{
+					LifeGauge.NextUpFrame = 0.0f;
+				}
 			}
 
 			LifeGauge.CurrentValue = value;
-			LifeGauge.FillAnimFrame = MathExtensions::ConvertRange<f32>(0, MainGameContext::MaxLifeValue, 0, animCache.LifeGauge_Fill->EndTime, value);
 		}
 
 		void DrawLyricsText(const vec2 scale)
@@ -533,19 +569,29 @@ namespace DIVA::MainGame
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameTop, 0.0f);
 			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.FrameBottom, 0.0f);
 
-			f32 clearPercentage = MathExtensions::ConvertRange<f32>(0, mainGameContext->Score.NoteCount, 0, 1.0f, mainGameContext->Score.NotesHit);
-			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.ClearGauge_Fill, clearPercentage * animCache.ClearGauge_Fill->EndTime);
+			const f32 tzReqBonus = mainGameContext->Score.TechnicalZonesTotal * 0.03f;
+			const f32 tzCurrentBonus = mainGameContext->Score.TechnicalZonesCompleted * 0.03f;
+			const f32 notePercentage = MathExtensions::ConvertRange<f32>(0, mainGameContext->Score.NoteCount, 0, 1.0f - tzReqBonus, mainGameContext->Score.NotesHit);
+
+			const f32 totalPercentage = notePercentage + tzCurrentBonus;
+			animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.ClearGauge_Fill, totalPercentage * animCache.ClearGauge_Fill->EndTime);
 
 			DrawScoreDisplay();
-			DrawClearPercentageDisplay(clearPercentage * 100.0f);
+			DrawClearPercentageDisplay(totalPercentage * 100.0f);
 
 			if (LifeGauge.CurrentValue >= MainGameContext::MaxLifeValue)
 				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_FullAnim, LifeGauge.FullAnimFrame);
 			else
 			{
 				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_Fill, LifeGauge.FillAnimFrame);
-				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentUp, LifeGauge.NextUpFrame);
-				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentDown, LifeGauge.NextDownFrame);
+
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentUp, LifeGauge.NextUpFrame,
+					{}, vec2(1.0f), LifeGauge.NextSegmentRotation);
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_NextSegmentDown, LifeGauge.NextDownFrame,
+					{}, vec2(1.0f), LifeGauge.NextSegmentRotation - LifeGaugeData::OneSegmentRotation);
+
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_Up, LifeGauge.UpFrame);
+				animSetRenderer.PushAnimation(animCache.hudAnimSet.get(), animCache.LifeGauge_Down, LifeGauge.DownFrame);
 			}
 		}
 
@@ -561,6 +607,7 @@ namespace DIVA::MainGame
 			DrawScoreBonusDisplay();
 			DrawFrame();
 
+			mainGameContext->SpriteRenderer->SetBlendMode(BlendMode::Normal);
 			fontRenderer.PushString(font, mainGameContext->SongName, animCache.SongNameTextPosition, vec2(1.0f), DefaultColors::White);
 			DrawLyricsText(vec2(1.0f));
 		}

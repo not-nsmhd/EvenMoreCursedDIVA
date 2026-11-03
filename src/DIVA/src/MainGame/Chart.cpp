@@ -21,9 +21,11 @@ namespace DIVA::MainGame
 		size_t noteCount = static_cast<size_t>(rootElement->ChildElementCount("Note"));
 		size_t noteTimeChangesCount = static_cast<size_t>(rootElement->ChildElementCount("SetNoteTime"));
 		size_t chanceTimeCount = static_cast<size_t>(rootElement->ChildElementCount("ChanceTimeStart"));
+		size_t techincalZoneCount = static_cast<size_t>(rootElement->ChildElementCount("TechnicalZoneStart"));
 		Notes.reserve(noteCount);
 		NoteTimeChanges.reserve(noteTimeChangesCount);
 		ChanceTimes.reserve(chanceTimeCount);
+		TechnicalZones.reserve(techincalZoneCount);
 
 		Xml::Element* element = rootElement->FirstChildElement("Note");
 		const Xml::Attribute* curAttrib = nullptr;
@@ -76,7 +78,7 @@ namespace DIVA::MainGame
 			element->QueryFloatAttribute("Time", &time_seconds);
 			chanceTime.StartTime = Starshine::TimeSpan::FromSeconds(time_seconds);
 
-			element = rootElement->FirstChildElement("ChanceTimeEnd");
+			element = element->NextSiblingElement("ChanceTimeEnd");
 			if (element != nullptr)
 			{
 				time_seconds = 0.0f;
@@ -85,6 +87,30 @@ namespace DIVA::MainGame
 
 				ChanceTimes.push_back(chanceTime);
 			}
+
+			element = element->NextSiblingElement("ChanceTimeStart");
+		}
+
+		element = rootElement->FirstChildElement("TechnicalZoneStart");
+		for (size_t i = 0; i < techincalZoneCount; i++)
+		{
+			TechnicalZone technicalZone{};
+
+			time_seconds = 0.0f;
+			element->QueryFloatAttribute("Time", &time_seconds);
+			technicalZone.StartTime = Starshine::TimeSpan::FromSeconds(time_seconds);
+
+			element = element->NextSiblingElement("TechnicalZoneEnd");
+			if (element != nullptr)
+			{
+				time_seconds = 0.0f;
+				element->QueryFloatAttribute("Time", &time_seconds);
+				technicalZone.EndTime = Starshine::TimeSpan::FromSeconds(time_seconds);
+
+				TechnicalZones.push_back(technicalZone);
+			}
+
+			element = element->NextSiblingElement("TechnicalZoneStart");
 		}
 
 		ProcessNoteReferences();
@@ -113,6 +139,7 @@ namespace DIVA::MainGame
 
 	void Chart::ProcessNoteReferences()
 	{
+		// ---- Hold Notes
 		size_t i = 0;
 		for (auto note = Notes.begin(); note != Notes.end(); note++)
 		{
@@ -128,6 +155,18 @@ namespace DIVA::MainGame
 				}
 			}
 			i++;
+		}
+
+		// ---- Technical Zone Note Counts
+		i = 0;
+		for (auto tz = TechnicalZones.begin(); tz != TechnicalZones.end(); tz++)
+		{
+			for (auto note = Notes.cbegin() + i; note != Notes.end(); note++)
+			{
+				const TimeSpan& noteHitTime = GetNoteTime(note->AppearTime) + note->AppearTime;
+				if (noteHitTime >= tz->StartTime && noteHitTime <= tz->EndTime)
+					tz->NoteCount++;
+			}
 		}
 	}
 
@@ -163,6 +202,18 @@ namespace DIVA::MainGame
 		for (auto& chanceTime : ChanceTimes)
 		{
 			if (chanceTime.StartTime <= time && chanceTime.EndTime >= time) { return &chanceTime; }
+		}
+
+		return nullptr;
+	}
+
+	const TechnicalZone* Chart::GetNextTechnicalZone(const TimeSpan& time)
+	{
+		if (TechnicalZones.empty()) { return nullptr; }
+
+		for (auto& tz : TechnicalZones)
+		{
+			if (tz.StartTime <= time && tz.EndTime >= time) { return &tz; }
 		}
 
 		return nullptr;

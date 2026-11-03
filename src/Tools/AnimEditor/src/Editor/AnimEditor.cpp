@@ -1213,7 +1213,7 @@ namespace Starshine
 
 			if (playing)
 			{
-				sprRenderer->AnimationSet().PushAnimation(&context.AnimSet, context.CurrentAnimation, context.TimelineFrame, viewPan, vec2(viewZoom));
+				sprRenderer->AnimationSet().PushAnimation(&context.AnimSet, context.CurrentAnimation, context.TimelineFrame, viewPan, vec2(viewZoom), 0.0f);
 				sprRenderer->Present();
 
 				context.TimelineFrame += context.AnimSet.GetRelativeFrameTimeStep(gameTime.ElapsedFrameTime.GetSeconds());

@@ -32,8 +32,8 @@ def GetNoteTypeString(value):
     print("Unknown type value: {0}".format(value));
     return "Normal"
     
-if len(sys.argv) < 3:
-    print(f"Usage: {sys.argv[0]} <script format> <script file path>")
+if len(sys.argv) < 4:
+    print(f"Usage: {sys.argv[0]} <script format> <script file path> <difficulty index>")
     print()
     print("Script formats:")
     print("\tinfo_A12 - Dreamy Theater 1st/Arcade")
@@ -61,6 +61,7 @@ opcode_dbFile.close()
 # ---------------
 
 chartFile = sys.argv[2]
+difficultyIndex = 1 << int(sys.argv[3])
 dscFile = open(chartFile, "rb")
 
 dscFile.seek(0, io.SEEK_END)
@@ -149,27 +150,27 @@ while True:
             difficulty = dscData[opcodeIdx + 1]
             mode = dscData[opcodeIdx + 2]
         
-            if difficulty & 1 != 0:
+            if difficulty & difficultyIndex != 0:
                 eventName = ""
                 match mode:
                     case 1:
                         eventName = "ChanceTimeStart"
                     case 3:
                         eventName = "ChanceTimeEnd"
-                    #case 8:
-                        #eventName = "TechnicalZoneStart"
-                    #case 9:
-                        #eventName = "TechnicalZoneEnd"
+                    case 8:
+                        eventName = "TechnicalZoneStart"
+                    case 9:
+                        eventName = "TechnicalZoneEnd"
                     case _:
                         eventName = ""
                 
                 if len(eventName) > 0:
-                     xmlEvent = XmlET.SubElement(xmlChart, eventName, 
+                    xmlEvent = XmlET.SubElement(xmlChart, eventName, 
                     {
                         "Time": "{0}".format(nextCommandTime_divaTime / 100000.0),
                     })
-            
-            XmlET.indent(xmlChart, space="\t")
+                
+                XmlET.indent(xmlChart, space="\t")
         case 28: # BAR_TIME_SET
             bpm = dscData[opcodeIdx + 1]
             beatsPerBar = dscData[opcodeIdx + 2]

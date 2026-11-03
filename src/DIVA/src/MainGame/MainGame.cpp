@@ -80,6 +80,12 @@ namespace DIVA::MainGame
 		const ChanceTime* NextChanceTime{ nullptr };
 		size_t PassedChanceTimes{};
 
+		bool TechnicalZoneActive{ false };
+		bool TechnicalZoneFailed{ false };
+		const TechnicalZone* NextTechnicalZone{};
+		i32 RemainingTZNoteCount{ -1 };
+		size_t PassedTechnicalZones{};
+
 		struct KeyboardBindsData
 		{
 			KeyBind Pause = KeyBind{ SDLK_ESCAPE, Input::UnboundKey };
@@ -163,11 +169,17 @@ namespace DIVA::MainGame
 			MainGameContext.Score.Score = 0;
 			MainGameContext.Score.Combo = 0;
 			MainGameContext.Score.MaxCombo = 0;
+			MainGameContext.Score.TechnicalZonesCompleted = 0;
 			MainGameContext.Life = MainGameContext::StartingLifeValue;
 
 			IsChanceTime = false;
 			NextChanceTime = nullptr;
 			PassedChanceTimes = 0;
+
+			TechnicalZoneActive = false;
+			NextTechnicalZone = nullptr;
+			PassedTechnicalZones = 0;
+			RemainingTZNoteCount = -1;
 
 			Paused = false;
 			pause_optionIndex = 0;
@@ -352,6 +364,8 @@ namespace DIVA::MainGame
 			MainGameContext.Score.NoteCount = songChart.Notes.size();
 			MainGameContext.Score.TargetScore = songChart.Notes.size() * ScoreValues::Cool;
 
+			MainGameContext.Score.TechnicalZonesTotal = songChart.TechnicalZones.size();
+
 			return loadResult;
 		}
 
@@ -470,9 +484,10 @@ namespace DIVA::MainGame
 			}
 
 			if (NextChanceTime == nullptr && songChart.ChanceTimes.size() > PassedChanceTimes)
-			{
 				NextChanceTime = songChart.GetNextChanceTime(ElapsedTime);
-			}
+
+			if (NextTechnicalZone == nullptr && songChart.TechnicalZones.size() > PassedTechnicalZones)
+				NextTechnicalZone = songChart.GetNextTechnicalZone(ElapsedTime);
 
 			if (NextChanceTime != nullptr)
 			{
@@ -485,6 +500,29 @@ namespace DIVA::MainGame
 						PassedChanceTimes++;
 					}
 					else { IsChanceTime = true; }
+				}
+			}
+
+			if (NextTechnicalZone != nullptr)
+			{
+				if (NextTechnicalZone->StartTime <= ElapsedTime)
+				{
+					if (NextTechnicalZone->EndTime <= ElapsedTime)
+					{
+						if (!TechnicalZoneFailed)
+							MainGameContext.Score.TechnicalZonesCompleted++;
+
+						TechnicalZoneActive = false;
+						TechnicalZoneFailed = false;
+						NextTechnicalZone = nullptr;
+						RemainingTZNoteCount = -1;
+						PassedTechnicalZones++;
+					}
+					else if (RemainingTZNoteCount == -1)
+					{
+						TechnicalZoneActive = true;
+						RemainingTZNoteCount = NextTechnicalZone->NoteCount;
+					}
 				}
 			}
 		}
@@ -501,8 +539,11 @@ namespace DIVA::MainGame
 					note->Expired = true;
 					MainGameContext.Score.Combo = 0;
 
-					MainGameContext.Life += LifeValues::Miss;
+					MainGameContext.Life += IsChanceTime ? 0 : LifeValues::Miss;
 					MainGameContext.Life = MathExtensions::Clamp(MainGameContext.Life, 0, MainGameContext.MaxLifeValue);
+
+					if (TechnicalZoneActive)
+						TechnicalZoneFailed = true;
 
 					hud->SetComboDisplayState(HitEvaluation::Miss, 0, false, note->TargetPosition);
 					hud->SetLifeGaugeValue(MainGameContext.Life);
@@ -649,37 +690,46 @@ namespace DIVA::MainGame
 				noteScore = note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
 				MainGameContext.Score.NotesHit += note->HitWrong ? 0 : 1;
-				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Cool;
+				MainGameContext.Life += IsChanceTime ? 0 : (note->HitWrong ? LifeValues::Wrong : LifeValues::Cool);
 				break;
 			case HitEvaluation::Good:
 				noteScore = note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
 				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
 				MainGameContext.Score.NotesHit += note->HitWrong ? 0 : 1;
-				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Good;
+				MainGameContext.Life += IsChanceTime ? 0 : (note->HitWrong ? LifeValues::Wrong : LifeValues::Good);
 				break;
 			case HitEvaluation::Safe:
 				noteScore = note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
 				MainGameContext.Score.Combo = 0;
-				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Safe;
+				MainGameContext.Life += IsChanceTime ? 0 : (note->HitWrong ? LifeValues::Wrong : LifeValues::Safe);
 				break;
 			case HitEvaluation::Bad:
 				noteScore = note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
 				MainGameContext.Score.Combo = 0;
-				MainGameContext.Life += note->HitWrong ? LifeValues::Wrong : LifeValues::Bad;
+				MainGameContext.Life += IsChanceTime ? 0 : (note->HitWrong ? LifeValues::Wrong : LifeValues::Bad);
 				break;
 			case HitEvaluation::Miss:
 				MainGameContext.Score.Combo = 0;
-				MainGameContext.Life += LifeValues::Miss;
+				MainGameContext.Life += IsChanceTime ? 0 : LifeValues::Miss;
 				break;
 			}
 
 			MainGameContext.Life = MathExtensions::Clamp(MainGameContext.Life, 0, MainGameContext.MaxLifeValue);
-			hud->SetLifeGaugeValue(MainGameContext.Life);
+			if (!IsChanceTime)
+				hud->SetLifeGaugeValue(MainGameContext.Life);
 
 			if (IsChanceTime && !note->HitWrong)
 				noteScore *= 2;
 
 			MainGameContext.Score.Score += noteScore;
+
+			if (TechnicalZoneActive && !TechnicalZoneFailed)
+			{
+				if (((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)) && !note->HitWrong)
+					RemainingTZNoteCount--;
+				else
+					TechnicalZoneFailed = true;
+			}
 
 			if (MainGameContext.Score.Combo > 0 && MainGameContext.Score.Combo % 10 == 0)
 			{
@@ -725,122 +775,6 @@ namespace DIVA::MainGame
 				{
 					hud->SetScoreBonusDisplayState(noteScore, note->TargetPosition);
 				}
-			}
-
-			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
-			hud->SetComboDisplayState(note->HitEvaluation, MainGameContext.Score.Combo, note->HitWrong, note->TargetPosition);
-		}
-
-		void UpdateInputGamepadBinding(NoteShape shape, const GamepadBind& binding)
-		{
-			bool primTapped = false;
-			bool altTapped = false;
-
-			bool primDown = false;
-			bool altDown = false;
-
-			bool tapped = false;
-			bool released = false;
-
-			if (shape != NoteShape::Star)
-			{
-				tapped = Gamepad::IsAnyButtonTapped(binding, &primTapped, &altTapped);
-				Gamepad::IsAnyButtonDown(binding, &primDown, &altDown);
-
-				released = Gamepad::IsAnyButtonReleased(binding, nullptr, nullptr);
-			}
-			else
-			{
-				primTapped = Gamepad::IsStickPulled(GamepadStick::Left);
-				altTapped = Gamepad::IsStickPulled(GamepadStick::Right);
-
-				primDown = Gamepad::IsStickHeld(GamepadStick::Left);
-				altDown = Gamepad::IsStickHeld(GamepadStick::Right);
-
-				tapped = primTapped || altTapped;
-				released = Gamepad::IsStickReleased(GamepadStick::Left) || Gamepad::IsStickReleased(GamepadStick::Right);
-			}
-
-			if (!tapped && !released) { return; }
-
-			GameNote* note = FindNoteToEvaluate();
-			if (note == nullptr) { return; }
-
-			switch (note->Type)
-			{
-			case NoteType::Normal:
-				if (!tapped) { return; }
-				break;
-			case NoteType::Double:
-			{
-				if (primTapped) { note->DoubleTap.Primary = true; }
-				if (altTapped) { note->DoubleTap.Alternative = true; }
-
-				note->Hold.PrimaryHeld = primDown;
-				note->Hold.AlternativeHeld = altDown;
-				break;
-			}
-			case NoteType::HoldStart:
-			{
-				if (!tapped && released) { return; }
-
-				note->Hold.PrimaryHeld = primDown;
-				note->Hold.AlternativeHeld = altDown;
-				break;
-			}
-			case NoteType::HoldEnd:
-			{
-				if (tapped && !released) { return; }
-
-				note->Hold.PrimaryHeld = primDown;
-				note->Hold.AlternativeHeld = altDown;
-				break;
-			}
-			}
-
-			bool evaluated = note->Evaluate(shape);
-			if (!evaluated) { return; }
-
-			switch (note->HitEvaluation)
-			{
-			case HitEvaluation::Cool:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::CoolWrong : ScoreValues::Cool;
-				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
-				break;
-			case HitEvaluation::Good:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::GoodWrong : ScoreValues::Good;
-				MainGameContext.Score.Combo = note->HitWrong ? 0 : (MainGameContext.Score.Combo + 1);
-				break;
-			case HitEvaluation::Safe:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::SafeWrong : ScoreValues::Safe;
-				MainGameContext.Score.Combo = 0;
-				break;
-			case HitEvaluation::Bad:
-				MainGameContext.Score.Score += note->HitWrong ? ScoreValues::BadWrong : ScoreValues::Bad;
-				MainGameContext.Score.Combo = 0;
-				break;
-			case HitEvaluation::Miss:
-				MainGameContext.Score.Combo = 0;
-				break;
-			}
-
-			if (note->Type == NoteType::Double &&
-				note->DoubleTap.GiveBonus &&
-				!note->HitWrong &&
-				((note->HitEvaluation == HitEvaluation::Cool) || (note->HitEvaluation == HitEvaluation::Good)))
-			{
-				MainGameContext.Score.Score += 200;
-				hud->SetScoreBonusDisplayState(200, note->TargetPosition);
-			}
-			else if (note->Type == NoteType::HoldStart)
-			{
-				hud->HoldScoreBonus();
-				hud->SetScoreBonusDisplayState(note->Hold.CurrentBonus, note->TargetPosition);
-			}
-			else if (note->Type == NoteType::HoldEnd)
-			{
-				bool drop = (note->HitEvaluation != HitEvaluation::Cool) && (note->HitEvaluation != HitEvaluation::Good) || note->HitWrong;
-				hud->ReleaseScoreBonus(drop);
 			}
 
 			MainGameContext.Score.MaxCombo = MathExtensions::Max(MainGameContext.Score.Combo, MainGameContext.Score.MaxCombo);
@@ -959,7 +893,7 @@ namespace DIVA::MainGame
 
 		void UpdateResults()
 		{
-			if (!resultsSaved)
+			/*if (!resultsSaved)
 			{
 				Xml::Printer printer;
 
@@ -975,7 +909,7 @@ namespace DIVA::MainGame
 				printer.ClearBuffer();
 				
 				resultsSaved = true;
-			}
+			}*/
 
 			if (Keyboard::IsKeyTapped(SDLK_DOWN)) { results_optionIndex++; }
 			if (Keyboard::IsKeyTapped(SDLK_UP)) { results_optionIndex--; }
@@ -1004,6 +938,9 @@ namespace DIVA::MainGame
 			size_t lastPos = 0;
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Score: %d\n", MainGameContext.Score.Score);
 			lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Max Combo: %d\n", MainGameContext.Score.MaxCombo);
+			if (MainGameContext.Score.TechnicalZonesTotal)
+				lastPos += SDL_snprintf(debugText + lastPos, sizeof(debugText) - 1, "Technical Zones: %d/%d\n",
+					MainGameContext.Score.TechnicalZonesCompleted, MainGameContext.Score.TechnicalZonesTotal);
 		}
 
 		void Draw(GameTime& gameTime)
@@ -1051,14 +988,10 @@ namespace DIVA::MainGame
 			spriteRenderer->DrawShape(noteTrailVertices.get(), noteTrailVerticesToDraw, PrimitiveType::TriangleStrip, tex);
 
 			for (auto& note : ActiveNotes)
-			{
 				note.Draw(gameTime);
-			}
 
 			for (auto& note : ActiveNotes)
-			{
 				note.DrawEffect(gameTime);
-			}
 
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 
@@ -1068,8 +1001,20 @@ namespace DIVA::MainGame
 				DrawPauseMenu();
 
 			spriteRenderer->Present();
-
 			spriteRenderer->SetTransformMatrix(glm::identity<mat4>());
+
+			auto font = GameContext::GetInstance()->DebugFont.get();
+			if (TechnicalZoneActive && RemainingTZNoteCount != -1)
+			{
+				char notesLeftText[32]{};
+				SDL_snprintf(notesLeftText, sizeof(notesLeftText), "\nNotes left: %d", RemainingTZNoteCount);
+
+				static constexpr Color tzLabelColor = Color(255, 106, 20, 255);
+				static constexpr Color tzLabelColor_fail = Color(100, 100, 100, 255);
+				spriteRenderer->Font().PushString(font, "Technical Zone", vec2(16.0f, 192.0f), vec2(1.0f), TechnicalZoneFailed ? tzLabelColor_fail : tzLabelColor);
+				spriteRenderer->Font().PushString(font, notesLeftText, vec2(16.0f, 192.0f), vec2(1.0f), DefaultColors::White);
+			}
+
 			spriteRenderer->Font().PushString(debugFont, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			spriteRenderer->Present();
@@ -1103,7 +1048,7 @@ namespace DIVA::MainGame
 			spriteRenderer->SetBlendMode(BlendMode::Normal);
 			spriteRenderer->SetTransformMatrix(scaleMatrix);
 
-			spriteRenderer->Font().PushString(font, std::string_view(debugText), vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
+			spriteRenderer->Font().PushString(font, debugText, vec2(0.0f, 0.0f), vec2(1.0f), DefaultColors::White);
 
 			for (i32 i = 0; i < results_OptionNames.size(); i++)
 			{

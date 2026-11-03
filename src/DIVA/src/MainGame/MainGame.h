@@ -29,6 +29,9 @@ namespace DIVA::MainGame
 			u32 TargetScore{};
 			u32 NoteCount{};
 			u32 NotesHit{};
+
+			u32 TechnicalZonesCompleted{};
+			u32 TechnicalZonesTotal{};
 		} Score;
 
 		struct IconSetSpritesCache
